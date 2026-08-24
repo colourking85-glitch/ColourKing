@@ -51,6 +51,7 @@ export default function MonitorDashboard() {
   const [soundEnabled, setSoundEnabled] = useState(true);
   const [filter, setFilter] = useState<string>('all');
   const [clock, setClock] = useState(clockStr());
+  const [refreshInterval, setRefreshInterval] = useState(8);
   const lastCountRef = useRef(0);
   const audioRef = useRef<HTMLAudioElement | null>(null);
 
@@ -82,9 +83,9 @@ export default function MonitorDashboard() {
   useEffect(() => { load(); }, [load]);
 
   useEffect(() => {
-    const iv = setInterval(load, 8000);
+    const iv = setInterval(load, refreshInterval * 1000);
     return () => clearInterval(iv);
-  }, [load]);
+  }, [load, refreshInterval]);
 
   useEffect(() => {
     const iv = setInterval(() => setClock(clockStr()), 1000);
@@ -148,6 +149,22 @@ export default function MonitorDashboard() {
         </div>
 
         <div className="flex items-center gap-2">
+          <div className="flex items-center gap-1 rounded-lg border border-[#1e1e2a] px-2 py-1">
+            <RefreshCw size={12} className="text-[#6b6b80]" />
+            <select
+              value={refreshInterval}
+              onChange={e => setRefreshInterval(Number(e.target.value))}
+              className="bg-transparent text-xs text-white outline-none cursor-pointer"
+            >
+              <option value={3} className="bg-[#12121a]">3s</option>
+              <option value={5} className="bg-[#12121a]">5s</option>
+              <option value={8} className="bg-[#12121a]">8s</option>
+              <option value={10} className="bg-[#12121a]">10s</option>
+              <option value={15} className="bg-[#12121a]">15s</option>
+              <option value={30} className="bg-[#12121a]">30s</option>
+              <option value={60} className="bg-[#12121a]">60s</option>
+            </select>
+          </div>
           <button
             onClick={() => setSoundEnabled(!soundEnabled)}
             className={`flex h-8 w-8 items-center justify-center rounded-lg border border-[#1e1e2a] transition-colors ${
@@ -234,7 +251,7 @@ export default function MonitorDashboard() {
             </div>
             <div className="flex items-center gap-1.5 text-[11px] text-[#3a3a50]">
               <RefreshCw size={10} className="animate-spin" />
-              Automatisch vernieuwen actief (8s)
+              Automatisch vernieuwen actief ({refreshInterval}s)
             </div>
           </div>
         ) : (
@@ -291,7 +308,7 @@ export default function MonitorDashboard() {
         <span>monitor.colourking.nl</span>
         <span className="flex items-center gap-1.5">
           <span className="h-1.5 w-1.5 rounded-full bg-green-500" />
-          Verbonden — auto-refresh 8s
+          Verbonden — auto-refresh {refreshInterval}s
         </span>
         <span>{notifications.length} meldingen totaal</span>
       </footer>
