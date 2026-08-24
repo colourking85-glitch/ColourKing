@@ -15,6 +15,13 @@ export function middleware(req: NextRequest) {
     return res;
   }
 
+  // Monitor routes — standalone monitoring dashboard
+  if (pathname.startsWith('/monitor')) {
+    const res = NextResponse.next();
+    res.headers.set('X-Robots-Tag', 'noindex, nofollow');
+    return res;
+  }
+
   // Login page — no locale, no auth
   if (pathname === '/login') {
     return NextResponse.next();
