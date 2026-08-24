@@ -4,9 +4,14 @@
   "buildCommand": "pnpm build",
   "rewrites": [
     {
-      "source": "/:path*",
+      "source": "/",
       "has": [{ "type": "host", "value": "monitor.colourking.nl" }],
-      "destination": "/monitor/:path*"
+      "destination": "/monitor"
+    },
+    {
+      "source": "/:path+",
+      "has": [{ "type": "host", "value": "monitor.colourking.nl" }],
+      "destination": "/monitor/:path+"
     }
   ]
 }
