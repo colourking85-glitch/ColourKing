@@ -1,27 +1,5 @@
 {
   "framework": "nextjs",
   "installCommand": "pnpm install",
-  "buildCommand": "pnpm build",
-  "rewrites": [
-    {
-      "source": "/",
-      "has": [{ "type": "host", "value": "monitor.colourking.nl" }],
-      "destination": "/monitor"
-    },
-    {
-      "source": "/:path+",
-      "has": [{ "type": "host", "value": "monitor.colourking.nl" }],
-      "destination": "/monitor/:path+"
-    },
-    {
-      "source": "/",
-      "has": [{ "type": "host", "value": "admin.colourking.nl" }],
-      "destination": "/app"
-    },
-    {
-      "source": "/:path+",
-      "has": [{ "type": "host", "value": "admin.colourking.nl" }],
-      "destination": "/app/:path+"
-    }
-  ]
+  "buildCommand": "pnpm build"
 }
