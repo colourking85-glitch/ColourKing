@@ -77,6 +77,9 @@ export const SCREEN_REGISTRY: Record<string, ScreenMeta> = {
 
   // Settings
   '/app/instellingen': { id: 'SY01', title: 'Settings', titleNl: 'Instellingen', module: 'SY', route: '/app/instellingen' },
+
+  // Monitoring
+  '/app/monitoring': { id: 'SY05', title: 'Monitoring', titleNl: 'Monitoring', module: 'SY', route: '/app/monitoring' },
 };
 
 export function getScreen(pathname: string): ScreenMeta | undefined {

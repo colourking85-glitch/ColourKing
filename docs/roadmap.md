@@ -12,12 +12,21 @@
 - Leads inbox + pipeline (LD01/LD05/LD10)
 - API routes with null-stripping, anon RLS policies
 
-## Sprint 2 — Jobs + Photos (current)
+## Sprint 2 — Jobs + Photos (done)
 - Jobs state machine: 10 stages (intake → closed)
 - Job CRUD + events audit trail (JB01/JB05/JB10)
 - Workshop board / kanban view (JB15)
-- Job photos (before/during/after) — storage TBD
+- Job photos (before/during/after) via Supabase Storage
 - Migration 0008 applied
+
+## Sprint 2.5 — Nav, Settings & Notifications (done)
+- Sidebar: flyout submenus, nested items, collapsible sections, role filtering, coming-soon badges
+- Header: Quick Create dropdown, notification bell with unread badge, System menu, Cmd-K palette
+- Settings page (SY01): theme, accent colour, compact mode, sidebar toggle, company info, locale, notifications
+- Monitoring screen (SY05): real-time notification feed, filters, stats, sound alerts, auto-refresh
+- Notification system: notifications table (migration 0009), API (GET/POST/PATCH), mark read/all read
+- Header bell polls API every 15s, monitoring page polls every 10s
+- vercel.json added to fix Vercel build output directory issue
 
 ## Sprint 3 — Estimates & Invoicing
 - Offer/estimate builder (ES01/ES05)

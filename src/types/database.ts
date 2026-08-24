@@ -1,4 +1,4 @@
-// Auto-generated types — reflects migrations 0001-0007.
+// Auto-generated types — reflects migrations 0001-0009.
 // Regenerate after every migration: supabase gen types typescript --local > src/types/database.ts
 
 export type Json =
@@ -31,6 +31,7 @@ export type OfferLineKind = 'labour' | 'part' | 'material' | 'other';
 export type VatReturnStatus = 'open' | 'draft' | 'filed' | 'corrected';
 export type VatPeriodType = 'quarter' | 'month';
 export type TaxCode = 'H21' | 'L9' | 'N0' | 'V0' | 'M0' | 'ICP' | 'EX';
+export type NotificationType = 'new_lead' | 'stage_change' | 'new_email' | 'appointment_confirmed' | 'appointment_cancelled' | 'part_received' | 'payment_received' | 'document_issued' | 'system';
 
 export interface Staff {
   id: string;
@@ -118,6 +119,19 @@ export interface LeadPhoto {
   created_at: string;
 }
 
+export interface Notification {
+  id: string;
+  staff_id: string | null;
+  type: NotificationType;
+  title: string;
+  body: string | null;
+  link: string | null;
+  ref_type: string | null;
+  ref_id: string | null;
+  read: boolean;
+  created_at: string;
+}
+
 export interface Database {
   public: {
     Tables: {
@@ -151,6 +165,11 @@ export interface Database {
         Insert: Omit<LeadPhoto, 'id' | 'created_at'> & { id?: string };
         Update: Partial<Omit<LeadPhoto, 'id' | 'created_at'>>;
       };
+      notifications: {
+        Row: Notification;
+        Insert: Omit<Notification, 'id' | 'created_at' | 'read'> & { id?: string; read?: boolean };
+        Update: Partial<Omit<Notification, 'id' | 'created_at'>>;
+      };
     };
     Views: Record<string, never>;
     Functions: Record<string, never>;
@@ -177,6 +196,7 @@ export interface Database {
       vat_return_status: VatReturnStatus;
       vat_period_type: VatPeriodType;
       tax_code: TaxCode;
+      notification_type: NotificationType;
     };
   };
 }

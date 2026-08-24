@@ -1,7 +1,7 @@
 # ColourKing — Implementation Trace
 
 **Created:** 2026-08-24
-**Status:** Pre-sprint 0 — Planning & Setup
+**Status:** Sprint 2.5 complete — Nav + Settings + Notifications + Monitoring
 
 ---
 
@@ -115,9 +115,9 @@
 
 ## Sprint 1: Records (5 days)
 
-- [~] Migration 0005: customers table + RLS (written, needs SQL Editor apply)
-- [~] Migration 0006: vehicles table + RLS (written, needs SQL Editor apply)
-- [~] Migration 0007: leads + lead_photos tables + RLS (written, needs SQL Editor apply)
+- [x] Migration 0005: customers table + RLS — applied via SQL Editor
+- [x] Migration 0006: vehicles table + RLS — applied via SQL Editor
+- [x] Migration 0007: leads + lead_photos tables + RLS — applied via SQL Editor
 - [x] Module: src/modules/customers/ (schema, queries, actions)
 - [x] Module: src/modules/vehicles/ (schema, queries, actions)
 - [x] Module: src/modules/leads/ (schema, queries, actions)
@@ -140,19 +140,25 @@
 
 ## Sprint 2: Job + Photos (6 days)
 
-- [ ] Migration: jobs + job_events + job_photos tables + RLS
-- [ ] Module: src/modules/jobs/ (schema, queries, actions, machine.ts, components)
-- [ ] State machine: 10 stages with transition rules
-- [ ] job_events: every transition writes a row
-- [ ] Screen: JB01 Create job
-- [ ] Screen: JB05 Job list / board
-- [ ] Screen: JB10 Job detail (the main screen)
-- [ ] Screen: JB15 Job board (drag between stages)
-- [ ] Screen: JB20 Mobile capture (shop floor, tablet)
-- [ ] Photo upload: compression before upload, IndexedDB queue
-- [ ] Storage: jobs/{job_id}/{phase}/{uuid}.jpg, private bucket, signed URLs
-- [ ] Strings in nl/en/tr
-- [ ] Tests: state machine transitions, job_events writes
+- [x] Migration 0008: jobs + job_events + job_photos tables + RLS — applied via SQL Editor
+- [x] Supabase Storage bucket: job-photos (public, 10MB, JPG/PNG/WebP/HEIC)
+- [x] Module: src/modules/jobs/ (schema.ts, queries.ts, actions.ts, machine.ts)
+- [x] State machine: 10 stages (intake→quoted→approved→scheduled→checked_in→in_progress→qc→ready→delivered→closed)
+- [x] job_events: every transition + notes write audit trail rows
+- [x] API routes: /api/jobs, /api/jobs/[id], /api/jobs/[id]/events, /api/jobs/[id]/photos
+- [x] Screen: JB01 Create job (/app/jobs/nieuw)
+- [x] Screen: JB05 Job list with search + stage filter (/app/jobs)
+- [x] Screen: JB10 Job detail — progress bar, stage transitions, timeline, photos, notes (/app/jobs/[id])
+- [x] Screen: JB15 Job board — kanban columns per stage (/app/jobs/board)
+- [ ] Screen: JB20 Mobile capture (shop floor, tablet) — deferred
+- [x] Photo upload: before/during/after phases, multi-file, lightbox viewer, delete
+- [ ] Photo compression before upload, IndexedDB queue — deferred
+- [x] Screen registry updated: JB01, JB10 added
+- [x] Strings in nl/en/tr (jb namespace)
+- [x] Tests: state machine transitions (7 tests) — 24/24 total pass
+- [x] Committed: d1c19a2 (19 files, 1603 lines)
+- [x] Pushed to GitHub: colourking85-glitch/ColourKing
+- [x] Roadmap doc created: docs/roadmap.md (Sprints 0–8)
 
 ---
 
@@ -337,4 +343,18 @@
 | 2026-08-24 | Mollie — major settings done, create free subscription | In progress |
 | 2026-08-24 | Shop decisions: stages, slots, TR, BTW scope, legal form | Deferred — decide during implementation |
 | 2026-08-24 | Terms & conditions text from the shop | Deferred |
+| 2026-08-24 | Sprint 1 committed (58cf407) + pushed to GitHub | Done |
+| 2026-08-24 | Sprint 2 committed (d1c19a2) + pushed to GitHub | Done |
+| 2026-08-24 | VPS SSH access confirmed (204.168.163.146) — dessystems-web-dev inspected | Done |
+| 2026-08-24 | SY051 screen on dessystems — skipped/ignored per user | Closed |
 | 2026-08-24 | Supabase region: eu-west-1 (Ireland) confirmed | Done — EU-compliant |
+| 2026-08-24 | Nav enhancements: flyout submenus, nested items, role filtering, coming-soon badges, collapsible sections | Done |
+| 2026-08-24 | Header: Quick Create dropdown, notification bell with unread badge, System menu, Cmd-K palette | Done |
+| 2026-08-24 | SY01 Settings page: theme selector, accent colour, compact mode, sidebar toggle, company info, locale/timezone, notification preferences | Done |
+| 2026-08-24 | i18n: sy namespace added to nl/en/tr | Done |
+| 2026-08-24 | Migration 0009: notifications table + RLS | Ready — run in Supabase SQL Editor |
+| 2026-08-24 | Notification API: GET/POST/PATCH /api/notifications | Done |
+| 2026-08-24 | SY05 Monitoring page: real-time feed, filters, stats, sound, auto-refresh | Done |
+| 2026-08-24 | Header bell wired to real API (polls every 15s) | Done |
+| 2026-08-24 | Sidebar: Monitoring (SY05) added under Systeem > Instellingen | Done |
+| 2026-08-24 | vercel.json: framework=nextjs to fix Vercel build | Done |
