@@ -5,7 +5,7 @@ import {
   Bell, BellOff, Check, CheckCheck, Inbox, Wrench, Mail,
   CalendarCheck, Package, CreditCard, FileText, AlertCircle,
   Volume2, VolumeX, RefreshCw, Maximize, LogOut, Filter,
-  Car, Clock, Calendar,
+  Car, Clock, Calendar, Timer, TrendingUp,
 } from 'lucide-react';
 import { signOut } from '@/lib/auth';
 import type { NotificationType } from '@/types/database';
@@ -25,6 +25,7 @@ type MonitorJob = {
   number: number;
   stage: string;
   notes: string | null;
+  created_at: string;
   updated_at: string;
   customers: { id: string; name: string } | null;
   vehicles: { id: string; kenteken: string | null; make: string | null; model: string | null; colour: string | null } | null;
@@ -42,11 +43,11 @@ const TYPE_META: Record<NotificationType, { icon: React.ElementType; color: stri
   system: { icon: AlertCircle, color: 'text-slate-400', bg: 'bg-slate-400/10', label: 'Systeem' },
 };
 
-const STAGE_LABELS: Record<string, { label: string; color: string }> = {
-  checked_in: { label: 'Ingecheckt', color: 'text-blue-400 bg-blue-400/10' },
-  in_progress: { label: 'In bewerking', color: 'text-amber-400 bg-amber-400/10' },
-  qc: { label: 'Kwaliteitscontrole', color: 'text-purple-400 bg-purple-400/10' },
-  scheduled: { label: 'Gepland', color: 'text-cyan-400 bg-cyan-400/10' },
+const STAGE_LABELS: Record<string, { label: string; color: string; border: string }> = {
+  checked_in: { label: 'Ingecheckt', color: 'text-blue-400 bg-blue-400/10', border: 'border-blue-400/30' },
+  in_progress: { label: 'In bewerking', color: 'text-amber-400 bg-amber-400/10', border: 'border-amber-400/30' },
+  qc: { label: 'QC', color: 'text-purple-400 bg-purple-400/10', border: 'border-purple-400/30' },
+  scheduled: { label: 'Gepland', color: 'text-cyan-400 bg-cyan-400/10', border: 'border-cyan-400/30' },
 };
 
 function timeAgo(dateStr: string): string {
@@ -57,6 +58,21 @@ function timeAgo(dateStr: string): string {
   const hrs = Math.floor(mins / 60);
   if (hrs < 24) return `${hrs}u`;
   return `${Math.floor(hrs / 24)}d`;
+}
+
+function durationStr(dateStr: string): string {
+  const diff = Date.now() - new Date(dateStr).getTime();
+  const hrs = Math.floor(diff / 3600000);
+  const mins = Math.floor((diff % 3600000) / 60000);
+  if (hrs >= 24) {
+    const days = Math.floor(hrs / 24);
+    return `${days}d ${hrs % 24}u`;
+  }
+  return `${hrs}u ${mins}m`;
+}
+
+function durationHours(dateStr: string): number {
+  return (Date.now() - new Date(dateStr).getTime()) / 3600000;
 }
 
 function formatDate(dateStr: string): string {
@@ -74,6 +90,39 @@ function clockStr() {
   return new Date().toLocaleTimeString('nl-NL', { hour: '2-digit', minute: '2-digit', second: '2-digit' });
 }
 
+function useAlertSound() {
+  const ctxRef = useRef<AudioContext | null>(null);
+  const playingRef = useRef(false);
+
+  return useCallback(() => {
+    if (playingRef.current) return;
+    playingRef.current = true;
+
+    if (!ctxRef.current) ctxRef.current = new AudioContext();
+    const ctx = ctxRef.current;
+
+    const now = ctx.currentTime;
+    const duration = 10;
+    const tones = [880, 1046.5, 880, 784, 880, 1046.5, 880, 784, 880, 1046.5];
+
+    tones.forEach((freq, i) => {
+      const osc = ctx.createOscillator();
+      const gain = ctx.createGain();
+      osc.type = 'sine';
+      osc.frequency.value = freq;
+      gain.gain.setValueAtTime(0, now + i);
+      gain.gain.linearRampToValueAtTime(0.15, now + i + 0.05);
+      gain.gain.linearRampToValueAtTime(0.1, now + i + 0.4);
+      gain.gain.linearRampToValueAtTime(0, now + i + 0.9);
+      osc.connect(gain).connect(ctx.destination);
+      osc.start(now + i);
+      osc.stop(now + i + 1);
+    });
+
+    setTimeout(() => { playingRef.current = false; }, duration * 1000);
+  }, []);
+}
+
 export default function MonitorDashboard() {
   const [notifications, setNotifications] = useState<Notification[]>([]);
   const [ongoing, setOngoing] = useState<MonitorJob[]>([]);
@@ -83,8 +132,17 @@ export default function MonitorDashboard() {
   const [filter, setFilter] = useState<string>('all');
   const [clock, setClock] = useState(clockStr());
   const [refreshInterval, setRefreshInterval] = useState(8);
+  const [alertActive, setAlertActive] = useState(false);
   const lastCountRef = useRef(0);
-  const audioRef = useRef<HTMLAudioElement | null>(null);
+  const alertTimeoutRef = useRef<ReturnType<typeof setTimeout>>();
+  const playAlert = useAlertSound();
+
+  const triggerAlert = useCallback(() => {
+    setAlertActive(true);
+    if (alertTimeoutRef.current) clearTimeout(alertTimeoutRef.current);
+    alertTimeoutRef.current = setTimeout(() => setAlertActive(false), 10000);
+    if (soundEnabled) playAlert();
+  }, [soundEnabled, playAlert]);
 
   const load = useCallback(async () => {
     try {
@@ -97,8 +155,8 @@ export default function MonitorDashboard() {
         const data: Notification[] = await notifRes.json();
         const unreadCount = data.filter(n => !n.read).length;
 
-        if (soundEnabled && unreadCount > lastCountRef.current && lastCountRef.current >= 0 && notifications.length > 0) {
-          playSound();
+        if (unreadCount > lastCountRef.current && lastCountRef.current >= 0 && notifications.length > 0) {
+          triggerAlert();
         }
         lastCountRef.current = unreadCount;
         setNotifications(data);
@@ -112,14 +170,7 @@ export default function MonitorDashboard() {
     } finally {
       setLoading(false);
     }
-  }, [soundEnabled, notifications.length]);
-
-  function playSound() {
-    if (!audioRef.current) {
-      audioRef.current = new Audio('data:audio/wav;base64,UklGRnoGAABXQVZFZm10IBAAAAABAAEAQB8AAEAfAAABAAgAZGF0YQoGAACBhYqFbF1fdH2Nk4+Ff3J5goqOjIJ3cHJ8hoyOiYN6c3R9hYuMiIR8d3Z7goiKiIWBfHp6f4SHiIaEgn98fH2AhIaGhYOBf359f4GDhYWEg4F/fn5/gYOEhISDgYB/fn+AgYODg4KBgH9/f4CBgoOCgoGAf39/gIGCgoKBgYB/f3+AgYGCgoGBgH9/f4CBgYGBgYGAf39/gIGBgYGBgIB/f3+AgYGBgYGAgH9/f4CBgYGBgYCAf39/gA==');
-    }
-    audioRef.current.play().catch(() => {});
-  }
+  }, [notifications.length, triggerAlert]);
 
   useEffect(() => { load(); }, [load]);
 
@@ -150,6 +201,7 @@ export default function MonitorDashboard() {
     });
     setNotifications(prev => prev.map(n => ({ ...n, read: true })));
     lastCountRef.current = 0;
+    setAlertActive(false);
   }
 
   function goFullscreen() {
@@ -158,6 +210,15 @@ export default function MonitorDashboard() {
 
   const unreadCount = notifications.filter(n => !n.read).length;
   const filtered = filter === 'all' ? notifications : notifications.filter(n => n.type === filter);
+
+  const recentUnread = notifications.filter(n => !n.read).slice(0, 8);
+  const tickerItems = recentUnread.length > 0
+    ? recentUnread.map(n => {
+        const meta = TYPE_META[n.type] ?? TYPE_META.system;
+        return `${meta.label}: ${n.title}${n.body ? ` — ${n.body}` : ''}`;
+      })
+    : ['Geen nieuwe meldingen — systeem draait normaal'];
+  const tickerText = tickerItems.join('     ●     ');
 
   const statCards = [
     { label: 'Ongelezen', value: unreadCount, color: 'text-[#E8364E]', pulse: unreadCount > 0 },
@@ -170,17 +231,72 @@ export default function MonitorDashboard() {
 
   return (
     <div className="flex h-screen flex-col overflow-hidden">
+      <style>{`
+        @keyframes ticker {
+          0% { transform: translateX(100%); }
+          100% { transform: translateX(-100%); }
+        }
+        @keyframes bellRing {
+          0%, 100% { transform: rotate(0deg); }
+          10% { transform: rotate(14deg); }
+          20% { transform: rotate(-14deg); }
+          30% { transform: rotate(10deg); }
+          40% { transform: rotate(-10deg); }
+          50% { transform: rotate(6deg); }
+          60% { transform: rotate(-6deg); }
+          70% { transform: rotate(2deg); }
+          80% { transform: rotate(-2deg); }
+        }
+        @keyframes alertGlow {
+          0%, 100% { box-shadow: 0 0 0 0 rgba(232,54,78,0); }
+          50% { box-shadow: 0 0 20px 4px rgba(232,54,78,0.4); }
+        }
+        @keyframes slideIn {
+          from { opacity: 0; transform: translateX(20px); }
+          to { opacity: 1; transform: translateX(0); }
+        }
+        @keyframes progressPulse {
+          0%, 100% { opacity: 0.6; }
+          50% { opacity: 1; }
+        }
+        .ticker-scroll {
+          animation: ticker 30s linear infinite;
+        }
+        .bell-ring {
+          animation: bellRing 1s ease-in-out infinite;
+        }
+        .alert-glow {
+          animation: alertGlow 1.5s ease-in-out infinite;
+        }
+        .slide-in {
+          animation: slideIn 0.3s ease-out;
+        }
+        .progress-pulse {
+          animation: progressPulse 2s ease-in-out infinite;
+        }
+      `}</style>
+
       {/* Top bar */}
-      <header className="flex h-14 shrink-0 items-center justify-between border-b border-[#1e1e2a] bg-[#0f0f17] px-6">
+      <header className={`flex h-14 shrink-0 items-center justify-between border-b px-6 transition-colors duration-500 ${
+        alertActive ? 'border-[#E8364E]/50 bg-[#E8364E]/5' : 'border-[#1e1e2a] bg-[#0f0f17]'
+      }`}>
         <div className="flex items-center gap-3">
-          <div className="flex h-8 w-8 items-center justify-center rounded-lg bg-[#E8364E]">
+          <div className={`flex h-8 w-8 items-center justify-center rounded-lg bg-[#E8364E] ${alertActive ? 'alert-glow' : ''}`}>
             <span className="font-display text-xs font-bold text-white">CK</span>
           </div>
           <h1 className="font-display text-sm font-bold tracking-wide text-white">MONITORING</h1>
           {unreadCount > 0 && (
-            <span className="flex items-center gap-1 rounded-full bg-[#E8364E]/20 px-2.5 py-0.5 text-xs font-bold text-[#E8364E] animate-pulse">
-              <Bell size={11} />
+            <span className={`flex items-center gap-1 rounded-full bg-[#E8364E]/20 px-2.5 py-0.5 text-xs font-bold text-[#E8364E] ${alertActive ? '' : 'animate-pulse'}`}>
+              <span className={alertActive ? 'bell-ring inline-block' : ''}>
+                <Bell size={11} />
+              </span>
               {unreadCount}
+            </span>
+          )}
+          {alertActive && (
+            <span className="flex items-center gap-1.5 rounded-full bg-[#E8364E] px-3 py-1 text-[10px] font-bold uppercase tracking-wider text-white animate-pulse">
+              <span className="h-2 w-2 rounded-full bg-white animate-ping" />
+              Nieuwe melding
             </span>
           )}
         </div>
@@ -240,14 +356,29 @@ export default function MonitorDashboard() {
         </div>
       </header>
 
+      {/* Flying ticker banner */}
+      <div className={`flex h-8 shrink-0 items-center overflow-hidden border-b transition-colors duration-500 ${
+        alertActive
+          ? 'border-[#E8364E]/30 bg-gradient-to-r from-[#E8364E]/10 via-[#0f0f17] to-[#E8364E]/10'
+          : 'border-[#1e1e2a] bg-[#0a0a12]'
+      }`}>
+        <div className="ticker-scroll whitespace-nowrap text-xs">
+          <span className={alertActive ? 'text-[#E8364E] font-semibold' : 'text-[#6b6b80]'}>
+            {tickerText}
+          </span>
+        </div>
+      </div>
+
       {/* Stats row */}
       <div className="grid shrink-0 grid-cols-6 gap-3 border-b border-[#1e1e2a] bg-[#0f0f17] p-4">
         {statCards.map(s => (
           <div
             key={s.label}
-            className={`rounded-xl border border-[#1e1e2a] bg-[#12121a] p-4 text-center ${s.pulse ? 'animate-pulse' : ''}`}
+            className={`rounded-xl border border-[#1e1e2a] bg-[#12121a] p-4 text-center transition-all duration-300 ${
+              s.pulse ? 'alert-glow' : ''
+            }`}
           >
-            <div className={`font-display text-3xl font-bold ${s.color}`}>{s.value}</div>
+            <div className={`font-display text-3xl font-bold tabular-nums ${s.color}`}>{s.value}</div>
             <div className="mt-1 text-[11px] text-[#6b6b80]">{s.label}</div>
           </div>
         ))}
@@ -256,7 +387,7 @@ export default function MonitorDashboard() {
       {/* Main content: two-column layout */}
       <div className="flex min-h-0 flex-1">
         {/* Left: Jobs panels */}
-        <div className="flex w-[380px] shrink-0 flex-col border-r border-[#1e1e2a] overflow-y-auto">
+        <div className="flex w-[400px] shrink-0 flex-col border-r border-[#1e1e2a] overflow-y-auto">
           {/* Ongoing jobs */}
           <div className="border-b border-[#1e1e2a] p-4">
             <div className="mb-3 flex items-center gap-2">
@@ -271,9 +402,12 @@ export default function MonitorDashboard() {
             ) : (
               <div className="space-y-2">
                 {ongoing.map(job => {
-                  const stage = STAGE_LABELS[job.stage] ?? { label: job.stage, color: 'text-slate-400 bg-slate-400/10' };
+                  const stage = STAGE_LABELS[job.stage] ?? { label: job.stage, color: 'text-slate-400 bg-slate-400/10', border: 'border-slate-400/30' };
+                  const hours = durationHours(job.created_at);
+                  const isOvertime = hours > 48;
+                  const isWarning = hours > 24 && !isOvertime;
                   return (
-                    <div key={job.id} className="rounded-xl border border-[#1e1e2a] bg-[#12121a] p-3">
+                    <div key={job.id} className={`slide-in rounded-xl border bg-[#12121a] p-3 transition-all ${stage.border}`}>
                       <div className="flex items-center justify-between">
                         <div className="flex items-center gap-2">
                           <span className="font-mono text-sm font-bold text-white">
@@ -299,9 +433,23 @@ export default function MonitorDashboard() {
                       {job.customers?.name && (
                         <div className="mt-1 text-[11px] text-[#6b6b80]">{job.customers.name}</div>
                       )}
-                      <div className="mt-1 flex items-center gap-1 text-[10px] text-[#3a3a50]">
-                        <Clock size={9} />
-                        {timeAgo(job.updated_at)}
+                      {/* Duration tracker */}
+                      <div className="mt-2 flex items-center gap-2">
+                        <Timer size={10} className={isOvertime ? 'text-red-400' : isWarning ? 'text-amber-400' : 'text-green-400'} />
+                        <span className={`text-[11px] font-mono font-semibold tabular-nums ${
+                          isOvertime ? 'text-red-400' : isWarning ? 'text-amber-400' : 'text-green-400'
+                        }`}>
+                          {durationStr(job.created_at)}
+                        </span>
+                        {/* Progress bar */}
+                        <div className="flex-1 h-1.5 rounded-full bg-[#1e1e2a] overflow-hidden">
+                          <div
+                            className={`h-full rounded-full transition-all ${
+                              isOvertime ? 'bg-red-400 progress-pulse' : isWarning ? 'bg-amber-400' : 'bg-green-400'
+                            }`}
+                            style={{ width: `${Math.min(100, (hours / 48) * 100)}%` }}
+                          />
+                        </div>
                       </div>
                     </div>
                   );
@@ -323,8 +471,8 @@ export default function MonitorDashboard() {
               </div>
             ) : (
               <div className="space-y-2">
-                {scheduled.map(job => (
-                  <div key={job.id} className="rounded-xl border border-[#1e1e2a] bg-[#12121a] p-3">
+                {scheduled.map((job, i) => (
+                  <div key={job.id} className="slide-in rounded-xl border border-cyan-400/20 bg-[#12121a] p-3" style={{ animationDelay: `${i * 50}ms` }}>
                     <div className="flex items-center justify-between">
                       <div className="flex items-center gap-2">
                         <span className="font-mono text-sm font-bold text-white">
@@ -344,7 +492,7 @@ export default function MonitorDashboard() {
                     {job.customers?.name && (
                       <div className="mt-1 text-[11px] text-[#6b6b80]">{job.customers.name}</div>
                     )}
-                    <div className="mt-1 flex items-center gap-1 text-[10px] text-[#3a3a50]">
+                    <div className="mt-1 flex items-center gap-1 text-[10px] text-cyan-400/70">
                       <Calendar size={9} />
                       {formatDate(job.updated_at)}
                     </div>
@@ -352,6 +500,44 @@ export default function MonitorDashboard() {
                 ))}
               </div>
             )}
+          </div>
+
+          {/* Performance summary */}
+          <div className="border-t border-[#1e1e2a] p-4">
+            <div className="mb-3 flex items-center gap-2">
+              <TrendingUp size={14} className="text-emerald-400" />
+              <h2 className="text-xs font-bold uppercase tracking-wider text-white">Prestaties</h2>
+            </div>
+            <div className="grid grid-cols-2 gap-2">
+              <div className="rounded-lg border border-[#1e1e2a] bg-[#12121a] p-3 text-center">
+                <div className="text-lg font-bold tabular-nums text-emerald-400">
+                  {ongoing.length > 0
+                    ? `${Math.round(ongoing.reduce((sum, j) => sum + durationHours(j.created_at), 0) / ongoing.length)}u`
+                    : '—'}
+                </div>
+                <div className="mt-0.5 text-[9px] text-[#6b6b80]">Gem. doorlooptijd</div>
+              </div>
+              <div className="rounded-lg border border-[#1e1e2a] bg-[#12121a] p-3 text-center">
+                <div className={`text-lg font-bold tabular-nums ${
+                  ongoing.filter(j => durationHours(j.created_at) > 48).length > 0 ? 'text-red-400' : 'text-green-400'
+                }`}>
+                  {ongoing.filter(j => durationHours(j.created_at) > 48).length}
+                </div>
+                <div className="mt-0.5 text-[9px] text-[#6b6b80]">Vertraagd (&gt;48u)</div>
+              </div>
+              <div className="rounded-lg border border-[#1e1e2a] bg-[#12121a] p-3 text-center">
+                <div className="text-lg font-bold tabular-nums text-amber-400">
+                  {ongoing.filter(j => j.stage === 'in_progress').length}
+                </div>
+                <div className="mt-0.5 text-[9px] text-[#6b6b80]">Actief in werk</div>
+              </div>
+              <div className="rounded-lg border border-[#1e1e2a] bg-[#12121a] p-3 text-center">
+                <div className="text-lg font-bold tabular-nums text-purple-400">
+                  {ongoing.filter(j => j.stage === 'qc').length}
+                </div>
+                <div className="mt-0.5 text-[9px] text-[#6b6b80]">In QC</div>
+              </div>
+            </div>
           </div>
         </div>
 
@@ -401,17 +587,18 @@ export default function MonitorDashboard() {
               </div>
             ) : (
               <div className="space-y-2">
-                {filtered.map(n => {
+                {filtered.map((n, i) => {
                   const meta = TYPE_META[n.type] ?? TYPE_META.system;
                   const Icon = meta.icon;
                   return (
                     <div
                       key={n.id}
-                      className={`group flex items-center gap-4 rounded-xl border p-4 transition-all ${
+                      className={`slide-in group flex items-center gap-4 rounded-xl border p-4 transition-all ${
                         n.read
                           ? 'border-[#1e1e2a]/50 bg-[#12121a]/50'
                           : 'border-[#E8364E]/30 bg-[#12121a] shadow-lg shadow-[#E8364E]/5'
                       }`}
+                      style={{ animationDelay: `${i * 30}ms` }}
                     >
                       <div className={`flex h-11 w-11 shrink-0 items-center justify-center rounded-xl ${meta.bg}`}>
                         <Icon size={20} className={meta.color} />
@@ -423,7 +610,7 @@ export default function MonitorDashboard() {
                             {meta.label}
                           </span>
                           {!n.read && (
-                            <span className="h-2 w-2 rounded-full bg-[#E8364E]" />
+                            <span className="h-2 w-2 rounded-full bg-[#E8364E] animate-pulse" />
                           )}
                         </div>
                         {n.body && (
@@ -454,8 +641,8 @@ export default function MonitorDashboard() {
       <footer className="flex h-8 shrink-0 items-center justify-between border-t border-[#1e1e2a] bg-[#0f0f17] px-6 text-[10px] text-[#3a3a50]">
         <span>monitor.colourking.nl</span>
         <span className="flex items-center gap-1.5">
-          <span className="h-1.5 w-1.5 rounded-full bg-green-500" />
-          Verbonden — auto-refresh {refreshInterval}s
+          <span className={`h-1.5 w-1.5 rounded-full ${alertActive ? 'bg-[#E8364E] animate-ping' : 'bg-green-500'}`} />
+          {alertActive ? 'Alert actief' : `Verbonden — auto-refresh ${refreshInterval}s`}
         </span>
         <span>{ongoing.length} actief · {scheduled.length} gepland · {notifications.length} meldingen</span>
       </footer>
