@@ -12,6 +12,16 @@
       "source": "/:path+",
       "has": [{ "type": "host", "value": "monitor.colourking.nl" }],
       "destination": "/monitor/:path+"
+    },
+    {
+      "source": "/",
+      "has": [{ "type": "host", "value": "admin.colourking.nl" }],
+      "destination": "/app"
+    },
+    {
+      "source": "/:path+",
+      "has": [{ "type": "host", "value": "admin.colourking.nl" }],
+      "destination": "/app/:path+"
     }
   ]
 }
