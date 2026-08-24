@@ -67,14 +67,15 @@
 - [x] vitest configured + initial test (codes.test.ts — 4/4 pass)
 
 ### 0.1 Supabase Setup
-- [ ] supabase init + config.toml
-- [ ] Docker: supabase start runs locally
-- [ ] Migration 0001: extensions (uuid-ossp, pgcrypto)
-- [ ] Migration 0002: enums (job_status, offer_status, doc_status, etc.)
-- [ ] Migration 0003: staff table + settings table
-- [ ] Migration 0004: RLS on staff + settings
-- [x] Placeholder types: src/types/database.ts
+- [-] supabase init + config.toml (skipped — using hosted Supabase directly)
+- [-] Docker: supabase start runs locally (deferred — install Docker Desktop later)
+- [x] Migration 0001: extensions (uuid-ossp, pgcrypto) — applied via SQL Editor
+- [x] Migration 0002: enums (22 types) — applied via SQL Editor
+- [x] Migration 0003: staff + settings tables + seed data — applied via SQL Editor
+- [x] Migration 0004: RLS on staff + settings — applied via SQL Editor
+- [x] Types: src/types/database.ts regenerated with Staff, Settings, all enums
 - [x] Supabase client setup: lib/supabase/{server,client,admin}.ts
+- [x] API route: /api/auth/me (staff lookup by session)
 
 ### 0.2 Auth & Routing
 - [x] lib/auth.ts: roles (admin/office/tech), can() function, PERMISSIONS map, mock session
@@ -107,30 +108,33 @@
 - [x] Dev server runs, admin shell renders with full sidebar
 - [x] Login page renders with CK branding
 - [x] Public landing page renders at /nl
-- [ ] GitHub remote connected + initial commit pushed
-- [ ] Supabase migrations applied locally
+- [x] GitHub remote connected + initial commit pushed (ed522e0 → colourking85-glitch/ColourKing)
+- [x] Supabase migrations applied (0001-0004 via hosted SQL Editor)
 
 ---
 
 ## Sprint 1: Records (5 days)
 
-- [ ] Migration: customers table + RLS
-- [ ] Migration: vehicles table + RLS
-- [ ] Migration: leads + lead_photos tables + RLS
-- [ ] Module: src/modules/customers/ (schema, queries, actions, components)
-- [ ] Module: src/modules/vehicles/ (schema, queries, actions, components)
-- [ ] Module: src/modules/leads/ (schema, queries, actions, components)
-- [ ] Screen: KL01 Create customer
-- [ ] Screen: KL05 Customer list
-- [ ] Screen: KL02/03 Change/display customer
-- [ ] Screen: VH01 Create vehicle (kenteken RDW lookup + WOK flag)
-- [ ] Screen: VH05 Vehicle list
-- [ ] Screen: LD01 Create lead
-- [ ] Screen: LD05 Leads inbox
-- [ ] Screen: LD10 Lead detail
-- [ ] RDW API integration: lib/rdw.ts
-- [ ] Strings in nl/en/tr
-- [ ] Tests: RDW lookup, customer CRUD
+- [~] Migration 0005: customers table + RLS (written, needs SQL Editor apply)
+- [~] Migration 0006: vehicles table + RLS (written, needs SQL Editor apply)
+- [~] Migration 0007: leads + lead_photos tables + RLS (written, needs SQL Editor apply)
+- [x] Module: src/modules/customers/ (schema, queries, actions)
+- [x] Module: src/modules/vehicles/ (schema, queries, actions)
+- [x] Module: src/modules/leads/ (schema, queries, actions)
+- [x] API routes: /api/customers, /api/customers/[id], /api/vehicles, /api/vehicles/[id], /api/leads, /api/leads/[id], /api/rdw
+- [x] Screen: KL01 Create customer (/app/klanten/nieuw)
+- [x] Screen: KL05 Customer list (/app/klanten)
+- [x] Screen: KL02 Customer detail (/app/klanten/[id])
+- [x] Screen: VH01 Create vehicle with RDW lookup (/app/voertuigen/nieuw)
+- [x] Screen: VH05 Vehicle list (/app/voertuigen)
+- [x] Screen: LD01 Create lead (/app/leads/nieuw)
+- [x] Screen: LD05 Leads inbox with status filters (/app/leads)
+- [x] Screen: LD10 Lead detail with status transitions (/app/leads/[id])
+- [x] RDW API integration: lib/rdw.ts + /api/rdw endpoint
+- [x] Strings in nl/en/tr (kl, vh, ld namespaces)
+- [x] Tests: RDW mapping (3), schema validation (10), screen registry (4) — 17/17 pass
+- [x] Screen registry updated: KL01, KL02, KL05, VH01, VH05, LD01, LD05, LD10
+- [ ] Database types regenerated after migrations applied
 
 ---
 

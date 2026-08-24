@@ -45,29 +45,44 @@ export function can(role: Role, permission: string): boolean {
   return perms.includes(`${mod}.*`);
 }
 
+const DEV_BYPASS = process.env.NODE_ENV === 'development';
+
 export async function getSession(): Promise<Session> {
   if (USING_MOCK || !supabase) {
     return {
       id: 'mock-admin',
       email: 'admin@colourking.nl',
-      name: 'Admin',
+      name: 'Admin (dev)',
       role: 'admin',
     };
   }
 
+  if (DEV_BYPASS) {
+    const { data } = await supabase.auth.getSession();
+    if (!data.session?.user) {
+      return {
+        id: 'dev-admin',
+        email: 'admin@colourking.nl',
+        name: 'Admin (dev)',
+        role: 'admin',
+      };
+    }
+  }
+
   const { data } = await supabase.auth.getSession();
-  const user = data.session?.user;
-  if (!user) return null;
+  if (!data.session?.user) return null;
+
+  const user = data.session.user;
 
   try {
-    const res = await fetch(`/api/auth/me?uid=${user.id}`);
+    const res = await fetch('/api/auth/me');
     if (res.ok) {
-      const profile = await res.json();
+      const staff = await res.json();
       return {
         id: user.id,
-        email: profile.email ?? user.email ?? '',
-        name: profile.name ?? '',
-        role: (profile.role as Role) ?? 'tech',
+        email: staff.email,
+        name: staff.name,
+        role: staff.role as Role,
       };
     }
   } catch {

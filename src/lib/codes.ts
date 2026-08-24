@@ -29,15 +29,17 @@ export const SCREEN_REGISTRY: Record<string, ScreenMeta> = {
 
   // Leads
   '/app/leads': { id: 'LD05', title: 'Leads Inbox', titleNl: 'Leads Inbox', module: 'LD', route: '/app/leads' },
-  '/app/leads/new': { id: 'LD01', title: 'Create Lead', titleNl: 'Lead Aanmaken', module: 'LD', route: '/app/leads/new' },
+  '/app/leads/nieuw': { id: 'LD01', title: 'Create Lead', titleNl: 'Lead Aanmaken', module: 'LD', route: '/app/leads/nieuw' },
+  '/app/leads/[id]': { id: 'LD10', title: 'Lead Detail', titleNl: 'Lead Detail', module: 'LD', route: '/app/leads/[id]' },
 
   // Customers
   '/app/klanten': { id: 'KL05', title: 'Customer List', titleNl: 'Klantenlijst', module: 'KL', route: '/app/klanten' },
-  '/app/klanten/new': { id: 'KL01', title: 'Create Customer', titleNl: 'Klant Aanmaken', module: 'KL', route: '/app/klanten/new' },
+  '/app/klanten/nieuw': { id: 'KL01', title: 'Create Customer', titleNl: 'Klant Aanmaken', module: 'KL', route: '/app/klanten/nieuw' },
+  '/app/klanten/[id]': { id: 'KL02', title: 'Customer Detail', titleNl: 'Klantgegevens', module: 'KL', route: '/app/klanten/[id]' },
 
   // Vehicles
   '/app/voertuigen': { id: 'VH05', title: 'Vehicle List', titleNl: 'Voertuigenlijst', module: 'VH', route: '/app/voertuigen' },
-  '/app/voertuigen/new': { id: 'VH01', title: 'Create Vehicle', titleNl: 'Voertuig Aanmaken', module: 'VH', route: '/app/voertuigen/new' },
+  '/app/voertuigen/nieuw': { id: 'VH01', title: 'Create Vehicle', titleNl: 'Voertuig Aanmaken', module: 'VH', route: '/app/voertuigen/nieuw' },
 
   // Offers
   '/app/offertes': { id: 'ES05', title: 'Offer List', titleNl: 'Offertelijst', module: 'ES', route: '/app/offertes' },
