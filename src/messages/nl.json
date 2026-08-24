@@ -1,0 +1,57 @@
+{
+  "common": {
+    "appName": "Colourking",
+    "login": "Inloggen",
+    "logout": "Uitloggen",
+    "save": "Opslaan",
+    "cancel": "Annuleren",
+    "delete": "Verwijderen",
+    "edit": "Bewerken",
+    "create": "Aanmaken",
+    "search": "Zoeken",
+    "loading": "Laden...",
+    "noResults": "Geen resultaten",
+    "confirm": "Bevestigen",
+    "back": "Terug",
+    "next": "Volgende",
+    "close": "Sluiten",
+    "yes": "Ja",
+    "no": "Nee"
+  },
+  "nav": {
+    "dashboard": "Dashboard",
+    "leads": "Leads",
+    "customers": "Klanten",
+    "vehicles": "Voertuigen",
+    "offers": "Offertes",
+    "jobs": "Werkplaats",
+    "parts": "Onderdelen",
+    "invoices": "Facturen",
+    "documents": "Documenten",
+    "appointments": "Afspraken",
+    "tasks": "Taken",
+    "planning": "Planning",
+    "reports": "Rapportage",
+    "vat": "BTW",
+    "purchases": "Inkoop",
+    "settings": "Instellingen"
+  },
+  "auth": {
+    "email": "E-mailadres",
+    "password": "Wachtwoord",
+    "signIn": "Inloggen",
+    "signInTitle": "Inloggen bij Colourking",
+    "signInSubtitle": "Beheerconsole",
+    "invalidCredentials": "Onjuiste inloggegevens",
+    "sessionExpired": "Sessie verlopen, log opnieuw in"
+  },
+  "dashboard": {
+    "title": "Dashboard",
+    "welcome": "Welkom bij Colourking",
+    "todayOverview": "Vandaag",
+    "jobsByStage": "Opdrachten per fase",
+    "upcomingAppointments": "Komende afspraken",
+    "pendingOffers": "Openstaande offertes",
+    "overdueInvoices": "Achterstallige facturen"
+  }
+}

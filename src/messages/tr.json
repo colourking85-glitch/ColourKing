@@ -1,0 +1,57 @@
+{
+  "common": {
+    "appName": "Colourking",
+    "login": "Giriş yap",
+    "logout": "Çıkış yap",
+    "save": "Kaydet",
+    "cancel": "İptal",
+    "delete": "Sil",
+    "edit": "Düzenle",
+    "create": "Oluştur",
+    "search": "Ara",
+    "loading": "Yükleniyor...",
+    "noResults": "Sonuç bulunamadı",
+    "confirm": "Onayla",
+    "back": "Geri",
+    "next": "İleri",
+    "close": "Kapat",
+    "yes": "Evet",
+    "no": "Hayır"
+  },
+  "nav": {
+    "dashboard": "Gösterge Paneli",
+    "leads": "Talepler",
+    "customers": "Müşteriler",
+    "vehicles": "Araçlar",
+    "offers": "Teklifler",
+    "jobs": "Atölye",
+    "parts": "Parçalar",
+    "invoices": "Faturalar",
+    "documents": "Belgeler",
+    "appointments": "Randevular",
+    "tasks": "Görevler",
+    "planning": "Planlama",
+    "reports": "Raporlar",
+    "vat": "KDV",
+    "purchases": "Satın Alma",
+    "settings": "Ayarlar"
+  },
+  "auth": {
+    "email": "E-posta adresi",
+    "password": "Şifre",
+    "signIn": "Giriş yap",
+    "signInTitle": "Colourking'e giriş yapın",
+    "signInSubtitle": "Yönetim konsolu",
+    "invalidCredentials": "Geçersiz kimlik bilgileri",
+    "sessionExpired": "Oturum süresi doldu, lütfen tekrar giriş yapın"
+  },
+  "dashboard": {
+    "title": "Gösterge Paneli",
+    "welcome": "Colourking'e hoş geldiniz",
+    "todayOverview": "Bugün",
+    "jobsByStage": "Aşamaya göre işler",
+    "upcomingAppointments": "Yaklaşan randevular",
+    "pendingOffers": "Bekleyen teklifler",
+    "overdueInvoices": "Vadesi geçmiş faturalar"
+  }
+}

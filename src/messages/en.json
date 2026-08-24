@@ -1,0 +1,57 @@
+{
+  "common": {
+    "appName": "Colourking",
+    "login": "Log in",
+    "logout": "Log out",
+    "save": "Save",
+    "cancel": "Cancel",
+    "delete": "Delete",
+    "edit": "Edit",
+    "create": "Create",
+    "search": "Search",
+    "loading": "Loading...",
+    "noResults": "No results",
+    "confirm": "Confirm",
+    "back": "Back",
+    "next": "Next",
+    "close": "Close",
+    "yes": "Yes",
+    "no": "No"
+  },
+  "nav": {
+    "dashboard": "Dashboard",
+    "leads": "Leads",
+    "customers": "Customers",
+    "vehicles": "Vehicles",
+    "offers": "Quotes",
+    "jobs": "Workshop",
+    "parts": "Parts",
+    "invoices": "Invoices",
+    "documents": "Documents",
+    "appointments": "Appointments",
+    "tasks": "Tasks",
+    "planning": "Planning",
+    "reports": "Reports",
+    "vat": "VAT",
+    "purchases": "Purchases",
+    "settings": "Settings"
+  },
+  "auth": {
+    "email": "Email address",
+    "password": "Password",
+    "signIn": "Sign in",
+    "signInTitle": "Sign in to Colourking",
+    "signInSubtitle": "Admin console",
+    "invalidCredentials": "Invalid credentials",
+    "sessionExpired": "Session expired, please sign in again"
+  },
+  "dashboard": {
+    "title": "Dashboard",
+    "welcome": "Welcome to Colourking",
+    "todayOverview": "Today",
+    "jobsByStage": "Jobs by stage",
+    "upcomingAppointments": "Upcoming appointments",
+    "pendingOffers": "Pending quotes",
+    "overdueInvoices": "Overdue invoices"
+  }
+}
