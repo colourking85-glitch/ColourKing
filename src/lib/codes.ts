@@ -47,6 +47,8 @@ export const SCREEN_REGISTRY: Record<string, ScreenMeta> = {
 
   // Jobs
   '/app/jobs': { id: 'JB05', title: 'Job List', titleNl: 'Opdrachtlijst', module: 'JB', route: '/app/jobs' },
+  '/app/jobs/nieuw': { id: 'JB01', title: 'Create Job', titleNl: 'Opdracht Aanmaken', module: 'JB', route: '/app/jobs/nieuw' },
+  '/app/jobs/[id]': { id: 'JB10', title: 'Job Detail', titleNl: 'Opdrachtdetail', module: 'JB', route: '/app/jobs/[id]' },
   '/app/jobs/board': { id: 'JB15', title: 'Job Board', titleNl: 'Werkplaatsbord', module: 'JB', route: '/app/jobs/board' },
 
   // Parts
