@@ -5,6 +5,7 @@ import {
   Bell, BellOff, Check, CheckCheck, Inbox, Wrench, Mail,
   CalendarCheck, Package, CreditCard, FileText, AlertCircle,
   Volume2, VolumeX, RefreshCw, Maximize, LogOut, Filter,
+  Car, Clock, Calendar,
 } from 'lucide-react';
 import { signOut } from '@/lib/auth';
 import type { NotificationType } from '@/types/database';
@@ -19,6 +20,16 @@ type Notification = {
   created_at: string;
 };
 
+type MonitorJob = {
+  id: string;
+  number: number;
+  stage: string;
+  notes: string | null;
+  updated_at: string;
+  customers: { id: string; name: string } | null;
+  vehicles: { id: string; kenteken: string | null; make: string | null; model: string | null; colour: string | null } | null;
+};
+
 const TYPE_META: Record<NotificationType, { icon: React.ElementType; color: string; bg: string; label: string }> = {
   new_lead: { icon: Inbox, color: 'text-amber-400', bg: 'bg-amber-400/10', label: 'Lead' },
   stage_change: { icon: Wrench, color: 'text-cyan-400', bg: 'bg-cyan-400/10', label: 'Fase' },
@@ -31,6 +42,13 @@ const TYPE_META: Record<NotificationType, { icon: React.ElementType; color: stri
   system: { icon: AlertCircle, color: 'text-slate-400', bg: 'bg-slate-400/10', label: 'Systeem' },
 };
 
+const STAGE_LABELS: Record<string, { label: string; color: string }> = {
+  checked_in: { label: 'Ingecheckt', color: 'text-blue-400 bg-blue-400/10' },
+  in_progress: { label: 'In bewerking', color: 'text-amber-400 bg-amber-400/10' },
+  qc: { label: 'Kwaliteitscontrole', color: 'text-purple-400 bg-purple-400/10' },
+  scheduled: { label: 'Gepland', color: 'text-cyan-400 bg-cyan-400/10' },
+};
+
 function timeAgo(dateStr: string): string {
   const diff = Date.now() - new Date(dateStr).getTime();
   const mins = Math.floor(diff / 60000);
@@ -41,12 +59,25 @@ function timeAgo(dateStr: string): string {
   return `${Math.floor(hrs / 24)}d`;
 }
 
+function formatDate(dateStr: string): string {
+  const d = new Date(dateStr);
+  const now = new Date();
+  const diffDays = Math.floor((d.getTime() - now.getTime()) / 86400000);
+  const dayStr = d.toLocaleDateString('nl-NL', { weekday: 'short', day: 'numeric', month: 'short' });
+  const timeStr = d.toLocaleTimeString('nl-NL', { hour: '2-digit', minute: '2-digit' });
+  if (diffDays === 0) return `Vandaag ${timeStr}`;
+  if (diffDays === 1) return `Morgen ${timeStr}`;
+  return `${dayStr} ${timeStr}`;
+}
+
 function clockStr() {
   return new Date().toLocaleTimeString('nl-NL', { hour: '2-digit', minute: '2-digit', second: '2-digit' });
 }
 
 export default function MonitorDashboard() {
   const [notifications, setNotifications] = useState<Notification[]>([]);
+  const [ongoing, setOngoing] = useState<MonitorJob[]>([]);
+  const [scheduled, setScheduled] = useState<MonitorJob[]>([]);
   const [loading, setLoading] = useState(true);
   const [soundEnabled, setSoundEnabled] = useState(true);
   const [filter, setFilter] = useState<string>('all');
@@ -57,9 +88,13 @@ export default function MonitorDashboard() {
 
   const load = useCallback(async () => {
     try {
-      const res = await fetch('/api/notifications?limit=100');
-      if (res.ok) {
-        const data: Notification[] = await res.json();
+      const [notifRes, monitorRes] = await Promise.all([
+        fetch('/api/notifications?limit=100'),
+        fetch('/api/monitor'),
+      ]);
+
+      if (notifRes.ok) {
+        const data: Notification[] = await notifRes.json();
         const unreadCount = data.filter(n => !n.read).length;
 
         if (soundEnabled && unreadCount > lastCountRef.current && lastCountRef.current >= 0 && notifications.length > 0) {
@@ -67,6 +102,12 @@ export default function MonitorDashboard() {
         }
         lastCountRef.current = unreadCount;
         setNotifications(data);
+      }
+
+      if (monitorRes.ok) {
+        const data = await monitorRes.json();
+        setOngoing(data.ongoing ?? []);
+        setScheduled(data.scheduled ?? []);
       }
     } finally {
       setLoading(false);
@@ -120,10 +161,10 @@ export default function MonitorDashboard() {
 
   const statCards = [
     { label: 'Ongelezen', value: unreadCount, color: 'text-[#E8364E]', pulse: unreadCount > 0 },
-    { label: 'Leads', value: notifications.filter(n => n.type === 'new_lead' && !n.read).length, color: 'text-amber-400' },
-    { label: 'Fasewijzigingen', value: notifications.filter(n => n.type === 'stage_change' && !n.read).length, color: 'text-cyan-400' },
+    { label: 'In bewerking', value: ongoing.length, color: 'text-amber-400' },
+    { label: 'Gepland', value: scheduled.length, color: 'text-cyan-400' },
+    { label: 'Leads', value: notifications.filter(n => n.type === 'new_lead' && !n.read).length, color: 'text-yellow-400' },
     { label: 'E-mails', value: notifications.filter(n => n.type === 'new_email' && !n.read).length, color: 'text-blue-400' },
-    { label: 'Afspraken', value: notifications.filter(n => n.type.startsWith('appointment') && !n.read).length, color: 'text-green-400' },
     { label: 'Betalingen', value: notifications.filter(n => n.type === 'payment_received' && !n.read).length, color: 'text-emerald-400' },
   ];
 
@@ -212,95 +253,201 @@ export default function MonitorDashboard() {
         ))}
       </div>
 
-      {/* Filter bar */}
-      <div className="flex shrink-0 items-center gap-2 border-b border-[#1e1e2a] bg-[#0f0f17] px-6 py-2">
-        <Filter size={12} className="text-[#6b6b80]" />
-        {[
-          { value: 'all', label: 'Alles' },
-          { value: 'new_lead', label: 'Leads' },
-          { value: 'stage_change', label: 'Fases' },
-          { value: 'new_email', label: 'E-mail' },
-          { value: 'appointment_confirmed', label: 'Afspraken' },
-          { value: 'payment_received', label: 'Betalingen' },
-        ].map(f => (
-          <button
-            key={f.value}
-            onClick={() => setFilter(f.value)}
-            className={`rounded-full px-3 py-1 text-[11px] font-medium transition-colors ${
-              filter === f.value
-                ? 'bg-[#E8364E]/20 text-[#E8364E]'
-                : 'bg-[#1e1e2a]/50 text-[#6b6b80] hover:text-white'
-            }`}
-          >
-            {f.label}
-          </button>
-        ))}
-      </div>
+      {/* Main content: two-column layout */}
+      <div className="flex min-h-0 flex-1">
+        {/* Left: Jobs panels */}
+        <div className="flex w-[380px] shrink-0 flex-col border-r border-[#1e1e2a] overflow-y-auto">
+          {/* Ongoing jobs */}
+          <div className="border-b border-[#1e1e2a] p-4">
+            <div className="mb-3 flex items-center gap-2">
+              <Car size={14} className="text-amber-400" />
+              <h2 className="text-xs font-bold uppercase tracking-wider text-white">In bewerking</h2>
+              <span className="rounded-full bg-amber-400/10 px-2 py-0.5 text-[10px] font-bold text-amber-400">{ongoing.length}</span>
+            </div>
+            {ongoing.length === 0 ? (
+              <div className="rounded-lg border border-dashed border-[#1e1e2a] p-6 text-center text-xs text-[#3a3a50]">
+                Geen voertuigen in bewerking
+              </div>
+            ) : (
+              <div className="space-y-2">
+                {ongoing.map(job => {
+                  const stage = STAGE_LABELS[job.stage] ?? { label: job.stage, color: 'text-slate-400 bg-slate-400/10' };
+                  return (
+                    <div key={job.id} className="rounded-xl border border-[#1e1e2a] bg-[#12121a] p-3">
+                      <div className="flex items-center justify-between">
+                        <div className="flex items-center gap-2">
+                          <span className="font-mono text-sm font-bold text-white">
+                            {job.vehicles?.kenteken ?? '—'}
+                          </span>
+                          <span className={`rounded-full px-1.5 py-0.5 text-[9px] font-bold uppercase ${stage.color}`}>
+                            {stage.label}
+                          </span>
+                        </div>
+                        <span className="text-[10px] tabular-nums text-[#3a3a50]">#{job.number}</span>
+                      </div>
+                      <div className="mt-1.5 flex items-center gap-3 text-[11px] text-[#6b6b80]">
+                        {job.vehicles?.make && (
+                          <span>{job.vehicles.make} {job.vehicles.model}</span>
+                        )}
+                        {job.vehicles?.colour && (
+                          <span className="flex items-center gap-1">
+                            <span className="inline-block h-2 w-2 rounded-full border border-[#3a3a50]" style={{ backgroundColor: job.vehicles.colour }} />
+                            {job.vehicles.colour}
+                          </span>
+                        )}
+                      </div>
+                      {job.customers?.name && (
+                        <div className="mt-1 text-[11px] text-[#6b6b80]">{job.customers.name}</div>
+                      )}
+                      <div className="mt-1 flex items-center gap-1 text-[10px] text-[#3a3a50]">
+                        <Clock size={9} />
+                        {timeAgo(job.updated_at)}
+                      </div>
+                    </div>
+                  );
+                })}
+              </div>
+            )}
+          </div>
 
-      {/* Notification feed */}
-      <div className="flex-1 overflow-y-auto p-4">
-        {loading ? (
-          <div className="flex h-full items-center justify-center">
-            <div className="h-10 w-10 animate-spin rounded-full border-2 border-[#1e1e2a] border-t-[#E8364E]" />
-          </div>
-        ) : filtered.length === 0 ? (
-          <div className="flex h-full flex-col items-center justify-center gap-4">
-            <BellOff size={56} className="text-[#1e1e2a]" />
-            <div className="text-sm text-[#6b6b80]">
-              {filter === 'all' ? 'Geen meldingen — alles is rustig' : 'Geen meldingen van dit type'}
+          {/* Upcoming scheduled */}
+          <div className="p-4">
+            <div className="mb-3 flex items-center gap-2">
+              <Calendar size={14} className="text-cyan-400" />
+              <h2 className="text-xs font-bold uppercase tracking-wider text-white">Gepland (4 dagen)</h2>
+              <span className="rounded-full bg-cyan-400/10 px-2 py-0.5 text-[10px] font-bold text-cyan-400">{scheduled.length}</span>
             </div>
-            <div className="flex items-center gap-1.5 text-[11px] text-[#3a3a50]">
-              <RefreshCw size={10} className="animate-spin" />
-              Automatisch vernieuwen actief ({refreshInterval}s)
-            </div>
-          </div>
-        ) : (
-          <div className="mx-auto max-w-4xl space-y-2">
-            {filtered.map(n => {
-              const meta = TYPE_META[n.type] ?? TYPE_META.system;
-              const Icon = meta.icon;
-              return (
-                <div
-                  key={n.id}
-                  className={`group flex items-center gap-4 rounded-xl border p-4 transition-all ${
-                    n.read
-                      ? 'border-[#1e1e2a]/50 bg-[#12121a]/50'
-                      : 'border-[#E8364E]/30 bg-[#12121a] shadow-lg shadow-[#E8364E]/5'
-                  }`}
-                >
-                  <div className={`flex h-11 w-11 shrink-0 items-center justify-center rounded-xl ${meta.bg}`}>
-                    <Icon size={20} className={meta.color} />
-                  </div>
-                  <div className="min-w-0 flex-1">
-                    <div className="flex items-center gap-2">
-                      <span className="text-sm font-semibold text-white">{n.title}</span>
-                      <span className={`rounded-full px-1.5 py-0.5 text-[9px] font-bold uppercase ${meta.bg} ${meta.color}`}>
-                        {meta.label}
-                      </span>
-                      {!n.read && (
-                        <span className="h-2 w-2 rounded-full bg-[#E8364E]" />
+            {scheduled.length === 0 ? (
+              <div className="rounded-lg border border-dashed border-[#1e1e2a] p-6 text-center text-xs text-[#3a3a50]">
+                Geen geplande voertuigen
+              </div>
+            ) : (
+              <div className="space-y-2">
+                {scheduled.map(job => (
+                  <div key={job.id} className="rounded-xl border border-[#1e1e2a] bg-[#12121a] p-3">
+                    <div className="flex items-center justify-between">
+                      <div className="flex items-center gap-2">
+                        <span className="font-mono text-sm font-bold text-white">
+                          {job.vehicles?.kenteken ?? '—'}
+                        </span>
+                        <span className="rounded-full bg-cyan-400/10 px-1.5 py-0.5 text-[9px] font-bold uppercase text-cyan-400">
+                          Gepland
+                        </span>
+                      </div>
+                      <span className="text-[10px] tabular-nums text-[#3a3a50]">#{job.number}</span>
+                    </div>
+                    <div className="mt-1.5 flex items-center gap-3 text-[11px] text-[#6b6b80]">
+                      {job.vehicles?.make && (
+                        <span>{job.vehicles.make} {job.vehicles.model}</span>
                       )}
                     </div>
-                    {n.body && (
-                      <div className="mt-0.5 text-xs text-[#6b6b80]">{n.body}</div>
+                    {job.customers?.name && (
+                      <div className="mt-1 text-[11px] text-[#6b6b80]">{job.customers.name}</div>
                     )}
+                    <div className="mt-1 flex items-center gap-1 text-[10px] text-[#3a3a50]">
+                      <Calendar size={9} />
+                      {formatDate(job.updated_at)}
+                    </div>
                   </div>
-                  <div className="flex items-center gap-3">
-                    <span className="text-xs tabular-nums text-[#3a3a50]">{timeAgo(n.created_at)}</span>
-                    {!n.read && (
-                      <button
-                        onClick={() => markRead(n.id)}
-                        className="rounded-lg p-1.5 text-[#6b6b80] opacity-0 transition-all hover:bg-[#1e1e2a] hover:text-white group-hover:opacity-100"
-                      >
-                        <Check size={14} />
-                      </button>
-                    )}
-                  </div>
-                </div>
-              );
-            })}
+                ))}
+              </div>
+            )}
           </div>
-        )}
+        </div>
+
+        {/* Right: Notification feed */}
+        <div className="flex min-w-0 flex-1 flex-col">
+          {/* Filter bar */}
+          <div className="flex shrink-0 items-center gap-2 border-b border-[#1e1e2a] bg-[#0f0f17] px-6 py-2">
+            <Filter size={12} className="text-[#6b6b80]" />
+            {[
+              { value: 'all', label: 'Alles' },
+              { value: 'new_lead', label: 'Leads' },
+              { value: 'stage_change', label: 'Fases' },
+              { value: 'new_email', label: 'E-mail' },
+              { value: 'appointment_confirmed', label: 'Afspraken' },
+              { value: 'payment_received', label: 'Betalingen' },
+            ].map(f => (
+              <button
+                key={f.value}
+                onClick={() => setFilter(f.value)}
+                className={`rounded-full px-3 py-1 text-[11px] font-medium transition-colors ${
+                  filter === f.value
+                    ? 'bg-[#E8364E]/20 text-[#E8364E]'
+                    : 'bg-[#1e1e2a]/50 text-[#6b6b80] hover:text-white'
+                }`}
+              >
+                {f.label}
+              </button>
+            ))}
+          </div>
+
+          {/* Feed */}
+          <div className="flex-1 overflow-y-auto p-4">
+            {loading ? (
+              <div className="flex h-full items-center justify-center">
+                <div className="h-10 w-10 animate-spin rounded-full border-2 border-[#1e1e2a] border-t-[#E8364E]" />
+              </div>
+            ) : filtered.length === 0 ? (
+              <div className="flex h-full flex-col items-center justify-center gap-4">
+                <BellOff size={56} className="text-[#1e1e2a]" />
+                <div className="text-sm text-[#6b6b80]">
+                  {filter === 'all' ? 'Geen meldingen — alles is rustig' : 'Geen meldingen van dit type'}
+                </div>
+                <div className="flex items-center gap-1.5 text-[11px] text-[#3a3a50]">
+                  <RefreshCw size={10} className="animate-spin" />
+                  Automatisch vernieuwen actief ({refreshInterval}s)
+                </div>
+              </div>
+            ) : (
+              <div className="space-y-2">
+                {filtered.map(n => {
+                  const meta = TYPE_META[n.type] ?? TYPE_META.system;
+                  const Icon = meta.icon;
+                  return (
+                    <div
+                      key={n.id}
+                      className={`group flex items-center gap-4 rounded-xl border p-4 transition-all ${
+                        n.read
+                          ? 'border-[#1e1e2a]/50 bg-[#12121a]/50'
+                          : 'border-[#E8364E]/30 bg-[#12121a] shadow-lg shadow-[#E8364E]/5'
+                      }`}
+                    >
+                      <div className={`flex h-11 w-11 shrink-0 items-center justify-center rounded-xl ${meta.bg}`}>
+                        <Icon size={20} className={meta.color} />
+                      </div>
+                      <div className="min-w-0 flex-1">
+                        <div className="flex items-center gap-2">
+                          <span className="text-sm font-semibold text-white">{n.title}</span>
+                          <span className={`rounded-full px-1.5 py-0.5 text-[9px] font-bold uppercase ${meta.bg} ${meta.color}`}>
+                            {meta.label}
+                          </span>
+                          {!n.read && (
+                            <span className="h-2 w-2 rounded-full bg-[#E8364E]" />
+                          )}
+                        </div>
+                        {n.body && (
+                          <div className="mt-0.5 text-xs text-[#6b6b80]">{n.body}</div>
+                        )}
+                      </div>
+                      <div className="flex items-center gap-3">
+                        <span className="text-xs tabular-nums text-[#3a3a50]">{timeAgo(n.created_at)}</span>
+                        {!n.read && (
+                          <button
+                            onClick={() => markRead(n.id)}
+                            className="rounded-lg p-1.5 text-[#6b6b80] opacity-0 transition-all hover:bg-[#1e1e2a] hover:text-white group-hover:opacity-100"
+                          >
+                            <Check size={14} />
+                          </button>
+                        )}
+                      </div>
+                    </div>
+                  );
+                })}
+              </div>
+            )}
+          </div>
+        </div>
       </div>
 
       {/* Bottom status bar */}
@@ -310,7 +457,7 @@ export default function MonitorDashboard() {
           <span className="h-1.5 w-1.5 rounded-full bg-green-500" />
           Verbonden — auto-refresh {refreshInterval}s
         </span>
-        <span>{notifications.length} meldingen totaal</span>
+        <span>{ongoing.length} actief · {scheduled.length} gepland · {notifications.length} meldingen</span>
       </footer>
     </div>
   );
