@@ -1,7 +1,7 @@
 # ColourKing — Implementation Trace
 
 **Created:** 2026-08-24
-**Status:** Sprint 2.5 complete — Nav + Settings + Notifications + Monitoring
+**Status:** Sprint 2.7 complete — KPI Dashboard + Monitor + Domain routing + Coming Soon
 
 ---
 
@@ -42,7 +42,7 @@
 - [x] Website design: Airo sample as inspiration (dark, Barlow, red #E8364E)
 - [x] BOP VPS source analyzed — Shell, TopNavBar, FlyoutSidebar, auth, screen-registry patterns captured
 - [x] Supabase region confirmed: eu-west-1 (Ireland) — EU-compliant, acceptable
-- [ ] Confirm domain: colourking.nl + admin.colourking.nl (GoDaddy DNS → Cloudflare, in progress)
+- [x] Domains: colourking.nl, admin.colourking.nl, monitor.colourking.nl configured (Vercel + Cloudflare)
 - [ ] Confirm numbering prefixes with accountant (OFF/OPD/AFL/FAC/CRE)
 - [ ] Confirm 10 job stages with the shop
 - [ ] Confirm bookable slot types and durations
@@ -92,8 +92,8 @@
 - [x] Cmd-K command palette: search by screen code or name
 - [x] Screen code registry: lib/codes.ts with 20 screens registered
 - [x] ScreenBadge component with per-module colors
-- [x] Design tokens: ck-dark, ck-red, ck-dark-card, ck-dark-border, Barlow fonts
-- [x] Dashboard page: 6 quick-stat cards + placeholder sections
+- [x] Design tokens: ck-bg, ck-surface, ck-border, ck-text hierarchy + semantic colors (green/red/amber/blue/purple)
+- [x] Dashboard page: KPI dashboard with shift overview + per vehicle tabs (demo data)
 
 ### 0.4 i18n
 - [x] next-intl setup with NL/EN/TR
@@ -159,6 +159,57 @@
 - [x] Committed: d1c19a2 (19 files, 1603 lines)
 - [x] Pushed to GitHub: colourking85-glitch/ColourKing
 - [x] Roadmap doc created: docs/roadmap.md (Sprints 0–8)
+
+---
+
+## Sprint 2.5: Subdomain Routing + Monitor + Coming Soon + KPI Dashboard
+
+### Domain & Routing
+- [x] Middleware-based subdomain routing (monitor.colourking.nl → /monitor, admin.colourking.nl → /app)
+- [x] Moved from vercel.json rewrites to Next.js middleware (middleware runs before vercel.json)
+- [x] Cloudflare DNS: CNAME records for admin, monitor, www subdomains (proxy OFF for Vercel SSL)
+- [x] Vercel domains: admin.colourking.nl (valid), monitor.colourking.nl (configured)
+- [x] X-Robots-Tag: noindex on admin and monitor routes
+
+### Monitor Dashboard (monitor.colourking.nl)
+- [x] Standalone monitor dashboard at /monitor with dedicated login
+- [x] Two-column layout: left panel (jobs + performance), right panel (notification feed)
+- [x] Auto-refresh: configurable 1–5 min interval with last-updated timestamp
+- [x] Manual refresh button
+- [x] Live clock + date display
+- [x] 10-second alert: Web Audio API multi-tone sound, blinking bell, red glow header
+- [x] Flying ticker banner scrolling unread notifications
+- [x] Ongoing jobs with kenteken, stage badge, duration tracker (green <24h, amber 24–48h, red >48h)
+- [x] Upcoming scheduled vehicles panel
+- [x] Performance indicators: avg duration KPI, delayed count, stage distribution bar chart
+- [x] Notification type distribution bar chart
+- [x] Inter + JetBrains Mono fonts via next/font
+- [x] API endpoint: /api/monitor (ongoing + scheduled jobs)
+- [x] Notification feed with type filters, mark read, mark all read
+
+### Coming Soon Page (colourking.nl)
+- [x] Dark-themed landing page at /[locale]
+- [x] Business details: Autospuitbedrijf Colour King, Satijnbloem 6, 3068 JP Rotterdam
+- [x] Contact: 06 - 81 63 10 20, info@colourking.nl
+- [x] CK logo mark with brand red
+
+### KPI Dashboard (RP01)
+- [x] Google Doc KPI spec imported (bodyshop-kpi-dashboard-spec)
+- [x] Admin UI redesign spec imported (color system, typography, layout)
+- [x] Alert strip: conditional red-tinted banner for urgent issues (overdue jobs, blocked parts)
+- [x] Tab navigation: Dienstoverzicht / Per voertuig
+- [x] Shift overview: 6 KPI cards (delivered, utilization, efficiency, touch ratio, revenue, WIP)
+- [x] Phase flow bars with bottleneck detection (≥90% = red alert)
+- [x] Hourly production bar chart (hours produced per shift hour)
+- [x] Technician output table (name, role, clocked, produced, efficiency bar)
+- [x] Exceptions log with severity-coded dots
+- [x] Per vehicle: WIP table with clickable rows
+- [x] Vehicle detail: 4 mini-KPIs (cycle time, touch ratio, estimate accuracy, gross margin)
+- [x] Cycle timeline visualization (active work vs waiting segments)
+- [x] Estimate vs actual cost breakdown table
+- [x] Refined color system: ck-surface/border/text hierarchy with 0.5px borders
+- [x] Font weight restraint: 400/500 only (no bold/600/700)
+- [x] Demo data with "Demo" badge — awaits time-tracking tables for live data
 
 ---
 
@@ -358,3 +409,12 @@
 | 2026-08-24 | Header bell wired to real API (polls every 15s) | Done |
 | 2026-08-24 | Sidebar: Monitoring (SY05) added under Systeem > Instellingen | Done |
 | 2026-08-24 | vercel.json: framework=nextjs to fix Vercel build | Done |
+| 2026-08-24 | Subdomain routing: moved to middleware (vercel.json rewrites don't work with intl middleware) | Done |
+| 2026-08-24 | admin.colourking.nl: Vercel domain valid, working | Done |
+| 2026-08-24 | monitor.colourking.nl: Vercel domain configured, needs SSL verification | In progress |
+| 2026-08-24 | colourking.nl: CNAME to Vercel, Coming Soon page deployed | Done |
+| 2026-08-24 | Cloudflare: proxy must be OFF (grey cloud) for Vercel SSL | Done |
+| 2026-08-25 | KPI Dashboard spec imported from Google Doc + Claude Design project | Done |
+| 2026-08-25 | Admin UI redesign spec imported from Google Doc | Done |
+| 2026-08-25 | RP01 KPI Dashboard implemented with demo data (shift + per vehicle views) | Done |
+| 2026-08-25 | Color system refined: ck-surface/border/text tokens in tailwind.config.js | Done |
