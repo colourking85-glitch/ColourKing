@@ -40,3 +40,10 @@ supabase/.temp/
 # ide
 .vscode/
 .idea/
+
+# project artifacts
+web/
+drive-download-*/
+/plan.md
+pnpm-workspace.yaml
+*.zip

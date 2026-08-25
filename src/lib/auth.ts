@@ -46,35 +46,39 @@ export function can(role: Role, permission: string): boolean {
   return perms.includes(`${mod}.*`);
 }
 
-const DEV_BYPASS = process.env.NODE_ENV === 'development';
+/** Mock session returned when Supabase is not configured */
+const MOCK_SESSION = {
+  id: 'mock-admin',
+  email: 'admin@colourking.nl',
+  name: 'Admin (dev)',
+  role: 'admin' as Role,
+};
 
 export async function getSession(): Promise<Session> {
+  // When no Supabase client is available, return mock admin
   if (USING_MOCK || !supabase) {
-    return {
-      id: 'mock-admin',
-      email: 'admin@colourking.nl',
-      name: 'Admin (dev)',
-      role: 'admin',
-    };
-  }
-
-  if (DEV_BYPASS) {
-    const { data } = await supabase.auth.getSession();
-    if (!data.session?.user) {
-      return {
-        id: 'dev-admin',
-        email: 'admin@colourking.nl',
-        name: 'Admin (dev)',
-        role: 'admin',
-      };
-    }
+    return MOCK_SESSION;
   }
 
   const { data } = await supabase.auth.getSession();
-  if (!data.session?.user) return null;
+
+  // Dev bypass: when Supabase is configured but no user is logged in,
+  // return a dev admin in development mode
+  if (!data.session?.user) {
+    if (process.env.NODE_ENV === 'development') {
+      return {
+        id: 'dev-admin',
+        email: MOCK_SESSION.email,
+        name: MOCK_SESSION.name,
+        role: MOCK_SESSION.role,
+      };
+    }
+    return null;
+  }
 
   const user = data.session.user;
 
+  // Fetch the staff record from the API
   try {
     const res = await fetch('/api/auth/me');
     if (res.ok) {

@@ -93,6 +93,8 @@ export const SCREEN_REGISTRY: Record<string, ScreenMeta> = {
 
   // Settings
   '/app/instellingen': { id: 'SY01', title: 'Settings', titleNl: 'Instellingen', module: 'SY', route: '/app/instellingen' },
+  '/app/instellingen/gebruikers': { id: 'SY02', title: 'Staff Management', titleNl: 'Gebruikersbeheer', module: 'SY', route: '/app/instellingen/gebruikers' },
+  '/app/instellingen/nummering': { id: 'SY03', title: 'Number Ranges', titleNl: 'Nummering', module: 'SY', route: '/app/instellingen/nummering' },
 
   // Monitoring
   '/app/monitoring': { id: 'SY05', title: 'Monitoring', titleNl: 'Monitoring', module: 'SY', route: '/app/monitoring' },

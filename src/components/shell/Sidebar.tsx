@@ -59,7 +59,7 @@ const NAV: NavSection[] = [
       { label: 'leads', href: '/app/leads', icon: Inbox, code: 'LD05', permission: 'leads.read' },
       { label: 'customers', href: '/app/klanten', icon: Users, code: 'KL05', permission: 'customers.read' },
       { label: 'vehicles', href: '/app/voertuigen', icon: Car, code: 'VH05', permission: 'vehicles.read' },
-      { label: 'offers', href: '/app/offertes', icon: FileText, code: 'ES05', permission: 'offers.read', soon: true },
+      { label: 'offers', href: '/app/offertes', icon: FileText, code: 'ES05', permission: 'offers.read' },
     ],
   },
   {
@@ -67,16 +67,16 @@ const NAV: NavSection[] = [
     items: [
       { label: 'jobs', href: '/app/jobs', icon: Wrench, code: 'JB05', permission: 'jobs.read' },
       { label: 'workshopBoard', href: '/app/jobs/board', icon: ClipboardList, code: 'JB15', permission: 'jobs.read' },
-      { label: 'parts', href: '/app/onderdelen', icon: Package, code: 'PT05', permission: 'parts.read', soon: true },
-      { label: 'planning', href: '/app/planning', icon: CalendarDays, code: 'TS10', permission: 'tasks.own', soon: true },
+      { label: 'parts', href: '/app/onderdelen', icon: Package, code: 'PT05', permission: 'parts.read' },
+      { label: 'planning', href: '/app/planning', icon: CalendarDays, code: 'TS10', permission: 'tasks.own' },
     ],
   },
   {
     group: 'groupAdmin',
     items: [
-      { label: 'invoices', href: '/app/facturen', icon: Receipt, code: 'FA05', permission: 'invoices.read', soon: true },
-      { label: 'documents', href: '/app/documenten', icon: FolderOpen, code: 'DO05', permission: 'documents.read', soon: true },
-      { label: 'appointments', href: '/app/afspraken', icon: CalendarDays, code: 'AP05', permission: 'appointments.read', soon: true },
+      { label: 'invoices', href: '/app/facturen', icon: Receipt, code: 'FA05', permission: 'invoices.read' },
+      { label: 'documents', href: '/app/documenten', icon: FolderOpen, code: 'DO05', permission: 'documents.read' },
+      { label: 'appointments', href: '/app/afspraken', icon: CalendarDays, code: 'AP05', permission: 'appointments.read' },
     ],
   },
   {
@@ -84,7 +84,7 @@ const NAV: NavSection[] = [
     items: [
       { label: 'vat', href: '/app/btw', icon: Calculator, code: 'BW05', permission: 'vat.read' },
       { label: 'purchases', href: '/app/inkoop', icon: ShoppingCart, code: 'PU05', permission: 'purchases.read' },
-      { label: 'reports', href: '/app/rapportage', icon: BarChart3, code: 'RP10', soon: true },
+      { label: 'reports', href: '/app/rapportage', icon: BarChart3, code: 'RP10' },
       { label: 'bookkeeping', href: '/app/boekhouding', icon: BookOpen, code: 'BK10', permission: 'bookkeeping.read' },
       { label: 'btwCalculator', href: '/app/btw-calculator', icon: Calculator, code: 'BW40' },
     ],
@@ -98,8 +98,8 @@ const NAV: NavSection[] = [
         subitems: [
           { label: 'general', href: '/app/instellingen', icon: Settings, code: 'SY01' },
           { label: 'monitoring', href: '/app/monitoring', icon: Bell, code: 'SY05' },
-          { label: 'users', href: '/app/instellingen/gebruikers', icon: Users, code: 'SY02', soon: true },
-          { label: 'numbering', href: '/app/instellingen/nummering', icon: Receipt, code: 'SY03', soon: true },
+          { label: 'users', href: '/app/instellingen/gebruikers', icon: Users, code: 'SY02' },
+          { label: 'numbering', href: '/app/instellingen/nummering', icon: Receipt, code: 'SY03' },
         ],
       },
     ],

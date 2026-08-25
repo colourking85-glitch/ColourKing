@@ -29,6 +29,7 @@
 | 15 | Purchase Register | DONE | PU01/05 | 0018 |
 | 16 | Bookkeeping Export | DONE | BK10 | — |
 | 17 | BTW Calculator | DONE | BW40 | — |
+| 18 | Production Auth & Cleanup | IN PROGRESS | SY02/SY03 | — |
 
 ---
 
@@ -188,6 +189,21 @@
 - Input amount → show ex-VAT, VAT, incl-VAT for each rate (21%, 9%, 0%)
 - Real-time calculation, all math in integer cents
 - 31 tests
+
+---
+
+## Tier 4 Sprints (In Progress — Production Readiness)
+
+### Sprint 18: Production Auth & Cleanup
+- Real Supabase auth: login page, password reset, session management
+- Staff management screen (SY02): invite, deactivate, role assignment
+- Number ranges settings screen (SY03): configure document numbering prefixes
+- Remove dev bypass / mock admin from auth.ts
+- Protected API routes: validate session on all endpoints
+- Remove all `soon: true` flags from sidebar (all screens are built)
+- Delete orphaned files from failed Sprint 10 attempt
+- Fix leads table column mismatch in quote-request API
+- Clean up untracked files (.gitignore for drive-download, web/, root plan.md)
 
 ---
 
