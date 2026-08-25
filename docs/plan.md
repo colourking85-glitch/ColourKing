@@ -17,10 +17,10 @@
 | 3 | Document Engine | DONE | DO03, DO05 | 0010 |
 | 4 | Offers | DONE | ES01/05/10 | 0011 |
 | 5 | Parts + Board | DONE | PT01/05 | 0012 |
-| 6 | Repair Order + Handover | NOT STARTED | DO20 | — |
-| 7 | Invoice + Payment | NOT STARTED | FA01/05/10, BW40 | — |
+| 6 | Repair Order + Handover | DONE | DO20, DO21 | 0014 |
+| 7 | Invoice + Payment | DONE | FA01/05/10 | 0016 |
 | 8 | Appointments | DONE | AP01/05 | 0013 |
-| 9 | Tasks & Timesheet | NOT STARTED | TS01/05/10/20 | — |
+| 9 | Tasks & Timesheet | DONE | TS01/05/10 | 0015 |
 
 ---
 
@@ -98,30 +98,38 @@
 
 ---
 
-## Upcoming Sprints
-
-### Sprint 6: Repair Order + Handover (depends on Sprint 4)
+### Sprint 6: Repair Order + Handover
 - Repair order document template (vehicle, mileage, existing damage, terms)
 - Handover note template (work summary, mileage out, warranty)
-- Tablet signature capture (canvas → PNG)
-- PDF rendering with letterhead, locale-specific terms
-- Gallery consent capture at handover
+- Tablet signature capture (SignatureCanvas component, canvas → PNG)
+- Screens: DO20 repair order detail, DO21 handover note detail
+- API: repair-orders CRUD + sign, handover-notes CRUD
+- Signatures table (migration 0014), gallery_consent on documents
+- 18 tests (schemas + status transitions + signature validation)
 
-### Sprint 7: Invoice + Payment (depends on Sprint 4 + 6)
-- Invoices + invoice_lines + payments tables
-- Invoice from approved offer + supplements
-- Credit note (supersedes invoice)
-- Tax codes on all lines (H21 default)
-- Mollie integration: payment links, webhook, paid status
-- Screens: FA01 create, FA05 list, FA10 detail
-- Public status + pay page: /s/[token]
-- BW40 quick VAT calculator
-
-### Sprint 9: Tasks & Timesheet (depends on Sprint 4)
-- job_tasks table
+### Sprint 9: Tasks & Timesheet
+- job_tasks + time_entries tables (migration 0015)
 - Auto-generate tasks from offer lines on approval
-- Screens: TS01 create, TS05 my tasks (technician), TS10 timesheet/planner, TS20 workload
-- Dashboard live data connection (replace demo data in RP01)
+- Task status machine: todo → in_progress → done, any → blocked, blocked → todo
+- Clock in/out per task with duration computation
+- Screens: TS01 create task, TS05 my tasks, TS10 timesheet/planner
+- API: tasks CRUD + generate, time-entries CRUD + active timer
+- 33 tests (schemas + status transitions + time entry validation)
+
+---
+
+### Sprint 7: Invoice + Payment
+- Invoices + invoice_lines + payments tables (migration 0016)
+- Invoice from approved offer: copies lines, calculates VAT per tax code
+- Credit note: negative mirror invoice, links via credit_note_id, marks original as credited
+- Invoice cancel via credit note only — no direct cancellation
+- State machine: draft → sent → paid/overdue/credited
+- Professional HTML invoice template: company letterhead, line items, VAT breakdown, payment info
+- Mollie payment integration: iDEAL, card, bank transfer
+- Public payment page: /s/[token] (token-based, no auth)
+- Webhook: /api/webhooks/mollie for payment status updates
+- Screens: FA01 create (from offer), FA05 list (search/filters), FA10 detail (preview, actions, payments)
+- 96 tests (schemas, state machine, line calculations, VAT, credit notes, payments)
 
 ---
 
@@ -184,9 +192,12 @@ Lead → Offer → Approval → Repair Order → Job → Parts → Tasks → Han
 | 0008 | jobs | jobs, job_events, job_photos | Yes |
 | 0009 | notifications | notifications | Yes |
 | 0010 | documents | documents, number_ranges, allocate_number() | Yes |
-| 0011 | offers | offers, offer_lines | Pending |
-| 0012 | parts | parts | Pending |
-| 0013 | appointments | resources, opening_hours, blackouts, appointments | Pending |
+| 0011 | offers | offers, offer_lines | Yes |
+| 0012 | parts | parts | Yes |
+| 0013 | appointments | resources, opening_hours, blackouts, appointments | Yes |
+| 0014 | repair_handover | signatures, gallery_consent column | Yes |
+| 0015 | tasks_timesheet | job_tasks, time_entries | Yes |
+| 0016 | invoices | invoices, invoice_lines, payments | Yes |
 
 ---
 

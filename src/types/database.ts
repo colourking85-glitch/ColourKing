@@ -1,4 +1,4 @@
-// Auto-generated types — reflects migrations 0001-0013.
+// Auto-generated types — reflects migrations 0001-0015.
 // Regenerate after every migration: supabase gen types typescript --local > src/types/database.ts
 
 export type Json =
@@ -165,6 +165,7 @@ export interface Document {
   signed_ip: string | null;
   cancelled_at: string | null;
   cancel_reason: string | null;
+  gallery_consent: boolean | null;
   created_at: string;
   updated_at: string;
 }
@@ -289,6 +290,48 @@ export interface Appointment {
   updated_at: string;
 }
 
+export interface Signature {
+  id: string;
+  document_id: string;
+  signer_name: string;
+  signer_role: string;
+  signature_data: string;
+  ip_address: string | null;
+  created_at: string;
+}
+
+export interface JobTask {
+  id: string;
+  job_id: string;
+  offer_line_id: string | null;
+  title: string;
+  description: string | null;
+  status: TaskStatus;
+  assigned_to: string | null;
+  estimated_minutes: number | null;
+  actual_minutes: number | null;
+  sort_order: number;
+  started_at: string | null;
+  completed_at: string | null;
+  blocked_reason: string | null;
+  created_at: string;
+  updated_at: string;
+}
+
+export interface TimeEntry {
+  id: string;
+  staff_id: string;
+  job_id: string | null;
+  task_id: string | null;
+  clock_in: string;
+  clock_out: string | null;
+  duration_minutes: number | null;
+  break_minutes: number;
+  notes: string | null;
+  created_at: string;
+  updated_at: string;
+}
+
 export interface Database {
   public: {
     Tables: {
@@ -371,6 +414,21 @@ export interface Database {
         Row: Appointment;
         Insert: Omit<Appointment, 'id' | 'created_at' | 'updated_at'> & { id?: string };
         Update: Partial<Omit<Appointment, 'id' | 'created_at' | 'updated_at'>>;
+      };
+      signatures: {
+        Row: Signature;
+        Insert: Omit<Signature, 'id' | 'created_at'> & { id?: string };
+        Update: Partial<Omit<Signature, 'id' | 'created_at'>>;
+      };
+      job_tasks: {
+        Row: JobTask;
+        Insert: Omit<JobTask, 'id' | 'created_at' | 'updated_at'> & { id?: string };
+        Update: Partial<Omit<JobTask, 'id' | 'created_at' | 'updated_at'>>;
+      };
+      time_entries: {
+        Row: TimeEntry;
+        Insert: Omit<TimeEntry, 'id' | 'created_at' | 'updated_at'> & { id?: string };
+        Update: Partial<Omit<TimeEntry, 'id' | 'created_at' | 'updated_at'>>;
       };
     };
     Views: Record<string, never>;

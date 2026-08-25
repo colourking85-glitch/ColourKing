@@ -58,16 +58,22 @@ export const SCREEN_REGISTRY: Record<string, ScreenMeta> = {
 
   // Invoices
   '/app/facturen': { id: 'FA05', title: 'Invoice List', titleNl: 'Facturenlijst', module: 'FA', route: '/app/facturen' },
+  '/app/facturen/nieuw': { id: 'FA01', title: 'Create Invoice', titleNl: 'Factuur Aanmaken', module: 'FA', route: '/app/facturen/nieuw' },
+  '/app/facturen/[id]': { id: 'FA10', title: 'Invoice Detail', titleNl: 'Factuurdetail', module: 'FA', route: '/app/facturen/[id]' },
 
   // Documents
   '/app/documenten': { id: 'DO05', title: 'Document Archive', titleNl: 'Documentarchief', module: 'DO', route: '/app/documenten' },
   '/app/documenten/[id]': { id: 'DO03', title: 'Document Detail', titleNl: 'Documentdetail', module: 'DO', route: '/app/documenten/[id]' },
+  '/app/reparatieopdracht/[id]': { id: 'DO20', title: 'Repair Order', titleNl: 'Reparatieopdracht', module: 'DO', route: '/app/reparatieopdracht/[id]' },
+  '/app/afleverbon/[id]': { id: 'DO21', title: 'Handover Note', titleNl: 'Afleverbon', module: 'DO', route: '/app/afleverbon/[id]' },
 
   // Appointments
   '/app/afspraken': { id: 'AP05', title: 'Appointment Calendar', titleNl: 'Afsprakenkalender', module: 'AP', route: '/app/afspraken' },
   '/app/afspraken/nieuw': { id: 'AP01', title: 'Create Appointment', titleNl: 'Afspraak Aanmaken', module: 'AP', route: '/app/afspraken/nieuw' },
 
   // Tasks & Planning
+  '/app/taken': { id: 'TS05', title: 'My Tasks', titleNl: 'Mijn Taken', module: 'TS', route: '/app/taken' },
+  '/app/taken/nieuw': { id: 'TS01', title: 'Create Task', titleNl: 'Taak Aanmaken', module: 'TS', route: '/app/taken/nieuw' },
   '/app/planning': { id: 'TS10', title: 'Timesheet / Planner', titleNl: 'Werkplanning', module: 'TS', route: '/app/planning' },
 
   // Reports
