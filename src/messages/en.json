@@ -70,7 +70,10 @@
     "monitoring": "Monitoring",
     "users": "Users",
     "numbering": "Numbering",
-    "general": "General"
+    "general": "General",
+    "manual": "Manual",
+    "cronJobs": "Cron Jobs",
+    "aiAgents": "AI Agents"
   },
   "header": {
     "quickCreate": "Quick create",

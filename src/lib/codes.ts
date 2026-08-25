@@ -98,6 +98,15 @@ export const SCREEN_REGISTRY: Record<string, ScreenMeta> = {
 
   // Monitoring
   '/app/monitoring': { id: 'SY05', title: 'Monitoring', titleNl: 'Monitoring', module: 'SY', route: '/app/monitoring' },
+
+  // Manual
+  '/app/handleiding': { id: 'SY10', title: 'Manual', titleNl: 'Handleiding', module: 'SY', route: '/app/handleiding' },
+
+  // Cron Jobs
+  '/app/cron-jobs': { id: 'SY15', title: 'Cron Jobs', titleNl: 'Cron Jobs', module: 'SY', route: '/app/cron-jobs' },
+
+  // AI Agent Definitions
+  '/app/ai-agents': { id: 'SY20', title: 'AI Agents', titleNl: 'AI Agents', module: 'SY', route: '/app/ai-agents' },
 };
 
 export function getScreen(pathname: string): ScreenMeta | undefined {

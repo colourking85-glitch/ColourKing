@@ -70,7 +70,10 @@
     "monitoring": "İzleme",
     "users": "Kullanıcılar",
     "numbering": "Numaralandırma",
-    "general": "Genel"
+    "general": "Genel",
+    "manual": "Kılavuz",
+    "cronJobs": "Cron İşleri",
+    "aiAgents": "AI Ajanları"
   },
   "header": {
     "quickCreate": "Hızlı oluştur",

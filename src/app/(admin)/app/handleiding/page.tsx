@@ -1,0 +1,586 @@
+'use client';
+
+import { useState } from 'react';
+import { useTranslations } from 'next-intl';
+import { BookOpenCheck, Bot, ChevronRight, ChevronDown } from 'lucide-react';
+import { ScreenBadge } from '@/components/ui/ScreenBadge';
+import { SCREEN_REGISTRY } from '@/lib/codes';
+
+type Tab = 'agent' | 'user';
+
+const MODULES = [
+  {
+    id: 'leads',
+    code: 'LD',
+    screens: [
+      {
+        code: 'LD05',
+        agentNotes: 'GET /api/leads — returns array. Filter by status query param. Statuses: new, contacted, quoted, won, lost.',
+        userFlow: 'The Leads Inbox shows all incoming customer requests. Each lead card displays the contact name, source, status, and date. Use the filter buttons at the top to narrow by status. Click a lead to open its detail view.',
+        inputs: 'Name (required), email, phone, kenteken, damage description, source, preferred date.',
+        outputs: 'Lead record with auto-assigned status "new". Appears in the Leads Inbox and triggers a new_lead notification.',
+        crossScreen: 'A lead can be converted to a Customer (KL01) and Vehicle (VH01) from the detail page. When a lead is marked "quoted", an Offer (ES01) can be created from it. The lead ID is stored on the offer for traceability.',
+      },
+      {
+        code: 'LD01',
+        agentNotes: 'POST /api/leads — body: { source, locale, name, email?, phone?, kenteken?, preferred_date?, damage_description? }. Returns created lead.',
+        userFlow: 'Fill in the contact form. Only the name is required. Select the source (website, phone, email, walk-in, referral). Submit to create the lead. You are redirected to the Leads Inbox.',
+        inputs: 'Source (dropdown), locale, name, email, phone, kenteken, preferred date, damage description.',
+        outputs: 'New lead with status "new".',
+        crossScreen: 'Created lead appears in Leads Inbox (LD05). If a kenteken is provided, it can later auto-link to a vehicle via RDW lookup.',
+      },
+      {
+        code: 'LD10',
+        agentNotes: 'GET /api/leads/[id]. PATCH /api/leads/[id] for status transitions. Allowed transitions: new→contacted|lost, contacted→quoted|lost, quoted→won|lost. Lost requires lost_reason.',
+        userFlow: 'View full lead details. The header shows the current status with transition buttons. Click "Contacted" to mark follow-up done. Click "Quoted" after sending an offer. Click "Won" when the job is confirmed. Click "Lost" to close — you must enter a reason. Use the sidebar buttons to create a customer or offer from this lead.',
+        inputs: 'Status transition (button click). Lost reason (text, required when marking lost).',
+        outputs: 'Updated lead status. When creating customer/offer from lead, the new records link back to this lead.',
+        crossScreen: 'Creates Customer (KL01), Vehicle (VH01), or Offer (ES01). Status changes trigger stage_change notifications (SY05). Lost reason is stored for conversion analytics (RP10).',
+      },
+    ],
+  },
+  {
+    id: 'customers',
+    code: 'KL',
+    screens: [
+      {
+        code: 'KL05',
+        agentNotes: 'GET /api/customers — returns array. Searchable by name/email/phone. Customer types: private, company, fleet, dealer.',
+        userFlow: 'Browse all customers in a searchable table. Columns show type icon (person/building/truck/store), name, email, phone, and city. Click a row to open the customer detail. Use "New customer" button to add one.',
+        inputs: 'Search query (filters name, email, phone).',
+        outputs: 'Filtered customer list with links to detail pages.',
+        crossScreen: 'Customer records are linked to Vehicles (VH05), Offers (ES05), Jobs (JB05), and Invoices (FA05). Deleting a customer requires no linked active jobs or unpaid invoices.',
+      },
+      {
+        code: 'KL01',
+        agentNotes: 'POST /api/customers — body: { type, locale, name, email?, phone?, address?, postcode?, city?, btw_number?, notes? }.',
+        userFlow: 'Fill in the customer form. Select type (private/company/fleet/dealer). Name is required. Add contact and address details. For companies, enter the VAT number (BTW nummer). Submit to create.',
+        inputs: 'Type, locale, name (required), email, phone, address, postcode, city, VAT number, notes.',
+        outputs: 'New customer record.',
+        crossScreen: 'New customer appears in Customer List (KL05). Can be linked to vehicles and offers immediately after creation.',
+      },
+      {
+        code: 'KL02',
+        agentNotes: 'GET /api/customers/[id]. PATCH /api/customers/[id]. DELETE /api/customers/[id]. Includes linked vehicles array.',
+        userFlow: 'View and edit customer details. Left panel shows all data fields. Right panel lists linked vehicles with a button to add a new vehicle pre-linked to this customer. Use Edit to modify details, Delete to remove (only if no active links).',
+        inputs: 'Editable fields: all customer fields. Delete action.',
+        outputs: 'Updated customer record. Linked vehicle list.',
+        crossScreen: 'Linked vehicles (VH05), offers, jobs, and invoices are accessible from here. Adding a vehicle navigates to VH01 with customer pre-selected.',
+      },
+    ],
+  },
+  {
+    id: 'vehicles',
+    code: 'VH',
+    screens: [
+      {
+        code: 'VH05',
+        agentNotes: 'GET /api/vehicles — returns array with joined customer name. Search by kenteken/make/model. WOK flag indicates total loss.',
+        userFlow: 'Browse all vehicles. Table shows kenteken (license plate), make/model/year, colour, owner name, and WOK status. WOK (Wettelijk Onherstelbaar Kriterium) means the vehicle is a total loss — shown as an amber warning. Search by kenteken or vehicle details.',
+        inputs: 'Search query.',
+        outputs: 'Filtered vehicle list.',
+        crossScreen: 'Vehicles link to their owner (KL02), and appear on Offers (ES), Jobs (JB), and Invoices (FA).',
+      },
+      {
+        code: 'VH01',
+        agentNotes: 'POST /api/vehicles — body: { customer_id (required), kenteken?, vin?, make?, model?, year?, colour?, paint_code?, fuel?, body_type?, wok? }. RDW lookup: GET /api/rdw?kenteken=XX-XXX-X.',
+        userFlow: 'Enter a kenteken and click the search button to auto-fill vehicle data from the RDW (Dutch vehicle registry). Select the owner customer (required). Review and adjust the auto-filled fields. Check WOK if applicable. If arriving from a customer page, the owner is pre-selected.',
+        inputs: 'Owner (required), kenteken, VIN, make, model, year, colour, paint code, fuel, body type, WOK checkbox.',
+        outputs: 'New vehicle record linked to the selected customer.',
+        crossScreen: 'RDW API provides auto-fill data. Vehicle appears in Vehicle List (VH05) and on the owner\'s Customer Detail (KL02).',
+      },
+    ],
+  },
+  {
+    id: 'offers',
+    code: 'ES',
+    screens: [
+      {
+        code: 'ES05',
+        agentNotes: 'GET /api/offers — returns array. Filters: search, type (offer/supplement), status (draft/sent/approved/rejected/superseded).',
+        userFlow: 'Browse all offers. Table shows offer number (or "CONCEPT" for drafts), type, customer, vehicle, total amount, status badge, and date. Filter by type and status. Click a row to open details.',
+        inputs: 'Search query, type filter, status filter.',
+        outputs: 'Filtered offer list.',
+        crossScreen: 'Offers originate from Leads (LD10). Approved offers can generate Invoices (FA01) and Jobs (JB01).',
+      },
+      {
+        code: 'ES01',
+        agentNotes: 'POST /api/offers — body: { customer_id (required), vehicle_id?, origin?, valid_until?, locale?, notes?, lines: [{ kind, description, quantity, unit_price_cents, discount_pct, unit, tax_code, part_number }] }. Tax codes: H21=21%, L9=9%, N0=0%.',
+        userFlow: 'Select a customer (required) and optionally a vehicle. Add line items: choose type (labour/part/material/other), enter description, quantity, unit price in euros (stored as cents), discount %, and tax code (21%/9%/0%). The running total updates live. Submit to create as draft.',
+        inputs: 'Customer (required), vehicle, origin, valid until, locale, notes, line items with kind/description/quantity/price/discount/tax.',
+        outputs: 'Draft offer with auto-calculated totals. Money stored in integer cents.',
+        crossScreen: 'Created offer links to Customer (KL) and Vehicle (VH). Can be sent, then approved/rejected. Approved offers feed into Invoice creation (FA01) and Job creation (JB01).',
+      },
+      {
+        code: 'ES10',
+        agentNotes: 'GET /api/offers/[id]. PATCH /api/offers/[id]/status — transitions: draft→sent (guard: has_lines), sent→approved (requires approved_by_name), sent→rejected (requires reason), sent→superseded (creates copy). Lines editable only in draft.',
+        userFlow: 'View offer details with line items and totals. Actions depend on status:\n- Draft: Edit lines, then "Send" to customer (requires at least one line item).\n- Sent: "Approve" (enter approver name), "Reject" (enter reason), or "Supersede" (creates a new copy for revision).\n- Approved/Rejected/Superseded: View-only. The version chain shows all related offers.',
+        inputs: 'Status transitions with required data (approver name, rejection reason). Line item edits in draft.',
+        outputs: 'Updated offer status. Supersede creates a new draft offer linked to the original.',
+        crossScreen: 'Approval triggers availability for Invoice (FA01) and Job (JB01) creation. Rejection/supersede records are visible in Reports (RP10). Version chain links all related offers.',
+      },
+    ],
+  },
+  {
+    id: 'jobs',
+    code: 'JB',
+    screens: [
+      {
+        code: 'JB05',
+        agentNotes: 'GET /api/jobs — returns array. Filter by stage. 10 stages: intake, quoted, approved, scheduled, checked_in, in_progress, qc, ready, delivered, closed.',
+        userFlow: 'Browse all jobs. Table shows job number, stage badge (colour-coded), customer, vehicle, and date. Filter by stage using the dropdown. Click a row for details, or switch to the Board view for a visual Kanban.',
+        inputs: 'Search query, stage filter.',
+        outputs: 'Filtered job list.',
+        crossScreen: 'Jobs originate from approved Offers (ES10). Parts (PT05) and Tasks (TS05) are linked to jobs. Job completion triggers Handover Note (DO21) and final Invoice (FA01).',
+      },
+      {
+        code: 'JB15',
+        agentNotes: 'GET /api/jobs?view=board — returns jobs grouped by stage. Visual Kanban. No drag-and-drop yet — stage changes happen on detail page.',
+        userFlow: 'The Workshop Board shows all active jobs as a Kanban board. Each column is a stage (intake through delivered — closed is hidden). Cards show job number, date, customer, and vehicle kenteken. Click any card to open its detail page where you can advance the stage.',
+        inputs: 'None (displays all non-closed jobs).',
+        outputs: 'Visual board with job counts per stage.',
+        crossScreen: 'Each card links to Job Detail (JB10). Provides a quick overview for workshop managers.',
+      },
+      {
+        code: 'JB10',
+        agentNotes: 'GET /api/jobs/[id]. PATCH /api/jobs/[id]/stage — transitions follow linear pipeline with QC rework loop. POST /api/jobs/[id]/photos — multipart upload with phase tag. POST /api/jobs/[id]/events — add note.',
+        userFlow: 'Full job management view. The stage progress bar shows all 10 stages with the current one highlighted. Stage transition buttons appear based on allowed next stages:\n\nintake → quoted → approved → scheduled → checked_in → in_progress → qc → ready → delivered → closed\n\nAt QC, the job can loop back to in_progress for rework.\n\nUpload photos tagged by phase (before/during/after). Add notes to the audit trail. The event timeline on the right tracks all changes with timestamps.',
+        inputs: 'Stage transitions (button clicks). Photo uploads with phase tags. Notes (text).',
+        outputs: 'Updated job stage. Photo gallery. Event timeline.',
+        crossScreen: 'Stage changes trigger notifications (SY05). Photos are stored and visible in Documents (DO05). Parts (PT05) blocking flags can prevent stage advancement. Tasks (TS05) are linked for labour tracking.',
+      },
+    ],
+  },
+  {
+    id: 'parts',
+    code: 'PT',
+    screens: [
+      {
+        code: 'PT05',
+        agentNotes: 'GET /api/parts — returns array with joined job data. Filters: search, status (needed/ordered/shipped/received/returned), blocking flag.',
+        userFlow: 'Track all parts across jobs. Table shows description, part number, supplier, quantity, unit price, total, status badge, and blocking indicator. A blocking part (amber triangle) prevents the linked job from advancing past certain stages. Filter by status and blocking flag.',
+        inputs: 'Search query, status filter, blocking filter.',
+        outputs: 'Filtered parts list with costs and blocking indicators.',
+        crossScreen: 'Parts are linked to Jobs (JB10). Blocking parts affect job stage transitions. Part costs feed into Offer line items (ES01) and Purchase records (PU05). Part received triggers notification (SY05).',
+      },
+      {
+        code: 'PT01',
+        agentNotes: 'POST /api/parts — body: { job_id, description (required), part_number?, supplier?, quantity?, unit_price_cents?, blocking?, notes? }. Price entered in euros, stored in cents.',
+        userFlow: 'Add a new part to a job. Select the job, enter the part description (required), part number, supplier, quantity, and unit price in euros. Check "Blocking" if the job cannot proceed without this part. The total is auto-calculated.',
+        inputs: 'Job (required), description (required), part number, supplier, quantity, unit price, blocking checkbox, notes.',
+        outputs: 'New part record with status "needed" and calculated total in cents.',
+        crossScreen: 'Part appears in Parts List (PT05) and on the linked Job Detail (JB10). If blocking, it affects the job\'s stage advancement.',
+      },
+    ],
+  },
+  {
+    id: 'invoices',
+    code: 'FA',
+    screens: [
+      {
+        code: 'FA05',
+        agentNotes: 'GET /api/invoices — returns array. Filters: search, status (draft/sent/paid/overdue/cancelled/credited). Overdue auto-calculated from due_date.',
+        userFlow: 'Browse all invoices. Table shows invoice number (or "Concept"), customer, date, due date (red if overdue), total in EUR, and status badge. Filter by status. Click to open detail with the full invoice template.',
+        inputs: 'Search query, status filter.',
+        outputs: 'Filtered invoice list.',
+        crossScreen: 'Invoices are created from approved Offers (ES10). Payments link to Mollie (payment gateway). Credit notes are separate invoices that reference the original. VAT amounts feed into VAT Dashboard (BW05).',
+      },
+      {
+        code: 'FA01',
+        agentNotes: 'POST /api/invoices — body: { offer_id (approved offers only), due_date?, payment_terms? }. Lines copied from offer. Due date defaults to +30 days.',
+        userFlow: 'Create an invoice from an approved offer. Select the offer — only approved offers appear. The line items are copied automatically. Set the due date (defaults to 30 days from now) and payment terms text. Submit to create as draft.',
+        inputs: 'Offer (approved only), due date, payment terms text.',
+        outputs: 'Draft invoice with lines copied from the selected offer.',
+        crossScreen: 'Links to the source Offer (ES10). Once issued, triggers document_issued notification (SY05). Appears in Invoice List (FA05) and Document Archive (DO05).',
+      },
+      {
+        code: 'FA10',
+        agentNotes: 'GET /api/invoices/[id]. Actions: POST /api/invoices/[id]/issue (draft→sent, assigns number), POST /api/invoices/[id]/payment (amount_cents, method, reference), POST /api/invoices/[id]/credit (reason). GET /api/invoices/[id]/payment-link returns public URL. Never edit issued invoices — use credit notes.',
+        userFlow: 'View the full professional invoice (A4, print-ready, locale-aware). Actions by status:\n- Draft: "Issue" assigns a number and marks as sent. Delete available.\n- Sent/Overdue: "Record Payment" (enter amount, method, reference), "Credit Note" (creates negative mirror with reason), "Payment Link" (copies a public URL for online payment via Mollie).\n- Paid/Credited/Cancelled: View-only.\n\nUse the Print button for a clean A4 print. The sidebar shows links to related records and any recorded payments.',
+        inputs: 'Issue action. Payment recording (amount, method: bank/ideal/card/cash, reference). Credit note creation (reason). Payment link generation.',
+        outputs: 'Updated invoice status. Payment records. Credit note (separate invoice). Public payment URL via Mollie.',
+        crossScreen: 'Payments update the outstanding amount in Reports (RP10) and Dashboard (RP01). Credit notes appear as separate invoices linked to the original. VAT amounts feed into VAT Dashboard (BW05). Payment link uses Mollie API integration.',
+      },
+    ],
+  },
+  {
+    id: 'documents',
+    code: 'DO',
+    screens: [
+      {
+        code: 'DO05',
+        agentNotes: 'GET /api/documents — returns array. Filters: search, doc_type (offer/repair_order/handover_note/invoice/credit_note), status (draft/issued/cancelled).',
+        userFlow: 'Central archive of all system documents. Filter by document type and status. Each row shows document number, type badge, customer, vehicle, status, and date. Click to view the document detail with its frozen payload and integrity hash.',
+        inputs: 'Search query, document type filter, status filter.',
+        outputs: 'Filtered document list.',
+        crossScreen: 'Documents are generated by Offers (ES), Jobs (JB), and Invoices (FA). Each document stores a SHA-256 hash of its payload for integrity verification.',
+      },
+    ],
+  },
+  {
+    id: 'appointments',
+    code: 'AP',
+    screens: [
+      {
+        code: 'AP05',
+        agentNotes: 'GET /api/appointments — returns array. Filters: date range, type, resource. Types: inspection, drop_off, collection, repair_slot. Statuses: requested, confirmed, cancelled, completed. Resources: bay, booth, staff.',
+        userFlow: 'Weekly calendar view (07:00-18:00). Appointments are colour-coded by type: inspection (green), drop-off (blue), collection (purple), repair slot (amber). Border style indicates status: dashed for requested, solid for confirmed, strikethrough for cancelled. Navigate weeks with arrows, jump to today. Filter by type and resource.',
+        inputs: 'Week navigation, type filter, resource filter.',
+        outputs: 'Visual weekly calendar with appointment blocks.',
+        crossScreen: 'Appointments link to Customers (KL) and Vehicles (VH). Confirmations and cancellations trigger notifications (SY05). Inspection appointments can initiate Lead creation (LD01).',
+      },
+      {
+        code: 'AP01',
+        agentNotes: 'POST /api/appointments — body: { type (required), contact_name (required), phone?, email?, date, time_slot, duration_minutes, resource_id?, customer_id?, vehicle_id?, notes? }. Available slots: GET /api/appointments/slots?date=YYYY-MM-DD.',
+        userFlow: 'Create a new appointment. Select the type (inspection/drop-off/collection/repair slot). Enter contact name (required) and optional phone/email. Pick a date — the available time slots load automatically. Choose duration (15min to 4 hours) and optionally assign a resource (bay/booth/staff). Link to an existing customer and vehicle if applicable.',
+        inputs: 'Type (required), contact name (required), phone, email, date, time slot, duration, resource, customer/vehicle IDs, notes.',
+        outputs: 'New appointment. Inspections auto-confirm; others start as "requested".',
+        crossScreen: 'Appointment appears in Calendar (AP05). Confirmation triggers notification (SY05) and can send email to customer via Resend. Linked customer/vehicle records are accessible from the appointment.',
+      },
+    ],
+  },
+  {
+    id: 'tasks',
+    code: 'TS',
+    screens: [
+      {
+        code: 'TS05',
+        agentNotes: 'GET /api/tasks — returns array. Filters: status (todo/in_progress/done/blocked), assigned_to. Includes time entries. PATCH /api/tasks/[id] for status and clock in/out.',
+        userFlow: 'View your assigned tasks grouped by status. Each task card shows the linked job number, title, assigned staff, and estimated vs actual minutes. Clock in/out buttons track active work time. Status transitions: todo → in_progress → done. Any task can be marked "blocked" with a reason, and unblocked back to "todo".',
+        inputs: 'Status transitions, clock in/out actions.',
+        outputs: 'Updated task status and time tracking entries.',
+        crossScreen: 'Tasks are linked to Jobs (JB10) and can reference specific Offer lines (ES10). Time entries feed into Timesheet (TS10) and Reports (RP10). Task completion updates job progress.',
+      },
+    ],
+  },
+  {
+    id: 'planning',
+    code: 'TS',
+    screens: [
+      {
+        code: 'TS10',
+        agentNotes: 'GET /api/planning — returns time entries grouped by staff and day. Week view with totals.',
+        userFlow: 'Week-view grid showing all staff hours. Rows are staff members, columns are days (Mon-Sun). Each cell shows logged hours from clock in/out on tasks. Navigate between weeks. Totals are shown per staff member (row) and per day (column).',
+        inputs: 'Week navigation.',
+        outputs: 'Time entry grid with duration, linked job and task for each entry.',
+        crossScreen: 'Time data comes from Task clock in/out (TS05). Hours feed into Reports (RP10) for workload and labour cost analysis.',
+      },
+    ],
+  },
+  {
+    id: 'reports',
+    code: 'RP',
+    screens: [
+      {
+        code: 'RP10',
+        agentNotes: 'GET /api/reports?type=revenue|jobs|workload|customers&from=YYYY-MM-DD&to=YYYY-MM-DD. Returns aggregated data.',
+        userFlow: 'Four report tabs: Revenue (by period/customer/line type, outstanding total, average invoice value), Jobs (completed count, average cycle days, stages snapshot), Workload (hours by staff, task completion rate), Customers (new by month, lead conversion rate, repeat customers). Select a date range using presets or custom dates.',
+        inputs: 'Report type tab, date range (presets: this month, last month, this quarter, this year, custom).',
+        outputs: 'Aggregated charts and figures. CSS-only charts (no external library).',
+        crossScreen: 'Pulls data from all modules: Invoices (FA), Jobs (JB), Tasks (TS), Customers (KL), Leads (LD).',
+      },
+    ],
+  },
+  {
+    id: 'vat',
+    code: 'BW',
+    screens: [
+      {
+        code: 'BW05',
+        agentNotes: 'GET /api/vat-returns — returns array by year and period. Statuses: open, draft, filed (locked), corrected. Filed returns cannot be edited — use correction only. NEVER edit a locked VAT period.',
+        userFlow: 'Manage Dutch BTW aangifte returns. Select year and period type (quarter/month). Each return shows all Dutch VAT boxes (1a through 5f). Status flow: open → draft → filed (locked) → corrected. Once filed, a return is permanently locked — edits are only possible via correction (creates a new adjustment return).',
+        inputs: 'Year selector, period type toggle, filing action.',
+        outputs: 'VAT return data with Dutch tax authority box numbers. Filed returns are immutable.',
+        crossScreen: 'VAT amounts come from Invoices (FA05) and Purchases (PU05). Filed returns affect Bookkeeping Export (BK10). Corrections create new return records.',
+      },
+      {
+        code: 'BW40',
+        agentNotes: 'Client-side only, no API calls. Pure calculation in integer cents.',
+        userFlow: 'Quick calculator tool. Enter an amount (inclusive or exclusive of VAT) and instantly see the breakdown for all three Dutch VAT rates (21%, 9%, 0%). All calculations use integer cents to avoid floating-point errors. Useful for quick price checks.',
+        inputs: 'Amount in euros, direction (inclusive/exclusive).',
+        outputs: 'VAT breakdown table for all three rates.',
+        crossScreen: 'Standalone tool, no cross-screen effects.',
+      },
+    ],
+  },
+  {
+    id: 'purchases',
+    code: 'PU',
+    screens: [
+      {
+        code: 'PU05',
+        agentNotes: 'GET /api/purchases — returns array. Filters: search, category (general/parts/paint/materials/tools/rent/utilities/insurance/other), paid status.',
+        userFlow: 'Register incoming purchase invoices from suppliers. Table shows supplier name, invoice date, amounts, tax code, category badge, and paid/unpaid status. Filter by category and payment status. Used for cost tracking and VAT input declarations.',
+        inputs: 'Search query, category filter, paid filter.',
+        outputs: 'Filtered purchase list with totals.',
+        crossScreen: 'Purchase VAT amounts feed into VAT Dashboard (BW05). Categories feed into Profit/Loss in Bookkeeping Export (BK10). Parts purchases can link to Parts (PT05).',
+      },
+      {
+        code: 'PU01',
+        agentNotes: 'POST /api/purchases — body: { supplier_name (required), supplier_vat?, invoice_date, due_date?, subtotal_cents, tax_code (H21/L9/N0/V0/M0/ICP/EX), category, description?, reference?, job_id? }. VAT auto-calculated.',
+        userFlow: 'Register a new purchase invoice. Enter supplier name (required), optional supplier VAT number, dates, subtotal in euros (stored as cents), tax code, and category. The system auto-calculates VAT and total based on the selected tax code. Optionally link to a job for job costing.',
+        inputs: 'Supplier name (required), VAT number, dates, subtotal, tax code, category, description, reference, job ID.',
+        outputs: 'New purchase record with auto-calculated VAT and total in cents.',
+        crossScreen: 'Feeds into VAT Dashboard (BW05), Bookkeeping Export (BK10), and optionally Job costing (JB10).',
+      },
+    ],
+  },
+  {
+    id: 'bookkeeping',
+    code: 'BK',
+    screens: [
+      {
+        code: 'BK10',
+        agentNotes: 'GET /api/bookkeeping/export?type=invoices|purchases|vat|pnl&period=YYYY-MM. Returns CSV or summary data.',
+        userFlow: 'Export financial data for your accountant. Select a period (month/quarter/year). Four export options: Invoices CSV, Purchases CSV, VAT Returns CSV, and Profit/Loss summary. Each triggers a download. The P&L summary shows revenue by category, costs by category, and net profit.',
+        inputs: 'Period selector, export type button.',
+        outputs: 'CSV file downloads. P&L summary view.',
+        crossScreen: 'Aggregates data from Invoices (FA05), Purchases (PU05), and VAT Returns (BW05).',
+      },
+    ],
+  },
+  {
+    id: 'settings',
+    code: 'SY',
+    screens: [
+      {
+        code: 'SY01',
+        agentNotes: 'Client-side settings stored in localStorage/cookies. Three tabs: appearance, general, notifications.',
+        userFlow: 'Configure the application. Three tabs:\n- Appearance: Choose accent colour (6 presets), theme (dark only for now), compact mode toggle, sidebar collapsed default.\n- General: Company name, language (Dutch/English/Turkish), date format.\n- Notifications: Toggle which notifications you receive (new lead, stage change, email, appointment).',
+        inputs: 'All settings fields, save button.',
+        outputs: 'Updated application settings. Language change reloads the interface.',
+        crossScreen: 'Language setting affects all screens. Notification toggles affect Monitoring (SY05). Accent colour changes button and badge colours throughout.',
+      },
+      {
+        code: 'SY02',
+        agentNotes: 'GET /api/staff — returns array. POST /api/staff/invite — { email, name, role }. PATCH /api/staff/[id] — toggle active, change role. Roles: admin, office, tech.',
+        userFlow: 'Manage staff members. View all staff with email, name, role, and active status. Invite new staff by entering email, name, and role (admin/office/tech). Toggle active/inactive to disable access without deleting. Change roles as needed.',
+        inputs: 'Invite: email, name, role. Toggle: active/inactive. Edit: role change.',
+        outputs: 'Staff records. Invited users receive an email to set up their account.',
+        crossScreen: 'Staff roles affect permissions across all screens. Tech role users appear in Task assignment (TS05) and Timesheet (TS10). Admin role has full access.',
+      },
+      {
+        code: 'SY03',
+        agentNotes: 'GET /api/number-ranges — returns ranges by doc_type and year. PATCH /api/number-ranges/[id] — update prefix.',
+        userFlow: 'Configure document number prefixes. Each document type (offer, invoice, credit note, repair order, handover note) has a number range per year. Edit the prefix to customise numbering (e.g., "INV-2026-" for invoices). Preview shows the next number to be allocated.',
+        inputs: 'Prefix text per document type.',
+        outputs: 'Updated number range with next-number preview.',
+        crossScreen: 'Number prefixes affect all document creation screens (ES01, FA01, DO20, DO21). Changes apply to new documents only — existing numbers are never changed.',
+      },
+    ],
+  },
+];
+
+function getScreenTitle(code: string): string {
+  const entry = Object.values(SCREEN_REGISTRY).find((s) => s.id === code);
+  return entry ? `${entry.title} (${entry.titleNl})` : code;
+}
+
+export default function ManualPage() {
+  const t = useTranslations('nav');
+  const tSy = useTranslations('sy');
+  const [tab, setTab] = useState<Tab>('user');
+  const [expandedModule, setExpandedModule] = useState<string | null>('leads');
+
+  const tabs: { key: Tab; label: string; icon: React.ReactNode }[] = [
+    { key: 'user', label: 'End User Manual', icon: <BookOpenCheck className="h-4 w-4" /> },
+    { key: 'agent', label: 'AI Agent Guide', icon: <Bot className="h-4 w-4" /> },
+  ];
+
+  return (
+    <div className="mx-auto max-w-6xl space-y-6 p-6">
+      {/* Header */}
+      <div className="flex items-center justify-between">
+        <div>
+          <div className="flex items-center gap-3">
+            <h1 className="text-xl font-medium text-white">
+              {tab === 'user' ? 'End User Manual' : 'AI Agent Quick Reference'}
+            </h1>
+            <ScreenBadge code="SY10" />
+          </div>
+          <p className="mt-1 text-sm text-[#6b6b80]">
+            {tab === 'user'
+              ? 'Complete guide to every screen: what it does, how to use it, and how it connects to other parts of the system.'
+              : 'Machine-readable reference for AI agents to understand, navigate, and test the Colourking system.'}
+          </p>
+        </div>
+      </div>
+
+      {/* Tab switcher */}
+      <div className="flex gap-2">
+        {tabs.map((t) => (
+          <button
+            key={t.key}
+            onClick={() => setTab(t.key)}
+            className={`flex items-center gap-2 rounded-[10px] px-4 py-2 text-sm font-medium transition-colors ${
+              tab === t.key
+                ? 'bg-[#E8364E] text-white'
+                : 'border border-[#1e1e2a] bg-[#12121a] text-[#6b6b80] hover:text-white'
+            }`}
+          >
+            {t.icon}
+            {t.label}
+          </button>
+        ))}
+      </div>
+
+      {/* AI Agent Tab */}
+      {tab === 'agent' && (
+        <div className="space-y-4">
+          {/* System overview card */}
+          <div className="rounded-[10px] border border-[#1e1e2a] bg-[#12121a] p-6">
+            <h2 className="text-base font-medium text-white">System Overview</h2>
+            <div className="mt-4 space-y-3 text-sm text-[#6b6b80]">
+              <p><span className="text-white">Stack:</span> Next.js 14 App Router + Supabase + Vercel + Tailwind CSS</p>
+              <p><span className="text-white">Auth:</span> Supabase Auth with 3 roles (admin, office, tech). Session checked in middleware for /app/* routes.</p>
+              <p><span className="text-white">API pattern:</span> All data via /api/* routes. RESTful. JSON request/response. Auth via Supabase session cookie.</p>
+              <p><span className="text-white">Money:</span> All monetary values stored as integer cents. Never use floats. Display via formatCurrency(cents, locale).</p>
+              <p><span className="text-white">i18n:</span> 3 locales (nl, en, tr) via next-intl. All strings in src/messages/*.json. Screen codes (JB10, ES20...) are never translated.</p>
+              <p><span className="text-white">Domains:</span> colourking.nl (public), admin.colourking.nl (admin app), monitor.colourking.nl (monitoring)</p>
+              <p><span className="text-white">Database:</span> Supabase PostgreSQL. All schema changes via migration files in supabase/migrations/. RLS enabled on all tables.</p>
+            </div>
+          </div>
+
+          {/* Business flow */}
+          <div className="rounded-[10px] border border-[#1e1e2a] bg-[#12121a] p-6">
+            <h2 className="text-base font-medium text-white">Core Business Flow</h2>
+            <div className="mt-4 flex flex-wrap items-center gap-2 text-sm">
+              {['Lead', 'Offer', 'Approval', 'Repair Order', 'Job', 'Parts', 'Tasks', 'Handover', 'Invoice', 'Paid', 'Delivered'].map((step, i, arr) => (
+                <span key={step} className="flex items-center gap-2">
+                  <span className="rounded-md bg-[#0a0a0f] px-3 py-1.5 text-white">{step}</span>
+                  {i < arr.length - 1 && <ChevronRight className="h-3 w-3 text-[#6b6b80]" />}
+                </span>
+              ))}
+            </div>
+          </div>
+
+          {/* State machines */}
+          <div className="rounded-[10px] border border-[#1e1e2a] bg-[#12121a] p-6">
+            <h2 className="text-base font-medium text-white">State Machines</h2>
+            <div className="mt-4 space-y-4">
+              {[
+                { name: 'Lead Status', flow: 'new → contacted → quoted → won | lost (terminal from any non-terminal state)' },
+                { name: 'Offer Status', flow: 'draft → sent (guard: has_lines) → approved | rejected | superseded' },
+                { name: 'Job Stage', flow: 'intake → quoted → approved → scheduled → checked_in → in_progress → qc → ready → delivered → closed (qc can loop back to in_progress)' },
+                { name: 'Invoice Status', flow: 'draft → sent (guard: has_lines) → paid | overdue | credited | cancelled (only draft can be cancelled; sent uses credit notes)' },
+                { name: 'Part Status', flow: 'needed → ordered → shipped → received | returned' },
+                { name: 'Task Status', flow: 'todo → in_progress → done (any → blocked, blocked → todo)' },
+                { name: 'Document Status', flow: 'draft → issued → cancelled (invoices cannot be cancelled — use credit notes)' },
+                { name: 'VAT Return', flow: 'open → draft → filed (LOCKED) → corrected (filed returns are immutable)' },
+                { name: 'Appointment', flow: 'requested → confirmed → completed | cancelled (inspections auto-confirm)' },
+              ].map((sm) => (
+                <div key={sm.name}>
+                  <p className="text-sm font-medium text-white">{sm.name}</p>
+                  <p className="mt-1 text-xs text-[#6b6b80] font-mono">{sm.flow}</p>
+                </div>
+              ))}
+            </div>
+          </div>
+
+          {/* Per-screen API reference */}
+          <div className="rounded-[10px] border border-[#1e1e2a] bg-[#12121a] p-6">
+            <h2 className="text-base font-medium text-white">Screen API Reference</h2>
+            <div className="mt-4 space-y-3">
+              {MODULES.flatMap((m) =>
+                m.screens.map((s) => (
+                  <div key={s.code} className="border-b border-[#1e1e2a] pb-3 last:border-0 last:pb-0">
+                    <p className="text-sm font-medium text-white">
+                      <span className="mr-2 rounded bg-[#0a0a0f] px-1.5 py-0.5 text-xs font-mono text-[#E8364E]">{s.code}</span>
+                      {getScreenTitle(s.code)}
+                    </p>
+                    <p className="mt-1 text-xs text-[#6b6b80] font-mono leading-relaxed">{s.agentNotes}</p>
+                  </div>
+                ))
+              )}
+            </div>
+          </div>
+
+          {/* Hard rules */}
+          <div className="rounded-[10px] border border-[#E8364E]/20 bg-[#E8364E]/5 p-6">
+            <h2 className="text-base font-medium text-[#E8364E]">Hard Rules (Never Violate)</h2>
+            <ul className="mt-4 space-y-2 text-sm text-[#6b6b80]">
+              <li>1. All schema changes via migration files in supabase/migrations/. Never use the Supabase dashboard.</li>
+              <li>2. Regenerate src/types/database.ts after every migration, same commit.</li>
+              <li>3. Never use SUPABASE_SERVICE_ROLE_KEY in client components or app/(public).</li>
+              <li>4. Never edit an issued document or locked VAT period. Supersede or correct instead.</li>
+              <li>5. Money is stored in cents as integers. Never floats.</li>
+              <li>6. All user-facing strings go through next-intl. No hardcoded Dutch.</li>
+              <li>7. Screen codes (JB10, ES20...) are never translated and never renamed.</li>
+              <li>8. New tables must have RLS enabled and a policy.</li>
+              <li>9. New screens must be registered in lib/codes.ts.</li>
+              <li>10. New strings must exist in all three locales (en, nl, tr).</li>
+            </ul>
+          </div>
+        </div>
+      )}
+
+      {/* User Manual Tab */}
+      {tab === 'user' && (
+        <div className="space-y-2">
+          {/* Overview card */}
+          <div className="rounded-[10px] border border-[#1e1e2a] bg-[#12121a] p-6">
+            <h2 className="text-base font-medium text-white">Welcome to Colourking</h2>
+            <p className="mt-2 text-sm text-[#6b6b80]">
+              Colourking is a complete bodyshop management system. It handles the full workflow from receiving a customer enquiry (lead), through quoting, repair, and final delivery with invoicing. Use the sections below to learn how each part of the system works and how they connect to each other.
+            </p>
+            <div className="mt-4 flex flex-wrap gap-2">
+              {['Lead', 'Offer', 'Approval', 'Repair Order', 'Job', 'Parts', 'Tasks', 'QC', 'Handover', 'Invoice', 'Payment', 'Delivered'].map((step, i) => (
+                <span key={step} className="flex items-center gap-1 text-xs">
+                  <span className="rounded-md bg-[#0a0a0f] px-2 py-1 text-white">{i + 1}. {step}</span>
+                </span>
+              ))}
+            </div>
+          </div>
+
+          {MODULES.map((mod) => (
+            <div key={mod.id} className="rounded-[10px] border border-[#1e1e2a] bg-[#12121a]">
+              <button
+                onClick={() => setExpandedModule(expandedModule === mod.id ? null : mod.id)}
+                className="flex w-full items-center justify-between p-4 text-left"
+              >
+                <div className="flex items-center gap-3">
+                  <span className="rounded bg-[#0a0a0f] px-2 py-1 text-xs font-mono text-[#E8364E]">{mod.code}</span>
+                  <span className="text-sm font-medium capitalize text-white">{mod.id}</span>
+                  <span className="text-xs text-[#6b6b80]">{mod.screens.length} screen{mod.screens.length > 1 ? 's' : ''}</span>
+                </div>
+                <ChevronDown className={`h-4 w-4 text-[#6b6b80] transition-transform ${expandedModule === mod.id ? 'rotate-180' : ''}`} />
+              </button>
+
+              {expandedModule === mod.id && (
+                <div className="border-t border-[#1e1e2a] p-4 space-y-6">
+                  {mod.screens.map((s) => (
+                    <div key={s.code} className="space-y-3">
+                      <div className="flex items-center gap-2">
+                        <span className="rounded bg-[#0a0a0f] px-1.5 py-0.5 text-xs font-mono text-[#E8364E]">{s.code}</span>
+                        <h3 className="text-sm font-medium text-white">{getScreenTitle(s.code)}</h3>
+                      </div>
+
+                      <div className="space-y-2 pl-4 border-l-2 border-[#1e1e2a]">
+                        <div>
+                          <p className="text-xs font-medium text-[#E8364E] uppercase tracking-wider">How it works</p>
+                          <p className="mt-1 text-sm text-[#6b6b80] leading-relaxed whitespace-pre-line">{s.userFlow}</p>
+                        </div>
+                        <div>
+                          <p className="text-xs font-medium text-[#E8364E] uppercase tracking-wider">Inputs</p>
+                          <p className="mt-1 text-sm text-[#6b6b80]">{s.inputs}</p>
+                        </div>
+                        <div>
+                          <p className="text-xs font-medium text-[#E8364E] uppercase tracking-wider">Outputs</p>
+                          <p className="mt-1 text-sm text-[#6b6b80]">{s.outputs}</p>
+                        </div>
+                        <div>
+                          <p className="text-xs font-medium text-[#E8364E] uppercase tracking-wider">Cross-screen effects</p>
+                          <p className="mt-1 text-sm text-[#6b6b80]">{s.crossScreen}</p>
+                        </div>
+                      </div>
+                    </div>
+                  ))}
+                </div>
+              )}
+            </div>
+          ))}
+        </div>
+      )}
+    </div>
+  );
+}

@@ -70,7 +70,10 @@
     "monitoring": "Monitoring",
     "users": "Gebruikers",
     "numbering": "Nummering",
-    "general": "Algemeen"
+    "general": "Algemeen",
+    "manual": "Handleiding",
+    "cronJobs": "Cron Jobs",
+    "aiAgents": "AI Agents"
   },
   "header": {
     "quickCreate": "Snel aanmaken",
