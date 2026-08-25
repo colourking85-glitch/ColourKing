@@ -179,6 +179,9 @@ export default function MonitorDashboard() {
   const [soundEnabled, setSoundEnabled] = useState(true);
   const [filter, setFilter] = useState<string>('all');
   const [clock, setClock] = useState(clockStr());
+  const [dateStr, setDateStr] = useState(() =>
+    new Date().toLocaleDateString('nl-NL', { weekday: 'long', day: 'numeric', month: 'long', year: 'numeric' })
+  );
   const [refreshInterval, setRefreshInterval] = useState(60);
   const [lastUpdated, setLastUpdated] = useState<Date | null>(null);
   const [alertActive, setAlertActive] = useState(false);
@@ -231,9 +234,30 @@ export default function MonitorDashboard() {
   }, [load, refreshInterval]);
 
   useEffect(() => {
-    const iv = setInterval(() => setClock(clockStr()), 1000);
+    const iv = setInterval(() => {
+      setClock(clockStr());
+      setDateStr(new Date().toLocaleDateString('nl-NL', { weekday: 'long', day: 'numeric', month: 'long', year: 'numeric' }));
+    }, 1000);
     return () => clearInterval(iv);
   }, []);
+
+  async function manualRefresh() {
+    const [notifRes, monitorRes] = await Promise.all([
+      fetch('/api/notifications?limit=100'),
+      fetch('/api/monitor'),
+    ]);
+    if (notifRes.ok) {
+      const data: Notification[] = await notifRes.json();
+      lastCountRef.current = data.filter(n => !n.read).length;
+      setNotifications(data);
+    }
+    if (monitorRes.ok) {
+      const data = await monitorRes.json();
+      setOngoing(data.ongoing ?? []);
+      setScheduled(data.scheduled ?? []);
+    }
+    setLastUpdated(new Date());
+  }
 
   async function markRead(id: string) {
     await fetch('/api/notifications', {
@@ -363,8 +387,11 @@ export default function MonitorDashboard() {
           )}
         </div>
 
-        <div className="font-mono text-3xl font-bold tabular-nums tracking-wider text-white/80">
-          {clock}
+        <div className="text-center">
+          <div className="font-mono text-3xl font-bold tabular-nums tracking-wider text-white/80">
+            {clock}
+          </div>
+          <div className="text-[10px] text-[#4a4a60] capitalize">{dateStr}</div>
         </div>
 
         <div className="flex items-center gap-3">
@@ -388,7 +415,7 @@ export default function MonitorDashboard() {
             )}
           </div>
           <button
-            onClick={() => load()}
+            onClick={manualRefresh}
             className="flex h-9 w-9 items-center justify-center rounded-xl border border-[#1e1e2a] text-[#6b6b80] transition-colors hover:text-white hover:border-[#3a3a50]"
             title="Nu vernieuwen"
           >
