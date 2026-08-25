@@ -18,7 +18,7 @@ export default async function PublicLayout({
 
   return (
     <NextIntlClientProvider locale={locale} messages={messages}>
-      <div className="flex min-h-screen flex-col bg-[#0a0a0f]">
+      <div className="flex min-h-screen flex-col bg-ck-dark font-barlow">
         <Navbar locale={locale} />
         <main className="flex-1">{children}</main>
         <Footer />

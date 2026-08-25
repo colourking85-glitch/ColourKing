@@ -8,82 +8,88 @@ export function Footer() {
   const year = new Date().getFullYear();
 
   return (
-    <footer className="border-t border-[#1e1e2a] bg-[#0a0a0f]">
-      <div className="mx-auto max-w-6xl px-4 py-12 sm:px-6">
-        <div className="grid gap-8 sm:grid-cols-2 lg:grid-cols-4">
+    <footer className="border-t border-ck-border bg-ck-dark">
+      <div className="mx-auto max-w-7xl px-6 py-16">
+        <div className="grid grid-cols-1 gap-12 md:grid-cols-3">
           {/* Brand */}
-          <div>
-            <div className="flex items-center gap-2">
-              <span className="flex h-8 w-8 items-center justify-center rounded-[10px] bg-[#E8364E] text-xs font-medium text-white">
-                CK
+          <div className="flex flex-col gap-5">
+            <Link href="/">
+              <span className="font-heading text-xl font-bold tracking-tight text-white">
+                COLOUR<span className="text-[#E8364E]">KING</span>
               </span>
-              <span className="text-sm font-medium text-white">Colourking</span>
-            </div>
-            <p className="mt-3 text-sm text-[#6b6b80]">
+            </Link>
+            <p className="max-w-xs text-sm leading-relaxed text-ck-text-muted">
               {t('footer.description')}
             </p>
-            <div className="mt-3 space-y-1 text-xs text-[#6b6b80]">
-              <p>{t('footer.kvk')}</p>
-              <p>{t('footer.btw')}</p>
-            </div>
           </div>
 
-          {/* Quick Links */}
+          {/* Navigation */}
           <div>
-            <h3 className="text-sm font-medium text-white">{t('footer.quickLinks')}</h3>
-            <div className="mt-3 flex flex-col gap-2">
-              <Link href="/" className="text-sm text-[#6b6b80] transition-colors hover:text-white">
-                {t('nav.home')}
-              </Link>
-              <Link href="/diensten" className="text-sm text-[#6b6b80] transition-colors hover:text-white">
+            <h3 className="mb-5 text-xs font-semibold uppercase tracking-widest text-ck-text-muted">
+              {t('footer.quickLinks')}
+            </h3>
+            <nav aria-label="Footer" className="flex flex-col gap-3">
+              <Link href="/diensten" className="text-sm text-ck-text-muted transition-colors duration-200 hover:text-white">
                 {t('nav.services')}
               </Link>
-              <Link href="/gallerij" className="text-sm text-[#6b6b80] transition-colors hover:text-white">
+              <Link href="/gallerij" className="text-sm text-ck-text-muted transition-colors duration-200 hover:text-white">
                 {t('nav.gallery')}
               </Link>
-              <Link href="/over-ons" className="text-sm text-[#6b6b80] transition-colors hover:text-white">
+              <Link href="/over-ons" className="text-sm text-ck-text-muted transition-colors duration-200 hover:text-white">
                 {t('nav.about')}
               </Link>
-              <Link href="/contact" className="text-sm text-[#6b6b80] transition-colors hover:text-white">
+              <Link href="/contact" className="text-sm text-ck-text-muted transition-colors duration-200 hover:text-white">
                 {t('nav.contact')}
               </Link>
-            </div>
+            </nav>
           </div>
 
           {/* Contact */}
           <div>
-            <h3 className="text-sm font-medium text-white">{t('footer.contactInfo')}</h3>
-            <div className="mt-3 flex flex-col gap-2 text-sm text-[#6b6b80]">
-              <p>{t('footer.address')}</p>
-              <a href="tel:+31681631020" className="transition-colors hover:text-white">
+            <h3 className="mb-5 text-xs font-semibold uppercase tracking-widest text-ck-text-muted">
+              {t('footer.contactInfo')}
+            </h3>
+            <div className="flex flex-col gap-4">
+              <a
+                href="tel:+31681631020"
+                className="flex items-center gap-3 text-sm text-ck-text-muted transition-colors hover:text-white group"
+              >
+                <svg className="h-4 w-4 shrink-0 text-[#E8364E]" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth="2">
+                  <path strokeLinecap="round" strokeLinejoin="round" d="M22 16.92v3a2 2 0 01-2.18 2 19.79 19.79 0 01-8.63-3.07 19.5 19.5 0 01-6-6 19.79 19.79 0 01-3.07-8.67A2 2 0 014.11 2h3a2 2 0 012 1.72 12.84 12.84 0 00.7 2.81 2 2 0 01-.45 2.11L8.09 9.91a16 16 0 006 6l1.27-1.27a2 2 0 012.11-.45 12.84 12.84 0 002.81.7A2 2 0 0122 16.92z" />
+                </svg>
                 {t('footer.phone')}
               </a>
-              <a href="mailto:info@colourking.nl" className="transition-colors hover:text-white">
+              <a
+                href="mailto:info@colourking.nl"
+                className="flex items-center gap-3 text-sm text-ck-text-muted transition-colors hover:text-white"
+              >
+                <svg className="h-4 w-4 shrink-0 text-[#E8364E]" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth="2">
+                  <rect width="20" height="16" x="2" y="4" rx="2" />
+                  <path d="m22 7-8.97 5.7a1.94 1.94 0 01-2.06 0L2 7" />
+                </svg>
                 {t('footer.email')}
               </a>
-            </div>
-          </div>
-
-          {/* Hours */}
-          <div>
-            <h3 className="text-sm font-medium text-white">{t('footer.hours')}</h3>
-            <div className="mt-3 flex flex-col gap-2 text-sm text-[#6b6b80]">
-              <p>{t('footer.hoursWeekdays')}</p>
-              <p>{t('footer.hoursSaturday')}</p>
-              <p>{t('footer.hoursSunday')}</p>
+              <div className="flex items-start gap-3 text-sm text-ck-text-muted">
+                <svg className="mt-0.5 h-4 w-4 shrink-0 text-[#E8364E]" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth="2">
+                  <path d="M20 10c0 4.993-5.539 10.193-7.399 11.799a1 1 0 01-1.202 0C9.539 20.193 4 14.993 4 10a8 8 0 0116 0" />
+                  <circle cx="12" cy="10" r="3" />
+                </svg>
+                <address className="not-italic leading-relaxed">
+                  {t('footer.address')}
+                </address>
+              </div>
             </div>
           </div>
         </div>
 
         {/* Bottom */}
-        <div className="mt-10 flex flex-col items-center justify-between gap-3 border-t border-[#1e1e2a] pt-6 sm:flex-row">
-          <p className="text-xs text-[#6b6b80]">
+        <div className="mt-12 flex flex-col items-center justify-between gap-4 border-t border-ck-border pt-8 md:flex-row">
+          <p className="text-xs text-ck-text-muted">
             {t('footer.copyright', { year })}
           </p>
-          <div className="flex gap-4 text-xs text-[#6b6b80]">
-            <span className="cursor-default">{t('footer.privacy')}</span>
-            <span className="cursor-default">{t('footer.terms')}</span>
-          </div>
+          <p className="text-xs text-ck-text-muted">
+            {t('footer.kvk')}&nbsp;&nbsp;{t('footer.btw')}
+          </p>
         </div>
       </div>
     </footer>

@@ -1,4 +1,5 @@
 import { getTranslations } from 'next-intl/server';
+import { Link } from '@/i18n/routing';
 
 export async function generateMetadata({
   params: { locale },
@@ -27,64 +28,81 @@ export default async function AboutPage({
 
   return (
     <>
-      {/* Header */}
-      <section className="px-4 pb-8 pt-16 sm:px-6 sm:pt-20">
-        <div className="mx-auto max-w-4xl text-center">
-          <h1 className="text-3xl font-medium text-white sm:text-4xl">
+      {/* Hero */}
+      <section className="relative overflow-hidden px-6 pb-16 pt-32 sm:pt-40">
+        <div className="absolute inset-0 bg-gradient-to-b from-[#E8364E]/8 to-transparent" />
+        <div className="relative mx-auto max-w-7xl">
+          <p className="text-xs font-semibold uppercase tracking-[0.2em] text-[#E8364E]">
             {t('about.storyTitle')}
+          </p>
+          <h1 className="mt-4 font-heading text-4xl font-bold uppercase tracking-tight text-white sm:text-5xl lg:text-6xl">
+            {t('seo.aboutTitle').replace(' — Colour King', '')}
           </h1>
-          <p className="mx-auto mt-3 max-w-2xl text-sm text-[#6b6b80]">
+          <p className="mt-5 max-w-2xl text-lg leading-relaxed text-white/60">
             {t('seo.aboutDesc')}
           </p>
         </div>
       </section>
 
-      {/* Story */}
-      <section className="px-4 pb-12 sm:px-6 sm:pb-16">
-        <div className="mx-auto max-w-3xl">
-          <div className="rounded-[10px] border border-[#1e1e2a] bg-[#12121a] p-6 sm:p-8">
-            <h2 className="text-xl font-medium text-white">
+      {/* Story + Workshop two-column */}
+      <section className="px-6 pb-24">
+        <div className="mx-auto max-w-7xl grid gap-px bg-ck-border lg:grid-cols-2">
+          <div className="bg-ck-dark p-8 sm:p-12">
+            <h2 className="font-heading text-2xl font-bold uppercase tracking-tight text-white">
               {t('about.storyTitle')}
             </h2>
-            <p className="mt-4 text-sm text-[#6b6b80] leading-relaxed">
+            <p className="mt-6 text-sm leading-[1.8] text-white/60">
               {t('about.storyText')}
             </p>
           </div>
-        </div>
-      </section>
-
-      {/* Workshop */}
-      <section className="px-4 pb-12 sm:px-6 sm:pb-16">
-        <div className="mx-auto max-w-3xl">
-          <div className="rounded-[10px] border border-[#1e1e2a] bg-[#12121a] p-6 sm:p-8">
-            <h2 className="text-xl font-medium text-white">
+          <div className="bg-ck-dark p-8 sm:p-12">
+            <h2 className="font-heading text-2xl font-bold uppercase tracking-tight text-white">
               {t('about.workshopTitle')}
             </h2>
-            <p className="mt-4 text-sm text-[#6b6b80] leading-relaxed">
+            <p className="mt-6 text-sm leading-[1.8] text-white/60">
               {t('about.storyText')}
             </p>
           </div>
         </div>
       </section>
 
-      {/* Team placeholders */}
-      <section className="px-4 pb-12 sm:px-6 sm:pb-16">
-        <div className="mx-auto max-w-6xl">
-          <div className="text-center">
-            <h2 className="text-xl font-medium text-white">
-              {t('about.teamTitle')}
-            </h2>
+      {/* Timeline */}
+      <section className="px-6 pb-24">
+        <div className="mx-auto max-w-7xl">
+          <p className="text-xs font-semibold uppercase tracking-[0.2em] text-[#E8364E]">
+            {t('about.timelineTitle')}
+          </p>
+          <div className="mt-10 grid gap-px bg-ck-border sm:grid-cols-3">
+            {milestones.map((m) => (
+              <div key={m.year} className="bg-ck-dark p-8">
+                <span className="font-heading text-4xl font-bold text-[#E8364E]">
+                  {m.year}
+                </span>
+                <h3 className="mt-4 font-heading text-lg font-bold uppercase tracking-tight text-white">
+                  {m.title}
+                </h3>
+                <p className="mt-3 text-sm leading-relaxed text-white/60">
+                  {m.desc}
+                </p>
+              </div>
+            ))}
           </div>
-          <div className="mt-8 grid gap-4 sm:grid-cols-3">
+        </div>
+      </section>
+
+      {/* Team */}
+      <section className="px-6 pb-24">
+        <div className="mx-auto max-w-7xl">
+          <p className="text-xs font-semibold uppercase tracking-[0.2em] text-[#E8364E]">
+            {t('about.teamTitle')}
+          </p>
+          <div className="mt-10 grid gap-px bg-ck-border sm:grid-cols-3">
             {[1, 2, 3].map((n) => (
-              <div
-                key={n}
-                className="rounded-[10px] border border-[#1e1e2a] bg-[#12121a] p-6 text-center"
-              >
-                <div className="mx-auto flex h-16 w-16 items-center justify-center rounded-full bg-[#0a0a0f] text-2xl text-[#6b6b80]">
+              <div key={n} className="flex flex-col items-center bg-ck-dark px-8 py-12">
+                <div className="flex h-24 w-24 items-center justify-center border border-ck-border bg-ck-surface text-3xl text-white/20">
                   &#9786;
                 </div>
-                <p className="mt-4 text-sm font-medium text-white">
+                <p className="mt-6 font-heading text-lg font-bold uppercase tracking-tight text-white">
                   {t('about.teamMember')} {n}
                 </p>
               </div>
@@ -93,36 +111,38 @@ export default async function AboutPage({
         </div>
       </section>
 
-      {/* Milestones */}
-      <section className="px-4 pb-12 sm:px-6 sm:pb-16">
-        <div className="mx-auto max-w-3xl">
-          <h2 className="text-center text-xl font-medium text-white">
-            {t('about.timelineTitle')}
-          </h2>
-          <div className="mt-8 flex flex-col gap-4">
-            {milestones.map((m) => (
-              <div
-                key={m.year}
-                className="flex items-center gap-4 rounded-[10px] border border-[#1e1e2a] bg-[#12121a] p-4"
-              >
-                <span className="text-sm font-medium text-[#E8364E]">{m.year}</span>
-                <div>
-                  <p className="text-sm font-medium text-white">{m.title}</p>
-                  <p className="text-xs text-[#6b6b80]">{m.desc}</p>
-                </div>
-              </div>
-            ))}
+      {/* Certifications */}
+      <section className="px-6 pb-24">
+        <div className="mx-auto max-w-7xl">
+          <div className="border border-ck-border bg-ck-surface px-8 py-12 text-center sm:px-16">
+            <h2 className="font-heading text-2xl font-bold uppercase tracking-tight text-white">
+              {t('about.certificationsTitle')}
+            </h2>
           </div>
         </div>
       </section>
 
-      {/* Certifications placeholder */}
-      <section className="px-4 pb-16 sm:px-6 sm:pb-24">
-        <div className="mx-auto max-w-3xl">
-          <div className="rounded-[10px] border border-[#1e1e2a] bg-[#12121a] p-6 sm:p-8 text-center">
-            <h2 className="text-xl font-medium text-white">
-              {t('about.certificationsTitle')}
-            </h2>
+      {/* CTA */}
+      <section className="px-6 pb-24">
+        <div className="mx-auto max-w-7xl">
+          <div className="relative overflow-hidden border border-ck-border bg-ck-surface px-8 py-16 sm:px-16">
+            <div className="absolute right-0 top-0 h-40 w-40 bg-[#E8364E]/10 blur-[80px]" />
+            <div className="relative flex flex-col items-start gap-8 sm:flex-row sm:items-center sm:justify-between">
+              <div>
+                <h2 className="font-heading text-3xl font-bold uppercase tracking-tight text-white">
+                  {t('cta.title')}
+                </h2>
+                <p className="mt-3 text-sm text-white/60">
+                  {t('cta.subtitle')}
+                </p>
+              </div>
+              <Link
+                href="/contact"
+                className="shrink-0 bg-[#E8364E] px-8 py-4 text-sm font-semibold uppercase tracking-wider text-white transition-colors hover:bg-[#d02e44]"
+              >
+                {t('cta.button')}
+              </Link>
+            </div>
           </div>
         </div>
       </section>

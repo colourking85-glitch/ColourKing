@@ -1070,23 +1070,55 @@
       "contactDesc": "Contact Colour King for a quote or appointment."
     },
     "hero": {
+      "eyebrow": "Paint damage repair — Rotterdam",
+      "headline": "Perfection in Every Panel.",
       "title": "Your car looking like new again",
-      "subtitle": "Expert damage repair and paint work in Rotterdam. Fast, reliable, guaranteed.",
-      "ctaQuote": "Request a quote",
+      "subtitle": "Expert paint damage repair — from small chips to deep scratches. Precision work with guaranteed results.",
+      "ctaQuote": "Free Quote",
+      "ctaGallery": "View Our Work",
       "ctaCall": "Call now"
     },
     "stats": {
-      "yearsValue": "15+",
-      "yearsLabel": "Years of experience",
-      "carsValue": "5000+",
-      "carsLabel": "Cars repaired",
+      "yearsValue": "12+",
+      "yearsLabel": "Years Experience",
+      "carsValue": "4,800+",
+      "carsLabel": "Cars Restored",
       "customersValue": "98%",
-      "customersLabel": "Satisfied customers"
+      "customersLabel": "Customer Satisfaction",
+      "guaranteeValue": "2 Year",
+      "guaranteeLabel": "Warranty"
     },
     "servicesOverview": {
-      "title": "Our services",
+      "eyebrow": "Our Services",
+      "title": "Craftsmanship at Every Level",
       "subtitle": "From minor damage to full restoration — we take care of it.",
       "viewAll": "View all services"
+    },
+    "homeServices": {
+      "one": {
+        "eyebrow": "Precision paint restoration",
+        "title": "Chip & Scratch Repair",
+        "description": "Every scratch or chip is repaired layer by layer with precisely matched paint. Our technicians work with professional colour-mixing systems for an invisible result.",
+        "detail": "Suitable for stone chips, parking dents and surface scratches."
+      },
+      "two": {
+        "eyebrow": "Paintless dent removal",
+        "title": "Dent Removal (PDR)",
+        "description": "Paintless Dent Repair — the gentlest method to remove dents without affecting the original paint. No spraying, no sanding.",
+        "detail": "Ideal for hail damage, parking dents and minor collisions."
+      },
+      "three": {
+        "eyebrow": "Complete paint renewal",
+        "title": "Colour Matching & Spraying",
+        "description": "When a panel needs a full respray, we ensure a perfect colour match with your vehicle's original factory colour.",
+        "detail": "Including primer coat, colour coat and clear lacquer coat."
+      }
+    },
+    "beforeAfter": {
+      "eyebrow": "Before & After",
+      "heading": "The Results Speak for Themselves",
+      "subline": "See the transformation — from damaged paint to showroom quality.",
+      "ctaLabel": "View the Gallery"
     },
     "galleryPreview": {
       "title": "Our work",
@@ -1094,7 +1126,8 @@
       "viewMore": "View more"
     },
     "testimonialsSection": {
-      "title": "What customers say",
+      "eyebrow": "Testimonials",
+      "title": "What Customers Say",
       "subtitle": "Experiences from satisfied customers."
     },
     "testimonials": {
@@ -1115,9 +1148,10 @@
       }
     },
     "cta": {
-      "title": "Ready to have your car repaired?",
-      "subtitle": "Request a free, no-obligation quote today.",
-      "button": "Request a quote"
+      "eyebrow": "Get in Touch",
+      "title": "Ready to Restore Your Car?",
+      "subtitle": "Call us directly or request a free quote. We respond within one working day.",
+      "button": "Request a Quote"
     },
     "footer": {
       "description": "Your auto body shop in Rotterdam for damage repair, painting and bodywork.",

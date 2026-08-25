@@ -8,6 +8,8 @@ module.exports = {
         sans: ['var(--font-inter)', 'Inter', 'system-ui', 'sans-serif'],
         display: ['var(--font-inter)', 'Inter', 'system-ui', 'sans-serif'],
         mono: ['var(--font-mono)', 'JetBrains Mono', 'monospace'],
+        barlow: ['Barlow', 'system-ui', 'sans-serif'],
+        heading: ['Barlow Condensed', 'Barlow', 'system-ui', 'sans-serif'],
       },
       colors: {
         ck: {

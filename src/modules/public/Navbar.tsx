@@ -1,11 +1,10 @@
 'use client';
 
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
 import { useTranslations } from 'next-intl';
 import { Link, usePathname } from '@/i18n/routing';
 
 const navLinks = [
-  { href: '/', label: 'nav.home' },
   { href: '/diensten', label: 'nav.services' },
   { href: '/gallerij', label: 'nav.gallery' },
   { href: '/over-ons', label: 'nav.about' },
@@ -22,61 +21,73 @@ export function Navbar({ locale }: { locale: string }) {
   const t = useTranslations('pub');
   const pathname = usePathname();
   const [menuOpen, setMenuOpen] = useState(false);
+  const [scrolled, setScrolled] = useState(false);
+
+  useEffect(() => {
+    function onScroll() {
+      setScrolled(window.scrollY > 20);
+    }
+    window.addEventListener('scroll', onScroll, { passive: true });
+    return () => window.removeEventListener('scroll', onScroll);
+  }, []);
 
   return (
-    <header className="sticky top-0 z-50 border-b border-[#1e1e2a] bg-[#0a0a0f]/95 backdrop-blur-sm">
-      <nav className="mx-auto flex max-w-6xl items-center justify-between px-4 py-4 sm:px-6">
+    <header
+      className={`fixed top-0 left-0 right-0 z-50 transition-all duration-300 ${
+        scrolled
+          ? 'bg-ck-dark/95 backdrop-blur-md border-b border-ck-border py-3'
+          : 'bg-transparent py-5'
+      }`}
+    >
+      <nav className="mx-auto flex max-w-7xl items-center justify-between px-6">
         {/* Logo */}
-        <Link href="/" className="flex items-center gap-2">
-          <span className="flex h-9 w-9 items-center justify-center rounded-[10px] bg-[#E8364E] text-sm font-medium text-white">
-            CK
+        <Link href="/" className="flex items-center shrink-0">
+          <span className="font-heading text-2xl font-bold tracking-tight text-white">
+            COLOUR<span className="text-[#E8364E]">KING</span>
           </span>
         </Link>
 
         {/* Desktop nav */}
-        <div className="hidden items-center gap-6 md:flex">
+        <div className="hidden items-center gap-8 md:flex">
           {navLinks.map((link) => {
-            const isActive =
-              link.href === '/'
-                ? pathname === '/'
-                : pathname.startsWith(link.href);
+            const isActive = pathname.startsWith(link.href);
             return (
               <Link
                 key={link.href}
                 href={link.href}
-                className={`text-sm transition-colors ${
+                className={`text-sm font-medium uppercase tracking-wide transition-colors duration-200 ${
                   isActive
                     ? 'text-white'
-                    : 'text-[#6b6b80] hover:text-white'
+                    : 'text-white/70 hover:text-white'
                 }`}
               >
                 {t(link.label)}
               </Link>
             );
           })}
-        </div>
 
-        {/* Right side: language switcher + CTA */}
-        <div className="hidden items-center gap-3 md:flex">
-          <div className="flex items-center gap-1 rounded-[10px] border border-[#1e1e2a] px-2 py-1.5">
+          {/* Language switcher */}
+          <div className="flex items-center gap-1 border-l border-white/20 pl-6">
             {(['nl', 'en', 'tr'] as const).map((loc) => (
               <Link
                 key={loc}
-                href={pathname}
+                href={pathname || '/'}
                 locale={loc}
-                className={`rounded-md px-2 py-0.5 text-xs transition-colors ${
+                className={`px-2 py-0.5 text-xs font-medium uppercase tracking-wider transition-colors ${
                   locale === loc
-                    ? 'bg-[#1e1e2a] text-white'
-                    : 'text-[#6b6b80] hover:text-white'
+                    ? 'text-white'
+                    : 'text-white/40 hover:text-white/70'
                 }`}
               >
                 {localeLabels[loc]}
               </Link>
             ))}
           </div>
+
+          {/* CTA */}
           <Link
             href="/contact"
-            className="rounded-[10px] bg-[#E8364E] px-4 py-2 text-sm font-medium text-white transition-colors hover:bg-[#d02e44]"
+            className="ml-4 bg-[#E8364E] px-5 py-2.5 text-sm font-semibold uppercase tracking-wider text-white transition-colors duration-200 hover:bg-[#d02e44]"
           >
             {t('nav.quote')}
           </Link>
@@ -86,59 +97,47 @@ export function Navbar({ locale }: { locale: string }) {
         <button
           type="button"
           onClick={() => setMenuOpen(!menuOpen)}
-          className="flex h-9 w-9 items-center justify-center rounded-[10px] border border-[#1e1e2a] md:hidden"
+          className="flex flex-col gap-1.5 p-2 md:hidden"
           aria-label={t('nav.menu')}
         >
-          <span className="sr-only">{t('nav.menu')}</span>
-          {menuOpen ? (
-            <svg width="18" height="18" viewBox="0 0 18 18" fill="none" stroke="currentColor" strokeWidth="1.5" className="text-white">
-              <path d="M4 4l10 10M14 4L4 14" />
-            </svg>
-          ) : (
-            <svg width="18" height="18" viewBox="0 0 18 18" fill="none" stroke="currentColor" strokeWidth="1.5" className="text-white">
-              <path d="M3 5h12M3 9h12M3 13h12" />
-            </svg>
-          )}
+          <span className={`block h-0.5 w-6 bg-white transition-all duration-200 ${menuOpen ? 'translate-y-2 rotate-45' : ''}`} />
+          <span className={`block h-0.5 w-6 bg-white transition-all duration-200 ${menuOpen ? 'opacity-0' : ''}`} />
+          <span className={`block h-0.5 w-6 bg-white transition-all duration-200 ${menuOpen ? '-translate-y-2 -rotate-45' : ''}`} />
         </button>
       </nav>
 
       {/* Mobile menu */}
       {menuOpen && (
-        <div className="border-t border-[#1e1e2a] px-4 pb-4 md:hidden">
-          <div className="flex flex-col gap-1 py-3">
-            {navLinks.map((link) => {
-              const isActive =
-                link.href === '/'
-                  ? pathname === '/'
-                  : pathname.startsWith(link.href);
-              return (
-                <Link
-                  key={link.href}
-                  href={link.href}
-                  onClick={() => setMenuOpen(false)}
-                  className={`rounded-[10px] px-3 py-2 text-sm transition-colors ${
-                    isActive
-                      ? 'bg-[#12121a] text-white'
-                      : 'text-[#6b6b80] hover:bg-[#12121a] hover:text-white'
-                  }`}
-                >
-                  {t(link.label)}
-                </Link>
-              );
-            })}
+        <div className="border-t border-ck-border bg-ck-dark/98 px-6 pb-6 md:hidden">
+          <div className="flex flex-col gap-1 py-4">
+            <Link
+              href="/"
+              onClick={() => setMenuOpen(false)}
+              className="py-3 text-sm font-medium uppercase tracking-wide text-white/70 transition-colors hover:text-white"
+            >
+              {t('nav.home')}
+            </Link>
+            {navLinks.map((link) => (
+              <Link
+                key={link.href}
+                href={link.href}
+                onClick={() => setMenuOpen(false)}
+                className="py-3 text-sm font-medium uppercase tracking-wide text-white/70 transition-colors hover:text-white"
+              >
+                {t(link.label)}
+              </Link>
+            ))}
           </div>
-          <div className="flex items-center justify-between border-t border-[#1e1e2a] pt-3">
-            <div className="flex items-center gap-1">
+          <div className="flex items-center justify-between border-t border-ck-border pt-4">
+            <div className="flex items-center gap-2">
               {(['nl', 'en', 'tr'] as const).map((loc) => (
                 <Link
                   key={loc}
-                  href={pathname}
+                  href={pathname || '/'}
                   locale={loc}
                   onClick={() => setMenuOpen(false)}
-                  className={`rounded-md px-2.5 py-1 text-xs transition-colors ${
-                    locale === loc
-                      ? 'bg-[#1e1e2a] text-white'
-                      : 'text-[#6b6b80] hover:text-white'
+                  className={`px-2.5 py-1 text-xs font-medium uppercase tracking-wider transition-colors ${
+                    locale === loc ? 'text-white' : 'text-white/40 hover:text-white'
                   }`}
                 >
                   {localeLabels[loc]}
@@ -148,7 +147,7 @@ export function Navbar({ locale }: { locale: string }) {
             <Link
               href="/contact"
               onClick={() => setMenuOpen(false)}
-              className="rounded-[10px] bg-[#E8364E] px-4 py-2 text-sm font-medium text-white"
+              className="bg-[#E8364E] px-5 py-2.5 text-sm font-semibold uppercase tracking-wider text-white"
             >
               {t('nav.quote')}
             </Link>

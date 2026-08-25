@@ -1019,23 +1019,55 @@
       "contactDesc": "Teklif veya randevu için Colour King ile iletişime geçin."
     },
     "hero": {
+      "eyebrow": "Oto Boya Onarımı — Rotterdam",
+      "headline": "Her Panelde Mükemmellik.",
       "title": "Aracınız yeniden ilk günkü gibi",
-      "subtitle": "Rotterdam'da uzman hasar onarımı ve boya işleri. Hızlı, güvenilir ve garantili.",
-      "ctaQuote": "Teklif isteyin",
+      "subtitle": "Profesyonel oto boya onarımı — küçük çiziklerden derin hasarlara. Garantili hassas işçilik.",
+      "ctaQuote": "Ücretsiz Teklif Alın",
+      "ctaGallery": "Çalışmalarımızı Görün",
       "ctaCall": "Hemen arayın"
     },
     "stats": {
-      "yearsValue": "15+",
-      "yearsLabel": "Yıllık deneyim",
-      "carsValue": "5000+",
-      "carsLabel": "Onarılan araç",
+      "yearsValue": "12+",
+      "yearsLabel": "Yıllık Deneyim",
+      "carsValue": "4.800+",
+      "carsLabel": "Onarılan Araç",
       "customersValue": "%98",
-      "customersLabel": "Memnun müşteri"
+      "customersLabel": "Müşteri Memnuniyeti",
+      "guaranteeValue": "2 Yıl",
+      "guaranteeLabel": "Garanti"
     },
     "servicesOverview": {
-      "title": "Hizmetlerimiz",
+      "eyebrow": "Hizmetlerimiz",
+      "title": "Her Düzeyde Ustalık",
       "subtitle": "Küçük hasardan tam onarıma kadar her şeyi hallediyoruz.",
       "viewAll": "Tüm hizmetleri görüntüle"
+    },
+    "homeServices": {
+      "one": {
+        "eyebrow": "Hassas boya restorasyonu",
+        "title": "Çizik ve Taş İzi Onarımı",
+        "description": "Her çizik veya taş izi, tam olarak eşleştirilmiş boyayla katman katman onarılır. Teknisyenlerimiz görünmez sonuçlar için profesyonel renk karışım sistemleri kullanır.",
+        "detail": "Taş izleri, park çizikleri ve yüzeysel hasarlar için uygundur."
+      },
+      "two": {
+        "eyebrow": "Boyasız göçük onarımı",
+        "title": "Göçük Onarımı (PDR)",
+        "description": "Paintless Dent Repair — orijinal boyaya zarar vermeden göçükleri çıkarmanın en nazik yöntemi. Boyama yok, zımpara yok.",
+        "detail": "Dolu hasarı, park göçükleri ve küçük çarpışmalar için ideal."
+      },
+      "three": {
+        "eyebrow": "Tam boya yenileme",
+        "title": "Renk Eşleştirme ve Boyama",
+        "description": "Bir panelin tamamen boyanması gerektiğinde, aracınızın orijinal fabrika rengiyle mükemmel bir eşleşme sağlıyoruz.",
+        "detail": "Astar, renk katmanı ve şeffaf lak dahil."
+      }
+    },
+    "beforeAfter": {
+      "eyebrow": "Önce ve Sonra",
+      "heading": "Sonuç Kendini Gösteriyor",
+      "subline": "Dönüşümü görün — hasarlı boyadan showroom kalitesine.",
+      "ctaLabel": "Galeriyi Görüntüle"
     },
     "galleryPreview": {
       "title": "Çalışmalarımız",
@@ -1043,6 +1075,7 @@
       "viewMore": "Daha fazla görüntüle"
     },
     "testimonialsSection": {
+      "eyebrow": "Değerlendirmeler",
       "title": "Müşteriler ne diyor",
       "subtitle": "Memnun müşterilerimizin deneyimleri."
     },
@@ -1064,9 +1097,10 @@
       }
     },
     "cta": {
-      "title": "Aracınızı onarıma hazır mısınız?",
-      "subtitle": "Bugün taahhütsüz bir teklif isteyin.",
-      "button": "Teklif isteyin"
+      "eyebrow": "Bize Ulaşın",
+      "title": "Aracınızı Onarmaya Hazır mısınız?",
+      "subtitle": "Bizi arayın veya ücretsiz teklif isteyin. 24 saat içinde yanıt veriyoruz.",
+      "button": "Bize Mesaj Gönderin"
     },
     "footer": {
       "description": "Hasar onarımı, boya ve kaporta işleri için Rotterdam'daki oto boya atölyeniz.",

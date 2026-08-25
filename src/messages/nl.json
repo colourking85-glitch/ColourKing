@@ -1019,23 +1019,55 @@
       "contactDesc": "Neem contact op met Colour King voor een offerte of afspraak."
     },
     "hero": {
+      "eyebrow": "Lakschadeverstelling — Rotterdam",
+      "headline": "Perfectie in Elk Paneel.",
       "title": "Uw auto weer als nieuw",
-      "subtitle": "Vakkundig schadeherstel en spuitwerk in Rotterdam. Snel, betrouwbaar en met garantie.",
-      "ctaQuote": "Offerte aanvragen",
+      "subtitle": "Vakkundige lakschadeverstelling — van kleine chips tot diepe krassen. Precisiewerk met gegarandeerd resultaat.",
+      "ctaQuote": "Gratis Offerte Aanvragen",
+      "ctaGallery": "Bekijk Ons Werk",
       "ctaCall": "Bel direct"
     },
     "stats": {
-      "yearsValue": "15+",
-      "yearsLabel": "Jaar ervaring",
-      "carsValue": "5000+",
-      "carsLabel": "Auto's hersteld",
+      "yearsValue": "12+",
+      "yearsLabel": "Jaar Ervaring",
+      "carsValue": "4.800+",
+      "carsLabel": "Auto's Hersteld",
       "customersValue": "98%",
-      "customersLabel": "Tevreden klanten"
+      "customersLabel": "Klanttevredenheid",
+      "guaranteeValue": "2 Jaar",
+      "guaranteeLabel": "Garantie"
     },
     "servicesOverview": {
-      "title": "Onze diensten",
+      "eyebrow": "Onze Diensten",
+      "title": "Vakmanschap op Elk Niveau",
       "subtitle": "Van kleine schade tot volledig herstel — wij regelen het.",
       "viewAll": "Bekijk alle diensten"
+    },
+    "homeServices": {
+      "one": {
+        "eyebrow": "Nauwkeurige lakrestauratie",
+        "title": "Chip- & Krasreparatie",
+        "description": "Elke kras of chip wordt laag voor laag hersteld met exact gematchte lak. Onze technici werken met professionele kleurmengsystemen voor een onzichtbaar resultaat.",
+        "detail": "Geschikt voor steenslag, parkeerdeukjes en oppervlakkige krassen."
+      },
+      "two": {
+        "eyebrow": "Spuitloze deukverwijdering",
+        "title": "Deukverwijdering (PDR)",
+        "description": "Paintless Dent Repair — de meest schonende methode om deuken te verwijderen zonder de originele lak aan te tasten. Geen spuiten, geen schuren.",
+        "detail": "Ideaal voor hagelschade, parkeerdeuken en kleine botsingen."
+      },
+      "three": {
+        "eyebrow": "Volledige lakvernieuwing",
+        "title": "Kleurmatching & Spuiten",
+        "description": "Wanneer een paneel volledig gespoten moet worden, zorgen wij voor een perfecte kleurovereenkomst met de originele fabriekskleur van uw voertuig.",
+        "detail": "Inclusief grondlaag, kleurlaag en heldere laklaag."
+      }
+    },
+    "beforeAfter": {
+      "eyebrow": "Voor & Na",
+      "heading": "Het Resultaat Spreekt voor Zich",
+      "subline": "Bekijk de transformatie — van beschadigde lak naar showroomkwaliteit.",
+      "ctaLabel": "Bekijk de Galerij"
     },
     "galleryPreview": {
       "title": "Ons werk",
@@ -1043,6 +1075,7 @@
       "viewMore": "Bekijk meer"
     },
     "testimonialsSection": {
+      "eyebrow": "Beoordelingen",
       "title": "Wat klanten zeggen",
       "subtitle": "Ervaringen van tevreden klanten."
     },
@@ -1064,9 +1097,10 @@
       }
     },
     "cta": {
-      "title": "Klaar om uw auto te laten herstellen?",
-      "subtitle": "Vraag vandaag nog een vrijblijvende offerte aan.",
-      "button": "Offerte aanvragen"
+      "eyebrow": "Neem Contact Op",
+      "title": "Klaar om Uw Auto te Laten Herstellen?",
+      "subtitle": "Bel ons of vraag een vrijblijvende offerte aan. Wij reageren binnen 24 uur.",
+      "button": "Stuur Ons een Bericht"
     },
     "footer": {
       "description": "Uw autospuitbedrijf in Rotterdam voor schadeherstel, spuitwerk en carrosserieherstel.",
