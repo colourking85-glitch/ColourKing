@@ -52,14 +52,14 @@ export function Footer() {
 
           {/* Contact */}
           <div>
-            <h3 className="text-sm font-medium text-white">{t('footer.contact')}</h3>
+            <h3 className="text-sm font-medium text-white">{t('footer.contactInfo')}</h3>
             <div className="mt-3 flex flex-col gap-2 text-sm text-[#6b6b80]">
-              <p>{t('contact.addressValue')}</p>
+              <p>{t('footer.address')}</p>
               <a href="tel:+31681631020" className="transition-colors hover:text-white">
-                {t('contact.phoneValue')}
+                {t('footer.phone')}
               </a>
               <a href="mailto:info@colourking.nl" className="transition-colors hover:text-white">
-                {t('contact.emailValue')}
+                {t('footer.email')}
               </a>
             </div>
           </div>
@@ -68,9 +68,9 @@ export function Footer() {
           <div>
             <h3 className="text-sm font-medium text-white">{t('footer.hours')}</h3>
             <div className="mt-3 flex flex-col gap-2 text-sm text-[#6b6b80]">
-              <p>{t('footer.hoursWeekday')}</p>
-              <p>{t('footer.hoursSat')}</p>
-              <p>{t('footer.hoursSun')}</p>
+              <p>{t('footer.hoursWeekdays')}</p>
+              <p>{t('footer.hoursSaturday')}</p>
+              <p>{t('footer.hoursSunday')}</p>
             </div>
           </div>
         </div>

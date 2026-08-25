@@ -1050,7 +1050,9 @@
       "services": "Services",
       "gallery": "Gallery",
       "about": "About us",
-      "contact": "Contact"
+      "contact": "Contact",
+      "menu": "Menu",
+      "quote": "Get a quote"
     },
     "seo": {
       "homeTitle": "Colour King — Auto Body Shop Rotterdam",
