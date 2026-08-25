@@ -22,12 +22,10 @@ export default async function HomePage({
 
   const services = [
     { key: 'damageRepair', icon: '\u{1F6E0}' },
-    { key: 'paintwork', icon: '\u{1F3A8}' },
+    { key: 'painting', icon: '\u{1F3A8}' },
     { key: 'spotRepair', icon: '\u{1F4CD}' },
-    { key: 'bumperRepair', icon: '\u{1F698}' },
+    { key: 'bodywork', icon: '\u{1F698}' },
   ] as const;
-
-  const testimonials = ['review1', 'review2', 'review3'] as const;
 
   return (
     <>
@@ -46,7 +44,7 @@ export default async function HomePage({
               href="/contact"
               className="inline-flex items-center rounded-[10px] bg-[#E8364E] px-6 py-3 text-sm font-medium text-white transition-colors hover:bg-[#d02e44]"
             >
-              {t('hero.cta')}
+              {t('hero.ctaQuote')}
             </Link>
             <a
               href="tel:+31681631020"
@@ -62,9 +60,14 @@ export default async function HomePage({
       {/* Stats bar */}
       <section className="border-y border-[#1e1e2a] bg-[#12121a]">
         <div className="mx-auto grid max-w-4xl grid-cols-1 divide-y divide-[#1e1e2a] sm:grid-cols-3 sm:divide-x sm:divide-y-0">
-          {(['experience', 'vehicles', 'guarantee'] as const).map((key) => (
-            <div key={key} className="px-6 py-6 text-center">
-              <p className="text-sm font-medium text-white">{t(`stats.${key}`)}</p>
+          {([
+            { value: 'yearsValue', label: 'yearsLabel' },
+            { value: 'carsValue', label: 'carsLabel' },
+            { value: 'customersValue', label: 'customersLabel' },
+          ] as const).map(({ value, label }) => (
+            <div key={value} className="px-6 py-6 text-center">
+              <p className="text-xl font-medium text-[#E8364E]">{t(`stats.${value}`)}</p>
+              <p className="mt-1 text-sm text-[#6b6b80]">{t(`stats.${label}`)}</p>
             </div>
           ))}
         </div>
@@ -75,10 +78,10 @@ export default async function HomePage({
         <div className="mx-auto max-w-6xl">
           <div className="text-center">
             <h2 className="text-2xl font-medium text-white sm:text-3xl">
-              {t('services.title')}
+              {t('servicesOverview.title')}
             </h2>
             <p className="mx-auto mt-3 max-w-2xl text-sm text-[#6b6b80]">
-              {t('services.subtitle')}
+              {t('servicesOverview.subtitle')}
             </p>
           </div>
           <div className="mt-10 grid gap-4 sm:grid-cols-2 lg:grid-cols-4">
@@ -98,7 +101,7 @@ export default async function HomePage({
                   href="/diensten"
                   className="mt-4 inline-block text-xs text-[#E8364E] transition-colors hover:text-[#d02e44]"
                 >
-                  {t('services.moreInfo')} &rarr;
+                  {t('servicesPage.moreInfo')} &rarr;
                 </Link>
               </div>
             ))}
@@ -110,20 +113,26 @@ export default async function HomePage({
       <section className="border-t border-[#1e1e2a] bg-[#12121a] px-4 py-16 sm:px-6 sm:py-24">
         <div className="mx-auto max-w-6xl">
           <h2 className="text-center text-2xl font-medium text-white sm:text-3xl">
-            {t('testimonials.title')}
+            {t('testimonialsSection.title')}
           </h2>
+          <p className="mx-auto mt-3 max-w-2xl text-center text-sm text-[#6b6b80]">
+            {t('testimonialsSection.subtitle')}
+          </p>
           <div className="mt-10 grid gap-4 sm:grid-cols-3">
-            {testimonials.map((key) => (
+            {(['one', 'two', 'three'] as const).map((key) => (
               <div
                 key={key}
                 className="rounded-[10px] border border-[#1e1e2a] bg-[#0a0a0f] p-6"
               >
                 <div className="mb-3 text-[#E8364E]">&#9733;&#9733;&#9733;&#9733;&#9733;</div>
                 <p className="text-sm text-[#6b6b80] leading-relaxed">
-                  &ldquo;{t(`testimonials.${key}.text`)}&rdquo;
+                  &ldquo;{t(`testimonials.${key}.quote`)}&rdquo;
                 </p>
                 <p className="mt-4 text-xs font-medium text-white">
-                  {t(`testimonials.${key}.author`)}
+                  {t(`testimonials.${key}.name`)}
+                </p>
+                <p className="text-xs text-[#6b6b80]">
+                  {t(`testimonials.${key}.role`)}
                 </p>
               </div>
             ))}
