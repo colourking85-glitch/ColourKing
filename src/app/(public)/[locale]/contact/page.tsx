@@ -20,7 +20,7 @@ export default function ContactPage() {
 
   function validate() {
     const e: Record<string, string> = {};
-    if (!form.name.trim()) e.name = t('contact.required');
+    if (!form.name.trim()) e.name = t('contact.requiredField');
     if (form.email && !/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(form.email)) {
       e.email = t('contact.invalidEmail');
     }
@@ -72,10 +72,10 @@ export default function ContactPage() {
       <section className="px-4 pb-8 pt-16 sm:px-6 sm:pt-20">
         <div className="mx-auto max-w-4xl text-center">
           <h1 className="text-3xl font-medium text-white sm:text-4xl">
-            {t('contact.title')}
+            {t('contact.formTitle')}
           </h1>
           <p className="mx-auto mt-3 max-w-2xl text-sm text-[#6b6b80]">
-            {t('contact.subtitle')}
+            {t('cta.subtitle')}
           </p>
         </div>
       </section>
@@ -161,7 +161,7 @@ export default function ContactPage() {
                   {/* Damage description */}
                   <div>
                     <label htmlFor="damage" className="block text-sm text-[#6b6b80]">
-                      {t('contact.damage')}
+                      {t('contact.damageDescription')}
                     </label>
                     <textarea
                       id="damage"
@@ -181,7 +181,7 @@ export default function ContactPage() {
                     disabled={status === 'sending'}
                     className="w-full rounded-[10px] bg-[#E8364E] px-6 py-3 text-sm font-medium text-white transition-colors hover:bg-[#d02e44] disabled:opacity-50"
                   >
-                    {status === 'sending' ? t('contact.sending') : t('contact.submit')}
+                    {status === 'sending' ? t('contact.submitting') : t('contact.submit')}
                   </button>
                 </form>
               )}
@@ -199,9 +199,9 @@ export default function ContactPage() {
                 {/* Address */}
                 <div>
                   <p className="text-xs font-medium text-[#6b6b80] uppercase tracking-wider">
-                    {t('contact.address')}
+                    {t('contact.infoTitle')}
                   </p>
-                  <p className="mt-1 text-sm text-white">{t('contact.addressValue')}</p>
+                  <p className="mt-1 text-sm text-white">{t('footer.address')}</p>
                 </div>
 
                 {/* Phone */}
@@ -213,7 +213,7 @@ export default function ContactPage() {
                     href="tel:+31681631020"
                     className="mt-1 block text-sm text-white transition-colors hover:text-[#E8364E]"
                   >
-                    {t('contact.phoneValue')}
+                    {t('footer.phone')}
                   </a>
                 </div>
 
@@ -226,19 +226,19 @@ export default function ContactPage() {
                     href="mailto:info@colourking.nl"
                     className="mt-1 block text-sm text-white transition-colors hover:text-[#E8364E]"
                   >
-                    {t('contact.emailValue')}
+                    {t('footer.email')}
                   </a>
                 </div>
 
                 {/* Hours */}
                 <div>
                   <p className="text-xs font-medium text-[#6b6b80] uppercase tracking-wider">
-                    {t('contact.hours')}
+                    {t('footer.hours')}
                   </p>
                   <div className="mt-1 space-y-1 text-sm text-white">
-                    <p>{t('contact.hoursWeekday')}</p>
-                    <p>{t('contact.hoursSat')}</p>
-                    <p>{t('contact.hoursSun')}</p>
+                    <p>{t('footer.hoursWeekdays')}</p>
+                    <p>{t('footer.hoursSaturday')}</p>
+                    <p>{t('footer.hoursSunday')}</p>
                   </div>
                 </div>
               </div>

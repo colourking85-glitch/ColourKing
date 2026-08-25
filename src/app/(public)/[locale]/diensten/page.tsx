@@ -15,13 +15,13 @@ export async function generateMetadata({
 
 const serviceKeys = [
   { key: 'damageRepair', icon: '\u{1F6E0}' },
-  { key: 'paintwork', icon: '\u{1F3A8}' },
+  { key: 'painting', icon: '\u{1F3A8}' },
   { key: 'spotRepair', icon: '\u{1F4CD}' },
-  { key: 'fullRespray', icon: '\u{2728}' },
-  { key: 'bumperRepair', icon: '\u{1F698}' },
-  { key: 'dentRemoval', icon: '\u{1F528}' },
+  { key: 'bodywork', icon: '\u{2728}' },
   { key: 'insurance', icon: '\u{1F4CB}' },
-  { key: 'fleet', icon: '\u{1F69A}' },
+  { key: 'dentRepair', icon: '\u{1F528}' },
+  { key: 'assessment', icon: '\u{1F698}' },
+  { key: 'pickupDelivery', icon: '\u{1F69A}' },
 ] as const;
 
 export default async function ServicesPage({
@@ -37,10 +37,10 @@ export default async function ServicesPage({
       <section className="px-4 pb-8 pt-16 sm:px-6 sm:pt-20">
         <div className="mx-auto max-w-4xl text-center">
           <h1 className="text-3xl font-medium text-white sm:text-4xl">
-            {t('services.title')}
+            {t('servicesPage.title')}
           </h1>
           <p className="mx-auto mt-3 max-w-2xl text-sm text-[#6b6b80]">
-            {t('services.subtitle')}
+            {t('servicesPage.subtitle')}
           </p>
         </div>
       </section>
@@ -65,9 +65,6 @@ export default async function ServicesPage({
                       {t(`services.${key}.desc`)}
                     </p>
                     <div className="mt-4">
-                      <p className="text-xs font-medium text-[#6b6b80] mb-2">
-                        {t('services.included')}
-                      </p>
                       <div className="flex flex-wrap gap-1.5">
                         {bullets.map((bullet) => (
                           <span
@@ -91,16 +88,16 @@ export default async function ServicesPage({
       <section className="px-4 pb-16 sm:px-6 sm:pb-24">
         <div className="mx-auto max-w-4xl rounded-[10px] border border-[#E8364E]/20 bg-gradient-to-r from-[#E8364E]/10 to-[#E8364E]/5 px-6 py-12 text-center sm:px-12">
           <h2 className="text-2xl font-medium text-white">
-            {t('cta.title')}
+            {t('servicesPage.ctaTitle')}
           </h2>
           <p className="mt-3 text-sm text-[#6b6b80]">
-            {t('cta.subtitle')}
+            {t('servicesPage.ctaSubtitle')}
           </p>
           <Link
             href="/contact"
             className="mt-6 inline-flex items-center rounded-[10px] bg-[#E8364E] px-6 py-3 text-sm font-medium text-white transition-colors hover:bg-[#d02e44]"
           >
-            {t('cta.button')}
+            {t('servicesPage.ctaButton')}
           </Link>
         </div>
       </section>
