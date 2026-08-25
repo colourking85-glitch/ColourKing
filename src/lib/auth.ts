@@ -26,6 +26,7 @@ export const PERMISSIONS: Record<Role, string[]> = {
     'tasks.*',
     'vat.read',
     'purchases.*',
+    'bookkeeping.read',
   ],
   tech: [
     'jobs.read',

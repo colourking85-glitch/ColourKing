@@ -251,8 +251,8 @@ Lead → Offer → Approval → Repair Order → Job → Parts → Tasks → Han
 | 0014 | repair_handover | signatures, gallery_consent column | Yes |
 | 0015 | tasks_timesheet | job_tasks, time_entries | Yes |
 | 0016 | invoices | invoices, invoice_lines, payments | Yes |
-| 0017 | vat_returns | vat_returns | Pending |
-| 0018 | purchases | purchases | Pending |
+| 0017 | vat_returns | vat_returns | Yes |
+| 0018 | purchases | purchases | Yes |
 
 ---
 
