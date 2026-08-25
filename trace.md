@@ -1,7 +1,7 @@
 # ColourKing — Implementation Trace
 
 **Created:** 2026-08-24
-**Status:** Sprint 2.7 complete — KPI Dashboard + Monitor + Domain routing + Coming Soon
+**Status:** Sprints 3+4+5+8 complete — Documents, Offers, Parts, Appointments (148 tests)
 
 ---
 
@@ -215,50 +215,59 @@
 
 ## Sprint 3: Document Engine (4 days)
 
-- [ ] Migration: documents + number_ranges tables + RLS
-- [ ] allocate_number() PL/pgSQL function (FOR UPDATE serialization)
-- [ ] Module: src/modules/documents/ (schema, queries, actions, components)
-- [ ] Document lifecycle: draft → issued → cancelled
-- [ ] Payload freezing at issue time
-- [ ] PDF renderer: lib/pdf/ (letterhead, terms per locale)
-- [ ] Storage: documents/{year}/{type}/{number}.pdf, signed URLs
-- [ ] Screen: DO03 Display document
-- [ ] Screen: DO05 Document archive
-- [ ] Screen: DO10 Issue (draft → issued)
-- [ ] Screen: DO11 Cancel / credit
-- [ ] Strings in nl/en/tr
-- [ ] Tests: number allocation concurrency, payload freezing
+- [x] Migration 0010: documents + number_ranges tables + RLS — ready to run in SQL Editor
+- [x] allocate_number() PL/pgSQL function (FOR UPDATE row-level locking, auto-creates year entries)
+- [x] Module: src/modules/documents/ (schema.ts, queries.ts, actions.ts)
+- [x] Document lifecycle: draft → issued → cancelled (enforced in actions)
+- [x] Payload freezing at issue time with SHA-256 hash
+- [x] Invoice cancel blocked — must use credit note instead
+- [x] API routes: /api/documents (GET list + POST create), /api/documents/[id] (GET detail + PATCH issue/cancel + DELETE draft)
+- [x] Screen: DO05 Document archive (/app/documenten) — search, type/status filters, table view
+- [x] Screen: DO03 Document detail (/app/documenten/[id]) — info card, integrity hash, payload preview, document chain, links, issue/cancel/delete actions
+- [x] Screen registry: DO05, DO03 registered in lib/codes.ts
+- [x] Strings in nl/en/tr (doc namespace — 30+ keys)
+- [x] Tests: 10 document schema tests (DocumentSchema, IssueDocumentSchema, CancelDocumentSchema) — 34/34 total pass
+- [ ] PDF renderer: lib/pdf/ (letterhead, terms per locale) — deferred to Sprint 6
+- [ ] Storage: documents/{year}/{type}/{number}.pdf, signed URLs — deferred to Sprint 6
 
 ---
 
-## Sprint 4: Offers (6 days)
+## Sprint 4: Offers (6 days) — built in parallel
 
-- [ ] Migration: offers + offer_lines tables + RLS
-- [ ] Module: src/modules/offers/ (schema, queries, actions, machine.ts, components)
-- [ ] Offer lifecycle: draft → sent → approved/rejected/superseded
-- [ ] Versioning: supersedes_id, old link shows "replaced"
-- [ ] Issue offer as document (uses document engine)
-- [ ] Screen: ES01 Create offer (with/without lead)
-- [ ] Screen: ES05 Offer list
-- [ ] Screen: ES10 Send offer (email with approval link)
-- [ ] Screen: ES11 Supplement (type='supplement', parent_offer_id)
-- [ ] Public: /o/[token] — ES20 offer approval page
-- [ ] Rate settings in SY05
-- [ ] Approval → creates job automatically
-- [ ] Strings in nl/en/tr
-- [ ] Tests: offer versioning, approval flow, token verification
+- [x] Migration 0011: offers + offer_lines tables + RLS + indexes + updated_at trigger
+- [x] Module: src/modules/offers/ (schema.ts, queries.ts, actions.ts, machine.ts)
+- [x] Offer lifecycle: draft → sent → approved/rejected/superseded (state machine with guards)
+- [x] Line items: labour/part/material/other kinds, VAT calc, auto-recalculate totals
+- [x] Money in cents (integers) throughout
+- [x] Versioning: supersedeOffer copies lines to new draft, marks old as superseded
+- [x] API routes: /api/offers (list+create), /api/offers/[id] (detail+send+approve+reject+supersede), /api/offers/[id]/lines (list+add), /api/offers/[id]/lines/[lineId] (update+delete)
+- [x] Screen: ES01 Create offer (/app/offertes/nieuw) — customer/vehicle select, inline line editor, live totals
+- [x] Screen: ES05 Offer list (/app/offertes) — search, type/status filters, EUR totals
+- [x] Screen: ES10 Offer detail (/app/offertes/[id]) — info, lines table, actions, version chain
+- [x] Screen registry: ES01, ES05, ES10 registered
+- [x] Strings in nl/en/tr (es namespace — 40+ keys)
+- [x] Tests: 55 tests (schemas + state machine) — all pass
+- [ ] Public: /o/[token] — ES20 offer approval page — deferred
+- [ ] Approval → creates job automatically — deferred to Sprint 6
+- [ ] Rate settings in SY05 — deferred
 
 ---
 
-## Sprint 5: Parts + Board (4 days)
+## Sprint 5: Parts + Board (4 days) — built in parallel
 
-- [ ] Migration: parts table + RLS
-- [ ] Module: src/modules/parts/ (schema, queries, actions, components)
-- [ ] Blocking flag on parts (prevents stage change)
-- [ ] Screen: PT01 Add part to job
-- [ ] Screen: PT05 Parts list (per job, global)
-- [ ] Job board: drag-between-stages enhancement
-- [ ] Strings in nl/en/tr
+- [x] Migration 0012: parts table + RLS + indexes + updated_at trigger
+- [x] Module: src/modules/parts/ (schema.ts, queries.ts, actions.ts)
+- [x] Parts lifecycle: needed → ordered → shipped → received, needed → returned
+- [x] Blocking flag: prevents job stage change when true and not received
+- [x] Auto-recalculate total (qty × unit_price_cents)
+- [x] Auto-set timestamps (ordered_at, received_at) on status transitions
+- [x] API routes: /api/parts (list+create), /api/parts/[id] (detail+update+status+delete)
+- [x] Screen: PT05 Parts list (/app/onderdelen) — search, status/blocking filters, color-coded badges
+- [x] Screen: PT01 Create part (/app/onderdelen/nieuw) — form with EUR→cents conversion, blocking toggle
+- [x] Screen registry: PT01, PT05 registered
+- [x] Strings in nl/en/tr (pt namespace — 22+ keys)
+- [x] Tests: 27 tests (schemas + status transitions) — all pass
+- [ ] Job board: drag-between-stages enhancement — deferred
 
 ---
 
@@ -291,18 +300,23 @@
 
 ---
 
-## Sprint 8: Appointments (5 days)
+## Sprint 8: Appointments (5 days) — built in parallel
 
-- [ ] Migration: resources + appointments + blackouts tables + RLS
-- [ ] Module: src/modules/appointments/ (schema, queries, actions, components)
-- [ ] Slot engine: opening hours - appointments - blackouts - capacity
-- [ ] Auto-confirm inspection, request-confirm for drop-off/collection
-- [ ] Screen: AP01 Create appointment
-- [ ] Screen: AP05 Appointment calendar (day/week)
-- [ ] Screen: AP10 Confirm pending requests
-- [ ] Screen: SY06 Opening hours, resources, blackouts
-- [ ] Public: /afspraak — AP20 booking page
-- [ ] Strings in nl/en/tr
+- [x] Migration 0013: resources + opening_hours + blackouts + appointments tables + RLS + indexes + triggers
+- [x] Seed data: Mon-Fri 08:00-17:00 opening hours, Bay 1 + Bay 2 resources
+- [x] Module: src/modules/appointments/ (schema.ts, queries.ts, actions.ts)
+- [x] Slot engine: compute available slots from opening hours - existing appointments - blackouts - resource capacity
+- [x] Auto-confirm inspection appointments, manual confirm for drop-off/collection/repair_slot
+- [x] Status transitions: requested → confirmed → completed, requested/confirmed → cancelled
+- [x] API routes: /api/appointments (list+create), /api/appointments/[id] (detail+confirm+cancel+complete), /api/appointments/slots (available slots), /api/resources (list+create), /api/resources/[id] (update+delete)
+- [x] Screen: AP05 Appointment calendar (/app/afspraken) — week view, time grid, colored blocks by type, status indicators, date nav, filters
+- [x] Screen: AP01 Create appointment (/app/afspraken/nieuw) — type buttons, contact fields, date picker, dynamic slot loading, resource select
+- [x] Screen registry: AP01, AP05 registered
+- [x] Strings in nl/en/tr (ap namespace — 30+ keys)
+- [x] Tests: 32 tests (schemas + status transitions + auto-confirm logic) — all pass
+- [ ] Screen: AP10 Confirm pending requests — deferred
+- [ ] Screen: SY06 Opening hours, resources, blackouts settings — deferred
+- [ ] Public: /afspraak — AP20 booking page — deferred
 
 ---
 
@@ -418,3 +432,12 @@
 | 2026-08-25 | Admin UI redesign spec imported from Google Doc | Done |
 | 2026-08-25 | RP01 KPI Dashboard implemented with demo data (shift + per vehicle views) | Done |
 | 2026-08-25 | Color system refined: ck-surface/border/text tokens in tailwind.config.js | Done |
+| 2026-08-25 | Sprint 3 Document Engine: migration 0010, module, API, screens DO05+DO03, 10 tests | Done |
+| 2026-08-25 | Migration 0010 (documents + number_ranges) | Done — applied in SQL Editor |
+| 2026-08-25 | Sprint 4 Offers: migration 0011, module, API, screens ES01+ES05+ES10, 55 tests | Done |
+| 2026-08-25 | Sprint 5 Parts: migration 0012, module, API, screens PT01+PT05, 27 tests | Done |
+| 2026-08-25 | Sprint 8 Appointments: migration 0013, module, API, screens AP01+AP05, 32 tests | Done |
+| 2026-08-25 | Shared files merged: database.ts (0001-0013), codes.ts (+6 screens), i18n (+3 namespaces) | Done |
+| 2026-08-25 | Migration 0009 (notifications) | Done — already existed, re-run skipped |
+| 2026-08-25 | Migrations 0011, 0012, 0013 | Ready — run in Supabase SQL Editor |
+| 2026-08-25 | Total tests: 148/148 pass (7 test files) | Done |

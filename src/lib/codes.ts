@@ -43,7 +43,8 @@ export const SCREEN_REGISTRY: Record<string, ScreenMeta> = {
 
   // Offers
   '/app/offertes': { id: 'ES05', title: 'Offer List', titleNl: 'Offertelijst', module: 'ES', route: '/app/offertes' },
-  '/app/offertes/new': { id: 'ES01', title: 'Create Offer', titleNl: 'Offerte Aanmaken', module: 'ES', route: '/app/offertes/new' },
+  '/app/offertes/nieuw': { id: 'ES01', title: 'Create Offer', titleNl: 'Offerte Aanmaken', module: 'ES', route: '/app/offertes/nieuw' },
+  '/app/offertes/[id]': { id: 'ES10', title: 'Offer Detail', titleNl: 'Offertedetail', module: 'ES', route: '/app/offertes/[id]' },
 
   // Jobs
   '/app/jobs': { id: 'JB05', title: 'Job List', titleNl: 'Opdrachtlijst', module: 'JB', route: '/app/jobs' },
@@ -53,15 +54,18 @@ export const SCREEN_REGISTRY: Record<string, ScreenMeta> = {
 
   // Parts
   '/app/onderdelen': { id: 'PT05', title: 'Parts List', titleNl: 'Onderdelenlijst', module: 'PT', route: '/app/onderdelen' },
+  '/app/onderdelen/nieuw': { id: 'PT01', title: 'Create Part', titleNl: 'Onderdeel Aanmaken', module: 'PT', route: '/app/onderdelen/nieuw' },
 
   // Invoices
   '/app/facturen': { id: 'FA05', title: 'Invoice List', titleNl: 'Facturenlijst', module: 'FA', route: '/app/facturen' },
 
   // Documents
   '/app/documenten': { id: 'DO05', title: 'Document Archive', titleNl: 'Documentarchief', module: 'DO', route: '/app/documenten' },
+  '/app/documenten/[id]': { id: 'DO03', title: 'Document Detail', titleNl: 'Documentdetail', module: 'DO', route: '/app/documenten/[id]' },
 
   // Appointments
   '/app/afspraken': { id: 'AP05', title: 'Appointment Calendar', titleNl: 'Afsprakenkalender', module: 'AP', route: '/app/afspraken' },
+  '/app/afspraken/nieuw': { id: 'AP01', title: 'Create Appointment', titleNl: 'Afspraak Aanmaken', module: 'AP', route: '/app/afspraken/nieuw' },
 
   // Tasks & Planning
   '/app/planning': { id: 'TS10', title: 'Timesheet / Planner', titleNl: 'Werkplanning', module: 'TS', route: '/app/planning' },

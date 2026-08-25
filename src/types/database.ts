@@ -1,4 +1,4 @@
-// Auto-generated types — reflects migrations 0001-0009.
+// Auto-generated types — reflects migrations 0001-0013.
 // Regenerate after every migration: supabase gen types typescript --local > src/types/database.ts
 
 export type Json =
@@ -132,6 +132,163 @@ export interface Notification {
   created_at: string;
 }
 
+export interface NumberRange {
+  id: string;
+  doc_type: DocType;
+  year: number;
+  prefix: string;
+  next_number: number;
+  created_at: string;
+}
+
+export interface Document {
+  id: string;
+  doc_type: DocType;
+  doc_number: string | null;
+  status: DocStatus;
+  supersedes_id: string | null;
+  job_id: string | null;
+  offer_id: string | null;
+  invoice_id: string | null;
+  customer_id: string;
+  vehicle_id: string | null;
+  locale: string;
+  payload: Json | null;
+  pdf_path: string | null;
+  pdf_sha256: string | null;
+  issued_at: string | null;
+  issued_by: string | null;
+  sent_at: string | null;
+  signed_at: string | null;
+  signed_by_name: string | null;
+  signature_path: string | null;
+  signed_ip: string | null;
+  cancelled_at: string | null;
+  cancel_reason: string | null;
+  created_at: string;
+  updated_at: string;
+}
+
+export interface Offer {
+  id: string;
+  type: OfferType;
+  status: OfferStatus;
+  origin: OfferOrigin;
+  offer_number: string | null;
+  customer_id: string;
+  vehicle_id: string | null;
+  lead_id: string | null;
+  job_id: string | null;
+  parent_offer_id: string | null;
+  supersedes_id: string | null;
+  locale: string;
+  valid_until: string | null;
+  notes: string | null;
+  subtotal_cents: number;
+  vat_cents: number;
+  total_cents: number;
+  discount_cents: number;
+  approved_at: string | null;
+  approved_by_name: string | null;
+  approved_ip: string | null;
+  rejected_at: string | null;
+  rejected_reason: string | null;
+  sent_at: string | null;
+  created_by: string | null;
+  created_at: string;
+  updated_at: string;
+}
+
+export interface OfferLine {
+  id: string;
+  offer_id: string;
+  sort_order: number;
+  kind: OfferLineKind;
+  description: string;
+  quantity: number;
+  unit: string;
+  unit_price_cents: number;
+  discount_pct: number;
+  line_total_cents: number;
+  tax_code: TaxCode;
+  vat_amount_cents: number;
+  part_number: string | null;
+  created_at: string;
+}
+
+export interface Part {
+  id: string;
+  job_id: string;
+  offer_line_id: string | null;
+  description: string;
+  part_number: string | null;
+  supplier: string | null;
+  quantity: number;
+  unit_price_cents: number;
+  total_cents: number;
+  status: PartStatus;
+  ordered_at: string | null;
+  expected_at: string | null;
+  received_at: string | null;
+  blocking: boolean;
+  notes: string | null;
+  created_by: string | null;
+  created_at: string;
+  updated_at: string;
+}
+
+export interface Resource {
+  id: string;
+  type: ResourceType;
+  name: string;
+  capacity: number;
+  active: boolean;
+  created_at: string;
+  updated_at: string;
+}
+
+export interface OpeningHours {
+  id: string;
+  day_of_week: number;
+  open_time: string;
+  close_time: string;
+  created_at: string;
+}
+
+export interface Blackout {
+  id: string;
+  title: string;
+  start_date: string;
+  end_date: string;
+  all_day: boolean;
+  resource_id: string | null;
+  created_at: string;
+}
+
+export interface Appointment {
+  id: string;
+  type: AppointmentType;
+  status: AppointmentStatus;
+  customer_id: string | null;
+  vehicle_id: string | null;
+  job_id: string | null;
+  resource_id: string | null;
+  contact_name: string;
+  contact_phone: string | null;
+  contact_email: string | null;
+  scheduled_date: string;
+  scheduled_time: string;
+  duration_minutes: number;
+  notes: string | null;
+  confirmed_at: string | null;
+  cancelled_at: string | null;
+  cancel_reason: string | null;
+  completed_at: string | null;
+  created_by: string | null;
+  created_at: string;
+  updated_at: string;
+}
+
 export interface Database {
   public: {
     Tables: {
@@ -169,6 +326,51 @@ export interface Database {
         Row: Notification;
         Insert: Omit<Notification, 'id' | 'created_at' | 'read'> & { id?: string; read?: boolean };
         Update: Partial<Omit<Notification, 'id' | 'created_at'>>;
+      };
+      documents: {
+        Row: Document;
+        Insert: Omit<Document, 'id' | 'created_at' | 'updated_at'> & { id?: string };
+        Update: Partial<Omit<Document, 'id' | 'created_at' | 'updated_at'>>;
+      };
+      number_ranges: {
+        Row: NumberRange;
+        Insert: Omit<NumberRange, 'id' | 'created_at'> & { id?: string };
+        Update: Partial<Omit<NumberRange, 'id' | 'created_at'>>;
+      };
+      offers: {
+        Row: Offer;
+        Insert: Omit<Offer, 'id' | 'created_at' | 'updated_at'> & { id?: string };
+        Update: Partial<Omit<Offer, 'id' | 'created_at' | 'updated_at'>>;
+      };
+      offer_lines: {
+        Row: OfferLine;
+        Insert: Omit<OfferLine, 'id' | 'created_at'> & { id?: string };
+        Update: Partial<Omit<OfferLine, 'id' | 'created_at'>>;
+      };
+      parts: {
+        Row: Part;
+        Insert: Omit<Part, 'id' | 'created_at' | 'updated_at'> & { id?: string };
+        Update: Partial<Omit<Part, 'id' | 'created_at' | 'updated_at'>>;
+      };
+      resources: {
+        Row: Resource;
+        Insert: Omit<Resource, 'id' | 'created_at' | 'updated_at'> & { id?: string };
+        Update: Partial<Omit<Resource, 'id' | 'created_at' | 'updated_at'>>;
+      };
+      opening_hours: {
+        Row: OpeningHours;
+        Insert: Omit<OpeningHours, 'id' | 'created_at'> & { id?: string };
+        Update: Partial<Omit<OpeningHours, 'id' | 'created_at'>>;
+      };
+      blackouts: {
+        Row: Blackout;
+        Insert: Omit<Blackout, 'id' | 'created_at'> & { id?: string };
+        Update: Partial<Omit<Blackout, 'id' | 'created_at'>>;
+      };
+      appointments: {
+        Row: Appointment;
+        Insert: Omit<Appointment, 'id' | 'created_at' | 'updated_at'> & { id?: string };
+        Update: Partial<Omit<Appointment, 'id' | 'created_at' | 'updated_at'>>;
       };
     };
     Views: Record<string, never>;
