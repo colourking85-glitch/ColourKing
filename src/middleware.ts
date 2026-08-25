@@ -39,7 +39,62 @@ export async function middleware(req: NextRequest) {
 
   // admin.colourking.nl -> rewrite to /app routes
   if (host.startsWith('admin.')) {
+    // Allow login and reset-password on admin subdomain
+    if (pathname === '/login' || pathname.startsWith('/reset-password')) {
+      return NextResponse.next();
+    }
+
     const dest = pathname === '/' ? '/app' : `/app${pathname}`;
+
+    // Auth check for admin subdomain when Supabase is configured
+    if (hasSupabaseConfig()) {
+      const supabaseResponse = NextResponse.next({
+        request: { headers: req.headers },
+      });
+
+      const supabase = createServerClient(
+        process.env.NEXT_PUBLIC_SUPABASE_URL!,
+        process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY!,
+        {
+          cookies: {
+            get(name: string) {
+              return req.cookies.get(name)?.value;
+            },
+            set(name: string, value: string, options: CookieOptions) {
+              req.cookies.set({ name, value });
+              supabaseResponse.cookies.set({ name, value, ...options });
+            },
+            remove(name: string, options: CookieOptions) {
+              req.cookies.set({ name, value: '' });
+              supabaseResponse.cookies.set({ name, value: '', ...options });
+            },
+          },
+        }
+      );
+
+      const {
+        data: { user },
+      } = await supabase.auth.getUser();
+
+      if (!user) {
+        const loginUrl = req.nextUrl.clone();
+        loginUrl.pathname = '/login';
+        loginUrl.searchParams.set('next', pathname);
+        return NextResponse.redirect(loginUrl);
+      }
+
+      // Rewrite to /app path with refreshed cookies
+      const url = req.nextUrl.clone();
+      url.pathname = dest;
+      const rewriteRes = NextResponse.rewrite(url);
+      supabaseResponse.cookies.getAll().forEach(c => {
+        rewriteRes.cookies.set(c);
+      });
+      rewriteRes.headers.set('X-Robots-Tag', 'noindex, nofollow');
+      return rewriteRes;
+    }
+
+    // No Supabase config — dev mode, rewrite directly
     const url = req.nextUrl.clone();
     url.pathname = dest;
     const res = NextResponse.rewrite(url);
