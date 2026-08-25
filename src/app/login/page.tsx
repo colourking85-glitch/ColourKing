@@ -2,10 +2,14 @@
 
 import { useState } from 'react';
 import { useRouter } from 'next/navigation';
+import { useTranslations } from 'next-intl';
 import { signIn } from '@/lib/auth';
+import { AdminIntlProvider } from '@/components/AdminIntlProvider';
 
-export default function LoginPage() {
+function LoginForm() {
   const router = useRouter();
+  const tAuth = useTranslations('auth');
+  const tCommon = useTranslations('common');
   const [email, setEmail] = useState('');
   const [password, setPassword] = useState('');
   const [error, setError] = useState('');
@@ -35,9 +39,9 @@ export default function LoginPage() {
             <span className="font-display text-xl font-bold text-white">CK</span>
           </div>
           <h1 className="font-display text-xl font-bold text-white">
-            Colourking
+            {tCommon('appName')}
           </h1>
-          <p className="mt-1 text-sm text-ck-muted">Beheerconsole</p>
+          <p className="mt-1 text-sm text-ck-muted">{tAuth('signInSubtitle')}</p>
         </div>
 
         {/* Form */}
@@ -47,7 +51,7 @@ export default function LoginPage() {
               htmlFor="email"
               className="mb-1.5 block text-xs font-medium text-ck-muted-light"
             >
-              E-mailadres
+              {tAuth('email')}
             </label>
             <input
               id="email"
@@ -56,7 +60,7 @@ export default function LoginPage() {
               onChange={(e) => setEmail(e.target.value)}
               required
               className="w-full rounded-lg border border-ck-dark-border bg-ck-dark-card px-3 py-2.5 text-sm text-white outline-none transition-colors placeholder:text-ck-muted focus:border-ck-red"
-              placeholder="naam@colourking.nl"
+              placeholder={tAuth('emailPlaceholder')}
             />
           </div>
 
@@ -65,7 +69,7 @@ export default function LoginPage() {
               htmlFor="password"
               className="mb-1.5 block text-xs font-medium text-ck-muted-light"
             >
-              Wachtwoord
+              {tAuth('password')}
             </label>
             <input
               id="password"
@@ -89,10 +93,18 @@ export default function LoginPage() {
             disabled={loading}
             className="w-full rounded-lg bg-ck-red px-4 py-2.5 text-sm font-semibold text-white transition-colors hover:bg-ck-red-hover disabled:opacity-50"
           >
-            {loading ? 'Bezig...' : 'Inloggen'}
+            {loading ? tAuth('signingIn') : tAuth('signIn')}
           </button>
         </form>
       </div>
     </div>
+  );
+}
+
+export default function LoginPage() {
+  return (
+    <AdminIntlProvider>
+      <LoginForm />
+    </AdminIntlProvider>
   );
 }

@@ -4,6 +4,7 @@ import { useState, useEffect, useMemo } from 'react';
 import {
   ChevronLeft, ChevronRight, Calendar, Clock, Zap, Users,
 } from 'lucide-react';
+import { useTranslations } from 'next-intl';
 import { ScreenBadge } from '@/components/ui/ScreenBadge';
 
 type TimeEntryRow = {
@@ -51,8 +52,6 @@ function toISODate(d: Date): string {
   return d.toISOString().slice(0, 10);
 }
 
-const DAY_NAMES = ['Ma', 'Di', 'Wo', 'Do', 'Vr', 'Za', 'Zo'];
-
 function formatHours(mins: number): string {
   if (mins === 0) return '-';
   const h = Math.floor(mins / 60);
@@ -69,6 +68,9 @@ function utilizationColor(mins: number, targetMinutes: number): string {
 }
 
 export default function PlanningPage() {
+  const t = useTranslations('te');
+  const tAp = useTranslations('ap');
+  const DAY_NAMES = [tAp('dayMo'), tAp('dayTu'), tAp('dayWe'), tAp('dayTh'), tAp('dayFr'), tAp('daySa'), tAp('daySu')];
   const [weekOffset, setWeekOffset] = useState(0);
   const [entries, setEntries] = useState<TimeEntryRow[]>([]);
   const [loading, setLoading] = useState(true);
@@ -143,9 +145,9 @@ export default function PlanningPage() {
         <div className="flex items-center gap-3">
           <ScreenBadge code="TS10" />
           <div>
-            <h1 className="text-base font-medium text-ck-text">Planning & Urenregistratie</h1>
+            <h1 className="text-base font-medium text-ck-text">{t('planner')} & {t('title')}</h1>
             <p className="mt-0.5 text-[11px] text-ck-text-muted">
-              Weekoverzicht uren per medewerker
+              {t('subtitle')}
             </p>
           </div>
         </div>
@@ -165,7 +167,7 @@ export default function PlanningPage() {
             className="rounded-[10px] border-[0.5px] border-ck-border bg-ck-surface px-3 py-2 text-sm text-ck-text hover:bg-ck-surface-2 transition-colors"
           >
             <Calendar size={14} className="inline mr-1.5" />
-            Vandaag
+            {t('today')}
           </button>
           <button
             onClick={() => setWeekOffset(w => w + 1)}
@@ -186,13 +188,13 @@ export default function PlanningPage() {
         ) : staffSummaries.length === 0 ? (
           <div className="flex h-48 flex-col items-center justify-center gap-3">
             <Users size={32} className="text-ck-text-faint" />
-            <p className="text-sm text-ck-text-muted">Geen uren geregistreerd deze week</p>
+            <p className="text-sm text-ck-text-muted">{t('noEntriesWeek')}</p>
           </div>
         ) : (
           <table className="w-full min-w-[700px]">
             <thead>
               <tr className="border-b border-ck-border text-[11px] uppercase tracking-wider text-ck-text-muted">
-                <th className="px-4 py-3 text-left font-medium">Medewerker</th>
+                <th className="px-4 py-3 text-left font-medium">{t('staffMember')}</th>
                 {dates.map((d, i) => {
                   const isToday = toISODate(d) === toISODate(new Date());
                   return (
@@ -207,7 +209,7 @@ export default function PlanningPage() {
                     </th>
                   );
                 })}
-                <th className="px-4 py-3 text-center font-medium">Totaal</th>
+                <th className="px-4 py-3 text-center font-medium">{t('total')}</th>
               </tr>
             </thead>
             <tbody>
@@ -248,7 +250,7 @@ export default function PlanningPage() {
               {/* Summary row */}
               <tr className="border-t border-ck-border bg-ck-surface-2/30">
                 <td className="px-4 py-3 text-[11px] font-medium uppercase tracking-wider text-ck-text-muted">
-                  Totaal
+                  {t('total')}
                 </td>
                 {dates.map((d, i) => {
                   const key = toISODate(d);
@@ -274,7 +276,7 @@ export default function PlanningPage() {
           <div className="flex items-center gap-2">
             <Clock size={14} className="text-ck-text-muted" />
             <span className="text-sm font-medium text-ck-text">
-              Detail: {new Date(selectedCell.date).toLocaleDateString('nl-NL', { weekday: 'long', day: 'numeric', month: 'long' })}
+              {t('detail')} {new Date(selectedCell.date).toLocaleDateString('nl-NL', { weekday: 'long', day: 'numeric', month: 'long' })}
             </span>
           </div>
           <div className="space-y-2">
@@ -284,7 +286,7 @@ export default function PlanningPage() {
                 className="flex items-center justify-between rounded-[10px] border-[0.5px] border-ck-divider bg-ck-bg px-3 py-2"
               >
                 <div className="text-sm text-ck-text-2">
-                  {entry.job_tasks?.title ?? entry.jobs?.job_number ?? 'Algemeen'}
+                  {entry.job_tasks?.title ?? entry.jobs?.job_number ?? t('general')}
                 </div>
                 <div className="flex items-center gap-3 text-[11px] text-ck-text-muted">
                   <span>
@@ -292,14 +294,14 @@ export default function PlanningPage() {
                     {' - '}
                     {entry.clock_out
                       ? new Date(entry.clock_out).toLocaleTimeString('nl-NL', { hour: '2-digit', minute: '2-digit' })
-                      : 'actief'}
+                      : t('active')}
                   </span>
                   <span className="font-mono tabular-nums">
                     {entry.duration_minutes ? formatHours(entry.duration_minutes) : '-'}
                   </span>
                   {entry.break_minutes > 0 && (
                     <span className="text-ck-text-faint">
-                      ({entry.break_minutes}m pauze)
+                      ({entry.break_minutes}m {t('breakLabel')})
                     </span>
                   )}
                 </div>
@@ -312,7 +314,7 @@ export default function PlanningPage() {
       {/* Legend */}
       <div className="flex items-center gap-4 text-[11px] text-ck-text-muted">
         <Zap size={12} />
-        <span>Bezetting:</span>
+        <span>{t('occupancy')}</span>
         <span className="flex items-center gap-1">
           <span className="inline-block h-3 w-3 rounded bg-emerald-400/15" />
           &ge;80%

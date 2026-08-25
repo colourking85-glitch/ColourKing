@@ -3,6 +3,7 @@
 import { useState, useRef, useEffect, useCallback } from 'react';
 import Link from 'next/link';
 import { usePathname } from 'next/navigation';
+import { useTranslations } from 'next-intl';
 import {
   LayoutDashboard, Inbox, Users, Car, FileText, Wrench,
   Package, Receipt, FolderOpen, CalendarDays, ClipboardList,
@@ -44,58 +45,59 @@ function getLeaves(item: NavItem): NavLeaf[] {
 }
 
 // ── Nav data ─────────────────────────────────────────────────────────────────
+// Labels are translation keys resolved via useTranslations('nav')
 const NAV: NavSection[] = [
   {
-    group: 'Overzicht',
+    group: 'groupOverview',
     items: [
-      { label: 'Dashboard', href: '/app', icon: LayoutDashboard, code: 'RP01' },
+      { label: 'dashboard', href: '/app', icon: LayoutDashboard, code: 'RP01' },
     ],
   },
   {
-    group: 'Verkoop',
+    group: 'groupSales',
     items: [
-      { label: 'Leads', href: '/app/leads', icon: Inbox, code: 'LD05', permission: 'leads.read' },
-      { label: 'Klanten', href: '/app/klanten', icon: Users, code: 'KL05', permission: 'customers.read' },
-      { label: 'Voertuigen', href: '/app/voertuigen', icon: Car, code: 'VH05', permission: 'vehicles.read' },
-      { label: 'Offertes', href: '/app/offertes', icon: FileText, code: 'ES05', permission: 'offers.read', soon: true },
+      { label: 'leads', href: '/app/leads', icon: Inbox, code: 'LD05', permission: 'leads.read' },
+      { label: 'customers', href: '/app/klanten', icon: Users, code: 'KL05', permission: 'customers.read' },
+      { label: 'vehicles', href: '/app/voertuigen', icon: Car, code: 'VH05', permission: 'vehicles.read' },
+      { label: 'offers', href: '/app/offertes', icon: FileText, code: 'ES05', permission: 'offers.read', soon: true },
     ],
   },
   {
-    group: 'Werkplaats',
+    group: 'groupWorkshop',
     items: [
-      { label: 'Opdrachten', href: '/app/jobs', icon: Wrench, code: 'JB05', permission: 'jobs.read' },
-      { label: 'Werkplaatsbord', href: '/app/jobs/board', icon: ClipboardList, code: 'JB15', permission: 'jobs.read' },
-      { label: 'Onderdelen', href: '/app/onderdelen', icon: Package, code: 'PT05', permission: 'parts.read', soon: true },
-      { label: 'Planning', href: '/app/planning', icon: CalendarDays, code: 'TS10', permission: 'tasks.own', soon: true },
+      { label: 'jobs', href: '/app/jobs', icon: Wrench, code: 'JB05', permission: 'jobs.read' },
+      { label: 'workshopBoard', href: '/app/jobs/board', icon: ClipboardList, code: 'JB15', permission: 'jobs.read' },
+      { label: 'parts', href: '/app/onderdelen', icon: Package, code: 'PT05', permission: 'parts.read', soon: true },
+      { label: 'planning', href: '/app/planning', icon: CalendarDays, code: 'TS10', permission: 'tasks.own', soon: true },
     ],
   },
   {
-    group: 'Administratie',
+    group: 'groupAdmin',
     items: [
-      { label: 'Facturen', href: '/app/facturen', icon: Receipt, code: 'FA05', permission: 'invoices.read', soon: true },
-      { label: 'Documenten', href: '/app/documenten', icon: FolderOpen, code: 'DO05', permission: 'documents.read', soon: true },
-      { label: 'Afspraken', href: '/app/afspraken', icon: CalendarDays, code: 'AP05', permission: 'appointments.read', soon: true },
+      { label: 'invoices', href: '/app/facturen', icon: Receipt, code: 'FA05', permission: 'invoices.read', soon: true },
+      { label: 'documents', href: '/app/documenten', icon: FolderOpen, code: 'DO05', permission: 'documents.read', soon: true },
+      { label: 'appointments', href: '/app/afspraken', icon: CalendarDays, code: 'AP05', permission: 'appointments.read', soon: true },
     ],
   },
   {
-    group: 'Financieel',
+    group: 'groupFinancial',
     items: [
-      { label: 'BTW', href: '/app/btw', icon: Calculator, code: 'BW05', permission: 'vat.read', soon: true },
-      { label: 'Inkoop', href: '/app/inkoop', icon: ShoppingCart, code: 'PU05', permission: 'purchases.read', soon: true },
-      { label: 'Rapportage', href: '/app/rapportage', icon: BarChart3, code: 'RP10', soon: true },
+      { label: 'vat', href: '/app/btw', icon: Calculator, code: 'BW05', permission: 'vat.read', soon: true },
+      { label: 'purchases', href: '/app/inkoop', icon: ShoppingCart, code: 'PU05', permission: 'purchases.read', soon: true },
+      { label: 'reports', href: '/app/rapportage', icon: BarChart3, code: 'RP10', soon: true },
     ],
   },
   {
-    group: 'Systeem',
+    group: 'groupSystem',
     items: [
       {
-        label: 'Instellingen',
+        label: 'settings',
         icon: Settings,
         subitems: [
-          { label: 'Algemeen', href: '/app/instellingen', icon: Settings, code: 'SY01' },
-          { label: 'Monitoring', href: '/app/monitoring', icon: Bell, code: 'SY05' },
-          { label: 'Gebruikers', href: '/app/instellingen/gebruikers', icon: Users, code: 'SY02', soon: true },
-          { label: 'Nummering', href: '/app/instellingen/nummering', icon: Receipt, code: 'SY03', soon: true },
+          { label: 'general', href: '/app/instellingen', icon: Settings, code: 'SY01' },
+          { label: 'monitoring', href: '/app/monitoring', icon: Bell, code: 'SY05' },
+          { label: 'users', href: '/app/instellingen/gebruikers', icon: Users, code: 'SY02', soon: true },
+          { label: 'numbering', href: '/app/instellingen/nummering', icon: Receipt, code: 'SY03', soon: true },
         ],
       },
     ],
@@ -130,6 +132,8 @@ function FlyoutPanel({
   onClose: () => void;
   onKeepOpen: () => void;
 }) {
+  const tNav = useTranslations('nav');
+  const tCommon = useTranslations('common');
   const vh = typeof window !== 'undefined' ? window.innerHeight : 800;
   const MARGIN = 8;
   const spaceBelow = vh - triggerRect.top - MARGIN;
@@ -162,7 +166,7 @@ function FlyoutPanel({
       onMouseLeave={onClose}
     >
       <div className="mb-1 px-3 py-1 text-[10px] font-bold uppercase tracking-[0.14em] text-ck-muted">
-        {section.group}
+        {tNav(section.group)}
       </div>
       {allLeaves.map(({ leaf, parent }) => {
         if (!canSeeItem(leaf, role)) return null;
@@ -173,7 +177,7 @@ function FlyoutPanel({
           <div key={leaf.href}>
             {showParent && (
               <div className="mt-2 px-3 py-0.5 text-[9px] font-semibold uppercase tracking-widest text-ck-muted/60">
-                {parent}
+                {tNav(parent)}
               </div>
             )}
             <FlyoutLeaf leaf={leaf} pathname={pathname} onClick={onClose} />
@@ -185,6 +189,8 @@ function FlyoutPanel({
 }
 
 function FlyoutLeaf({ leaf, pathname, onClick }: { leaf: NavLeaf; pathname: string; onClick: () => void }) {
+  const tNav = useTranslations('nav');
+  const tCommon = useTranslations('common');
   const active = isActive(leaf.href, pathname);
   const reg = SCREEN_REGISTRY[leaf.href];
 
@@ -192,8 +198,8 @@ function FlyoutLeaf({ leaf, pathname, onClick }: { leaf: NavLeaf; pathname: stri
     return (
       <span className="flex cursor-not-allowed items-center gap-2 px-3 py-1.5 text-[12px] text-ck-muted/40">
         <leaf.icon size={14} strokeWidth={1.6} />
-        <span className="flex-1 truncate">{leaf.label}</span>
-        <span className="rounded-full bg-ck-dark-border px-1.5 py-0.5 font-mono text-[8px] text-ck-muted/50">SOON</span>
+        <span className="flex-1 truncate">{tNav(leaf.label)}</span>
+        <span className="rounded-full bg-ck-dark-border px-1.5 py-0.5 font-mono text-[8px] text-ck-muted/50">{tCommon('soon').toUpperCase()}</span>
       </span>
     );
   }
@@ -209,7 +215,7 @@ function FlyoutLeaf({ leaf, pathname, onClick }: { leaf: NavLeaf; pathname: stri
       }`}
     >
       <leaf.icon size={14} strokeWidth={active ? 2.2 : 1.6} />
-      <span className="flex-1 truncate">{leaf.label}</span>
+      <span className="flex-1 truncate">{tNav(leaf.label)}</span>
       {reg && (
         <span className={`font-mono text-[9px] ${active ? 'text-ck-red/60' : 'text-ck-muted/40'}`}>
           {reg.id}
@@ -228,6 +234,8 @@ function canSeeItem(leaf: NavLeaf, role: Role): boolean {
 // ── Main Sidebar ─────────────────────────────────────────────────────────────
 export function Sidebar() {
   const pathname = usePathname();
+  const tNav = useTranslations('nav');
+  const tCommon = useTranslations('common');
   const [collapsed, setCollapsed] = useState(false);
   const [expandedGroups, setExpandedGroups] = useState<Record<string, boolean>>({});
   const [collapsedSections, setCollapsedSections] = useState<Record<string, boolean>>({});
@@ -307,7 +315,7 @@ export function Sidebar() {
                     onClick={() => toggleSection(section.group)}
                     className="mb-1 flex w-full items-center justify-between px-3 text-[10px] font-semibold uppercase tracking-[0.14em] text-ck-muted transition-colors hover:text-white"
                   >
-                    <span>{section.group}</span>
+                    <span>{tNav(section.group)}</span>
                     <ChevronDown
                       size={10}
                       className={`transition-transform ${collapsedSections[section.group] ? '-rotate-90' : ''}`}
@@ -334,7 +342,7 @@ export function Sidebar() {
                       return (
                         <div
                           key={isLeaf(item) ? item.href : item.label}
-                          title={isLeaf(item) ? item.label : item.label}
+                          title={tNav(item.label)}
                           className={`mb-0.5 flex items-center justify-center rounded-lg p-2 transition-colors ${
                             active ? 'bg-ck-red/15 text-ck-red' : 'text-ck-muted-light hover:bg-ck-dark-border/50 hover:text-white'
                           } ${firstLeaf.soon ? 'opacity-30 cursor-not-allowed' : ''}`}
@@ -367,7 +375,7 @@ export function Sidebar() {
                           }`}
                         >
                           <Icon size={16} strokeWidth={active ? 2.2 : 1.8} className="flex-shrink-0" />
-                          <span className="flex-1 truncate text-left">{item.label}</span>
+                          <span className="flex-1 truncate text-left">{tNav(item.label)}</span>
                           <ChevronDown
                             size={12}
                             className={`transition-transform ${isExpanded ? '' : '-rotate-90'}`}
@@ -409,6 +417,8 @@ export function Sidebar() {
 
 // ── Single leaf link ─────────────────────────────────────────────────────────
 function SidebarLeaf({ item, pathname, nested }: { item: NavLeaf; pathname: string; nested?: boolean }) {
+  const tNav = useTranslations('nav');
+  const tCommon = useTranslations('common');
   const active = isActive(item.href, pathname);
   const Icon = item.icon;
 
@@ -418,8 +428,8 @@ function SidebarLeaf({ item, pathname, nested }: { item: NavLeaf; pathname: stri
         className={`mb-0.5 flex cursor-not-allowed items-center gap-2.5 rounded-lg px-3 py-2 text-[13px] font-medium text-ck-muted/30 ${nested ? 'py-1.5 text-[12px]' : ''}`}
       >
         <Icon size={nested ? 14 : 16} strokeWidth={1.6} className="flex-shrink-0" />
-        <span className="flex-1 truncate">{item.label}</span>
-        <span className="rounded-full bg-ck-dark-border px-1.5 py-0.5 font-mono text-[7px] text-ck-muted/40">SOON</span>
+        <span className="flex-1 truncate">{tNav(item.label)}</span>
+        <span className="rounded-full bg-ck-dark-border px-1.5 py-0.5 font-mono text-[7px] text-ck-muted/40">{tCommon('soon').toUpperCase()}</span>
       </span>
     );
   }
@@ -434,7 +444,7 @@ function SidebarLeaf({ item, pathname, nested }: { item: NavLeaf; pathname: stri
       }`}
     >
       <Icon size={nested ? 14 : 16} strokeWidth={active ? 2.2 : 1.8} className="flex-shrink-0" />
-      <span className="flex-1 truncate">{item.label}</span>
+      <span className="flex-1 truncate">{tNav(item.label)}</span>
       <ScreenBadge id={item.code} />
     </Link>
   );

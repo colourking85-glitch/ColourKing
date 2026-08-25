@@ -3,6 +3,7 @@
 import { useState, useEffect } from 'react';
 import Link from 'next/link';
 import { Search, FileText, FileCheck, FileMinus, File } from 'lucide-react';
+import { useTranslations } from 'next-intl';
 import type { DocType, DocStatus } from '@/types/database';
 
 type DocumentRow = {
@@ -17,12 +18,12 @@ type DocumentRow = {
   vehicles: { id: string; kenteken: string | null; make: string | null; model: string | null } | null;
 };
 
-const DOC_TYPE_LABELS: Record<DocType, string> = {
-  offer: 'Offerte',
-  repair_order: 'Reparatieopdracht',
-  handover_note: 'Afleverbon',
-  invoice: 'Factuur',
-  credit_note: 'Creditnota',
+const DOC_TYPE_KEYS: Record<DocType, string> = {
+  offer: 'offer',
+  repair_order: 'repair_order',
+  handover_note: 'handover_note',
+  invoice: 'invoice',
+  credit_note: 'credit_note',
 };
 
 const DOC_TYPE_COLORS: Record<DocType, string> = {
@@ -33,10 +34,10 @@ const DOC_TYPE_COLORS: Record<DocType, string> = {
   credit_note: 'text-red-400 bg-red-400/10',
 };
 
-const STATUS_LABELS: Record<DocStatus, string> = {
-  draft: 'Concept',
-  issued: 'Uitgegeven',
-  cancelled: 'Geannuleerd',
+const STATUS_KEYS: Record<DocStatus, string> = {
+  draft: 'draft',
+  issued: 'issued',
+  cancelled: 'cancelled',
 };
 
 const STATUS_ICONS: Record<DocStatus, typeof File> = {
@@ -52,6 +53,8 @@ const STATUS_COLORS: Record<DocStatus, string> = {
 };
 
 export default function DocumentArchivePage() {
+  const t = useTranslations('doc');
+  const tc = useTranslations('common');
   const [documents, setDocuments] = useState<DocumentRow[]>([]);
   const [search, setSearch] = useState('');
   const [typeFilter, setTypeFilter] = useState('');
@@ -74,9 +77,9 @@ export default function DocumentArchivePage() {
     <div className="space-y-6">
       <div className="flex items-center justify-between">
         <div>
-          <h1 className="text-base font-medium text-ck-text">Documentarchief</h1>
+          <h1 className="text-base font-medium text-ck-text">{t('archive')}</h1>
           <p className="mt-0.5 text-[11px] text-ck-text-muted">
-            Alle documenten — offertes, facturen, reparatieopdrachten
+            {t('archiveDesc')}
           </p>
         </div>
       </div>
@@ -87,7 +90,7 @@ export default function DocumentArchivePage() {
           <Search size={16} className="absolute left-3 top-1/2 -translate-y-1/2 text-ck-text-muted" />
           <input
             type="text"
-            placeholder="Zoek op documentnr. of klantnaam..."
+            placeholder={t('searchPlaceholder')}
             value={search}
             onChange={e => setSearch(e.target.value)}
             className="w-full rounded-[10px] border-[0.5px] border-ck-border bg-ck-surface py-2 pl-10 pr-4 text-sm text-ck-text placeholder:text-ck-text-muted focus:border-ck-red focus:outline-none"
@@ -98,9 +101,9 @@ export default function DocumentArchivePage() {
           onChange={e => setTypeFilter(e.target.value)}
           className="rounded-[10px] border-[0.5px] border-ck-border bg-ck-surface px-3 py-2 text-sm text-ck-text focus:border-ck-red focus:outline-none"
         >
-          <option value="">Alle types</option>
-          {(Object.keys(DOC_TYPE_LABELS) as DocType[]).map(t => (
-            <option key={t} value={t}>{DOC_TYPE_LABELS[t]}</option>
+          <option value="">{t('allTypes')}</option>
+          {(Object.keys(DOC_TYPE_KEYS) as DocType[]).map(k => (
+            <option key={k} value={k}>{t(DOC_TYPE_KEYS[k])}</option>
           ))}
         </select>
         <select
@@ -108,9 +111,9 @@ export default function DocumentArchivePage() {
           onChange={e => setStatusFilter(e.target.value)}
           className="rounded-[10px] border-[0.5px] border-ck-border bg-ck-surface px-3 py-2 text-sm text-ck-text focus:border-ck-red focus:outline-none"
         >
-          <option value="">Alle statussen</option>
-          {(Object.keys(STATUS_LABELS) as DocStatus[]).map(s => (
-            <option key={s} value={s}>{STATUS_LABELS[s]}</option>
+          <option value="">{t('allStatuses')}</option>
+          {(Object.keys(STATUS_KEYS) as DocStatus[]).map(s => (
+            <option key={s} value={s}>{t(STATUS_KEYS[s])}</option>
           ))}
         </select>
       </div>
@@ -125,19 +128,19 @@ export default function DocumentArchivePage() {
           <div className="flex h-48 flex-col items-center justify-center gap-3">
             <FileText size={32} className="text-ck-text-faint" />
             <p className="text-sm text-ck-text-muted">
-              {search || typeFilter || statusFilter ? 'Geen documenten gevonden' : 'Nog geen documenten'}
+              {search || typeFilter || statusFilter ? t('noDocumentsFound') : t('noDocuments')}
             </p>
           </div>
         ) : (
           <table className="w-full">
             <thead>
               <tr className="border-b border-ck-border text-left text-[11px] uppercase tracking-wider text-ck-text-muted">
-                <th className="px-4 py-3 font-medium">Document</th>
-                <th className="px-4 py-3 font-medium">Type</th>
-                <th className="px-4 py-3 font-medium">Klant</th>
-                <th className="px-4 py-3 font-medium">Voertuig</th>
-                <th className="px-4 py-3 font-medium">Status</th>
-                <th className="px-4 py-3 font-medium">Datum</th>
+                <th className="px-4 py-3 font-medium">{t('title')}</th>
+                <th className="px-4 py-3 font-medium">{t('type')}</th>
+                <th className="px-4 py-3 font-medium">{t('customer')}</th>
+                <th className="px-4 py-3 font-medium">{t('vehicle')}</th>
+                <th className="px-4 py-3 font-medium">{t('status')}</th>
+                <th className="px-4 py-3 font-medium">{t('date')}</th>
               </tr>
             </thead>
             <tbody>
@@ -149,13 +152,13 @@ export default function DocumentArchivePage() {
                       <Link href={`/app/documenten/${doc.id}`} className="flex items-center gap-2 hover:text-ck-red transition-colors">
                         <Icon size={14} className="text-ck-text-muted" />
                         <span className="font-mono text-sm tabular-nums text-ck-text">
-                          {doc.doc_number ?? 'CONCEPT'}
+                          {doc.doc_number ?? tc('draft').toUpperCase()}
                         </span>
                       </Link>
                     </td>
                     <td className="px-4 py-3">
                       <span className={`inline-block rounded-full px-2 py-0.5 text-[10px] font-medium ${DOC_TYPE_COLORS[doc.doc_type]}`}>
-                        {DOC_TYPE_LABELS[doc.doc_type]}
+                        {t(DOC_TYPE_KEYS[doc.doc_type])}
                       </span>
                     </td>
                     <td className="px-4 py-3 text-sm text-ck-text-2">{doc.customers?.name ?? '—'}</td>
@@ -168,7 +171,7 @@ export default function DocumentArchivePage() {
                     </td>
                     <td className="px-4 py-3">
                       <span className={`inline-flex items-center gap-1 rounded-full px-2 py-0.5 text-[10px] font-medium ${STATUS_COLORS[doc.status]}`}>
-                        {STATUS_LABELS[doc.status]}
+                        {t(STATUS_KEYS[doc.status])}
                       </span>
                     </td>
                     <td className="px-4 py-3 font-mono text-xs tabular-nums text-ck-text-muted">

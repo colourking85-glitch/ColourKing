@@ -2,15 +2,14 @@
 
 import { useEffect, useState } from 'react';
 import { useRouter } from 'next/navigation';
+import { useTranslations } from 'next-intl';
 import { Shell } from '@/components/shell/Shell';
+import { AdminIntlProvider } from '@/components/AdminIntlProvider';
 import { getSession } from '@/lib/auth';
 
-export default function AdminLayout({
-  children,
-}: {
-  children: React.ReactNode;
-}) {
+function AuthGate({ children }: { children: React.ReactNode }) {
   const router = useRouter();
+  const t = useTranslations('common');
   const [ok, setOk] = useState(false);
 
   useEffect(() => {
@@ -38,11 +37,23 @@ export default function AdminLayout({
       <div className="flex h-screen items-center justify-center bg-ck-dark">
         <div className="text-center">
           <div className="mx-auto mb-3 h-8 w-8 animate-spin rounded-full border-2 border-ck-dark-border border-t-ck-red" />
-          <p className="text-sm text-ck-muted">Authenticating...</p>
+          <p className="text-sm text-ck-muted">{t('authenticating')}</p>
         </div>
       </div>
     );
   }
 
   return <Shell>{children}</Shell>;
+}
+
+export default function AdminLayout({
+  children,
+}: {
+  children: React.ReactNode;
+}) {
+  return (
+    <AdminIntlProvider>
+      <AuthGate>{children}</AuthGate>
+    </AdminIntlProvider>
+  );
 }

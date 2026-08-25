@@ -8,6 +8,7 @@ import {
   Send, Ban, Trash2, ExternalLink, Hash, Calendar,
   User, Car, Shield,
 } from 'lucide-react';
+import { useTranslations } from 'next-intl';
 import type { DocType, DocStatus } from '@/types/database';
 
 type DocumentDetail = {
@@ -44,18 +45,18 @@ type DocumentDetail = {
   }>;
 };
 
-const DOC_TYPE_LABELS: Record<DocType, string> = {
-  offer: 'Offerte',
-  repair_order: 'Reparatieopdracht',
-  handover_note: 'Afleverbon',
-  invoice: 'Factuur',
-  credit_note: 'Creditnota',
+const DOC_TYPE_KEYS: Record<DocType, string> = {
+  offer: 'offer',
+  repair_order: 'repair_order',
+  handover_note: 'handover_note',
+  invoice: 'invoice',
+  credit_note: 'credit_note',
 };
 
-const STATUS_LABELS: Record<DocStatus, string> = {
-  draft: 'Concept',
-  issued: 'Uitgegeven',
-  cancelled: 'Geannuleerd',
+const STATUS_KEYS: Record<DocStatus, string> = {
+  draft: 'draft',
+  issued: 'issued',
+  cancelled: 'cancelled',
 };
 
 const STATUS_COLORS: Record<DocStatus, string> = {
@@ -71,6 +72,8 @@ const STATUS_ICONS: Record<DocStatus, typeof File> = {
 };
 
 export default function DocumentDetailPage() {
+  const t = useTranslations('doc');
+  const tc = useTranslations('common');
   const { id } = useParams<{ id: string }>();
   const router = useRouter();
   const [doc, setDoc] = useState<DocumentDetail | null>(null);
@@ -135,9 +138,9 @@ export default function DocumentDetailPage() {
     return (
       <div className="flex h-64 flex-col items-center justify-center gap-3">
         <FileText size={32} className="text-ck-text-faint" />
-        <p className="text-sm text-ck-text-muted">Document niet gevonden</p>
+        <p className="text-sm text-ck-text-muted">{t('notFound')}</p>
         <Link href="/app/documenten" className="text-sm text-ck-red hover:underline">
-          Terug naar archief
+          {t('backToArchive')}
         </Link>
       </div>
     );
@@ -159,15 +162,15 @@ export default function DocumentDetailPage() {
           <div>
             <div className="flex items-center gap-3">
               <h1 className="font-mono text-lg font-medium tabular-nums text-ck-text">
-                {doc.doc_number ?? 'CONCEPT'}
+                {doc.doc_number ?? tc('draft').toUpperCase()}
               </h1>
               <span className={`inline-flex items-center gap-1 rounded-full px-2.5 py-0.5 text-[10px] font-medium ${STATUS_COLORS[doc.status]}`}>
                 <Icon size={10} />
-                {STATUS_LABELS[doc.status]}
+                {t(STATUS_KEYS[doc.status])}
               </span>
             </div>
             <p className="mt-0.5 text-[11px] text-ck-text-muted">
-              {DOC_TYPE_LABELS[doc.doc_type]}
+              {t(DOC_TYPE_KEYS[doc.doc_type])}
             </p>
           </div>
         </div>
@@ -180,7 +183,7 @@ export default function DocumentDetailPage() {
               className="flex items-center gap-1.5 rounded-[10px] bg-ck-red px-4 py-2 text-sm font-medium text-white hover:bg-ck-red-hover transition-colors disabled:opacity-50"
             >
               <Send size={14} />
-              Uitgeven
+              {t('issue')}
             </button>
           )}
           {canCancel && (
@@ -190,7 +193,7 @@ export default function DocumentDetailPage() {
               className="flex items-center gap-1.5 rounded-[10px] border border-ck-border bg-ck-surface px-4 py-2 text-sm text-ck-text-3 hover:border-red-500/50 hover:text-red-400 transition-colors disabled:opacity-50"
             >
               <Ban size={14} />
-              Annuleren
+              {t('cancel')}
             </button>
           )}
           {canDelete && (
@@ -208,10 +211,10 @@ export default function DocumentDetailPage() {
       {/* Cancel dialog */}
       {showCancel && (
         <div className="rounded-[10px] border border-red-500/30 bg-ck-red-bg p-4">
-          <p className="mb-3 text-sm font-medium text-ck-red-text">Document annuleren</p>
+          <p className="mb-3 text-sm font-medium text-ck-red-text">{t('cancelConfirm')}</p>
           <input
             type="text"
-            placeholder="Reden voor annulering..."
+            placeholder={t('cancelReasonPlaceholder')}
             value={cancelReason}
             onChange={e => setCancelReason(e.target.value)}
             className="mb-3 w-full rounded-lg border border-ck-border bg-ck-surface px-3 py-2 text-sm text-ck-text placeholder:text-ck-text-muted focus:border-ck-red focus:outline-none"
@@ -222,13 +225,13 @@ export default function DocumentDetailPage() {
               disabled={acting || !cancelReason.trim()}
               className="rounded-lg bg-red-600 px-4 py-1.5 text-sm font-medium text-white hover:bg-red-700 disabled:opacity-50"
             >
-              Bevestigen
+              {tc('confirm')}
             </button>
             <button
               onClick={() => { setShowCancel(false); setCancelReason(''); }}
               className="rounded-lg border border-ck-border px-4 py-1.5 text-sm text-ck-text-3 hover:bg-ck-surface-2"
             >
-              Terug
+              {tc('back')}
             </button>
           </div>
         </div>
@@ -239,19 +242,19 @@ export default function DocumentDetailPage() {
         <div className="space-y-6 lg:col-span-2">
           {/* Details card */}
           <div className="rounded-[10px] border-[0.5px] border-ck-border bg-ck-surface p-5">
-            <h2 className="mb-4 text-xs font-medium uppercase tracking-wider text-ck-text-muted">Details</h2>
+            <h2 className="mb-4 text-xs font-medium uppercase tracking-wider text-ck-text-muted">{t('details')}</h2>
             <div className="grid gap-4 sm:grid-cols-2">
-              <InfoRow icon={Hash} label="Documentnummer" value={doc.doc_number ?? '—'} mono />
-              <InfoRow icon={FileText} label="Type" value={DOC_TYPE_LABELS[doc.doc_type]} />
-              <InfoRow icon={User} label="Klant" value={doc.customers?.name ?? '—'} />
-              <InfoRow icon={Car} label="Voertuig" value={doc.vehicles ? (doc.vehicles.kenteken ?? `${doc.vehicles.make} ${doc.vehicles.model}`) : '—'} />
-              <InfoRow icon={Calendar} label="Aangemaakt" value={fmtDate(doc.created_at)} />
-              <InfoRow icon={Calendar} label="Uitgegeven" value={doc.issued_at ? fmtDate(doc.issued_at) : '—'} />
-              {doc.staff && <InfoRow icon={User} label="Uitgegeven door" value={doc.staff.name} />}
+              <InfoRow icon={Hash} label={t('number')} value={doc.doc_number ?? '—'} mono />
+              <InfoRow icon={FileText} label={t('type')} value={t(DOC_TYPE_KEYS[doc.doc_type])} />
+              <InfoRow icon={User} label={t('customer')} value={doc.customers?.name ?? '—'} />
+              <InfoRow icon={Car} label={t('vehicle')} value={doc.vehicles ? (doc.vehicles.kenteken ?? `${doc.vehicles.make} ${doc.vehicles.model}`) : '—'} />
+              <InfoRow icon={Calendar} label={t('createdAt')} value={fmtDate(doc.created_at)} />
+              <InfoRow icon={Calendar} label={t('issuedAt')} value={doc.issued_at ? fmtDate(doc.issued_at) : '—'} />
+              {doc.staff && <InfoRow icon={User} label={t('issuedBy')} value={doc.staff.name} />}
               {doc.cancelled_at && (
                 <>
-                  <InfoRow icon={Ban} label="Geannuleerd" value={fmtDate(doc.cancelled_at)} />
-                  <InfoRow icon={FileText} label="Reden" value={doc.cancel_reason ?? '—'} />
+                  <InfoRow icon={Ban} label={t('cancelledAt')} value={fmtDate(doc.cancelled_at)} />
+                  <InfoRow icon={FileText} label={t('cancelReason')} value={doc.cancel_reason ?? '—'} />
                 </>
               )}
             </div>
@@ -260,7 +263,7 @@ export default function DocumentDetailPage() {
           {/* Integrity */}
           {doc.pdf_sha256 && (
             <div className="rounded-[10px] border-[0.5px] border-ck-border bg-ck-surface p-5">
-              <h2 className="mb-3 text-xs font-medium uppercase tracking-wider text-ck-text-muted">Integriteit</h2>
+              <h2 className="mb-3 text-xs font-medium uppercase tracking-wider text-ck-text-muted">{t('integrity')}</h2>
               <div className="flex items-start gap-2">
                 <Shield size={14} className="mt-0.5 text-emerald-400" />
                 <div>
@@ -274,7 +277,7 @@ export default function DocumentDetailPage() {
           {/* Payload preview */}
           {doc.payload && Object.keys(doc.payload).length > 0 && (
             <div className="rounded-[10px] border-[0.5px] border-ck-border bg-ck-surface p-5">
-              <h2 className="mb-3 text-xs font-medium uppercase tracking-wider text-ck-text-muted">Payload</h2>
+              <h2 className="mb-3 text-xs font-medium uppercase tracking-wider text-ck-text-muted">{t('payload')}</h2>
               <pre className="overflow-x-auto rounded-lg bg-ck-bg p-3 font-mono text-xs text-ck-text-3">
                 {JSON.stringify(doc.payload, null, 2)}
               </pre>
@@ -286,16 +289,16 @@ export default function DocumentDetailPage() {
         <div className="space-y-6">
           {/* Links */}
           <div className="rounded-[10px] border-[0.5px] border-ck-border bg-ck-surface p-5">
-            <h2 className="mb-3 text-xs font-medium uppercase tracking-wider text-ck-text-muted">Koppelingen</h2>
+            <h2 className="mb-3 text-xs font-medium uppercase tracking-wider text-ck-text-muted">{t('links')}</h2>
             <div className="space-y-2">
               {doc.customers && (
-                <SideLink href={`/app/klanten/${doc.customers.id}`} label="Klant" value={doc.customers.name} />
+                <SideLink href={`/app/klanten/${doc.customers.id}`} label={t('customer')} value={doc.customers.name} />
               )}
               {doc.job_id && (
-                <SideLink href={`/app/jobs/${doc.job_id}`} label="Opdracht" value={doc.job_id.slice(0, 8)} />
+                <SideLink href={`/app/jobs/${doc.job_id}`} label={tc('job')} value={doc.job_id.slice(0, 8)} />
               )}
               {doc.supersedes_id && (
-                <SideLink href={`/app/documenten/${doc.supersedes_id}`} label="Vervangt" value={doc.supersedes_id.slice(0, 8)} />
+                <SideLink href={`/app/documenten/${doc.supersedes_id}`} label={t('supersedes')} value={doc.supersedes_id.slice(0, 8)} />
               )}
             </div>
           </div>
@@ -303,7 +306,7 @@ export default function DocumentDetailPage() {
           {/* Document chain */}
           {doc.chain && doc.chain.length > 1 && (
             <div className="rounded-[10px] border-[0.5px] border-ck-border bg-ck-surface p-5">
-              <h2 className="mb-3 text-xs font-medium uppercase tracking-wider text-ck-text-muted">Documentketen</h2>
+              <h2 className="mb-3 text-xs font-medium uppercase tracking-wider text-ck-text-muted">{t('chain')}</h2>
               <div className="space-y-2">
                 {doc.chain.map(c => (
                   <Link
@@ -313,9 +316,9 @@ export default function DocumentDetailPage() {
                       c.id === doc.id ? 'bg-ck-surface-3 text-ck-text' : 'text-ck-text-3 hover:bg-ck-surface-2'
                     }`}
                   >
-                    <span className="font-mono text-xs tabular-nums">{c.doc_number ?? 'CONCEPT'}</span>
+                    <span className="font-mono text-xs tabular-nums">{c.doc_number ?? tc('draft').toUpperCase()}</span>
                     <span className={`rounded-full px-2 py-0.5 text-[9px] ${STATUS_COLORS[c.status]}`}>
-                      {STATUS_LABELS[c.status]}
+                      {t(STATUS_KEYS[c.status])}
                     </span>
                   </Link>
                 ))}

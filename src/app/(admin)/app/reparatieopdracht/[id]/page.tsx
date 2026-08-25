@@ -7,8 +7,11 @@ import {
   ArrowLeft, FileText, Send, Hash, Calendar,
   User, Car, Pen, Printer, AlertTriangle,
 } from 'lucide-react';
+import { useTranslations } from 'next-intl';
 import SignatureCanvas from '@/components/SignatureCanvas';
 import type { DocStatus } from '@/types/database';
+import { formatCurrency } from '@/lib/format';
+import { useAppLocale } from '@/components/AdminIntlProvider';
 
 type Signature = {
   id: string;
@@ -55,10 +58,10 @@ type RepairOrderDetail = {
   signatures: Signature[];
 };
 
-const STATUS_LABELS: Record<DocStatus, string> = {
-  draft: 'Concept',
-  issued: 'Uitgegeven',
-  cancelled: 'Geannuleerd',
+const STATUS_KEYS: Record<DocStatus, string> = {
+  draft: 'draft',
+  issued: 'issued',
+  cancelled: 'cancelled',
 };
 
 const STATUS_COLORS: Record<DocStatus, string> = {
@@ -66,10 +69,6 @@ const STATUS_COLORS: Record<DocStatus, string> = {
   issued: 'text-emerald-400 bg-emerald-400/10',
   cancelled: 'text-red-400 bg-red-400/10',
 };
-
-function formatCents(cents: number): string {
-  return new Intl.NumberFormat('nl-NL', { style: 'currency', currency: 'EUR' }).format(cents / 100);
-}
 
 function fmtDate(iso: string) {
   return new Date(iso).toLocaleDateString('nl-NL', {
@@ -82,6 +81,10 @@ function fmtDate(iso: string) {
 }
 
 export default function RepairOrderPage() {
+  const t = useTranslations('ro');
+  const tc = useTranslations('common');
+  const { locale } = useAppLocale();
+  const formatCents = (c: number) => formatCurrency(c, locale);
   const { id } = useParams<{ id: string }>();
   const [doc, setDoc] = useState<RepairOrderDetail | null>(null);
   const [loading, setLoading] = useState(true);
@@ -143,9 +146,9 @@ export default function RepairOrderPage() {
     return (
       <div className="flex h-64 flex-col items-center justify-center gap-3">
         <FileText size={32} className="text-ck-text-faint" />
-        <p className="text-sm text-ck-text-muted">Reparatieopdracht niet gevonden</p>
+        <p className="text-sm text-ck-text-muted">{t('notFound')}</p>
         <Link href="/app/documenten" className="text-sm text-ck-red hover:underline">
-          Terug naar documenten
+          {t('backToDocuments')}
         </Link>
       </div>
     );
@@ -166,13 +169,13 @@ export default function RepairOrderPage() {
           <div>
             <div className="flex items-center gap-3">
               <h1 className="font-mono text-lg font-medium tabular-nums text-ck-text">
-                {doc.doc_number ?? 'CONCEPT'}
+                {doc.doc_number ?? tc('draft').toUpperCase()}
               </h1>
               <span className={`inline-flex items-center gap-1 rounded-full px-2.5 py-0.5 text-[10px] font-medium ${STATUS_COLORS[doc.status]}`}>
-                {STATUS_LABELS[doc.status]}
+                {t(STATUS_KEYS[doc.status])}
               </span>
             </div>
-            <p className="mt-0.5 text-[11px] text-ck-text-muted">Reparatieopdracht</p>
+            <p className="mt-0.5 text-[11px] text-ck-text-muted">{t('title')}</p>
           </div>
         </div>
 
@@ -184,7 +187,7 @@ export default function RepairOrderPage() {
               className="flex items-center gap-1.5 rounded-[10px] bg-ck-red px-4 py-2 text-sm font-medium text-white hover:bg-ck-red-hover transition-colors disabled:opacity-50"
             >
               <Send size={14} />
-              Uitgeven
+              {t('issued')}
             </button>
           )}
           <button
@@ -192,7 +195,7 @@ export default function RepairOrderPage() {
             className="flex items-center gap-1.5 rounded-[10px] border-[0.5px] border-ck-border bg-ck-surface px-4 py-2 text-sm text-ck-text-3 opacity-50 cursor-not-allowed"
           >
             <Printer size={14} />
-            PDF
+            {t('pdf')}
           </button>
         </div>
       </div>
@@ -202,34 +205,34 @@ export default function RepairOrderPage() {
         <div className="space-y-6 lg:col-span-2">
           {/* Vehicle info */}
           <div className="rounded-[10px] border-[0.5px] border-ck-border bg-ck-surface p-5">
-            <h2 className="mb-4 text-xs font-medium uppercase tracking-wider text-ck-text-muted">Voertuig</h2>
+            <h2 className="mb-4 text-xs font-medium uppercase tracking-wider text-ck-text-muted">{t('vehicleInfo')}</h2>
             <div className="grid gap-4 sm:grid-cols-2">
-              <InfoRow icon={Car} label="Kenteken" value={p.kenteken} mono />
-              <InfoRow icon={Car} label="Merk / Model" value={`${p.make} ${p.model}`} />
-              {p.year && <InfoRow icon={Calendar} label="Bouwjaar" value={String(p.year)} />}
-              {p.colour && <InfoRow icon={Car} label="Kleur" value={p.colour} />}
-              {p.vin && <InfoRow icon={Hash} label="VIN" value={p.vin} mono />}
-              {p.mileage_in != null && <InfoRow icon={Car} label="Kilometerstand in" value={`${p.mileage_in.toLocaleString('nl-NL')} km`} />}
+              <InfoRow icon={Car} label={tc('vehicle')} value={p.kenteken} mono />
+              <InfoRow icon={Car} label={t('makeModel')} value={`${p.make} ${p.model}`} />
+              {p.year && <InfoRow icon={Calendar} label={t('yearLabel')} value={String(p.year)} />}
+              {p.colour && <InfoRow icon={Car} label={t('colourLabel')} value={p.colour} />}
+              {p.vin && <InfoRow icon={Hash} label={t('vinLabel')} value={p.vin} mono />}
+              {p.mileage_in != null && <InfoRow icon={Car} label={t('mileageInLabel')} value={`${p.mileage_in.toLocaleString('nl-NL')} km`} />}
             </div>
           </div>
 
           {/* Existing damage */}
           <div className="rounded-[10px] border-[0.5px] border-ck-border bg-ck-surface p-5">
-            <h2 className="mb-4 text-xs font-medium uppercase tracking-wider text-ck-text-muted">Bestaande schade</h2>
+            <h2 className="mb-4 text-xs font-medium uppercase tracking-wider text-ck-text-muted">{t('existingDamage')}</h2>
             {p.existing_damage ? (
               <p className="text-sm text-ck-text-2 whitespace-pre-wrap">{p.existing_damage}</p>
             ) : (
-              <p className="text-sm text-ck-text-muted italic">Geen bestaande schade genoteerd</p>
+              <p className="text-sm text-ck-text-muted italic">{t('noDamage')}</p>
             )}
           </div>
 
           {/* Work description */}
           <div className="rounded-[10px] border-[0.5px] border-ck-border bg-ck-surface p-5">
-            <h2 className="mb-4 text-xs font-medium uppercase tracking-wider text-ck-text-muted">Werkzaamheden</h2>
+            <h2 className="mb-4 text-xs font-medium uppercase tracking-wider text-ck-text-muted">{t('work')}</h2>
             <p className="text-sm text-ck-text-2 whitespace-pre-wrap">{p.work_description}</p>
             <div className="mt-4 border-t border-ck-divider pt-4">
               <div className="flex items-center justify-between">
-                <span className="text-sm text-ck-text-muted">Geschat totaal</span>
+                <span className="text-sm text-ck-text-muted">{t('estimatedTotal')}</span>
                 <span className="font-mono text-sm font-medium tabular-nums text-ck-text">
                   {formatCents(p.estimated_total_cents)}
                 </span>
@@ -239,17 +242,17 @@ export default function RepairOrderPage() {
 
           {/* Terms */}
           <div className="rounded-[10px] border-[0.5px] border-ck-border bg-ck-surface p-5">
-            <h2 className="mb-4 text-xs font-medium uppercase tracking-wider text-ck-text-muted">Voorwaarden</h2>
+            <h2 className="mb-4 text-xs font-medium uppercase tracking-wider text-ck-text-muted">{t('terms')}</h2>
             <div className="flex items-center gap-2">
               {p.terms_accepted ? (
                 <span className="inline-flex items-center gap-1 text-sm text-emerald-400">
                   <span className="h-2 w-2 rounded-full bg-emerald-400" />
-                  Voorwaarden geaccepteerd
+                  {t('termsAccepted')}
                 </span>
               ) : (
                 <span className="inline-flex items-center gap-1 text-sm text-ck-text-muted">
                   <AlertTriangle size={14} className="text-amber-400" />
-                  Voorwaarden nog niet geaccepteerd
+                  {t('termsNotAccepted')}
                 </span>
               )}
             </div>
@@ -257,7 +260,7 @@ export default function RepairOrderPage() {
 
           {/* Signature section */}
           <div className="rounded-[10px] border-[0.5px] border-ck-border bg-ck-surface p-5">
-            <h2 className="mb-4 text-xs font-medium uppercase tracking-wider text-ck-text-muted">Handtekening</h2>
+            <h2 className="mb-4 text-xs font-medium uppercase tracking-wider text-ck-text-muted">{t('signature')}</h2>
 
             {hasSig ? (
               <div className="space-y-4">
@@ -266,14 +269,14 @@ export default function RepairOrderPage() {
                     <div className="mb-3 flex items-center justify-between">
                       <div>
                         <p className="text-sm font-medium text-ck-text">{sig.signer_name}</p>
-                        <p className="text-[11px] text-ck-text-muted">{sig.signer_role === 'customer' ? 'Klant' : 'Medewerker'}</p>
+                        <p className="text-[11px] text-ck-text-muted">{sig.signer_role === 'customer' ? t('roleCustomer') : t('roleStaff')}</p>
                       </div>
                       <p className="text-[11px] text-ck-text-muted">{fmtDate(sig.created_at)}</p>
                     </div>
                     {/* eslint-disable-next-line @next/next/no-img-element */}
                     <img
                       src={sig.signature_data}
-                      alt={`Handtekening ${sig.signer_name}`}
+                      alt={`${t('signature')} ${sig.signer_name}`}
                       className="h-20 rounded-lg border-[0.5px] border-ck-border bg-ck-surface-3 object-contain"
                     />
                   </div>
@@ -282,12 +285,12 @@ export default function RepairOrderPage() {
             ) : showSign ? (
               <div className="space-y-4">
                 <div>
-                  <label className="mb-1 block text-[11px] text-ck-text-muted">Naam ondertekenaar</label>
+                  <label className="mb-1 block text-[11px] text-ck-text-muted">{t('signerName')}</label>
                   <input
                     type="text"
                     value={signerName}
                     onChange={e => setSignerName(e.target.value)}
-                    placeholder="Volledige naam..."
+                    placeholder={t('signerPlaceholder')}
                     className="w-full max-w-xs rounded-[10px] border-[0.5px] border-ck-border bg-ck-surface px-3 py-2 text-sm text-ck-text placeholder:text-ck-text-muted focus:border-ck-red focus:outline-none"
                   />
                 </div>
@@ -296,7 +299,7 @@ export default function RepairOrderPage() {
                   onClick={() => { setShowSign(false); setSignerName(''); }}
                   className="rounded-[10px] border-[0.5px] border-ck-border px-4 py-1.5 text-sm text-ck-text-3 hover:bg-ck-surface-2"
                 >
-                  Annuleren
+                  {tc('cancel')}
                 </button>
               </div>
             ) : (
@@ -306,7 +309,7 @@ export default function RepairOrderPage() {
                 className="flex items-center gap-1.5 rounded-[10px] border-[0.5px] border-ck-border bg-ck-surface px-4 py-2 text-sm text-ck-text-3 hover:border-ck-red hover:text-ck-red transition-colors disabled:opacity-50"
               >
                 <Pen size={14} />
-                Handtekening plaatsen
+                {t('signHere')}
               </button>
             )}
           </div>
@@ -316,7 +319,7 @@ export default function RepairOrderPage() {
         <div className="space-y-6">
           {/* Customer info */}
           <div className="rounded-[10px] border-[0.5px] border-ck-border bg-ck-surface p-5">
-            <h2 className="mb-3 text-xs font-medium uppercase tracking-wider text-ck-text-muted">Klant</h2>
+            <h2 className="mb-3 text-xs font-medium uppercase tracking-wider text-ck-text-muted">{tc('customer')}</h2>
             <div className="space-y-2">
               <InfoRow icon={User} label="Naam" value={p.customer_name} />
               {p.customer_address && <InfoRow icon={User} label="Adres" value={p.customer_address} />}
@@ -327,20 +330,20 @@ export default function RepairOrderPage() {
 
           {/* Metadata */}
           <div className="rounded-[10px] border-[0.5px] border-ck-border bg-ck-surface p-5">
-            <h2 className="mb-3 text-xs font-medium uppercase tracking-wider text-ck-text-muted">Gegevens</h2>
+            <h2 className="mb-3 text-xs font-medium uppercase tracking-wider text-ck-text-muted">{t('details')}</h2>
             <div className="space-y-2">
-              <InfoRow icon={Hash} label="Documentnummer" value={doc.doc_number ?? 'Nog niet uitgegeven'} mono />
-              <InfoRow icon={Calendar} label="Aangemaakt" value={fmtDate(doc.created_at)} />
-              {doc.issued_at && <InfoRow icon={Calendar} label="Uitgegeven" value={fmtDate(doc.issued_at)} />}
-              {doc.signed_at && <InfoRow icon={Pen} label="Getekend" value={fmtDate(doc.signed_at)} />}
-              {doc.signed_by_name && <InfoRow icon={User} label="Getekend door" value={doc.signed_by_name} />}
+              <InfoRow icon={Hash} label={t('docNumber')} value={doc.doc_number ?? t('notIssued')} mono />
+              <InfoRow icon={Calendar} label={t('draft')} value={fmtDate(doc.created_at)} />
+              {doc.issued_at && <InfoRow icon={Calendar} label={t('issued')} value={fmtDate(doc.issued_at)} />}
+              {doc.signed_at && <InfoRow icon={Pen} label={t('signedAt')} value={fmtDate(doc.signed_at)} />}
+              {doc.signed_by_name && <InfoRow icon={User} label={t('signedBy')} value={doc.signed_by_name} />}
               {doc.job_id && (
                 <div className="pt-2">
                   <Link
                     href={`/app/jobs/${doc.job_id}`}
                     className="text-sm text-ck-red hover:underline"
                   >
-                    Naar opdracht
+                    {t('goToJob')}
                   </Link>
                 </div>
               )}

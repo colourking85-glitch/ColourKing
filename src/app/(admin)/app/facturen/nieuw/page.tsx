@@ -3,7 +3,10 @@
 import { useState, useEffect } from 'react';
 import { useRouter } from 'next/navigation';
 import Link from 'next/link';
+import { useTranslations } from 'next-intl';
 import { ArrowLeft, Save, FileText } from 'lucide-react';
+import { formatCurrency } from '@/lib/format';
+import { useAppLocale } from '@/components/AdminIntlProvider';
 
 type OfferOption = {
   id: string;
@@ -26,11 +29,11 @@ type OfferOption = {
   }>;
 };
 
-function formatCents(cents: number): string {
-  return new Intl.NumberFormat('nl-NL', { style: 'currency', currency: 'EUR' }).format(cents / 100);
-}
-
 export default function CreateInvoicePage() {
+  const t = useTranslations('fa');
+  const tc = useTranslations('common');
+  const { locale } = useAppLocale();
+  const formatCents = (c: number) => formatCurrency(c, locale);
   const router = useRouter();
   const [offers, setOffers] = useState<OfferOption[]>([]);
   const [selectedOfferId, setSelectedOfferId] = useState('');
@@ -69,7 +72,7 @@ export default function CreateInvoicePage() {
 
   const handleSave = async () => {
     if (!selectedOfferId) {
-      setError('Selecteer een offerte');
+      setError(t('selectOffer'));
       return;
     }
 
@@ -89,7 +92,7 @@ export default function CreateInvoicePage() {
 
       if (!res.ok) {
         const data = await res.json();
-        throw new Error(data.error || 'Kon factuur niet aanmaken');
+        throw new Error(data.error || tc('saveFailed'));
       }
 
       const invoice = await res.json();
@@ -109,8 +112,8 @@ export default function CreateInvoicePage() {
             <ArrowLeft size={18} />
           </Link>
           <div>
-            <h1 className="text-base font-medium text-ck-text">Nieuwe factuur</h1>
-            <p className="mt-0.5 text-[11px] text-ck-text-muted">Maak een factuur van een goedgekeurde offerte</p>
+            <h1 className="text-base font-medium text-ck-text">{t('new')}</h1>
+            <p className="mt-0.5 text-[11px] text-ck-text-muted">{t('fromOffer')}</p>
           </div>
         </div>
         <button
@@ -119,7 +122,7 @@ export default function CreateInvoicePage() {
           className="flex items-center gap-1.5 rounded-[10px] bg-ck-red px-4 py-2 text-sm font-medium text-white hover:bg-ck-red-hover transition-colors disabled:opacity-50"
         >
           <Save size={14} />
-          {saving ? 'Aanmaken...' : 'Factuur aanmaken'}
+          {saving ? t('creating') : t('createInvoice')}
         </button>
       </div>
 
@@ -131,7 +134,7 @@ export default function CreateInvoicePage() {
 
       {/* Offer selection */}
       <div className="rounded-[10px] border-[0.5px] border-ck-border bg-ck-surface p-5">
-        <h2 className="mb-4 text-xs font-medium uppercase tracking-wider text-ck-text-muted">Offerte selecteren</h2>
+        <h2 className="mb-4 text-xs font-medium uppercase tracking-wider text-ck-text-muted">{t('selectOffer')}</h2>
 
         {loadingOffers ? (
           <div className="flex h-24 items-center justify-center">
@@ -140,7 +143,7 @@ export default function CreateInvoicePage() {
         ) : offers.length === 0 ? (
           <div className="flex h-24 flex-col items-center justify-center gap-2">
             <FileText size={24} className="text-ck-text-faint" />
-            <p className="text-sm text-ck-text-muted">Geen goedgekeurde offertes beschikbaar</p>
+            <p className="text-sm text-ck-text-muted">{t('noApprovedOffers')}</p>
           </div>
         ) : (
           <select
@@ -148,10 +151,10 @@ export default function CreateInvoicePage() {
             onChange={e => setSelectedOfferId(e.target.value)}
             className="w-full rounded-[10px] border-[0.5px] border-ck-border bg-ck-surface px-3 py-2 text-sm text-ck-text focus:border-ck-red focus:outline-none"
           >
-            <option value="">Selecteer een offerte...</option>
+            <option value="">{t('selectOfferPlaceholder')}</option>
             {offers.map(o => (
               <option key={o.id} value={o.id}>
-                {o.offer_number ?? 'CONCEPT'} — {o.customers?.name ?? 'Onbekend'} — {formatCents(o.total_cents)}
+                {o.offer_number ?? t('draft')} — {o.customers?.name ?? tc('unknown')} — {formatCents(o.total_cents)}
               </option>
             ))}
           </select>
@@ -161,17 +164,17 @@ export default function CreateInvoicePage() {
       {/* Preview lines from offer */}
       {selectedOffer && selectedOffer.offer_lines && (
         <div className="rounded-[10px] border-[0.5px] border-ck-border bg-ck-surface p-5">
-          <h2 className="mb-4 text-xs font-medium uppercase tracking-wider text-ck-text-muted">Offerteregels (worden overgenomen)</h2>
+          <h2 className="mb-4 text-xs font-medium uppercase tracking-wider text-ck-text-muted">{t('offerLines')}</h2>
           <div className="overflow-x-auto">
             <table className="w-full">
               <thead>
                 <tr className="border-b border-ck-border text-left text-[10px] uppercase tracking-wider text-ck-text-muted">
                   <th className="pb-2 pr-3 font-medium">#</th>
-                  <th className="pb-2 pr-3 font-medium">Omschrijving</th>
-                  <th className="pb-2 pr-3 font-medium text-right">Aantal</th>
-                  <th className="pb-2 pr-3 font-medium text-right">Stukprijs</th>
-                  <th className="pb-2 pr-3 font-medium text-right">BTW</th>
-                  <th className="pb-2 font-medium text-right">Totaal</th>
+                  <th className="pb-2 pr-3 font-medium">{t('description')}</th>
+                  <th className="pb-2 pr-3 font-medium text-right">{t('quantity')}</th>
+                  <th className="pb-2 pr-3 font-medium text-right">{t('unitPrice')}</th>
+                  <th className="pb-2 pr-3 font-medium text-right">{t('vat')}</th>
+                  <th className="pb-2 font-medium text-right">{t('total')}</th>
                 </tr>
               </thead>
               <tbody>
@@ -201,10 +204,10 @@ export default function CreateInvoicePage() {
 
       {/* Invoice settings */}
       <div className="rounded-[10px] border-[0.5px] border-ck-border bg-ck-surface p-5">
-        <h2 className="mb-4 text-xs font-medium uppercase tracking-wider text-ck-text-muted">Factuurinstellingen</h2>
+        <h2 className="mb-4 text-xs font-medium uppercase tracking-wider text-ck-text-muted">{t('invoiceSettings')}</h2>
         <div className="grid gap-4 sm:grid-cols-2">
           <div>
-            <label className="mb-1 block text-[11px] text-ck-text-muted">Vervaldatum</label>
+            <label className="mb-1 block text-[11px] text-ck-text-muted">{t('dueDate')}</label>
             <input
               type="date"
               value={dueDate}
@@ -213,13 +216,13 @@ export default function CreateInvoicePage() {
             />
           </div>
           <div className="sm:col-span-2">
-            <label className="mb-1 block text-[11px] text-ck-text-muted">Betalingsvoorwaarden</label>
+            <label className="mb-1 block text-[11px] text-ck-text-muted">{t('paymentTerms')}</label>
             <textarea
               value={terms}
               onChange={e => setTerms(e.target.value)}
               rows={3}
               className="w-full rounded-[10px] border-[0.5px] border-ck-border bg-ck-surface px-3 py-2 text-sm text-ck-text placeholder:text-ck-text-muted focus:border-ck-red focus:outline-none"
-              placeholder="Betaling binnen 30 dagen na factuurdatum..."
+              placeholder={t('paymentTermsPlaceholder')}
             />
           </div>
         </div>

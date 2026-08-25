@@ -3,9 +3,12 @@
 import { useState, useEffect } from 'react';
 import { useRouter, useSearchParams } from 'next/navigation';
 import { Search } from 'lucide-react';
+import { useTranslations } from 'next-intl';
 import { ScreenBadge } from '@/components/ui/ScreenBadge';
 
 export default function NewVehiclePage() {
+  const t = useTranslations('vh');
+  const tCommon = useTranslations('common');
   const router = useRouter();
   const searchParams = useSearchParams();
   const presetCustomer = searchParams.get('customer');
@@ -32,7 +35,7 @@ export default function NewVehiclePage() {
     if (res.ok) {
       setRdwData(await res.json());
     } else {
-      setError('Kenteken niet gevonden in RDW');
+      setError(t('rdwNotFound'));
       setRdwData(null);
     }
     setRdwLoading(false);
@@ -60,7 +63,7 @@ export default function NewVehiclePage() {
     };
 
     if (!body.customer_id) {
-      setError('Selecteer een klant');
+      setError(t('selectOwner'));
       setSaving(false);
       return;
     }
@@ -76,7 +79,7 @@ export default function NewVehiclePage() {
       router.push(`/app/voertuigen/${vehicle.id}`);
     } else {
       const err = await res.json();
-      setError(err.error ?? 'Opslaan mislukt');
+      setError(err.error ?? tCommon('saveFailed'));
       setSaving(false);
     }
   }
@@ -85,7 +88,7 @@ export default function NewVehiclePage() {
     <div className="mx-auto max-w-2xl space-y-6">
       <div className="flex items-center gap-3">
         <ScreenBadge code="VH01" />
-        <h1 className="font-display text-2xl font-bold text-white">Nieuw voertuig</h1>
+        <h1 className="font-display text-2xl font-bold text-white">{t('new')}</h1>
       </div>
 
       {error && (
@@ -95,11 +98,11 @@ export default function NewVehiclePage() {
       )}
 
       <div className="rounded-lg border border-ck-dark-border bg-ck-dark-card p-6">
-        <h2 className="mb-3 text-sm font-semibold text-ck-muted">RDW OPZOEKEN</h2>
+        <h2 className="mb-3 text-sm font-semibold text-ck-muted">{t('rdwLookup').toUpperCase()}</h2>
         <div className="flex gap-2">
           <input
             type="text"
-            placeholder="Kenteken (bijv. AB-123-C)"
+            placeholder={t('registrationExample')}
             value={kentekenInput}
             onChange={e => setKentekenInput(e.target.value)}
             onKeyDown={e => e.key === 'Enter' && (e.preventDefault(), lookupRdw())}
@@ -112,25 +115,25 @@ export default function NewVehiclePage() {
             className="flex items-center gap-2 rounded-lg bg-ck-red px-4 py-2 text-sm font-semibold text-white hover:bg-ck-red-hover disabled:opacity-50"
           >
             <Search size={14} />
-            {rdwLoading ? 'Zoeken...' : 'Opzoeken'}
+            {rdwLoading ? t('lookingUp') : t('rdwLookup')}
           </button>
         </div>
         {rdwData && (
           <p className="mt-2 text-xs text-green-400">
-            Gevonden: {rdwData.make} {rdwData.model} ({rdwData.year}) — {rdwData.colour}
+            {t('found')} {rdwData.make} {rdwData.model} ({rdwData.year}) — {rdwData.colour}
           </p>
         )}
       </div>
 
       <form onSubmit={handleSubmit} className="space-y-4 rounded-lg border border-ck-dark-border bg-ck-dark-card p-6">
         <div>
-          <label className="mb-1 block text-xs text-ck-muted">Klant *</label>
+          <label className="mb-1 block text-xs text-ck-muted">{tCommon('customer')} *</label>
           <select
             value={customerId}
             onChange={e => setCustomerId(e.target.value)}
             className="w-full rounded-lg border border-ck-dark-border bg-ck-dark-surface px-3 py-2 text-sm text-white focus:border-ck-red focus:outline-none"
           >
-            <option value="">Selecteer klant...</option>
+            <option value="">{t('selectOwner')}...</option>
             {customers.map(c => (
               <option key={c.id} value={c.id}>{c.name}</option>
             ))}
@@ -139,7 +142,7 @@ export default function NewVehiclePage() {
 
         <div className="grid grid-cols-2 gap-4">
           <div>
-            <label className="mb-1 block text-xs text-ck-muted">Kenteken</label>
+            <label className="mb-1 block text-xs text-ck-muted">{t('kenteken')}</label>
             <input
               name="kenteken"
               defaultValue={rdwData?.kenteken as string ?? ''}
@@ -147,7 +150,7 @@ export default function NewVehiclePage() {
             />
           </div>
           <div>
-            <label className="mb-1 block text-xs text-ck-muted">VIN</label>
+            <label className="mb-1 block text-xs text-ck-muted">{t('vin')}</label>
             <input
               name="vin"
               className="w-full rounded-lg border border-ck-dark-border bg-ck-dark-surface px-3 py-2 text-sm text-white focus:border-ck-red focus:outline-none"
@@ -157,7 +160,7 @@ export default function NewVehiclePage() {
 
         <div className="grid grid-cols-3 gap-4">
           <div>
-            <label className="mb-1 block text-xs text-ck-muted">Merk</label>
+            <label className="mb-1 block text-xs text-ck-muted">{t('make')}</label>
             <input
               name="make"
               defaultValue={rdwData?.make as string ?? ''}
@@ -165,7 +168,7 @@ export default function NewVehiclePage() {
             />
           </div>
           <div>
-            <label className="mb-1 block text-xs text-ck-muted">Model</label>
+            <label className="mb-1 block text-xs text-ck-muted">{t('model')}</label>
             <input
               name="model"
               defaultValue={rdwData?.model as string ?? ''}
@@ -173,7 +176,7 @@ export default function NewVehiclePage() {
             />
           </div>
           <div>
-            <label className="mb-1 block text-xs text-ck-muted">Bouwjaar</label>
+            <label className="mb-1 block text-xs text-ck-muted">{t('year')}</label>
             <input
               name="year"
               type="number"
@@ -185,7 +188,7 @@ export default function NewVehiclePage() {
 
         <div className="grid grid-cols-3 gap-4">
           <div>
-            <label className="mb-1 block text-xs text-ck-muted">Kleur</label>
+            <label className="mb-1 block text-xs text-ck-muted">{t('colour')}</label>
             <input
               name="colour"
               defaultValue={rdwData?.colour as string ?? ''}
@@ -193,14 +196,14 @@ export default function NewVehiclePage() {
             />
           </div>
           <div>
-            <label className="mb-1 block text-xs text-ck-muted">Lak code</label>
+            <label className="mb-1 block text-xs text-ck-muted">{t('paintCode')}</label>
             <input
               name="paint_code"
               className="w-full rounded-lg border border-ck-dark-border bg-ck-dark-surface px-3 py-2 text-sm text-white focus:border-ck-red focus:outline-none"
             />
           </div>
           <div>
-            <label className="mb-1 block text-xs text-ck-muted">Brandstof</label>
+            <label className="mb-1 block text-xs text-ck-muted">{t('fuel')}</label>
             <input
               name="fuel"
               defaultValue={rdwData?.fuel as string ?? ''}
@@ -211,7 +214,7 @@ export default function NewVehiclePage() {
 
         <div className="grid grid-cols-2 gap-4">
           <div>
-            <label className="mb-1 block text-xs text-ck-muted">Carrosserie</label>
+            <label className="mb-1 block text-xs text-ck-muted">{t('bodyType')}</label>
             <input
               name="body_type"
               defaultValue={rdwData?.body_type as string ?? ''}
@@ -226,7 +229,7 @@ export default function NewVehiclePage() {
                 defaultChecked={rdwData?.wok as boolean ?? false}
                 className="rounded border-ck-dark-border bg-ck-dark-surface"
               />
-              WOK (Wacht op keuring)
+              {t('wok')}
             </label>
           </div>
         </div>
@@ -237,14 +240,14 @@ export default function NewVehiclePage() {
             disabled={saving}
             className="rounded-lg bg-ck-red px-6 py-2 text-sm font-semibold text-white hover:bg-ck-red-hover disabled:opacity-50"
           >
-            {saving ? 'Opslaan...' : 'Opslaan'}
+            {saving ? tCommon('saving') : tCommon('save')}
           </button>
           <button
             type="button"
             onClick={() => router.back()}
             className="rounded-lg border border-ck-dark-border px-6 py-2 text-sm text-ck-muted-light hover:text-white"
           >
-            Annuleren
+            {tCommon('cancel')}
           </button>
         </div>
       </form>

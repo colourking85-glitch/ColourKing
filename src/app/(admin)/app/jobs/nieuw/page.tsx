@@ -2,11 +2,14 @@
 
 import { useState, useEffect } from 'react';
 import { useRouter } from 'next/navigation';
+import { useTranslations } from 'next-intl';
 import { ScreenBadge } from '@/components/ui/ScreenBadge';
 
 type SelectOption = { id: string; name: string; kenteken?: string; make?: string; model?: string };
 
 export default function CreateJobPage() {
+  const t = useTranslations('jb');
+  const tCommon = useTranslations('common');
   const router = useRouter();
   const [customers, setCustomers] = useState<SelectOption[]>([]);
   const [vehicles, setVehicles] = useState<SelectOption[]>([]);
@@ -47,7 +50,7 @@ export default function CreateJobPage() {
 
     if (!res.ok) {
       const data = await res.json();
-      setError(data.error || 'Fout bij aanmaken');
+      setError(data.error || t('createFailed'));
       setSaving(false);
       return;
     }
@@ -60,7 +63,7 @@ export default function CreateJobPage() {
     <div className="mx-auto max-w-2xl space-y-6">
       <div className="flex items-center gap-3">
         <ScreenBadge code="JB01" />
-        <h1 className="font-display text-2xl font-bold text-white">Nieuwe opdracht</h1>
+        <h1 className="font-display text-2xl font-bold text-white">{t('new')}</h1>
       </div>
 
       {error && (
@@ -69,13 +72,13 @@ export default function CreateJobPage() {
 
       <form onSubmit={handleSubmit} className="space-y-4 rounded-lg border border-ck-dark-border bg-ck-dark-card p-6">
         <div>
-          <label className="mb-1 block text-sm text-ck-muted-light">Klant</label>
+          <label className="mb-1 block text-sm text-ck-muted-light">{t('customer')}</label>
           <select
             value={form.customer_id}
             onChange={set('customer_id')}
             className="w-full rounded-lg border border-ck-dark-border bg-ck-dark-surface px-3 py-2 text-sm text-white focus:border-ck-red focus:outline-none"
           >
-            <option value="">— Selecteer klant —</option>
+            <option value="">{t('selectCustomerPlaceholder')}</option>
             {customers.map(c => (
               <option key={c.id} value={c.id}>{c.name}</option>
             ))}
@@ -83,13 +86,13 @@ export default function CreateJobPage() {
         </div>
 
         <div>
-          <label className="mb-1 block text-sm text-ck-muted-light">Voertuig</label>
+          <label className="mb-1 block text-sm text-ck-muted-light">{t('vehicle')}</label>
           <select
             value={form.vehicle_id}
             onChange={set('vehicle_id')}
             className="w-full rounded-lg border border-ck-dark-border bg-ck-dark-surface px-3 py-2 text-sm text-white focus:border-ck-red focus:outline-none"
           >
-            <option value="">— Selecteer voertuig —</option>
+            <option value="">{t('selectVehiclePlaceholder')}</option>
             {vehicles.map(v => (
               <option key={v.id} value={v.id}>
                 {v.kenteken} — {v.make} {v.model}
@@ -99,7 +102,7 @@ export default function CreateJobPage() {
         </div>
 
         <div>
-          <label className="mb-1 block text-sm text-ck-muted-light">KM-stand bij intake</label>
+          <label className="mb-1 block text-sm text-ck-muted-light">{t('intakeKm')}</label>
           <input
             type="number"
             value={form.intake_km}
@@ -109,7 +112,7 @@ export default function CreateJobPage() {
         </div>
 
         <div>
-          <label className="mb-1 block text-sm text-ck-muted-light">Notities</label>
+          <label className="mb-1 block text-sm text-ck-muted-light">{t('notes')}</label>
           <textarea
             value={form.notes}
             onChange={set('notes')}
@@ -124,14 +127,14 @@ export default function CreateJobPage() {
             onClick={() => router.back()}
             className="rounded-lg border border-ck-dark-border px-4 py-2 text-sm text-ck-muted-light hover:bg-ck-dark-surface"
           >
-            Annuleren
+            {tCommon('cancel')}
           </button>
           <button
             type="submit"
             disabled={saving}
             className="rounded-lg bg-ck-red px-4 py-2 text-sm font-semibold text-white hover:bg-ck-red-hover disabled:opacity-50"
           >
-            {saving ? 'Opslaan...' : 'Opdracht aanmaken'}
+            {saving ? tCommon('saving') : t('createJob')}
           </button>
         </div>
       </form>

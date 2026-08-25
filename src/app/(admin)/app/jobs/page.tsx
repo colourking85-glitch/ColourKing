@@ -3,6 +3,7 @@
 import { useState, useEffect } from 'react';
 import Link from 'next/link';
 import { Plus, Search, LayoutGrid } from 'lucide-react';
+import { useTranslations } from 'next-intl';
 import { ScreenBadge } from '@/components/ui/ScreenBadge';
 import { JOB_STAGES, STAGE_LABELS, STAGE_COLORS, type JobStage } from '@/modules/jobs/machine';
 
@@ -17,6 +18,8 @@ type Job = {
 };
 
 export default function JobsPage() {
+  const t = useTranslations('jb');
+  const tCommon = useTranslations('common');
   const [jobs, setJobs] = useState<Job[]>([]);
   const [search, setSearch] = useState('');
   const [stageFilter, setStageFilter] = useState('');
@@ -38,7 +41,7 @@ export default function JobsPage() {
       <div className="flex items-center justify-between">
         <div className="flex items-center gap-3">
           <ScreenBadge code="JB05" />
-          <h1 className="font-display text-2xl font-bold text-white">Opdrachten</h1>
+          <h1 className="font-display text-2xl font-bold text-white">{t('title')}</h1>
         </div>
         <div className="flex items-center gap-2">
           <Link
@@ -46,14 +49,14 @@ export default function JobsPage() {
             className="flex items-center gap-2 rounded-lg border border-ck-dark-border px-4 py-2 text-sm text-ck-muted-light hover:bg-ck-dark-surface"
           >
             <LayoutGrid size={16} />
-            Board
+            {t('board')}
           </Link>
           <Link
             href="/app/jobs/nieuw"
             className="flex items-center gap-2 rounded-lg bg-ck-red px-4 py-2 text-sm font-semibold text-white hover:bg-ck-red-hover"
           >
             <Plus size={16} />
-            Nieuwe opdracht
+            {t('new')}
           </Link>
         </div>
       </div>
@@ -63,7 +66,7 @@ export default function JobsPage() {
           <Search size={16} className="absolute left-3 top-1/2 -translate-y-1/2 text-ck-muted" />
           <input
             type="text"
-            placeholder="Zoek op opdrachtnr. of kenteken..."
+            placeholder={t('searchPlaceholder')}
             value={search}
             onChange={e => setSearch(e.target.value)}
             className="w-full rounded-lg border border-ck-dark-border bg-ck-dark-card py-2 pl-10 pr-4 text-sm text-white placeholder:text-ck-muted focus:border-ck-red focus:outline-none"
@@ -74,7 +77,7 @@ export default function JobsPage() {
           onChange={e => setStageFilter(e.target.value)}
           className="rounded-lg border border-ck-dark-border bg-ck-dark-card px-3 py-2 text-sm text-white focus:border-ck-red focus:outline-none"
         >
-          <option value="">Alle fases</option>
+          <option value="">{t('allStages')}</option>
           {JOB_STAGES.map(s => (
             <option key={s} value={s}>{STAGE_LABELS[s]}</option>
           ))}
@@ -83,20 +86,20 @@ export default function JobsPage() {
 
       <div className="rounded-lg border border-ck-dark-border bg-ck-dark-card">
         {loading ? (
-          <div className="p-8 text-center text-ck-muted">Laden...</div>
+          <div className="p-8 text-center text-ck-muted">{tCommon('loading')}</div>
         ) : jobs.length === 0 ? (
           <div className="p-8 text-center text-ck-muted">
-            {search || stageFilter ? 'Geen opdrachten gevonden' : 'Nog geen opdrachten. Maak de eerste aan.'}
+            {search || stageFilter ? t('noJobsFound') : t('noJobsMessage')}
           </div>
         ) : (
           <table className="w-full">
             <thead>
               <tr className="border-b border-ck-dark-border text-left text-xs uppercase text-ck-muted">
-                <th className="px-4 py-3">Nr.</th>
-                <th className="px-4 py-3">Fase</th>
-                <th className="px-4 py-3">Klant</th>
-                <th className="px-4 py-3">Voertuig</th>
-                <th className="px-4 py-3">Datum</th>
+                <th className="px-4 py-3">{t('number')}</th>
+                <th className="px-4 py-3">{t('stage')}</th>
+                <th className="px-4 py-3">{t('customer')}</th>
+                <th className="px-4 py-3">{t('vehicle')}</th>
+                <th className="px-4 py-3">{t('created')}</th>
               </tr>
             </thead>
             <tbody>

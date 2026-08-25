@@ -2,6 +2,7 @@
 
 import { useState, useEffect } from 'react';
 import Link from 'next/link';
+import { useTranslations } from 'next-intl';
 import { ScreenBadge } from '@/components/ui/ScreenBadge';
 import { JOB_STAGES, STAGE_LABELS, STAGE_COLORS, type JobStage } from '@/modules/jobs/machine';
 
@@ -18,6 +19,8 @@ type BoardJob = {
 const BOARD_STAGES = JOB_STAGES.filter(s => s !== 'closed') as JobStage[];
 
 export default function JobBoardPage() {
+  const t = useTranslations('jb');
+  const tCommon = useTranslations('common');
   const [jobs, setJobs] = useState<BoardJob[]>([]);
   const [loading, setLoading] = useState(true);
 
@@ -35,20 +38,20 @@ export default function JobBoardPage() {
     jobs: jobs.filter(j => j.stage === stage),
   }));
 
-  if (loading) return <div className="p-8 text-center text-ck-muted">Laden...</div>;
+  if (loading) return <div className="p-8 text-center text-ck-muted">{tCommon('loading')}</div>;
 
   return (
     <div className="space-y-6">
       <div className="flex items-center justify-between">
         <div className="flex items-center gap-3">
           <ScreenBadge code="JB15" />
-          <h1 className="font-display text-2xl font-bold text-white">Werkplaatsbord</h1>
+          <h1 className="font-display text-2xl font-bold text-white">{t('board')}</h1>
         </div>
         <Link
           href="/app/jobs"
           className="rounded-lg border border-ck-dark-border px-4 py-2 text-sm text-ck-muted-light hover:bg-ck-dark-surface"
         >
-          Lijstweergave
+          {t('listView')}
         </Link>
       </div>
 
@@ -86,7 +89,7 @@ export default function JobBoardPage() {
               ))}
               {col.jobs.length === 0 && (
                 <div className="rounded-lg border border-dashed border-ck-dark-border p-4 text-center text-xs text-ck-muted">
-                  Leeg
+                  {t('empty')}
                 </div>
               )}
             </div>

@@ -3,6 +3,7 @@
 import { useState, useEffect } from 'react';
 import { useParams, useRouter } from 'next/navigation';
 import Link from 'next/link';
+import { useTranslations } from 'next-intl';
 import {
   ArrowLeft, FileText, Send, CheckCircle, AlertCircle,
   File, Ban, CreditCard, Trash2, Hash, Calendar,
@@ -11,6 +12,8 @@ import {
 } from 'lucide-react';
 import type { InvoiceStatus, OfferLineKind, TaxCode, PaymentMethod } from '@/types/database';
 import { InvoiceTemplate } from '@/modules/invoices/template';
+import { formatCurrency } from '@/lib/format';
+import { useAppLocale } from '@/components/AdminIntlProvider';
 
 type InvoiceLine = {
   id: string;
@@ -87,15 +90,6 @@ type InvoiceDetail = {
   }>;
 };
 
-const STATUS_LABELS: Record<InvoiceStatus, string> = {
-  draft: 'Concept',
-  sent: 'Verzonden',
-  paid: 'Betaald',
-  overdue: 'Achterstallig',
-  cancelled: 'Geannuleerd',
-  credited: 'Gecrediteerd',
-};
-
 const STATUS_ICONS: Record<InvoiceStatus, typeof File> = {
   draft: File,
   sent: Send,
@@ -114,18 +108,6 @@ const STATUS_COLORS: Record<InvoiceStatus, string> = {
   credited: 'text-orange-400 bg-orange-400/10',
 };
 
-const METHOD_LABELS: Record<string, string> = {
-  ideal: 'iDEAL',
-  bank_transfer: 'Overboeking',
-  cash: 'Contant',
-  card: 'Pinpas',
-  mollie: 'Mollie',
-};
-
-function formatCents(cents: number): string {
-  return new Intl.NumberFormat('nl-NL', { style: 'currency', currency: 'EUR' }).format(cents / 100);
-}
-
 function fmtDate(iso: string) {
   return new Date(iso).toLocaleDateString('nl-NL', {
     day: '2-digit',
@@ -137,8 +119,21 @@ function fmtDate(iso: string) {
 }
 
 export default function InvoiceDetailPage() {
+  const t = useTranslations('fa');
+  const tc = useTranslations('common');
+  const { locale } = useAppLocale();
+  const formatCents = (c: number) => formatCurrency(c, locale);
   const { id } = useParams<{ id: string }>();
   const router = useRouter();
+
+  const statusLabel = (s: InvoiceStatus): string => {
+    const map: Record<InvoiceStatus, string> = { draft: t('draft'), sent: t('sent'), paid: t('paid'), overdue: t('overdue'), cancelled: t('cancelled'), credited: t('credited') };
+    return map[s];
+  };
+  const methodLabel = (m: string): string => {
+    const map: Record<string, string> = { ideal: t('ideal'), bank_transfer: t('bank_transfer'), cash: t('cash'), card: t('card'), mollie: t('mollie') };
+    return map[m] ?? m;
+  };
   const [invoice, setInvoice] = useState<InvoiceDetail | null>(null);
   const [loading, setLoading] = useState(true);
   const [acting, setActing] = useState(false);
@@ -240,9 +235,9 @@ export default function InvoiceDetailPage() {
     return (
       <div className="flex h-64 flex-col items-center justify-center gap-3">
         <FileText size={32} className="text-ck-text-faint" />
-        <p className="text-sm text-ck-text-muted">Factuur niet gevonden</p>
+        <p className="text-sm text-ck-text-muted">{tc('notFound')}</p>
         <Link href="/app/facturen" className="text-sm text-ck-red hover:underline">
-          Terug naar facturen
+          {t('backToInvoices')}
         </Link>
       </div>
     );
@@ -265,7 +260,7 @@ export default function InvoiceDetailPage() {
             className="flex items-center gap-1.5 rounded-[10px] border-[0.5px] border-ck-border bg-ck-surface px-4 py-2 text-sm text-ck-text-3 hover:bg-ck-surface-2 transition-colors"
           >
             <ArrowLeft size={14} />
-            Terug
+            {tc('back')}
           </button>
         </div>
         <InvoiceTemplate invoice={invoice} />
@@ -284,15 +279,15 @@ export default function InvoiceDetailPage() {
           <div>
             <div className="flex items-center gap-3">
               <h1 className="font-mono text-lg font-medium tabular-nums text-ck-text">
-                {invoice.invoice_number ?? 'CONCEPT'}
+                {invoice.invoice_number ?? t('draft')}
               </h1>
               <span className={`inline-flex items-center gap-1 rounded-full px-2.5 py-0.5 text-[10px] font-medium ${STATUS_COLORS[invoice.status]}`}>
                 <Icon size={10} />
-                {STATUS_LABELS[invoice.status]}
+                {statusLabel(invoice.status)}
               </span>
             </div>
             <p className="mt-0.5 text-[11px] text-ck-text-muted">
-              Factuur {invoice.credit_note_id ? '(Creditnota)' : ''}
+              {t('number')} {invoice.credit_note_id ? `(${t('creditNote')})` : ''}
             </p>
           </div>
         </div>
@@ -305,7 +300,7 @@ export default function InvoiceDetailPage() {
               className="flex items-center gap-1.5 rounded-[10px] bg-ck-red px-4 py-2 text-sm font-medium text-white hover:bg-ck-red-hover transition-colors disabled:opacity-50"
             >
               <Send size={14} />
-              Uitgeven
+              {t('issue')}
             </button>
           )}
           {canPay && (
@@ -315,7 +310,7 @@ export default function InvoiceDetailPage() {
               className="flex items-center gap-1.5 rounded-[10px] bg-emerald-600 px-4 py-2 text-sm font-medium text-white hover:bg-emerald-700 transition-colors disabled:opacity-50"
             >
               <Banknote size={14} />
-              Betaling registreren
+              {t('recordPayment')}
             </button>
           )}
           {canCredit && (
@@ -325,7 +320,7 @@ export default function InvoiceDetailPage() {
               className="flex items-center gap-1.5 rounded-[10px] border-[0.5px] border-ck-border bg-ck-surface px-4 py-2 text-sm text-ck-text-3 hover:border-orange-500/50 hover:text-orange-400 transition-colors disabled:opacity-50"
             >
               <CreditCard size={14} />
-              Creditnota
+              {t('creditNote')}
             </button>
           )}
           {invoice.payment_token && invoice.status !== 'draft' && (
@@ -334,7 +329,7 @@ export default function InvoiceDetailPage() {
               className="flex items-center gap-1.5 rounded-[10px] border-[0.5px] border-ck-border bg-ck-surface px-4 py-2 text-sm text-ck-text-3 hover:border-blue-500/50 hover:text-blue-400 transition-colors"
             >
               <Link2 size={14} />
-              {linkCopied ? 'Gekopieerd!' : 'Betaallink'}
+              {linkCopied ? t('copied') : t('paymentLink')}
             </button>
           )}
           <button
@@ -358,13 +353,13 @@ export default function InvoiceDetailPage() {
       {/* Credit note dialog */}
       {showCreditNote && (
         <div className="rounded-[10px] border-[0.5px] border-orange-500/30 bg-orange-500/5 p-4">
-          <p className="mb-3 text-sm font-medium text-orange-400">Creditnota aanmaken</p>
+          <p className="mb-3 text-sm font-medium text-orange-400">{t('createCreditNote')}</p>
           <p className="mb-3 text-xs text-ck-text-muted">
-            Er wordt een creditnota aangemaakt die de volledige factuur crediteert. De oorspronkelijke factuur wordt gemarkeerd als gecrediteerd.
+            {t('creditNoteDesc')}
           </p>
           <input
             type="text"
-            placeholder="Reden voor creditering..."
+            placeholder={t('creditReasonPlaceholder')}
             value={creditNoteReason}
             onChange={e => setCreditNoteReason(e.target.value)}
             className="mb-3 w-full rounded-[10px] border-[0.5px] border-ck-border bg-ck-surface px-3 py-2 text-sm text-ck-text placeholder:text-ck-text-muted focus:border-orange-500 focus:outline-none"
@@ -375,13 +370,13 @@ export default function InvoiceDetailPage() {
               disabled={acting || !creditNoteReason.trim()}
               className="rounded-[10px] bg-orange-600 px-4 py-1.5 text-sm font-medium text-white hover:bg-orange-700 disabled:opacity-50"
             >
-              Creditnota aanmaken
+              {t('createCreditNote')}
             </button>
             <button
               onClick={() => { setShowCreditNote(false); setCreditNoteReason(''); }}
               className="rounded-[10px] border-[0.5px] border-ck-border px-4 py-1.5 text-sm text-ck-text-3 hover:bg-ck-surface-2"
             >
-              Annuleren
+              {tc('cancel')}
             </button>
           </div>
         </div>
@@ -390,10 +385,10 @@ export default function InvoiceDetailPage() {
       {/* Record payment dialog */}
       {showPayment && (
         <div className="rounded-[10px] border-[0.5px] border-emerald-500/30 bg-emerald-500/5 p-4">
-          <p className="mb-3 text-sm font-medium text-emerald-400">Betaling registreren</p>
+          <p className="mb-3 text-sm font-medium text-emerald-400">{t('recordPayment')}</p>
           <div className="mb-3 grid gap-3 sm:grid-cols-3">
             <div>
-              <label className="mb-1 block text-[10px] text-ck-text-muted">Bedrag (centen)</label>
+              <label className="mb-1 block text-[10px] text-ck-text-muted">{t('amountCents')}</label>
               <input
                 type="number"
                 value={paymentAmount}
@@ -403,26 +398,26 @@ export default function InvoiceDetailPage() {
               <p className="mt-0.5 text-[10px] text-ck-text-muted">{formatCents(paymentAmount)}</p>
             </div>
             <div>
-              <label className="mb-1 block text-[10px] text-ck-text-muted">Methode</label>
+              <label className="mb-1 block text-[10px] text-ck-text-muted">{t('method')}</label>
               <select
                 value={paymentMethod}
                 onChange={e => setPaymentMethod(e.target.value as PaymentMethod)}
                 className="w-full rounded-[10px] border-[0.5px] border-ck-border bg-ck-surface px-3 py-2 text-sm text-ck-text focus:border-emerald-500 focus:outline-none"
               >
-                <option value="bank_transfer">Overboeking</option>
-                <option value="ideal">iDEAL</option>
-                <option value="card">Pinpas</option>
-                <option value="cash">Contant</option>
+                <option value="bank_transfer">{t('bank_transfer')}</option>
+                <option value="ideal">{t('ideal')}</option>
+                <option value="card">{t('card')}</option>
+                <option value="cash">{t('cash')}</option>
               </select>
             </div>
             <div>
-              <label className="mb-1 block text-[10px] text-ck-text-muted">Referentie</label>
+              <label className="mb-1 block text-[10px] text-ck-text-muted">{t('reference')}</label>
               <input
                 type="text"
                 value={paymentRef}
                 onChange={e => setPaymentRef(e.target.value)}
                 className="w-full rounded-[10px] border-[0.5px] border-ck-border bg-ck-surface px-3 py-2 text-sm text-ck-text focus:border-emerald-500 focus:outline-none"
-                placeholder="Optioneel"
+                placeholder={t('referenceOptional')}
               />
             </div>
           </div>
@@ -432,13 +427,13 @@ export default function InvoiceDetailPage() {
               disabled={acting || paymentAmount <= 0}
               className="rounded-[10px] bg-emerald-600 px-4 py-1.5 text-sm font-medium text-white hover:bg-emerald-700 disabled:opacity-50"
             >
-              Betaling registreren
+              {t('recordPayment')}
             </button>
             <button
               onClick={() => setShowPayment(false)}
               className="rounded-[10px] border-[0.5px] border-ck-border px-4 py-1.5 text-sm text-ck-text-3 hover:bg-ck-surface-2"
             >
-              Annuleren
+              {tc('cancel')}
             </button>
           </div>
         </div>
@@ -455,7 +450,7 @@ export default function InvoiceDetailPage() {
           {/* Payments */}
           {invoice.payments.length > 0 && (
             <div className="rounded-[10px] border-[0.5px] border-ck-border bg-ck-surface p-5">
-              <h2 className="mb-4 text-xs font-medium uppercase tracking-wider text-ck-text-muted">Betalingen</h2>
+              <h2 className="mb-4 text-xs font-medium uppercase tracking-wider text-ck-text-muted">{t('payments')}</h2>
               <div className="space-y-2">
                 {invoice.payments.map(p => (
                   <div key={p.id} className="flex items-center justify-between rounded-lg bg-ck-bg px-3 py-2">
@@ -463,7 +458,7 @@ export default function InvoiceDetailPage() {
                       <CheckCircle size={14} className="text-emerald-400" />
                       <div>
                         <p className="text-sm text-ck-text-2">
-                          {formatCents(p.amount_cents)} via {METHOD_LABELS[p.method] ?? p.method}
+                          {formatCents(p.amount_cents)} via {methodLabel(p.method)}
                         </p>
                         {p.reference && (
                           <p className="text-[10px] text-ck-text-muted">Ref: {p.reference}</p>
@@ -484,40 +479,40 @@ export default function InvoiceDetailPage() {
         <div className="space-y-6">
           {/* Details */}
           <div className="rounded-[10px] border-[0.5px] border-ck-border bg-ck-surface p-5">
-            <h2 className="mb-3 text-xs font-medium uppercase tracking-wider text-ck-text-muted">Details</h2>
+            <h2 className="mb-3 text-xs font-medium uppercase tracking-wider text-ck-text-muted">{tc('details')}</h2>
             <div className="space-y-3">
-              <InfoRow icon={Hash} label="Factuurnummer" value={invoice.invoice_number ?? '—'} mono />
-              <InfoRow icon={Calendar} label="Aangemaakt" value={fmtDate(invoice.created_at)} />
-              {invoice.issued_at && <InfoRow icon={Send} label="Uitgegeven" value={fmtDate(invoice.issued_at)} />}
-              {invoice.due_date && <InfoRow icon={Clock} label="Vervaldatum" value={new Date(invoice.due_date).toLocaleDateString('nl-NL')} />}
-              {invoice.paid_at && <InfoRow icon={CheckCircle} label="Betaald" value={fmtDate(invoice.paid_at)} />}
-              {invoice.staff && <InfoRow icon={User} label="Aangemaakt door" value={invoice.staff.name} />}
-              {invoice.notes && <InfoRow icon={FileText} label="Notities" value={invoice.notes} />}
+              <InfoRow icon={Hash} label={t('invoiceNumber')} value={invoice.invoice_number ?? '—'} mono />
+              <InfoRow icon={Calendar} label={t('createdAt')} value={fmtDate(invoice.created_at)} />
+              {invoice.issued_at && <InfoRow icon={Send} label={t('issuedAt')} value={fmtDate(invoice.issued_at)} />}
+              {invoice.due_date && <InfoRow icon={Clock} label={t('dueDate')} value={new Date(invoice.due_date).toLocaleDateString('nl-NL')} />}
+              {invoice.paid_at && <InfoRow icon={CheckCircle} label={t('paidDate')} value={fmtDate(invoice.paid_at)} />}
+              {invoice.staff && <InfoRow icon={User} label={t('createdBy')} value={invoice.staff.name} />}
+              {invoice.notes && <InfoRow icon={FileText} label={t('notes')} value={invoice.notes} />}
             </div>
           </div>
 
           {/* Links */}
           <div className="rounded-[10px] border-[0.5px] border-ck-border bg-ck-surface p-5">
-            <h2 className="mb-3 text-xs font-medium uppercase tracking-wider text-ck-text-muted">Koppelingen</h2>
+            <h2 className="mb-3 text-xs font-medium uppercase tracking-wider text-ck-text-muted">{t('links')}</h2>
             <div className="space-y-2">
               {invoice.customers && (
-                <SideLink href={`/app/klanten/${invoice.customers.id}`} label="Klant" value={invoice.customers.name} />
+                <SideLink href={`/app/klanten/${invoice.customers.id}`} label={t('customer')} value={invoice.customers.name} />
               )}
               {invoice.vehicles && (
                 <SideLink
                   href={`/app/voertuigen`}
-                  label="Voertuig"
+                  label={t('vehicle')}
                   value={invoice.vehicles.kenteken ?? `${invoice.vehicles.make ?? ''} ${invoice.vehicles.model ?? ''}`}
                 />
               )}
               {invoice.offer_id && (
-                <SideLink href={`/app/offertes/${invoice.offer_id}`} label="Offerte" value={invoice.offer_id.slice(0, 8)} />
+                <SideLink href={`/app/offertes/${invoice.offer_id}`} label={t('offer')} value={invoice.offer_id.slice(0, 8)} />
               )}
               {invoice.job_id && (
-                <SideLink href={`/app/jobs/${invoice.job_id}`} label="Opdracht" value={invoice.job_id.slice(0, 8)} />
+                <SideLink href={`/app/jobs/${invoice.job_id}`} label={tc('job')} value={invoice.job_id.slice(0, 8)} />
               )}
               {invoice.credit_note_id && (
-                <SideLink href={`/app/facturen/${invoice.credit_note_id}`} label="Creditnota van" value={invoice.credit_note_id.slice(0, 8)} />
+                <SideLink href={`/app/facturen/${invoice.credit_note_id}`} label={t('creditNoteOf')} value={invoice.credit_note_id.slice(0, 8)} />
               )}
             </div>
           </div>
@@ -525,7 +520,7 @@ export default function InvoiceDetailPage() {
           {/* Document chain */}
           {invoice.chain && invoice.chain.length > 1 && (
             <div className="rounded-[10px] border-[0.5px] border-ck-border bg-ck-surface p-5">
-              <h2 className="mb-3 text-xs font-medium uppercase tracking-wider text-ck-text-muted">Documentketen</h2>
+              <h2 className="mb-3 text-xs font-medium uppercase tracking-wider text-ck-text-muted">{t('chain')}</h2>
               <div className="space-y-2">
                 {invoice.chain.map(c => (
                   <Link
@@ -535,9 +530,9 @@ export default function InvoiceDetailPage() {
                       c.id === invoice.id ? 'bg-ck-surface-3 text-ck-text' : 'text-ck-text-3 hover:bg-ck-surface-2'
                     }`}
                   >
-                    <span className="font-mono text-xs tabular-nums">{c.invoice_number ?? 'CONCEPT'}</span>
+                    <span className="font-mono text-xs tabular-nums">{c.invoice_number ?? t('draft')}</span>
                     <span className={`rounded-full px-2 py-0.5 text-[9px] ${STATUS_COLORS[c.status]}`}>
-                      {STATUS_LABELS[c.status]}
+                      {statusLabel(c.status)}
                     </span>
                   </Link>
                 ))}

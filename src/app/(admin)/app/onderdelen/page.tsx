@@ -2,9 +2,12 @@
 
 import { useState, useEffect } from 'react';
 import Link from 'next/link';
+import { useTranslations } from 'next-intl';
 import { Search, Package, AlertTriangle, Plus } from 'lucide-react';
 import { ScreenBadge } from '@/components/ui/ScreenBadge';
 import type { PartStatus } from '@/types/database';
+import { formatCurrency } from '@/lib/format';
+import { useAppLocale } from '@/components/AdminIntlProvider';
 
 type PartRow = {
   id: string;
@@ -21,13 +24,7 @@ type PartRow = {
   jobs: { id: string; job_number: string | null } | null;
 };
 
-const STATUS_LABELS: Record<PartStatus, string> = {
-  needed: 'Nodig',
-  ordered: 'Besteld',
-  shipped: 'Verzonden',
-  received: 'Ontvangen',
-  returned: 'Geretourneerd',
-};
+const STATUS_KEYS: PartStatus[] = ['needed', 'ordered', 'shipped', 'received', 'returned'];
 
 const STATUS_COLORS: Record<PartStatus, string> = {
   needed: 'text-amber-400 bg-amber-400/10',
@@ -37,14 +34,11 @@ const STATUS_COLORS: Record<PartStatus, string> = {
   returned: 'text-red-400 bg-red-400/10',
 };
 
-function formatEuros(cents: number): string {
-  return new Intl.NumberFormat('nl-NL', {
-    style: 'currency',
-    currency: 'EUR',
-  }).format(cents / 100);
-}
-
 export default function PartsListPage() {
+  const t = useTranslations('pt');
+  const { locale } = useAppLocale();
+  const formatEuros = (c: number) => formatCurrency(c, locale);
+  const tCommon = useTranslations('common');
   const [parts, setParts] = useState<PartRow[]>([]);
   const [search, setSearch] = useState('');
   const [statusFilter, setStatusFilter] = useState('');
@@ -69,9 +63,9 @@ export default function PartsListPage() {
         <div className="flex items-center gap-3">
           <ScreenBadge code="PT05" />
           <div>
-            <h1 className="text-base font-medium text-ck-text">Onderdelen</h1>
+            <h1 className="text-base font-medium text-ck-text">{t('title')}</h1>
             <p className="mt-0.5 text-[11px] text-ck-text-muted">
-              Alle onderdelen en hun status
+              {t('subtitle')}
             </p>
           </div>
         </div>
@@ -80,7 +74,7 @@ export default function PartsListPage() {
           className="inline-flex items-center gap-1.5 rounded-[10px] bg-ck-red px-4 py-2 text-sm font-medium text-white hover:bg-ck-red-hover transition-colors"
         >
           <Plus size={14} />
-          Nieuw onderdeel
+          {t('new')}
         </Link>
       </div>
 
@@ -90,7 +84,7 @@ export default function PartsListPage() {
           <Search size={16} className="absolute left-3 top-1/2 -translate-y-1/2 text-ck-text-muted" />
           <input
             type="text"
-            placeholder="Zoek op omschrijving, artikelnr. of leverancier..."
+            placeholder={t('searchPlaceholder')}
             value={search}
             onChange={e => setSearch(e.target.value)}
             className="w-full rounded-[10px] border-[0.5px] border-ck-border bg-ck-surface py-2 pl-10 pr-4 text-sm text-ck-text placeholder:text-ck-text-muted focus:border-ck-red focus:outline-none"
@@ -101,9 +95,9 @@ export default function PartsListPage() {
           onChange={e => setStatusFilter(e.target.value)}
           className="rounded-[10px] border-[0.5px] border-ck-border bg-ck-surface px-3 py-2 text-sm text-ck-text focus:border-ck-red focus:outline-none"
         >
-          <option value="">Alle statussen</option>
-          {(Object.keys(STATUS_LABELS) as PartStatus[]).map(s => (
-            <option key={s} value={s}>{STATUS_LABELS[s]}</option>
+          <option value="">{t('allStatuses')}</option>
+          {STATUS_KEYS.map(s => (
+            <option key={s} value={s}>{t(s)}</option>
           ))}
         </select>
         <select
@@ -111,9 +105,9 @@ export default function PartsListPage() {
           onChange={e => setBlockingFilter(e.target.value)}
           className="rounded-[10px] border-[0.5px] border-ck-border bg-ck-surface px-3 py-2 text-sm text-ck-text focus:border-ck-red focus:outline-none"
         >
-          <option value="">Alle</option>
-          <option value="true">Blokkerend</option>
-          <option value="false">Niet-blokkerend</option>
+          <option value="">{tCommon('all')}</option>
+          <option value="true">{t('blocking')}</option>
+          <option value="false">{t('nonBlocking')}</option>
         </select>
       </div>
 
@@ -127,21 +121,21 @@ export default function PartsListPage() {
           <div className="flex h-48 flex-col items-center justify-center gap-3">
             <Package size={32} className="text-ck-text-faint" />
             <p className="text-sm text-ck-text-muted">
-              {search || statusFilter || blockingFilter ? 'Geen onderdelen gevonden' : 'Nog geen onderdelen'}
+              {search || statusFilter || blockingFilter ? t('noPartsFound') : t('noPartsMessage')}
             </p>
           </div>
         ) : (
           <table className="w-full">
             <thead>
               <tr className="border-b border-ck-border text-left text-[11px] uppercase tracking-wider text-ck-text-muted">
-                <th className="px-4 py-3 font-medium">Artikelnr.</th>
-                <th className="px-4 py-3 font-medium">Omschrijving</th>
-                <th className="px-4 py-3 font-medium">Leverancier</th>
-                <th className="px-4 py-3 font-medium">Opdracht</th>
-                <th className="px-4 py-3 font-medium text-right">Aantal</th>
-                <th className="px-4 py-3 font-medium text-right">Prijs</th>
-                <th className="px-4 py-3 font-medium">Status</th>
-                <th className="px-4 py-3 font-medium text-center">Blok.</th>
+                <th className="px-4 py-3 font-medium">{t('partNumber')}</th>
+                <th className="px-4 py-3 font-medium">{t('description')}</th>
+                <th className="px-4 py-3 font-medium">{t('supplier')}</th>
+                <th className="px-4 py-3 font-medium">{t('job')}</th>
+                <th className="px-4 py-3 font-medium text-right">{t('quantity')}</th>
+                <th className="px-4 py-3 font-medium text-right">{t('unitPrice')}</th>
+                <th className="px-4 py-3 font-medium">{t('status')}</th>
+                <th className="px-4 py-3 font-medium text-center">{t('blocking')}</th>
               </tr>
             </thead>
             <tbody>
@@ -172,7 +166,7 @@ export default function PartsListPage() {
                   </td>
                   <td className="px-4 py-3">
                     <span className={`inline-flex items-center rounded-full px-2 py-0.5 text-[10px] font-medium ${STATUS_COLORS[part.status]}`}>
-                      {STATUS_LABELS[part.status]}
+                      {t(part.status)}
                     </span>
                   </td>
                   <td className="px-4 py-3 text-center">

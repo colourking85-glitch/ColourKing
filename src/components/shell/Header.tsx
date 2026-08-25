@@ -2,6 +2,7 @@
 
 import { useState, useEffect, useRef, useCallback } from 'react';
 import { usePathname } from 'next/navigation';
+import { useTranslations } from 'next-intl';
 import {
   Search, User, LogOut, Plus, Settings, HelpCircle, Shield,
   Inbox, Users, Car, Wrench, Bell,
@@ -12,22 +13,26 @@ import { signOut } from '@/lib/auth';
 import Link from 'next/link';
 
 // ── Quick Create items ───────────────────────────────────────────────────────
+// Labels are translation keys resolved via useTranslations('nav')
 const QUICK_CREATE = [
-  { label: 'Lead', href: '/app/leads/nieuw', icon: Inbox, color: 'text-amber-400' },
-  { label: 'Klant', href: '/app/klanten/nieuw', icon: Users, color: 'text-purple-400' },
-  { label: 'Voertuig', href: '/app/voertuigen/nieuw', icon: Car, color: 'text-blue-400' },
-  { label: 'Opdracht', href: '/app/jobs/nieuw', icon: Wrench, color: 'text-cyan-400' },
+  { labelKey: 'leads', href: '/app/leads/nieuw', icon: Inbox, color: 'text-amber-400' },
+  { labelKey: 'customers', href: '/app/klanten/nieuw', icon: Users, color: 'text-purple-400' },
+  { labelKey: 'vehicles', href: '/app/voertuigen/nieuw', icon: Car, color: 'text-blue-400' },
+  { labelKey: 'jobs', href: '/app/jobs/nieuw', icon: Wrench, color: 'text-cyan-400' },
 ];
 
 // ── System Menu items ────────────────────────────────────────────────────────
 type SysRow =
-  | { kind: 'sep'; label: string }
-  | { kind: 'link'; label: string; href: string; icon: React.ElementType }
-  | { kind: 'action'; label: string; icon: React.ElementType; run: () => void; danger?: boolean };
+  | { kind: 'sep'; labelKey: string }
+  | { kind: 'link'; labelKey: string; href: string; icon: React.ElementType }
+  | { kind: 'action'; labelKey: string; icon: React.ElementType; run: () => void; danger?: boolean };
 
 export function Header() {
   const pathname = usePathname();
   const screen = getScreen(pathname);
+  const tHeader = useTranslations('header');
+  const tCommon = useTranslations('common');
+  const tNav = useTranslations('nav');
   const [cmdkOpen, setCmdkOpen] = useState(false);
   const [query, setQuery] = useState('');
   const [results, setResults] = useState<ScreenMeta[]>([]);
@@ -70,11 +75,11 @@ export function Header() {
   function timeAgo(dateStr: string): string {
     const diff = Date.now() - new Date(dateStr).getTime();
     const mins = Math.floor(diff / 60000);
-    if (mins < 1) return 'Zojuist';
-    if (mins < 60) return `${mins} min geleden`;
+    if (mins < 1) return tHeader('timeJustNow');
+    if (mins < 60) return tHeader('timeMinAgo', { count: mins });
     const hrs = Math.floor(mins / 60);
-    if (hrs < 24) return `${hrs} uur geleden`;
-    return `${Math.floor(hrs / 24)}d geleden`;
+    if (hrs < 24) return tHeader('timeHourAgo', { count: hrs });
+    return tHeader('timeDayAgo', { count: Math.floor(hrs / 24) });
   }
 
   // Close dropdowns on outside click
@@ -117,12 +122,12 @@ export function Header() {
   }, [query]);
 
   const sysRows: SysRow[] = [
-    { kind: 'sep', label: 'Instellingen' },
-    { kind: 'link', label: 'Algemene instellingen', href: '/app/instellingen', icon: Settings },
-    { kind: 'sep', label: 'Ondersteuning' },
-    { kind: 'link', label: 'Help & Documentatie', href: '/app/help', icon: HelpCircle },
-    { kind: 'sep', label: 'Beveiliging' },
-    { kind: 'link', label: 'Account & Beveiliging', href: '/app/instellingen/beveiliging', icon: Shield },
+    { kind: 'sep', labelKey: 'settingsSection' },
+    { kind: 'link', labelKey: 'generalSettings', href: '/app/instellingen', icon: Settings },
+    { kind: 'sep', labelKey: 'supportSection' },
+    { kind: 'link', labelKey: 'helpDocs', href: '/app/help', icon: HelpCircle },
+    { kind: 'sep', labelKey: 'securitySection' },
+    { kind: 'link', labelKey: 'accountSecurity', href: '/app/instellingen/beveiliging', icon: Shield },
   ];
 
   return (
@@ -132,7 +137,7 @@ export function Header() {
         <div className="flex items-center gap-3">
           {screen && <ScreenBadge id={screen.id} />}
           <h1 className="text-sm font-semibold text-white">
-            {screen?.titleNl ?? 'Colourking'}
+            {screen?.titleNl ?? tCommon('appName')}
           </h1>
         </div>
 
@@ -145,12 +150,12 @@ export function Header() {
               className="flex items-center gap-1.5 rounded-lg bg-ck-red px-3 py-1.5 text-xs font-semibold text-white transition-colors hover:bg-ck-red-hover"
             >
               <Plus size={14} />
-              <span className="hidden sm:inline">Nieuw</span>
+              <span className="hidden sm:inline">{tCommon('new')}</span>
             </button>
             {qcOpen && (
               <div className="absolute right-0 top-full z-50 mt-2 w-48 overflow-hidden rounded-xl border border-ck-dark-border bg-ck-dark-surface shadow-xl">
                 <div className="px-3 py-2 text-[10px] font-bold uppercase tracking-[0.14em] text-ck-muted">
-                  Snel aanmaken
+                  {tHeader('quickCreate')}
                 </div>
                 {QUICK_CREATE.map(qc => (
                   <Link
@@ -160,7 +165,7 @@ export function Header() {
                     className="flex items-center gap-2.5 px-3 py-2 text-[13px] text-ck-muted-light transition-colors hover:bg-ck-dark-border/50 hover:text-white"
                   >
                     <qc.icon size={14} className={qc.color} />
-                    {qc.label}
+                    {tNav(qc.labelKey)}
                   </Link>
                 ))}
               </div>
@@ -172,7 +177,7 @@ export function Header() {
             <button
               onClick={() => { setBellOpen(!bellOpen); setQcOpen(false); setSysOpen(false); setUserMenuOpen(false); }}
               className="relative flex h-8 w-8 items-center justify-center rounded-lg border border-ck-dark-border text-ck-muted transition-colors hover:bg-ck-dark-border hover:text-white"
-              title="Meldingen"
+              title={tHeader('notifications')}
             >
               <Bell size={14} />
               {unreadCount > 0 && (
@@ -184,16 +189,16 @@ export function Header() {
             {bellOpen && (
               <div className="absolute right-0 top-full z-50 mt-2 w-80 overflow-hidden rounded-xl border border-ck-dark-border bg-ck-dark-surface shadow-xl">
                 <div className="flex items-center justify-between border-b border-ck-dark-border px-4 py-2.5">
-                  <span className="text-xs font-bold uppercase tracking-[0.14em] text-ck-muted">Meldingen</span>
+                  <span className="text-xs font-bold uppercase tracking-[0.14em] text-ck-muted">{tHeader('notifications')}</span>
                   {unreadCount > 0 && (
                     <button onClick={handleMarkAllRead} className="text-[11px] text-ck-red hover:text-ck-red-hover">
-                      Alles gelezen
+                      {tHeader('allRead')}
                     </button>
                   )}
                 </div>
                 <div className="max-h-72 overflow-y-auto">
                   {notifs.length === 0 ? (
-                    <div className="px-4 py-6 text-center text-xs text-ck-muted">Geen meldingen</div>
+                    <div className="px-4 py-6 text-center text-xs text-ck-muted">{tHeader('noNotifications')}</div>
                   ) : (
                     notifs.map(n => (
                       <div
@@ -217,7 +222,7 @@ export function Header() {
                   onClick={() => setBellOpen(false)}
                   className="flex items-center justify-center border-t border-ck-dark-border py-2.5 text-xs text-ck-red hover:text-ck-red-hover"
                 >
-                  Alle meldingen bekijken
+                  {tHeader('viewAll')}
                 </Link>
               </div>
             )}
@@ -229,7 +234,7 @@ export function Header() {
             className="flex items-center gap-2 rounded-lg border border-ck-dark-border bg-ck-dark px-3 py-1.5 text-xs text-ck-muted transition-colors hover:border-ck-muted/30 hover:text-white"
           >
             <Search size={14} />
-            <span className="hidden sm:inline">Zoeken...</span>
+            <span className="hidden sm:inline">{tHeader('searchLabel')}</span>
             <kbd className="rounded border border-ck-dark-border px-1 py-0.5 font-mono text-[10px] text-ck-muted">
               ⌘K
             </kbd>
@@ -240,7 +245,7 @@ export function Header() {
             <button
               onClick={() => { setSysOpen(!sysOpen); setQcOpen(false); setUserMenuOpen(false); }}
               className="flex h-8 w-8 items-center justify-center rounded-lg border border-ck-dark-border text-ck-muted transition-colors hover:bg-ck-dark-border hover:text-white"
-              title="Systeem"
+              title={tHeader('system')}
             >
               <Settings size={14} />
             </button>
@@ -250,7 +255,7 @@ export function Header() {
                   if (r.kind === 'sep') {
                     return (
                       <div key={i} className="mt-1 px-3 pb-0.5 pt-2 text-[10px] font-bold uppercase tracking-[0.14em] text-ck-muted/50">
-                        {r.label}
+                        {tHeader(r.labelKey)}
                       </div>
                     );
                   }
@@ -263,7 +268,7 @@ export function Header() {
                         className="flex items-center gap-2.5 px-3 py-2 text-[13px] text-ck-muted-light transition-colors hover:bg-ck-dark-border/50 hover:text-white"
                       >
                         <r.icon size={14} />
-                        {r.label}
+                        {tHeader(r.labelKey)}
                       </Link>
                     );
                   }
@@ -284,7 +289,7 @@ export function Header() {
             {userMenuOpen && (
               <div className="absolute right-0 top-full z-50 mt-2 w-48 overflow-hidden rounded-xl border border-ck-dark-border bg-ck-dark-surface shadow-xl">
                 <div className="border-b border-ck-dark-border px-4 py-3">
-                  <div className="text-xs font-medium text-white">Admin</div>
+                  <div className="text-xs font-medium text-white">{tHeader('admin')}</div>
                   <div className="text-[11px] text-ck-muted">admin@colourking.nl</div>
                 </div>
                 <Link
@@ -293,7 +298,7 @@ export function Header() {
                   className="flex w-full items-center gap-2 px-4 py-2.5 text-xs text-ck-muted-light transition-colors hover:bg-ck-dark-border/50 hover:text-white"
                 >
                   <Settings size={14} />
-                  Instellingen
+                  {tCommon('settings')}
                 </Link>
                 <button
                   onClick={() => {
@@ -303,7 +308,7 @@ export function Header() {
                   className="flex w-full items-center gap-2 px-4 py-2.5 text-xs text-red-400 transition-colors hover:bg-ck-dark-border/50 hover:text-red-300"
                 >
                   <LogOut size={14} />
-                  Uitloggen
+                  {tCommon('signOut')}
                 </button>
               </div>
             )}
@@ -328,7 +333,7 @@ export function Header() {
                 type="text"
                 value={query}
                 onChange={(e) => setQuery(e.target.value)}
-                placeholder="Zoek scherm of code (bijv. JB05, Facturen)..."
+                placeholder={tHeader('searchPlaceholder')}
                 className="flex-1 bg-transparent text-sm text-white outline-none placeholder:text-ck-muted"
               />
               <kbd className="rounded border border-ck-dark-border px-1.5 py-0.5 font-mono text-[10px] text-ck-muted">
@@ -353,7 +358,7 @@ export function Header() {
             )}
             {query.length > 0 && results.length === 0 && (
               <div className="px-4 py-6 text-center text-sm text-ck-muted">
-                Geen schermen gevonden
+                {tHeader('noScreensFound')}
               </div>
             )}
           </div>

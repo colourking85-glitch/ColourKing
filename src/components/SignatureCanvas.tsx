@@ -1,6 +1,7 @@
 'use client';
 
 import { useRef, useState, useEffect, useCallback } from 'react';
+import { useTranslations } from 'next-intl';
 import { Eraser, Check } from 'lucide-react';
 
 interface SignatureCanvasProps {
@@ -9,6 +10,7 @@ interface SignatureCanvasProps {
 }
 
 export default function SignatureCanvas({ onSign, disabled }: SignatureCanvasProps) {
+  const t = useTranslations('signature');
   const canvasRef = useRef<HTMLCanvasElement>(null);
   const containerRef = useRef<HTMLDivElement>(null);
   const [isDrawing, setIsDrawing] = useState(false);
@@ -121,7 +123,7 @@ export default function SignatureCanvas({ onSign, disabled }: SignatureCanvasPro
         />
         {!hasStrokes && (
           <div className="pointer-events-none absolute inset-0 flex items-center justify-center">
-            <p className="text-xs text-ck-text-faint">Teken hier uw handtekening</p>
+            <p className="text-xs text-ck-text-faint">{t('signHere')}</p>
           </div>
         )}
       </div>
@@ -133,7 +135,7 @@ export default function SignatureCanvas({ onSign, disabled }: SignatureCanvasPro
           className="flex items-center gap-1.5 rounded-[10px] border-[0.5px] border-ck-border bg-ck-surface px-4 py-2 text-sm text-ck-text-3 hover:bg-ck-surface-2 transition-colors disabled:opacity-50"
         >
           <Eraser size={14} />
-          Wissen
+          {t('clear')}
         </button>
         <button
           type="button"
@@ -142,7 +144,7 @@ export default function SignatureCanvas({ onSign, disabled }: SignatureCanvasPro
           className="flex items-center gap-1.5 rounded-[10px] bg-ck-red px-4 py-2 text-sm font-medium text-white hover:bg-ck-red-hover transition-colors disabled:opacity-50"
         >
           <Check size={14} />
-          Ondertekenen
+          {t('sign')}
         </button>
       </div>
     </div>

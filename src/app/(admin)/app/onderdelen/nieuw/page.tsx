@@ -2,21 +2,21 @@
 
 import { useState, useEffect, useMemo } from 'react';
 import { useRouter } from 'next/navigation';
+import { useTranslations } from 'next-intl';
 import { ScreenBadge } from '@/components/ui/ScreenBadge';
+import { formatCurrency } from '@/lib/format';
+import { useAppLocale } from '@/components/AdminIntlProvider';
 
 type JobOption = {
   id: string;
   job_number: string | null;
 };
 
-function formatEuros(cents: number): string {
-  return new Intl.NumberFormat('nl-NL', {
-    style: 'currency',
-    currency: 'EUR',
-  }).format(cents / 100);
-}
-
 export default function NewPartPage() {
+  const t = useTranslations('pt');
+  const tCommon = useTranslations('common');
+  const { locale } = useAppLocale();
+  const formatEuros = (c: number) => formatCurrency(c, locale);
   const router = useRouter();
   const [saving, setSaving] = useState(false);
   const [error, setError] = useState('');
@@ -66,7 +66,7 @@ export default function NewPartPage() {
       router.push('/app/onderdelen');
     } else {
       const err = await res.json();
-      setError(err.error ?? 'Opslaan mislukt');
+      setError(err.error ?? tCommon('save'));
       setSaving(false);
     }
   }
@@ -75,7 +75,7 @@ export default function NewPartPage() {
     <div className="mx-auto max-w-2xl space-y-6">
       <div className="flex items-center gap-3">
         <ScreenBadge code="PT01" />
-        <h1 className="text-base font-medium text-ck-text">Nieuw onderdeel</h1>
+        <h1 className="text-base font-medium text-ck-text">{t('new')}</h1>
       </div>
 
       {error && (
@@ -86,13 +86,13 @@ export default function NewPartPage() {
 
       <form onSubmit={handleSubmit} className="space-y-4 rounded-[10px] border-[0.5px] border-ck-border bg-ck-surface p-6">
         <div>
-          <label className="mb-1 block text-[11px] text-ck-text-muted">Opdracht *</label>
+          <label className="mb-1 block text-[11px] text-ck-text-muted">{t('job')} *</label>
           <select
             name="job_id"
             required
             className="w-full rounded-[10px] border-[0.5px] border-ck-border bg-ck-surface-2 px-3 py-2 text-sm text-ck-text focus:border-ck-red focus:outline-none"
           >
-            <option value="">Selecteer opdracht...</option>
+            <option value="">{t('selectJob')}</option>
             {jobs.map(j => (
               <option key={j.id} value={j.id}>
                 {j.job_number ?? j.id.slice(0, 8)}
@@ -102,7 +102,7 @@ export default function NewPartPage() {
         </div>
 
         <div>
-          <label className="mb-1 block text-[11px] text-ck-text-muted">Omschrijving *</label>
+          <label className="mb-1 block text-[11px] text-ck-text-muted">{t('description')} *</label>
           <input
             name="description"
             required
@@ -112,14 +112,14 @@ export default function NewPartPage() {
 
         <div className="grid grid-cols-2 gap-4">
           <div>
-            <label className="mb-1 block text-[11px] text-ck-text-muted">Artikelnummer</label>
+            <label className="mb-1 block text-[11px] text-ck-text-muted">{t('partNumber')}</label>
             <input
               name="part_number"
               className="w-full rounded-[10px] border-[0.5px] border-ck-border bg-ck-surface-2 px-3 py-2 font-mono text-sm text-ck-text focus:border-ck-red focus:outline-none"
             />
           </div>
           <div>
-            <label className="mb-1 block text-[11px] text-ck-text-muted">Leverancier</label>
+            <label className="mb-1 block text-[11px] text-ck-text-muted">{t('supplier')}</label>
             <input
               name="supplier"
               className="w-full rounded-[10px] border-[0.5px] border-ck-border bg-ck-surface-2 px-3 py-2 text-sm text-ck-text focus:border-ck-red focus:outline-none"
@@ -129,7 +129,7 @@ export default function NewPartPage() {
 
         <div className="grid grid-cols-3 gap-4">
           <div>
-            <label className="mb-1 block text-[11px] text-ck-text-muted">Aantal</label>
+            <label className="mb-1 block text-[11px] text-ck-text-muted">{t('quantity')}</label>
             <input
               type="number"
               min={1}
@@ -139,7 +139,7 @@ export default function NewPartPage() {
             />
           </div>
           <div>
-            <label className="mb-1 block text-[11px] text-ck-text-muted">Stukprijs (EUR)</label>
+            <label className="mb-1 block text-[11px] text-ck-text-muted">{t('unitPrice')} (EUR)</label>
             <input
               type="text"
               inputMode="decimal"
@@ -150,7 +150,7 @@ export default function NewPartPage() {
             />
           </div>
           <div>
-            <label className="mb-1 block text-[11px] text-ck-text-muted">Totaal</label>
+            <label className="mb-1 block text-[11px] text-ck-text-muted">{t('total')}</label>
             <div className="flex h-[38px] items-center rounded-[10px] border-[0.5px] border-ck-border bg-ck-surface-3 px-3 text-sm text-ck-text-2">
               {formatEuros(totalCents)}
             </div>
@@ -165,16 +165,16 @@ export default function NewPartPage() {
             className="h-4 w-4 rounded border-ck-border bg-ck-surface-2 text-ck-red focus:ring-ck-red"
           />
           <label htmlFor="blocking" className="text-sm text-ck-text">
-            Blokkerend onderdeel (voorkomt statuswijziging opdracht)
+            {t('blockingPart')}
           </label>
         </div>
 
         <div>
-          <label className="mb-1 block text-[11px] text-ck-text-muted">Notities</label>
+          <label className="mb-1 block text-[11px] text-ck-text-muted">{t('notes')}</label>
           <textarea
             name="notes"
             rows={3}
-            placeholder="Opmerkingen..."
+            placeholder={t('remarkPlaceholder')}
             className="w-full rounded-[10px] border-[0.5px] border-ck-border bg-ck-surface-2 px-3 py-2 text-sm text-ck-text placeholder:text-ck-text-muted focus:border-ck-red focus:outline-none"
           />
         </div>
@@ -185,14 +185,14 @@ export default function NewPartPage() {
             disabled={saving}
             className="rounded-[10px] bg-ck-red px-6 py-2 text-sm font-medium text-white hover:bg-ck-red-hover disabled:opacity-50 transition-colors"
           >
-            {saving ? 'Opslaan...' : 'Opslaan'}
+            {saving ? tCommon('saving') : tCommon('save')}
           </button>
           <button
             type="button"
             onClick={() => router.back()}
             className="rounded-[10px] border-[0.5px] border-ck-border px-6 py-2 text-sm text-ck-text-muted hover:text-ck-text transition-colors"
           >
-            Annuleren
+            {tCommon('cancel')}
           </button>
         </div>
       </form>

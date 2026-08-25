@@ -7,6 +7,7 @@ import {
   ArrowLeft, FileText, Send, Hash, Calendar,
   User, Pen, Printer, CheckSquare, Square,
 } from 'lucide-react';
+import { useTranslations } from 'next-intl';
 import SignatureCanvas from '@/components/SignatureCanvas';
 import type { DocStatus } from '@/types/database';
 
@@ -46,10 +47,10 @@ type HandoverDetail = {
   signatures: Signature[];
 };
 
-const STATUS_LABELS: Record<DocStatus, string> = {
-  draft: 'Concept',
-  issued: 'Uitgegeven',
-  cancelled: 'Geannuleerd',
+const STATUS_KEYS: Record<DocStatus, string> = {
+  draft: 'draft',
+  issued: 'issued',
+  cancelled: 'cancelled',
 };
 
 const STATUS_COLORS: Record<DocStatus, string> = {
@@ -69,6 +70,8 @@ function fmtDate(iso: string) {
 }
 
 export default function HandoverNotePage() {
+  const t = useTranslations('ho');
+  const tc = useTranslations('common');
   const { id } = useParams<{ id: string }>();
   const [doc, setDoc] = useState<HandoverDetail | null>(null);
   const [loading, setLoading] = useState(true);
@@ -141,9 +144,9 @@ export default function HandoverNotePage() {
     return (
       <div className="flex h-64 flex-col items-center justify-center gap-3">
         <FileText size={32} className="text-ck-text-faint" />
-        <p className="text-sm text-ck-text-muted">Afleverbon niet gevonden</p>
+        <p className="text-sm text-ck-text-muted">{t('notFound')}</p>
         <Link href="/app/documenten" className="text-sm text-ck-red hover:underline">
-          Terug naar documenten
+          {t('backToDocuments')}
         </Link>
       </div>
     );
@@ -164,13 +167,13 @@ export default function HandoverNotePage() {
           <div>
             <div className="flex items-center gap-3">
               <h1 className="font-mono text-lg font-medium tabular-nums text-ck-text">
-                {doc.doc_number ?? 'CONCEPT'}
+                {doc.doc_number ?? tc('draft').toUpperCase()}
               </h1>
               <span className={`inline-flex items-center gap-1 rounded-full px-2.5 py-0.5 text-[10px] font-medium ${STATUS_COLORS[doc.status]}`}>
-                {STATUS_LABELS[doc.status]}
+                {t(STATUS_KEYS[doc.status])}
               </span>
             </div>
-            <p className="mt-0.5 text-[11px] text-ck-text-muted">Afleverbon</p>
+            <p className="mt-0.5 text-[11px] text-ck-text-muted">{t('title')}</p>
           </div>
         </div>
 
@@ -182,7 +185,7 @@ export default function HandoverNotePage() {
               className="flex items-center gap-1.5 rounded-[10px] bg-ck-red px-4 py-2 text-sm font-medium text-white hover:bg-ck-red-hover transition-colors disabled:opacity-50"
             >
               <Send size={14} />
-              Uitgeven
+              {t('issued')}
             </button>
           )}
           <button
@@ -190,7 +193,7 @@ export default function HandoverNotePage() {
             className="flex items-center gap-1.5 rounded-[10px] border-[0.5px] border-ck-border bg-ck-surface px-4 py-2 text-sm text-ck-text-3 opacity-50 cursor-not-allowed"
           >
             <Printer size={14} />
-            PDF
+            {t('pdf')}
           </button>
         </div>
       </div>
@@ -200,29 +203,29 @@ export default function HandoverNotePage() {
         <div className="space-y-6 lg:col-span-2">
           {/* Work summary */}
           <div className="rounded-[10px] border-[0.5px] border-ck-border bg-ck-surface p-5">
-            <h2 className="mb-4 text-xs font-medium uppercase tracking-wider text-ck-text-muted">Samenvatting werkzaamheden</h2>
+            <h2 className="mb-4 text-xs font-medium uppercase tracking-wider text-ck-text-muted">{t('workSummary')}</h2>
             <p className="text-sm text-ck-text-2 whitespace-pre-wrap">{p.work_summary}</p>
           </div>
 
           {/* Mileage out */}
           <div className="rounded-[10px] border-[0.5px] border-ck-border bg-ck-surface p-5">
-            <h2 className="mb-4 text-xs font-medium uppercase tracking-wider text-ck-text-muted">Kilometerstand uit</h2>
+            <h2 className="mb-4 text-xs font-medium uppercase tracking-wider text-ck-text-muted">{t('mileageOutLabel')}</h2>
             <p className="font-mono text-sm tabular-nums text-ck-text-2">
-              {p.mileage_out > 0 ? `${p.mileage_out.toLocaleString('nl-NL')} km` : 'Nog niet ingevuld'}
+              {p.mileage_out > 0 ? `${p.mileage_out.toLocaleString('nl-NL')} km` : t('notFilledIn')}
             </p>
           </div>
 
           {/* Warranty */}
           {p.warranty_text && (
             <div className="rounded-[10px] border-[0.5px] border-ck-border bg-ck-surface p-5">
-              <h2 className="mb-4 text-xs font-medium uppercase tracking-wider text-ck-text-muted">Garantie</h2>
+              <h2 className="mb-4 text-xs font-medium uppercase tracking-wider text-ck-text-muted">{t('warranty')}</h2>
               <p className="text-sm text-ck-text-2 whitespace-pre-wrap">{p.warranty_text}</p>
             </div>
           )}
 
           {/* Items returned */}
           <div className="rounded-[10px] border-[0.5px] border-ck-border bg-ck-surface p-5">
-            <h2 className="mb-4 text-xs font-medium uppercase tracking-wider text-ck-text-muted">Teruggegeven items</h2>
+            <h2 className="mb-4 text-xs font-medium uppercase tracking-wider text-ck-text-muted">{t('returnedItems')}</h2>
             {p.items_returned.length > 0 ? (
               <ul className="space-y-2">
                 {p.items_returned.map((item, idx) => (
@@ -233,13 +236,13 @@ export default function HandoverNotePage() {
                 ))}
               </ul>
             ) : (
-              <p className="text-sm text-ck-text-muted italic">Geen items genoteerd</p>
+              <p className="text-sm text-ck-text-muted italic">{t('noItems')}</p>
             )}
           </div>
 
           {/* Gallery consent */}
           <div className="rounded-[10px] border-[0.5px] border-ck-border bg-ck-surface p-5">
-            <h2 className="mb-4 text-xs font-medium uppercase tracking-wider text-ck-text-muted">Toestemming galerij</h2>
+            <h2 className="mb-4 text-xs font-medium uppercase tracking-wider text-ck-text-muted">{t('galleryConsent')}</h2>
             <button
               onClick={() => isDraft && handleGalleryConsent(!doc.gallery_consent)}
               disabled={acting || !isDraft}
@@ -250,13 +253,13 @@ export default function HandoverNotePage() {
               ) : (
                 <Square size={16} className="text-ck-text-muted" />
               )}
-              Klant geeft toestemming voor gebruik van foto&apos;s in de galerij
+              {t('galleryConsentDesc')}
             </button>
           </div>
 
           {/* Signature section */}
           <div className="rounded-[10px] border-[0.5px] border-ck-border bg-ck-surface p-5">
-            <h2 className="mb-4 text-xs font-medium uppercase tracking-wider text-ck-text-muted">Handtekening</h2>
+            <h2 className="mb-4 text-xs font-medium uppercase tracking-wider text-ck-text-muted">{t('signature')}</h2>
 
             {hasSig ? (
               <div className="space-y-4">
@@ -265,14 +268,14 @@ export default function HandoverNotePage() {
                     <div className="mb-3 flex items-center justify-between">
                       <div>
                         <p className="text-sm font-medium text-ck-text">{sig.signer_name}</p>
-                        <p className="text-[11px] text-ck-text-muted">{sig.signer_role === 'customer' ? 'Klant' : 'Medewerker'}</p>
+                        <p className="text-[11px] text-ck-text-muted">{sig.signer_role === 'customer' ? t('roleCustomer') : t('roleStaff')}</p>
                       </div>
                       <p className="text-[11px] text-ck-text-muted">{fmtDate(sig.created_at)}</p>
                     </div>
                     {/* eslint-disable-next-line @next/next/no-img-element */}
                     <img
                       src={sig.signature_data}
-                      alt={`Handtekening ${sig.signer_name}`}
+                      alt={`${t('signature')} ${sig.signer_name}`}
                       className="h-20 rounded-lg border-[0.5px] border-ck-border bg-ck-surface-3 object-contain"
                     />
                   </div>
@@ -281,12 +284,12 @@ export default function HandoverNotePage() {
             ) : showSign ? (
               <div className="space-y-4">
                 <div>
-                  <label className="mb-1 block text-[11px] text-ck-text-muted">Naam ondertekenaar</label>
+                  <label className="mb-1 block text-[11px] text-ck-text-muted">{t('signerName')}</label>
                   <input
                     type="text"
                     value={signerName}
                     onChange={e => setSignerName(e.target.value)}
-                    placeholder="Volledige naam..."
+                    placeholder={t('signerPlaceholder')}
                     className="w-full max-w-xs rounded-[10px] border-[0.5px] border-ck-border bg-ck-surface px-3 py-2 text-sm text-ck-text placeholder:text-ck-text-muted focus:border-ck-red focus:outline-none"
                   />
                 </div>
@@ -295,7 +298,7 @@ export default function HandoverNotePage() {
                   onClick={() => { setShowSign(false); setSignerName(''); }}
                   className="rounded-[10px] border-[0.5px] border-ck-border px-4 py-1.5 text-sm text-ck-text-3 hover:bg-ck-surface-2"
                 >
-                  Annuleren
+                  {tc('cancel')}
                 </button>
               </div>
             ) : (
@@ -305,7 +308,7 @@ export default function HandoverNotePage() {
                 className="flex items-center gap-1.5 rounded-[10px] border-[0.5px] border-ck-border bg-ck-surface px-4 py-2 text-sm text-ck-text-3 hover:border-ck-red hover:text-ck-red transition-colors disabled:opacity-50"
               >
                 <Pen size={14} />
-                Handtekening plaatsen
+                {t('signHere')}
               </button>
             )}
           </div>
@@ -315,21 +318,21 @@ export default function HandoverNotePage() {
         <div className="space-y-6">
           {/* Metadata */}
           <div className="rounded-[10px] border-[0.5px] border-ck-border bg-ck-surface p-5">
-            <h2 className="mb-3 text-xs font-medium uppercase tracking-wider text-ck-text-muted">Gegevens</h2>
+            <h2 className="mb-3 text-xs font-medium uppercase tracking-wider text-ck-text-muted">{t('details')}</h2>
             <div className="space-y-2">
-              <InfoRow icon={Hash} label="Documentnummer" value={doc.doc_number ?? 'Nog niet uitgegeven'} mono />
-              <InfoRow icon={Calendar} label="Aangemaakt" value={fmtDate(doc.created_at)} />
-              {doc.issued_at && <InfoRow icon={Calendar} label="Uitgegeven" value={fmtDate(doc.issued_at)} />}
-              {doc.signed_at && <InfoRow icon={Pen} label="Getekend" value={fmtDate(doc.signed_at)} />}
-              {doc.signed_by_name && <InfoRow icon={User} label="Getekend door" value={doc.signed_by_name} />}
-              {doc.customers && <InfoRow icon={User} label="Klant" value={doc.customers.name} />}
+              <InfoRow icon={Hash} label={t('docNumber')} value={doc.doc_number ?? t('notIssued')} mono />
+              <InfoRow icon={Calendar} label={t('details')} value={fmtDate(doc.created_at)} />
+              {doc.issued_at && <InfoRow icon={Calendar} label={t('issued')} value={fmtDate(doc.issued_at)} />}
+              {doc.signed_at && <InfoRow icon={Pen} label={t('signature')} value={fmtDate(doc.signed_at)} />}
+              {doc.signed_by_name && <InfoRow icon={User} label={t('signature')} value={doc.signed_by_name} />}
+              {doc.customers && <InfoRow icon={User} label={tc('customer')} value={doc.customers.name} />}
               {doc.job_id && (
                 <div className="pt-2">
                   <Link
                     href={`/app/jobs/${doc.job_id}`}
                     className="text-sm text-ck-red hover:underline"
                   >
-                    Naar opdracht
+                    {t('goToJob')}
                   </Link>
                 </div>
               )}

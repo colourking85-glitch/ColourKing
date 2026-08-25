@@ -3,8 +3,11 @@
 import { useState, useEffect } from 'react';
 import { useRouter } from 'next/navigation';
 import Link from 'next/link';
+import { useTranslations } from 'next-intl';
 import { ArrowLeft, Plus, Trash2, Save } from 'lucide-react';
 import type { OfferLineKind, TaxCode } from '@/types/database';
+import { formatCurrency } from '@/lib/format';
+import { useAppLocale } from '@/components/AdminIntlProvider';
 
 type CustomerOption = { id: string; name: string };
 type VehicleOption = { id: string; kenteken: string | null; make: string | null; model: string | null; customer_id: string };
@@ -21,11 +24,11 @@ type LineItem = {
   part_number: string;
 };
 
-const KIND_LABELS: Record<OfferLineKind, string> = {
-  labour: 'Arbeid',
-  part: 'Onderdeel',
-  material: 'Materiaal',
-  other: 'Overig',
+const KIND_KEYS: Record<OfferLineKind, string> = {
+  labour: 'labour',
+  part: 'part',
+  material: 'material',
+  other: 'other',
 };
 
 const TAX_RATES: Record<TaxCode, number> = {
@@ -58,11 +61,13 @@ function calcLineTotalCents(line: LineItem): number {
   return gross - disc;
 }
 
-function formatCents(cents: number): string {
-  return new Intl.NumberFormat('nl-NL', { style: 'currency', currency: 'EUR' }).format(cents / 100);
-}
-
 export default function CreateOfferPage() {
+  const t = useTranslations('es');
+  const tCommon = useTranslations('common');
+  const { locale: appLocale } = useAppLocale();
+  const formatCents = (c: number) => formatCurrency(c, appLocale);
+  const tLd = useTranslations('ld');
+  const tSy = useTranslations('sy');
   const router = useRouter();
   const [customers, setCustomers] = useState<CustomerOption[]>([]);
   const [vehicles, setVehicles] = useState<VehicleOption[]>([]);
@@ -167,8 +172,8 @@ export default function CreateOfferPage() {
             <ArrowLeft size={18} />
           </Link>
           <div>
-            <h1 className="text-base font-medium text-ck-text">Nieuwe offerte</h1>
-            <p className="mt-0.5 text-[11px] text-ck-text-muted">Maak een concept offerte aan</p>
+            <h1 className="text-base font-medium text-ck-text">{t('new')}</h1>
+            <p className="mt-0.5 text-[11px] text-ck-text-muted">{t('createDraft')}</p>
           </div>
         </div>
         <button
@@ -177,7 +182,7 @@ export default function CreateOfferPage() {
           className="flex items-center gap-1.5 rounded-[10px] bg-ck-red px-4 py-2 text-sm font-medium text-white hover:bg-ck-red-hover transition-colors disabled:opacity-50"
         >
           <Save size={14} />
-          {saving ? 'Opslaan...' : 'Opslaan'}
+          {saving ? tCommon('saving') : tCommon('save')}
         </button>
       </div>
 
@@ -189,29 +194,29 @@ export default function CreateOfferPage() {
 
       {/* Offer details */}
       <div className="rounded-[10px] border-[0.5px] border-ck-border bg-ck-surface p-5">
-        <h2 className="mb-4 text-xs font-medium uppercase tracking-wider text-ck-text-muted">Offertegegevens</h2>
+        <h2 className="mb-4 text-xs font-medium uppercase tracking-wider text-ck-text-muted">{t('offerDetails')}</h2>
         <div className="grid gap-4 sm:grid-cols-2">
           <div>
-            <label className="mb-1 block text-[11px] text-ck-text-muted">Klant *</label>
+            <label className="mb-1 block text-[11px] text-ck-text-muted">{t('customer')} *</label>
             <select
               value={customerId}
               onChange={e => { setCustomerId(e.target.value); setVehicleId(''); }}
               className="w-full rounded-[10px] border-[0.5px] border-ck-border bg-ck-surface px-3 py-2 text-sm text-ck-text focus:border-ck-red focus:outline-none"
             >
-              <option value="">Selecteer klant...</option>
+              <option value="">{t('selectCustomerPlaceholder')}</option>
               {customers.map(c => (
                 <option key={c.id} value={c.id}>{c.name}</option>
               ))}
             </select>
           </div>
           <div>
-            <label className="mb-1 block text-[11px] text-ck-text-muted">Voertuig</label>
+            <label className="mb-1 block text-[11px] text-ck-text-muted">{t('vehicle')}</label>
             <select
               value={vehicleId}
               onChange={e => setVehicleId(e.target.value)}
               className="w-full rounded-[10px] border-[0.5px] border-ck-border bg-ck-surface px-3 py-2 text-sm text-ck-text focus:border-ck-red focus:outline-none"
             >
-              <option value="">Geen voertuig</option>
+              <option value="">{t('noVehiclePlaceholder')}</option>
               {filteredVehicles.map(v => (
                 <option key={v.id} value={v.id}>
                   {v.kenteken ?? `${v.make ?? ''} ${v.model ?? ''}`}
@@ -220,21 +225,21 @@ export default function CreateOfferPage() {
             </select>
           </div>
           <div>
-            <label className="mb-1 block text-[11px] text-ck-text-muted">Herkomst</label>
+            <label className="mb-1 block text-[11px] text-ck-text-muted">{t('origin')}</label>
             <select
               value={origin}
               onChange={e => setOrigin(e.target.value)}
               className="w-full rounded-[10px] border-[0.5px] border-ck-border bg-ck-surface px-3 py-2 text-sm text-ck-text focus:border-ck-red focus:outline-none"
             >
-              <option value="manual">Handmatig</option>
-              <option value="website">Website</option>
-              <option value="phone">Telefoon</option>
-              <option value="email">E-mail</option>
-              <option value="walk_in">Inloop</option>
+              <option value="manual">{t('manual')}</option>
+              <option value="website">{tLd('website')}</option>
+              <option value="phone">{tLd('phone')}</option>
+              <option value="email">{tLd('email')}</option>
+              <option value="walk_in">{tLd('walk_in')}</option>
             </select>
           </div>
           <div>
-            <label className="mb-1 block text-[11px] text-ck-text-muted">Geldig tot</label>
+            <label className="mb-1 block text-[11px] text-ck-text-muted">{t('validUntil')}</label>
             <input
               type="date"
               value={validUntil}
@@ -243,25 +248,25 @@ export default function CreateOfferPage() {
             />
           </div>
           <div>
-            <label className="mb-1 block text-[11px] text-ck-text-muted">Taal</label>
+            <label className="mb-1 block text-[11px] text-ck-text-muted">{tSy('language')}</label>
             <select
               value={locale}
               onChange={e => setLocale(e.target.value)}
               className="w-full rounded-[10px] border-[0.5px] border-ck-border bg-ck-surface px-3 py-2 text-sm text-ck-text focus:border-ck-red focus:outline-none"
             >
-              <option value="nl">Nederlands</option>
-              <option value="en">English</option>
-              <option value="tr">Turkce</option>
+              <option value="nl">{tSy('languageNl')}</option>
+              <option value="en">{tSy('languageEn')}</option>
+              <option value="tr">{tSy('languageTr')}</option>
             </select>
           </div>
           <div className="sm:col-span-2">
-            <label className="mb-1 block text-[11px] text-ck-text-muted">Opmerkingen</label>
+            <label className="mb-1 block text-[11px] text-ck-text-muted">{t('notes')}</label>
             <textarea
               value={notes}
               onChange={e => setNotes(e.target.value)}
               rows={2}
               className="w-full rounded-[10px] border-[0.5px] border-ck-border bg-ck-surface px-3 py-2 text-sm text-ck-text placeholder:text-ck-text-muted focus:border-ck-red focus:outline-none"
-              placeholder="Interne opmerkingen..."
+              placeholder={t('notes')}
             />
           </div>
         </div>
@@ -270,13 +275,13 @@ export default function CreateOfferPage() {
       {/* Line items */}
       <div className="rounded-[10px] border-[0.5px] border-ck-border bg-ck-surface p-5">
         <div className="mb-4 flex items-center justify-between">
-          <h2 className="text-xs font-medium uppercase tracking-wider text-ck-text-muted">Regels</h2>
+          <h2 className="text-xs font-medium uppercase tracking-wider text-ck-text-muted">{t('lines')}</h2>
           <button
             onClick={() => setLines(prev => [...prev, emptyLine()])}
             className="flex items-center gap-1 rounded-[10px] border-[0.5px] border-ck-border px-3 py-1.5 text-xs text-ck-text-3 hover:border-ck-red hover:text-ck-red transition-colors"
           >
             <Plus size={12} />
-            Regel toevoegen
+            {t('addLine')}
           </button>
         </div>
 
@@ -284,7 +289,7 @@ export default function CreateOfferPage() {
           {lines.map((line, idx) => (
             <div key={line.tempId} className="rounded-[10px] border-[0.5px] border-ck-border bg-ck-bg p-4">
               <div className="mb-3 flex items-center justify-between">
-                <span className="text-[11px] text-ck-text-muted">Regel {idx + 1}</span>
+                <span className="text-[11px] text-ck-text-muted">{t('lineN', { n: idx + 1 })}</span>
                 <button
                   onClick={() => removeLine(line.tempId)}
                   className="text-ck-text-muted hover:text-red-400 transition-colors"
@@ -294,30 +299,30 @@ export default function CreateOfferPage() {
               </div>
               <div className="grid gap-3 sm:grid-cols-6">
                 <div>
-                  <label className="mb-1 block text-[10px] text-ck-text-muted">Type</label>
+                  <label className="mb-1 block text-[10px] text-ck-text-muted">{t('type')}</label>
                   <select
                     value={line.kind}
                     onChange={e => updateLine(line.tempId, { kind: e.target.value as OfferLineKind })}
                     className="w-full rounded-lg border-[0.5px] border-ck-border bg-ck-surface px-2 py-1.5 text-xs text-ck-text focus:border-ck-red focus:outline-none"
                   >
-                    {(Object.keys(KIND_LABELS) as OfferLineKind[]).map(k => (
-                      <option key={k} value={k}>{KIND_LABELS[k]}</option>
+                    {(Object.keys(KIND_KEYS) as OfferLineKind[]).map(k => (
+                      <option key={k} value={k}>{t(KIND_KEYS[k])}</option>
                     ))}
                   </select>
                 </div>
                 <div className="sm:col-span-2">
-                  <label className="mb-1 block text-[10px] text-ck-text-muted">Omschrijving *</label>
+                  <label className="mb-1 block text-[10px] text-ck-text-muted">{t('description')} *</label>
                   <input
                     type="text"
                     value={line.description}
                     onChange={e => updateLine(line.tempId, { description: e.target.value })}
                     className="w-full rounded-lg border-[0.5px] border-ck-border bg-ck-surface px-2 py-1.5 text-xs text-ck-text focus:border-ck-red focus:outline-none"
-                    placeholder="Omschrijving..."
+                    placeholder={t('description')}
                   />
                 </div>
                 <div className="grid grid-cols-3 gap-2 sm:col-span-3">
                   <div>
-                    <label className="mb-1 block text-[10px] text-ck-text-muted">Aantal</label>
+                    <label className="mb-1 block text-[10px] text-ck-text-muted">{t('quantity')}</label>
                     <input
                       type="number"
                       step="0.01"
@@ -328,7 +333,7 @@ export default function CreateOfferPage() {
                     />
                   </div>
                   <div>
-                    <label className="mb-1 block text-[10px] text-ck-text-muted">Stukprijs</label>
+                    <label className="mb-1 block text-[10px] text-ck-text-muted">{t('unitPrice')}</label>
                     <input
                       type="number"
                       step="1"
@@ -336,11 +341,11 @@ export default function CreateOfferPage() {
                       value={line.unit_price_cents}
                       onChange={e => updateLine(line.tempId, { unit_price_cents: parseInt(e.target.value) || 0 })}
                       className="w-full rounded-lg border-[0.5px] border-ck-border bg-ck-surface px-2 py-1.5 text-xs text-ck-text tabular-nums focus:border-ck-red focus:outline-none"
-                      placeholder="centen"
+                      placeholder="ct"
                     />
                   </div>
                   <div>
-                    <label className="mb-1 block text-[10px] text-ck-text-muted">Korting %</label>
+                    <label className="mb-1 block text-[10px] text-ck-text-muted">{t('discount')} %</label>
                     <input
                       type="number"
                       step="0.01"
@@ -355,7 +360,7 @@ export default function CreateOfferPage() {
               </div>
               <div className="mt-2 grid gap-3 sm:grid-cols-6">
                 <div>
-                  <label className="mb-1 block text-[10px] text-ck-text-muted">Eenheid</label>
+                  <label className="mb-1 block text-[10px] text-ck-text-muted">{t('unit')}</label>
                   <input
                     type="text"
                     value={line.unit}
@@ -364,7 +369,7 @@ export default function CreateOfferPage() {
                   />
                 </div>
                 <div>
-                  <label className="mb-1 block text-[10px] text-ck-text-muted">BTW</label>
+                  <label className="mb-1 block text-[10px] text-ck-text-muted">{t('taxCode')}</label>
                   <select
                     value={line.tax_code}
                     onChange={e => updateLine(line.tempId, { tax_code: e.target.value as TaxCode })}
@@ -376,13 +381,13 @@ export default function CreateOfferPage() {
                   </select>
                 </div>
                 <div>
-                  <label className="mb-1 block text-[10px] text-ck-text-muted">Onderdeelnr.</label>
+                  <label className="mb-1 block text-[10px] text-ck-text-muted">{t('part')}</label>
                   <input
                     type="text"
                     value={line.part_number}
                     onChange={e => updateLine(line.tempId, { part_number: e.target.value })}
                     className="w-full rounded-lg border-[0.5px] border-ck-border bg-ck-surface px-2 py-1.5 text-xs text-ck-text focus:border-ck-red focus:outline-none"
-                    placeholder="Optioneel"
+                    placeholder={tCommon('optional')}
                   />
                 </div>
                 <div className="flex items-end sm:col-span-3">
@@ -399,15 +404,15 @@ export default function CreateOfferPage() {
         <div className="mt-4 border-t border-ck-divider pt-4">
           <div className="flex flex-col items-end gap-1">
             <div className="flex w-48 justify-between text-sm">
-              <span className="text-ck-text-muted">Subtotaal</span>
+              <span className="text-ck-text-muted">{t('subtotal')}</span>
               <span className="font-mono tabular-nums text-ck-text-2">{formatCents(subtotalCents)}</span>
             </div>
             <div className="flex w-48 justify-between text-sm">
-              <span className="text-ck-text-muted">BTW</span>
+              <span className="text-ck-text-muted">{t('vat')}</span>
               <span className="font-mono tabular-nums text-ck-text-2">{formatCents(vatCents)}</span>
             </div>
             <div className="flex w-48 justify-between border-t border-ck-divider pt-1 text-sm font-medium">
-              <span className="text-ck-text">Totaal</span>
+              <span className="text-ck-text">{t('total')}</span>
               <span className="font-mono tabular-nums text-ck-text">{formatCents(totalCents)}</span>
             </div>
           </div>

@@ -3,12 +3,15 @@
 import { useState, useEffect } from 'react';
 import { useParams, useRouter } from 'next/navigation';
 import Link from 'next/link';
+import { useTranslations } from 'next-intl';
 import {
   ArrowLeft, FileText, Send, CheckCircle, XCircle,
   File, GitBranch, Trash2, Plus, Hash, Calendar,
   User, Car, ExternalLink, Copy,
 } from 'lucide-react';
 import type { OfferType, OfferStatus, OfferLineKind, TaxCode } from '@/types/database';
+import { formatCurrency } from '@/lib/format';
+import { useAppLocale } from '@/components/AdminIntlProvider';
 
 type OfferLine = {
   id: string;
@@ -65,17 +68,17 @@ type OfferDetail = {
   }>;
 };
 
-const TYPE_LABELS: Record<OfferType, string> = {
-  offer: 'Offerte',
-  supplement: 'Aanvulling',
+const TYPE_KEYS: Record<OfferType, string> = {
+  offer: 'offer',
+  supplement: 'supplement',
 };
 
-const STATUS_LABELS: Record<OfferStatus, string> = {
-  draft: 'Concept',
-  sent: 'Verzonden',
-  approved: 'Goedgekeurd',
-  rejected: 'Afgewezen',
-  superseded: 'Vervangen',
+const STATUS_KEYS: Record<OfferStatus, string> = {
+  draft: 'draft',
+  sent: 'sent',
+  approved: 'approved',
+  rejected: 'rejected',
+  superseded: 'superseded',
 };
 
 const STATUS_ICONS: Record<OfferStatus, typeof File> = {
@@ -94,24 +97,12 @@ const STATUS_COLORS: Record<OfferStatus, string> = {
   superseded: 'text-amber-400 bg-amber-400/10',
 };
 
-const KIND_LABELS: Record<OfferLineKind, string> = {
-  labour: 'Arbeid',
-  part: 'Onderdeel',
-  material: 'Materiaal',
-  other: 'Overig',
+const KIND_KEYS: Record<OfferLineKind, string> = {
+  labour: 'labour',
+  part: 'part',
+  material: 'material',
+  other: 'other',
 };
-
-const ORIGIN_LABELS: Record<string, string> = {
-  manual: 'Handmatig',
-  website: 'Website',
-  phone: 'Telefoon',
-  email: 'E-mail',
-  walk_in: 'Inloop',
-};
-
-function formatCents(cents: number): string {
-  return new Intl.NumberFormat('nl-NL', { style: 'currency', currency: 'EUR' }).format(cents / 100);
-}
 
 function fmtDate(iso: string) {
   return new Date(iso).toLocaleDateString('nl-NL', {
@@ -124,6 +115,10 @@ function fmtDate(iso: string) {
 }
 
 export default function OfferDetailPage() {
+  const t = useTranslations('es');
+  const tCommon = useTranslations('common');
+  const { locale } = useAppLocale();
+  const formatCents = (c: number) => formatCurrency(c, locale);
   const { id } = useParams<{ id: string }>();
   const router = useRouter();
   const [offer, setOffer] = useState<OfferDetail | null>(null);
@@ -235,9 +230,9 @@ export default function OfferDetailPage() {
     return (
       <div className="flex h-64 flex-col items-center justify-center gap-3">
         <FileText size={32} className="text-ck-text-faint" />
-        <p className="text-sm text-ck-text-muted">Offerte niet gevonden</p>
+        <p className="text-sm text-ck-text-muted">{tCommon('notFound')}</p>
         <Link href="/app/offertes" className="text-sm text-ck-red hover:underline">
-          Terug naar offertes
+          {t('backToOffers')}
         </Link>
       </div>
     );
@@ -258,15 +253,15 @@ export default function OfferDetailPage() {
           <div>
             <div className="flex items-center gap-3">
               <h1 className="font-mono text-lg font-medium tabular-nums text-ck-text">
-                {offer.offer_number ?? 'CONCEPT'}
+                {offer.offer_number ?? tCommon('draft').toUpperCase()}
               </h1>
               <span className={`inline-flex items-center gap-1 rounded-full px-2.5 py-0.5 text-[10px] font-medium ${STATUS_COLORS[offer.status]}`}>
                 <Icon size={10} />
-                {STATUS_LABELS[offer.status]}
+                {t(STATUS_KEYS[offer.status])}
               </span>
             </div>
             <p className="mt-0.5 text-[11px] text-ck-text-muted">
-              {TYPE_LABELS[offer.type]} — {ORIGIN_LABELS[offer.origin] ?? offer.origin}
+              {t(TYPE_KEYS[offer.type])} — {offer.origin}
             </p>
           </div>
         </div>
@@ -279,7 +274,7 @@ export default function OfferDetailPage() {
               className="flex items-center gap-1.5 rounded-[10px] bg-ck-red px-4 py-2 text-sm font-medium text-white hover:bg-ck-red-hover transition-colors disabled:opacity-50"
             >
               <Send size={14} />
-              Verzenden
+              {t('send')}
             </button>
           )}
           {isSent && (
@@ -290,7 +285,7 @@ export default function OfferDetailPage() {
                 className="flex items-center gap-1.5 rounded-[10px] bg-emerald-600 px-4 py-2 text-sm font-medium text-white hover:bg-emerald-700 transition-colors disabled:opacity-50"
               >
                 <CheckCircle size={14} />
-                Goedkeuren
+                {t('approve')}
               </button>
               <button
                 onClick={() => setShowReject(true)}
@@ -298,7 +293,7 @@ export default function OfferDetailPage() {
                 className="flex items-center gap-1.5 rounded-[10px] border-[0.5px] border-ck-border bg-ck-surface px-4 py-2 text-sm text-ck-text-3 hover:border-red-500/50 hover:text-red-400 transition-colors disabled:opacity-50"
               >
                 <XCircle size={14} />
-                Afwijzen
+                {t('reject')}
               </button>
               <button
                 onClick={handleSupersede}
@@ -306,7 +301,7 @@ export default function OfferDetailPage() {
                 className="flex items-center gap-1.5 rounded-[10px] border-[0.5px] border-ck-border bg-ck-surface px-4 py-2 text-sm text-ck-text-3 hover:border-amber-500/50 hover:text-amber-400 transition-colors disabled:opacity-50"
               >
                 <Copy size={14} />
-                Herzien
+                {t('supersede')}
               </button>
             </>
           )}
@@ -325,10 +320,10 @@ export default function OfferDetailPage() {
       {/* Approve dialog */}
       {showApprove && (
         <div className="rounded-[10px] border-[0.5px] border-emerald-500/30 bg-emerald-500/5 p-4">
-          <p className="mb-3 text-sm font-medium text-emerald-400">Offerte goedkeuren</p>
+          <p className="mb-3 text-sm font-medium text-emerald-400">{t('approveOffer')}</p>
           <input
             type="text"
-            placeholder="Naam goedkeurder..."
+            placeholder={t('approvedBy')}
             value={approveName}
             onChange={e => setApproveName(e.target.value)}
             className="mb-3 w-full rounded-[10px] border-[0.5px] border-ck-border bg-ck-surface px-3 py-2 text-sm text-ck-text placeholder:text-ck-text-muted focus:border-emerald-500 focus:outline-none"
@@ -339,13 +334,13 @@ export default function OfferDetailPage() {
               disabled={acting || !approveName.trim()}
               className="rounded-[10px] bg-emerald-600 px-4 py-1.5 text-sm font-medium text-white hover:bg-emerald-700 disabled:opacity-50"
             >
-              Bevestigen
+              {tCommon('confirm')}
             </button>
             <button
               onClick={() => { setShowApprove(false); setApproveName(''); }}
               className="rounded-[10px] border-[0.5px] border-ck-border px-4 py-1.5 text-sm text-ck-text-3 hover:bg-ck-surface-2"
             >
-              Terug
+              {tCommon('cancel')}
             </button>
           </div>
         </div>
@@ -354,10 +349,10 @@ export default function OfferDetailPage() {
       {/* Reject dialog */}
       {showReject && (
         <div className="rounded-[10px] border-[0.5px] border-red-500/30 bg-red-500/5 p-4">
-          <p className="mb-3 text-sm font-medium text-red-400">Offerte afwijzen</p>
+          <p className="mb-3 text-sm font-medium text-red-400">{t('rejectOffer')}</p>
           <input
             type="text"
-            placeholder="Reden voor afwijzing..."
+            placeholder={t('rejectReason')}
             value={rejectReason}
             onChange={e => setRejectReason(e.target.value)}
             className="mb-3 w-full rounded-[10px] border-[0.5px] border-ck-border bg-ck-surface px-3 py-2 text-sm text-ck-text placeholder:text-ck-text-muted focus:border-red-500 focus:outline-none"
@@ -368,13 +363,13 @@ export default function OfferDetailPage() {
               disabled={acting || !rejectReason.trim()}
               className="rounded-[10px] bg-red-600 px-4 py-1.5 text-sm font-medium text-white hover:bg-red-700 disabled:opacity-50"
             >
-              Bevestigen
+              {tCommon('confirm')}
             </button>
             <button
               onClick={() => { setShowReject(false); setRejectReason(''); }}
               className="rounded-[10px] border-[0.5px] border-ck-border px-4 py-1.5 text-sm text-ck-text-3 hover:bg-ck-surface-2"
             >
-              Terug
+              {tCommon('cancel')}
             </button>
           </div>
         </div>
@@ -385,43 +380,43 @@ export default function OfferDetailPage() {
         <div className="space-y-6 lg:col-span-2">
           {/* Details card */}
           <div className="rounded-[10px] border-[0.5px] border-ck-border bg-ck-surface p-5">
-            <h2 className="mb-4 text-xs font-medium uppercase tracking-wider text-ck-text-muted">Details</h2>
+            <h2 className="mb-4 text-xs font-medium uppercase tracking-wider text-ck-text-muted">{tCommon('details')}</h2>
             <div className="grid gap-4 sm:grid-cols-2">
-              <InfoRow icon={Hash} label="Offertenummer" value={offer.offer_number ?? '—'} mono />
-              <InfoRow icon={FileText} label="Type" value={TYPE_LABELS[offer.type]} />
-              <InfoRow icon={User} label="Klant" value={offer.customers?.name ?? '—'} />
-              <InfoRow icon={Car} label="Voertuig" value={offer.vehicles ? (offer.vehicles.kenteken ?? `${offer.vehicles.make} ${offer.vehicles.model}`) : '—'} />
-              <InfoRow icon={Calendar} label="Aangemaakt" value={fmtDate(offer.created_at)} />
-              {offer.sent_at && <InfoRow icon={Send} label="Verzonden" value={fmtDate(offer.sent_at)} />}
-              {offer.valid_until && <InfoRow icon={Calendar} label="Geldig tot" value={new Date(offer.valid_until).toLocaleDateString('nl-NL')} />}
-              {offer.staff && <InfoRow icon={User} label="Aangemaakt door" value={offer.staff.name} />}
+              <InfoRow icon={Hash} label={t('number')} value={offer.offer_number ?? '—'} mono />
+              <InfoRow icon={FileText} label={t('type')} value={t(TYPE_KEYS[offer.type])} />
+              <InfoRow icon={User} label={t('customer')} value={offer.customers?.name ?? '—'} />
+              <InfoRow icon={Car} label={t('vehicle')} value={offer.vehicles ? (offer.vehicles.kenteken ?? `${offer.vehicles.make} ${offer.vehicles.model}`) : '—'} />
+              <InfoRow icon={Calendar} label={t('status')} value={fmtDate(offer.created_at)} />
+              {offer.sent_at && <InfoRow icon={Send} label={t('sent')} value={fmtDate(offer.sent_at)} />}
+              {offer.valid_until && <InfoRow icon={Calendar} label={t('validUntil')} value={new Date(offer.valid_until).toLocaleDateString('nl-NL')} />}
+              {offer.staff && <InfoRow icon={User} label={t('origin')} value={offer.staff.name} />}
               {offer.approved_at && (
                 <>
-                  <InfoRow icon={CheckCircle} label="Goedgekeurd" value={fmtDate(offer.approved_at)} />
-                  <InfoRow icon={User} label="Goedgekeurd door" value={offer.approved_by_name ?? '—'} />
+                  <InfoRow icon={CheckCircle} label={t('approved')} value={fmtDate(offer.approved_at)} />
+                  <InfoRow icon={User} label={t('approvedBy')} value={offer.approved_by_name ?? '—'} />
                 </>
               )}
               {offer.rejected_at && (
                 <>
-                  <InfoRow icon={XCircle} label="Afgewezen" value={fmtDate(offer.rejected_at)} />
-                  <InfoRow icon={FileText} label="Reden" value={offer.rejected_reason ?? '—'} />
+                  <InfoRow icon={XCircle} label={t('rejected')} value={fmtDate(offer.rejected_at)} />
+                  <InfoRow icon={FileText} label={t('rejectReason')} value={offer.rejected_reason ?? '—'} />
                 </>
               )}
-              {offer.notes && <InfoRow icon={FileText} label="Opmerkingen" value={offer.notes} />}
+              {offer.notes && <InfoRow icon={FileText} label={t('notes')} value={offer.notes} />}
             </div>
           </div>
 
           {/* Line items */}
           <div className="rounded-[10px] border-[0.5px] border-ck-border bg-ck-surface p-5">
             <div className="mb-4 flex items-center justify-between">
-              <h2 className="text-xs font-medium uppercase tracking-wider text-ck-text-muted">Regels</h2>
+              <h2 className="text-xs font-medium uppercase tracking-wider text-ck-text-muted">{t('lines')}</h2>
               {isDraft && (
                 <button
                   onClick={() => setShowAddLine(true)}
                   className="flex items-center gap-1 rounded-[10px] border-[0.5px] border-ck-border px-3 py-1.5 text-xs text-ck-text-3 hover:border-ck-red hover:text-ck-red transition-colors"
                 >
                   <Plus size={12} />
-                  Toevoegen
+                  {tCommon('add')}
                 </button>
               )}
             </div>
@@ -431,29 +426,29 @@ export default function OfferDetailPage() {
               <div className="mb-4 rounded-[10px] border-[0.5px] border-ck-red/30 bg-ck-bg p-4">
                 <div className="grid gap-3 sm:grid-cols-6">
                   <div>
-                    <label className="mb-1 block text-[10px] text-ck-text-muted">Type</label>
+                    <label className="mb-1 block text-[10px] text-ck-text-muted">{t('type')}</label>
                     <select
                       value={newLine.kind}
                       onChange={e => setNewLine(prev => ({ ...prev, kind: e.target.value as OfferLineKind }))}
                       className="w-full rounded-lg border-[0.5px] border-ck-border bg-ck-surface px-2 py-1.5 text-xs text-ck-text focus:border-ck-red focus:outline-none"
                     >
-                      {(Object.keys(KIND_LABELS) as OfferLineKind[]).map(k => (
-                        <option key={k} value={k}>{KIND_LABELS[k]}</option>
+                      {(Object.keys(KIND_KEYS) as OfferLineKind[]).map(k => (
+                        <option key={k} value={k}>{t(KIND_KEYS[k])}</option>
                       ))}
                     </select>
                   </div>
                   <div className="sm:col-span-2">
-                    <label className="mb-1 block text-[10px] text-ck-text-muted">Omschrijving *</label>
+                    <label className="mb-1 block text-[10px] text-ck-text-muted">{t('description')} *</label>
                     <input
                       type="text"
                       value={newLine.description}
                       onChange={e => setNewLine(prev => ({ ...prev, description: e.target.value }))}
                       className="w-full rounded-lg border-[0.5px] border-ck-border bg-ck-surface px-2 py-1.5 text-xs text-ck-text focus:border-ck-red focus:outline-none"
-                      placeholder="Omschrijving..."
+                      placeholder={t('description')}
                     />
                   </div>
                   <div>
-                    <label className="mb-1 block text-[10px] text-ck-text-muted">Aantal</label>
+                    <label className="mb-1 block text-[10px] text-ck-text-muted">{t('quantity')}</label>
                     <input
                       type="number"
                       step="0.01"
@@ -464,7 +459,7 @@ export default function OfferDetailPage() {
                     />
                   </div>
                   <div>
-                    <label className="mb-1 block text-[10px] text-ck-text-muted">Stukprijs (ct)</label>
+                    <label className="mb-1 block text-[10px] text-ck-text-muted">{t('unitPrice')}</label>
                     <input
                       type="number"
                       step="1"
@@ -475,7 +470,7 @@ export default function OfferDetailPage() {
                     />
                   </div>
                   <div>
-                    <label className="mb-1 block text-[10px] text-ck-text-muted">BTW</label>
+                    <label className="mb-1 block text-[10px] text-ck-text-muted">{t('vat')}</label>
                     <select
                       value={newLine.tax_code}
                       onChange={e => setNewLine(prev => ({ ...prev, tax_code: e.target.value as TaxCode }))}
@@ -493,13 +488,13 @@ export default function OfferDetailPage() {
                     disabled={acting || !newLine.description.trim()}
                     className="rounded-[10px] bg-ck-red px-4 py-1.5 text-sm font-medium text-white hover:bg-ck-red-hover disabled:opacity-50"
                   >
-                    Toevoegen
+                    {tCommon('add')}
                   </button>
                   <button
                     onClick={() => setShowAddLine(false)}
                     className="rounded-[10px] border-[0.5px] border-ck-border px-4 py-1.5 text-sm text-ck-text-3 hover:bg-ck-surface-2"
                   >
-                    Annuleren
+                    {tCommon('cancel')}
                   </button>
                 </div>
               </div>
@@ -507,7 +502,7 @@ export default function OfferDetailPage() {
 
             {offer.offer_lines.length === 0 ? (
               <div className="flex h-24 items-center justify-center">
-                <p className="text-sm text-ck-text-muted">Nog geen regels</p>
+                <p className="text-sm text-ck-text-muted">{t('noLines')}</p>
               </div>
             ) : (
               <div className="overflow-x-auto">
@@ -515,13 +510,13 @@ export default function OfferDetailPage() {
                   <thead>
                     <tr className="border-b border-ck-border text-left text-[10px] uppercase tracking-wider text-ck-text-muted">
                       <th className="pb-2 pr-3 font-medium">#</th>
-                      <th className="pb-2 pr-3 font-medium">Type</th>
-                      <th className="pb-2 pr-3 font-medium">Omschrijving</th>
-                      <th className="pb-2 pr-3 font-medium text-right">Aantal</th>
-                      <th className="pb-2 pr-3 font-medium text-right">Stukprijs</th>
-                      <th className="pb-2 pr-3 font-medium text-right">Korting</th>
-                      <th className="pb-2 pr-3 font-medium text-right">BTW</th>
-                      <th className="pb-2 font-medium text-right">Totaal</th>
+                      <th className="pb-2 pr-3 font-medium">{t('type')}</th>
+                      <th className="pb-2 pr-3 font-medium">{t('description')}</th>
+                      <th className="pb-2 pr-3 font-medium text-right">{t('quantity')}</th>
+                      <th className="pb-2 pr-3 font-medium text-right">{t('unitPrice')}</th>
+                      <th className="pb-2 pr-3 font-medium text-right">{t('discount')}</th>
+                      <th className="pb-2 pr-3 font-medium text-right">{t('vat')}</th>
+                      <th className="pb-2 font-medium text-right">{t('total')}</th>
                       {isDraft && <th className="pb-2 font-medium" />}
                     </tr>
                   </thead>
@@ -530,7 +525,7 @@ export default function OfferDetailPage() {
                       <tr key={line.id} className="border-b border-ck-divider last:border-0">
                         <td className="py-2.5 pr-3 font-mono text-xs tabular-nums text-ck-text-muted">{idx + 1}</td>
                         <td className="py-2.5 pr-3">
-                          <span className="text-[10px] text-ck-text-3">{KIND_LABELS[line.kind]}</span>
+                          <span className="text-[10px] text-ck-text-3">{t(KIND_KEYS[line.kind])}</span>
                         </td>
                         <td className="py-2.5 pr-3 text-sm text-ck-text-2">
                           {line.description}
@@ -575,21 +570,21 @@ export default function OfferDetailPage() {
             <div className="mt-4 border-t border-ck-divider pt-4">
               <div className="flex flex-col items-end gap-1">
                 <div className="flex w-52 justify-between text-sm">
-                  <span className="text-ck-text-muted">Subtotaal</span>
+                  <span className="text-ck-text-muted">{t('subtotal')}</span>
                   <span className="font-mono tabular-nums text-ck-text-2">{formatCents(offer.subtotal_cents)}</span>
                 </div>
                 {offer.discount_cents > 0 && (
                   <div className="flex w-52 justify-between text-sm">
-                    <span className="text-ck-text-muted">Korting</span>
+                    <span className="text-ck-text-muted">{t('discount')}</span>
                     <span className="font-mono tabular-nums text-red-400">-{formatCents(offer.discount_cents)}</span>
                   </div>
                 )}
                 <div className="flex w-52 justify-between text-sm">
-                  <span className="text-ck-text-muted">BTW</span>
+                  <span className="text-ck-text-muted">{t('vat')}</span>
                   <span className="font-mono tabular-nums text-ck-text-2">{formatCents(offer.vat_cents)}</span>
                 </div>
                 <div className="flex w-52 justify-between border-t border-ck-divider pt-1 text-sm font-medium">
-                  <span className="text-ck-text">Totaal</span>
+                  <span className="text-ck-text">{t('total')}</span>
                   <span className="font-mono tabular-nums text-ck-text">{formatCents(offer.total_cents)}</span>
                 </div>
               </div>
@@ -601,26 +596,26 @@ export default function OfferDetailPage() {
         <div className="space-y-6">
           {/* Links */}
           <div className="rounded-[10px] border-[0.5px] border-ck-border bg-ck-surface p-5">
-            <h2 className="mb-3 text-xs font-medium uppercase tracking-wider text-ck-text-muted">Koppelingen</h2>
+            <h2 className="mb-3 text-xs font-medium uppercase tracking-wider text-ck-text-muted">{tCommon('details')}</h2>
             <div className="space-y-2">
               {offer.customers && (
-                <SideLink href={`/app/klanten/${offer.customers.id}`} label="Klant" value={offer.customers.name} />
+                <SideLink href={`/app/klanten/${offer.customers.id}`} label={t('customer')} value={offer.customers.name} />
               )}
               {offer.vehicles && (
                 <SideLink
                   href={`/app/voertuigen/${offer.vehicles.id}`}
-                  label="Voertuig"
+                  label={t('vehicle')}
                   value={offer.vehicles.kenteken ?? `${offer.vehicles.make ?? ''} ${offer.vehicles.model ?? ''}`}
                 />
               )}
               {offer.job_id && (
-                <SideLink href={`/app/jobs/${offer.job_id}`} label="Opdracht" value={offer.job_id.slice(0, 8)} />
+                <SideLink href={`/app/jobs/${offer.job_id}`} label={tCommon('job')} value={offer.job_id.slice(0, 8)} />
               )}
               {offer.lead_id && (
                 <SideLink href={`/app/leads/${offer.lead_id}`} label="Lead" value={offer.lead_id.slice(0, 8)} />
               )}
               {offer.supersedes_id && (
-                <SideLink href={`/app/offertes/${offer.supersedes_id}`} label="Vervangt" value={offer.supersedes_id.slice(0, 8)} />
+                <SideLink href={`/app/offertes/${offer.supersedes_id}`} label={t('supersede')} value={offer.supersedes_id.slice(0, 8)} />
               )}
             </div>
           </div>
@@ -628,7 +623,7 @@ export default function OfferDetailPage() {
           {/* Version chain */}
           {offer.chain && offer.chain.length > 1 && (
             <div className="rounded-[10px] border-[0.5px] border-ck-border bg-ck-surface p-5">
-              <h2 className="mb-3 text-xs font-medium uppercase tracking-wider text-ck-text-muted">Versieketen</h2>
+              <h2 className="mb-3 text-xs font-medium uppercase tracking-wider text-ck-text-muted">{t('chain')}</h2>
               <div className="space-y-2">
                 {offer.chain.map(c => (
                   <Link
@@ -638,9 +633,9 @@ export default function OfferDetailPage() {
                       c.id === offer.id ? 'bg-ck-surface-3 text-ck-text' : 'text-ck-text-3 hover:bg-ck-surface-2'
                     }`}
                   >
-                    <span className="font-mono text-xs tabular-nums">{c.offer_number ?? 'CONCEPT'}</span>
+                    <span className="font-mono text-xs tabular-nums">{c.offer_number ?? tCommon('draft').toUpperCase()}</span>
                     <span className={`rounded-full px-2 py-0.5 text-[9px] ${STATUS_COLORS[c.status]}`}>
-                      {STATUS_LABELS[c.status]}
+                      {t(STATUS_KEYS[c.status])}
                     </span>
                   </Link>
                 ))}

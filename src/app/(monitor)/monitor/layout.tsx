@@ -2,9 +2,23 @@
 
 import { useEffect, useState } from 'react';
 import { useRouter } from 'next/navigation';
+import { useTranslations } from 'next-intl';
 import { getSession, type Session } from '@/lib/auth';
+import { AdminIntlProvider } from '@/components/AdminIntlProvider';
 
-export default function MonitorLayout({ children }: { children: React.ReactNode }) {
+function MonitorLoading() {
+  const t = useTranslations('monitor');
+  return (
+    <div className="flex h-screen items-center justify-center bg-[#0a0a0f]">
+      <div className="text-center">
+        <div className="mx-auto mb-3 h-10 w-10 animate-spin rounded-full border-2 border-[#1e1e2a] border-t-[#E8364E]" />
+        <p className="text-sm text-[#6b6b80]">{t('loadingMonitor')}</p>
+      </div>
+    </div>
+  );
+}
+
+function MonitorShell({ children }: { children: React.ReactNode }) {
   const router = useRouter();
   const [session, setSession] = useState<Session | undefined>(undefined);
 
@@ -26,19 +40,20 @@ export default function MonitorLayout({ children }: { children: React.ReactNode 
   }, [router]);
 
   if (session === undefined) {
-    return (
-      <div className="flex h-screen items-center justify-center bg-[#0a0a0f]">
-        <div className="text-center">
-          <div className="mx-auto mb-3 h-10 w-10 animate-spin rounded-full border-2 border-[#1e1e2a] border-t-[#E8364E]" />
-          <p className="text-sm text-[#6b6b80]">Monitoring laden...</p>
-        </div>
-      </div>
-    );
+    return <MonitorLoading />;
   }
 
   return (
     <div className="min-h-screen bg-[#0a0a0f]">
       {children}
     </div>
+  );
+}
+
+export default function MonitorLayout({ children }: { children: React.ReactNode }) {
+  return (
+    <AdminIntlProvider>
+      <MonitorShell>{children}</MonitorShell>
+    </AdminIntlProvider>
   );
 }

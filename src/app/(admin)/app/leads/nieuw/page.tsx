@@ -2,9 +2,13 @@
 
 import { useState } from 'react';
 import { useRouter } from 'next/navigation';
+import { useTranslations } from 'next-intl';
 import { ScreenBadge } from '@/components/ui/ScreenBadge';
 
 export default function NewLeadPage() {
+  const t = useTranslations('ld');
+  const tCommon = useTranslations('common');
+  const tKl = useTranslations('kl');
   const router = useRouter();
   const [saving, setSaving] = useState(false);
   const [error, setError] = useState('');
@@ -37,7 +41,7 @@ export default function NewLeadPage() {
       router.push(`/app/leads/${lead.id}`);
     } else {
       const err = await res.json();
-      setError(err.error ?? 'Opslaan mislukt');
+      setError(err.error ?? tCommon('saveFailed'));
       setSaving(false);
     }
   }
@@ -46,7 +50,7 @@ export default function NewLeadPage() {
     <div className="mx-auto max-w-2xl space-y-6">
       <div className="flex items-center gap-3">
         <ScreenBadge code="LD01" />
-        <h1 className="font-display text-2xl font-bold text-white">Nieuwe lead</h1>
+        <h1 className="font-display text-2xl font-bold text-white">{t('new')}</h1>
       </div>
 
       {error && (
@@ -58,35 +62,35 @@ export default function NewLeadPage() {
       <form onSubmit={handleSubmit} className="space-y-4 rounded-lg border border-ck-dark-border bg-ck-dark-card p-6">
         <div className="grid grid-cols-2 gap-4">
           <div>
-            <label className="mb-1 block text-xs text-ck-muted">Bron</label>
+            <label className="mb-1 block text-xs text-ck-muted">{t('source')}</label>
             <select
               name="source"
               defaultValue="phone"
               className="w-full rounded-lg border border-ck-dark-border bg-ck-dark-surface px-3 py-2 text-sm text-white focus:border-ck-red focus:outline-none"
             >
-              <option value="website">Website</option>
-              <option value="phone">Telefoon</option>
-              <option value="email">Email</option>
-              <option value="walk_in">Inloop</option>
-              <option value="referral">Doorverwijzing</option>
+              <option value="website">{t('website')}</option>
+              <option value="phone">{t('phone')}</option>
+              <option value="email">{t('email')}</option>
+              <option value="walk_in">{t('walk_in')}</option>
+              <option value="referral">{t('referral')}</option>
             </select>
           </div>
           <div>
-            <label className="mb-1 block text-xs text-ck-muted">Taal</label>
+            <label className="mb-1 block text-xs text-ck-muted">{tKl('locale')}</label>
             <select
               name="locale"
               defaultValue="nl"
               className="w-full rounded-lg border border-ck-dark-border bg-ck-dark-surface px-3 py-2 text-sm text-white focus:border-ck-red focus:outline-none"
             >
-              <option value="nl">Nederlands</option>
-              <option value="en">English</option>
-              <option value="tr">Turkce</option>
+              <option value="nl">{t('languageNl')}</option>
+              <option value="en">{t('languageEn')}</option>
+              <option value="tr">{t('languageTr')}</option>
             </select>
           </div>
         </div>
 
         <div>
-          <label className="mb-1 block text-xs text-ck-muted">Naam *</label>
+          <label className="mb-1 block text-xs text-ck-muted">{t('nameRequired')}</label>
           <input
             name="name"
             required
@@ -96,7 +100,7 @@ export default function NewLeadPage() {
 
         <div className="grid grid-cols-2 gap-4">
           <div>
-            <label className="mb-1 block text-xs text-ck-muted">Email</label>
+            <label className="mb-1 block text-xs text-ck-muted">{t('email')}</label>
             <input
               name="email"
               type="email"
@@ -104,7 +108,7 @@ export default function NewLeadPage() {
             />
           </div>
           <div>
-            <label className="mb-1 block text-xs text-ck-muted">Telefoon</label>
+            <label className="mb-1 block text-xs text-ck-muted">{t('phone')}</label>
             <input
               name="phone"
               className="w-full rounded-lg border border-ck-dark-border bg-ck-dark-surface px-3 py-2 text-sm text-white focus:border-ck-red focus:outline-none"
@@ -114,7 +118,7 @@ export default function NewLeadPage() {
 
         <div className="grid grid-cols-2 gap-4">
           <div>
-            <label className="mb-1 block text-xs text-ck-muted">Kenteken</label>
+            <label className="mb-1 block text-xs text-ck-muted">{t('kenteken')}</label>
             <input
               name="kenteken"
               placeholder="AB-123-C"
@@ -122,7 +126,7 @@ export default function NewLeadPage() {
             />
           </div>
           <div>
-            <label className="mb-1 block text-xs text-ck-muted">Gewenste datum</label>
+            <label className="mb-1 block text-xs text-ck-muted">{t('preferredDate')}</label>
             <input
               name="preferred_date"
               type="date"
@@ -132,11 +136,11 @@ export default function NewLeadPage() {
         </div>
 
         <div>
-          <label className="mb-1 block text-xs text-ck-muted">Schadenomschrijving</label>
+          <label className="mb-1 block text-xs text-ck-muted">{t('damage')}</label>
           <textarea
             name="damage_description"
             rows={4}
-            placeholder="Beschrijf de schade..."
+            placeholder={t('damagePlaceholder')}
             className="w-full rounded-lg border border-ck-dark-border bg-ck-dark-surface px-3 py-2 text-sm text-white focus:border-ck-red focus:outline-none"
           />
         </div>
@@ -147,14 +151,14 @@ export default function NewLeadPage() {
             disabled={saving}
             className="rounded-lg bg-ck-red px-6 py-2 text-sm font-semibold text-white hover:bg-ck-red-hover disabled:opacity-50"
           >
-            {saving ? 'Opslaan...' : 'Opslaan'}
+            {saving ? tCommon('saving') : tCommon('save')}
           </button>
           <button
             type="button"
             onClick={() => router.back()}
             className="rounded-lg border border-ck-dark-border px-6 py-2 text-sm text-ck-muted-light hover:text-white"
           >
-            Annuleren
+            {tCommon('cancel')}
           </button>
         </div>
       </form>

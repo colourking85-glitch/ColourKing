@@ -3,6 +3,7 @@
 import { useState, useEffect, useCallback, useRef } from 'react';
 import { useParams, useRouter } from 'next/navigation';
 import Link from 'next/link';
+import { useTranslations } from 'next-intl';
 import { ArrowLeft, ChevronRight, MessageSquare, Clock, Camera, Upload, Trash2, X } from 'lucide-react';
 import { ScreenBadge } from '@/components/ui/ScreenBadge';
 import {
@@ -47,13 +48,14 @@ type JobDetail = {
   job_photos: { id: string; phase: string; storage_path: string; caption: string | null; created_at: string }[];
 };
 
-const PHASE_LABELS: Record<string, string> = {
-  before: 'Voor',
-  during: 'Tijdens',
-  after: 'Na',
-};
-
 export default function JobDetailPage() {
+  const t = useTranslations('jb');
+  const tCommon = useTranslations('common');
+  const PHASE_LABELS: Record<string, string> = {
+    before: t('before'),
+    during: t('during'),
+    after: t('after'),
+  };
   const { id } = useParams<{ id: string }>();
   const router = useRouter();
   const [job, setJob] = useState<JobDetail | null>(null);
@@ -131,8 +133,8 @@ export default function JobDetailPage() {
     loadPhotos();
   }
 
-  if (loading) return <div className="p-8 text-center text-ck-muted">Laden...</div>;
-  if (!job) return <div className="p-8 text-center text-red-400">Opdracht niet gevonden</div>;
+  if (loading) return <div className="p-8 text-center text-ck-muted">{tCommon('loading')}</div>;
+  if (!job) return <div className="p-8 text-center text-red-400">{tCommon('notFound')}</div>;
 
   const next = nextStages(job.stage);
   const photosByPhase = (phase: string) => photos.filter(p => p.phase === phase);
@@ -147,7 +149,7 @@ export default function JobDetailPage() {
           </button>
           <ScreenBadge code="JB10" />
           <h1 className="font-display text-2xl font-bold text-white">
-            Opdracht #{job.number}
+            {t('jobNumber')}{job.number}
           </h1>
           <span className={`rounded-full px-2.5 py-0.5 text-xs font-medium ${STAGE_COLORS[job.stage]}`}>
             {STAGE_LABELS[job.stage]}
@@ -173,7 +175,7 @@ export default function JobDetailPage() {
           {/* Customer & vehicle */}
           <div className="grid grid-cols-2 gap-4">
             <div className="rounded-lg border border-ck-dark-border bg-ck-dark-card p-4">
-              <h3 className="mb-2 text-xs font-medium uppercase text-ck-muted">Klant</h3>
+              <h3 className="mb-2 text-xs font-medium uppercase text-ck-muted">{t('customer')}</h3>
               {job.customers ? (
                 <div>
                   <Link href={`/app/klanten/${job.customers.id}`} className="font-medium text-white hover:text-ck-red">
@@ -183,12 +185,12 @@ export default function JobDetailPage() {
                   {job.customers.email && <div className="text-sm text-ck-muted-light">{job.customers.email}</div>}
                 </div>
               ) : (
-                <span className="text-sm text-ck-muted">Geen klant gekoppeld</span>
+                <span className="text-sm text-ck-muted">{t('notLinked')}</span>
               )}
             </div>
 
             <div className="rounded-lg border border-ck-dark-border bg-ck-dark-card p-4">
-              <h3 className="mb-2 text-xs font-medium uppercase text-ck-muted">Voertuig</h3>
+              <h3 className="mb-2 text-xs font-medium uppercase text-ck-muted">{t('vehicle')}</h3>
               {job.vehicles ? (
                 <div>
                   <div className="font-mono font-medium text-white">{job.vehicles.kenteken}</div>
@@ -198,7 +200,7 @@ export default function JobDetailPage() {
                   <div className="text-sm text-ck-muted-light">{job.vehicles.colour}</div>
                 </div>
               ) : (
-                <span className="text-sm text-ck-muted">Geen voertuig gekoppeld</span>
+                <span className="text-sm text-ck-muted">{t('noVehicleLinked')}</span>
               )}
             </div>
           </div>
@@ -207,11 +209,11 @@ export default function JobDetailPage() {
           <div className="rounded-lg border border-ck-dark-border bg-ck-dark-card p-4">
             <div className="grid grid-cols-2 gap-4 text-sm">
               <div>
-                <span className="text-ck-muted">KM-stand intake:</span>{' '}
+                <span className="text-ck-muted">{t('mileageIntake')}</span>{' '}
                 <span className="text-white">{job.intake_km ?? '—'}</span>
               </div>
               <div>
-                <span className="text-ck-muted">Aangemaakt:</span>{' '}
+                <span className="text-ck-muted">{t('createdDate')}</span>{' '}
                 <span className="text-white">{new Date(job.created_at).toLocaleDateString('nl-NL')}</span>
               </div>
             </div>
@@ -223,7 +225,7 @@ export default function JobDetailPage() {
           {/* Stage transition */}
           {next.length > 0 && (
             <div className="flex items-center gap-3">
-              <span className="text-sm text-ck-muted">Volgende fase:</span>
+              <span className="text-sm text-ck-muted">{t('nextStage')}</span>
               {next.map(to => (
                 <button
                   key={to}
@@ -244,7 +246,7 @@ export default function JobDetailPage() {
           <div className="rounded-lg border border-ck-dark-border bg-ck-dark-card p-4">
             <div className="mb-4 flex items-center justify-between">
               <h3 className="flex items-center gap-2 text-xs font-medium uppercase text-ck-muted">
-                <Camera size={14} /> Foto&apos;s
+                <Camera size={14} /> {t('photos')}
               </h3>
               <div className="flex items-center gap-2">
                 <select
@@ -252,13 +254,13 @@ export default function JobDetailPage() {
                   onChange={e => setPhotoPhase(e.target.value)}
                   className="rounded border border-ck-dark-border bg-ck-dark-surface px-2 py-1 text-xs text-white focus:border-ck-red focus:outline-none"
                 >
-                  <option value="before">Voor</option>
-                  <option value="during">Tijdens</option>
-                  <option value="after">Na</option>
+                  <option value="before">{t('before')}</option>
+                  <option value="during">{t('during')}</option>
+                  <option value="after">{t('after')}</option>
                 </select>
                 <label className="flex cursor-pointer items-center gap-1 rounded-lg bg-ck-red px-3 py-1.5 text-xs font-semibold text-white hover:bg-ck-red-hover">
                   <Upload size={12} />
-                  {uploading ? 'Uploaden...' : 'Upload'}
+                  {uploading ? t('uploading') : t('upload')}
                   <input
                     ref={fileInputRef}
                     type="file"
@@ -306,7 +308,7 @@ export default function JobDetailPage() {
 
             {photos.length === 0 && (
               <div className="py-4 text-center text-sm text-ck-muted">
-                Nog geen foto&apos;s. Upload de eerste hierboven.
+                {t('noPhotos')}
               </div>
             )}
           </div>
@@ -314,14 +316,14 @@ export default function JobDetailPage() {
           {/* Add note */}
           <div className="rounded-lg border border-ck-dark-border bg-ck-dark-card p-4">
             <h3 className="mb-3 flex items-center gap-2 text-xs font-medium uppercase text-ck-muted">
-              <MessageSquare size={14} /> Notitie toevoegen
+              <MessageSquare size={14} /> {t('addNote')}
             </h3>
             <div className="flex gap-2">
               <input
                 type="text"
                 value={note}
                 onChange={e => setNote(e.target.value)}
-                placeholder="Typ een notitie..."
+                placeholder={t('notePlaceholder')}
                 className="flex-1 rounded-lg border border-ck-dark-border bg-ck-dark-surface px-3 py-2 text-sm text-white placeholder:text-ck-muted focus:border-ck-red focus:outline-none"
                 onKeyDown={e => e.key === 'Enter' && handleAddNote()}
               />
@@ -329,7 +331,7 @@ export default function JobDetailPage() {
                 onClick={handleAddNote}
                 className="rounded-lg bg-ck-red px-4 py-2 text-sm font-semibold text-white hover:bg-ck-red-hover"
               >
-                Toevoegen
+                {tCommon('add')}
               </button>
             </div>
           </div>
@@ -338,7 +340,7 @@ export default function JobDetailPage() {
         {/* Right column: timeline */}
         <div className="rounded-lg border border-ck-dark-border bg-ck-dark-card p-4">
           <h3 className="mb-4 flex items-center gap-2 text-xs font-medium uppercase text-ck-muted">
-            <Clock size={14} /> Tijdlijn
+            <Clock size={14} /> {t('timeline')}
           </h3>
           <div className="space-y-3">
             {job.job_events.map(ev => (
@@ -351,7 +353,7 @@ export default function JobDetailPage() {
                     {ev.from_stage ? (
                       <>{STAGE_LABELS[ev.from_stage as JobStage]} → {STAGE_LABELS[ev.to_stage as JobStage]}</>
                     ) : (
-                      <>Aangemaakt → {STAGE_LABELS[ev.to_stage as JobStage]}</>
+                      <>{t('createdArrow')} {STAGE_LABELS[ev.to_stage as JobStage]}</>
                     )}
                   </div>
                 ) : (
@@ -360,7 +362,7 @@ export default function JobDetailPage() {
               </div>
             ))}
             {job.job_events.length === 0 && (
-              <div className="text-sm text-ck-muted">Nog geen activiteit</div>
+              <div className="text-sm text-ck-muted">{t('noActivity')}</div>
             )}
           </div>
         </div>
@@ -380,7 +382,7 @@ export default function JobDetailPage() {
           </button>
           <img
             src={lightbox}
-            alt="Foto vergroting"
+            alt={t('photoEnlarged')}
             className="max-h-[90vh] max-w-[90vw] rounded-lg object-contain"
             onClick={e => e.stopPropagation()}
           />

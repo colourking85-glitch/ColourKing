@@ -2,8 +2,11 @@
 
 import { useState, useEffect } from 'react';
 import Link from 'next/link';
+import { useTranslations } from 'next-intl';
 import { Search, FileText, Plus, Send, CheckCircle, XCircle, File, GitBranch } from 'lucide-react';
 import type { OfferType, OfferStatus } from '@/types/database';
+import { formatCurrency } from '@/lib/format';
+import { useAppLocale } from '@/components/AdminIntlProvider';
 
 type OfferRow = {
   id: string;
@@ -20,9 +23,9 @@ type OfferRow = {
   vehicles: { id: string; kenteken: string | null; make: string | null; model: string | null } | null;
 };
 
-const TYPE_LABELS: Record<OfferType, string> = {
-  offer: 'Offerte',
-  supplement: 'Aanvulling',
+const TYPE_KEYS: Record<OfferType, string> = {
+  offer: 'offer',
+  supplement: 'supplement',
 };
 
 const TYPE_COLORS: Record<OfferType, string> = {
@@ -30,12 +33,12 @@ const TYPE_COLORS: Record<OfferType, string> = {
   supplement: 'text-blue-400 bg-blue-400/10',
 };
 
-const STATUS_LABELS: Record<OfferStatus, string> = {
-  draft: 'Concept',
-  sent: 'Verzonden',
-  approved: 'Goedgekeurd',
-  rejected: 'Afgewezen',
-  superseded: 'Vervangen',
+const STATUS_KEYS: Record<OfferStatus, string> = {
+  draft: 'draft',
+  sent: 'sent',
+  approved: 'approved',
+  rejected: 'rejected',
+  superseded: 'superseded',
 };
 
 const STATUS_ICONS: Record<OfferStatus, typeof File> = {
@@ -54,14 +57,11 @@ const STATUS_COLORS: Record<OfferStatus, string> = {
   superseded: 'text-amber-400 bg-amber-400/10',
 };
 
-function formatCents(cents: number): string {
-  return new Intl.NumberFormat('nl-NL', {
-    style: 'currency',
-    currency: 'EUR',
-  }).format(cents / 100);
-}
-
 export default function OfferListPage() {
+  const t = useTranslations('es');
+  const { locale } = useAppLocale();
+  const formatCents = (c: number) => formatCurrency(c, locale);
+  const tCommon = useTranslations('common');
   const [offers, setOffers] = useState<OfferRow[]>([]);
   const [search, setSearch] = useState('');
   const [typeFilter, setTypeFilter] = useState('');
@@ -84,9 +84,9 @@ export default function OfferListPage() {
     <div className="space-y-6">
       <div className="flex items-center justify-between">
         <div>
-          <h1 className="text-base font-medium text-ck-text">Offertes</h1>
+          <h1 className="text-base font-medium text-ck-text">{t('title')}</h1>
           <p className="mt-0.5 text-[11px] text-ck-text-muted">
-            Alle offertes en aanvullingen
+            {t('title')}
           </p>
         </div>
         <Link
@@ -94,7 +94,7 @@ export default function OfferListPage() {
           className="flex items-center gap-1.5 rounded-[10px] bg-ck-red px-4 py-2 text-sm font-medium text-white hover:bg-ck-red-hover transition-colors"
         >
           <Plus size={14} />
-          Nieuwe offerte
+          {t('new')}
         </Link>
       </div>
 
@@ -104,7 +104,7 @@ export default function OfferListPage() {
           <Search size={16} className="absolute left-3 top-1/2 -translate-y-1/2 text-ck-text-muted" />
           <input
             type="text"
-            placeholder="Zoek op offertenr. of klantnaam..."
+            placeholder={t('searchPlaceholder')}
             value={search}
             onChange={e => setSearch(e.target.value)}
             className="w-full rounded-[10px] border-[0.5px] border-ck-border bg-ck-surface py-2 pl-10 pr-4 text-sm text-ck-text placeholder:text-ck-text-muted focus:border-ck-red focus:outline-none"
@@ -115,9 +115,9 @@ export default function OfferListPage() {
           onChange={e => setTypeFilter(e.target.value)}
           className="rounded-[10px] border-[0.5px] border-ck-border bg-ck-surface px-3 py-2 text-sm text-ck-text focus:border-ck-red focus:outline-none"
         >
-          <option value="">Alle types</option>
-          {(Object.keys(TYPE_LABELS) as OfferType[]).map(t => (
-            <option key={t} value={t}>{TYPE_LABELS[t]}</option>
+          <option value="">{t('allTypes')}</option>
+          {(Object.keys(TYPE_KEYS) as OfferType[]).map(k => (
+            <option key={k} value={k}>{t(TYPE_KEYS[k])}</option>
           ))}
         </select>
         <select
@@ -125,9 +125,9 @@ export default function OfferListPage() {
           onChange={e => setStatusFilter(e.target.value)}
           className="rounded-[10px] border-[0.5px] border-ck-border bg-ck-surface px-3 py-2 text-sm text-ck-text focus:border-ck-red focus:outline-none"
         >
-          <option value="">Alle statussen</option>
-          {(Object.keys(STATUS_LABELS) as OfferStatus[]).map(s => (
-            <option key={s} value={s}>{STATUS_LABELS[s]}</option>
+          <option value="">{t('allStatuses')}</option>
+          {(Object.keys(STATUS_KEYS) as OfferStatus[]).map(s => (
+            <option key={s} value={s}>{t(STATUS_KEYS[s])}</option>
           ))}
         </select>
       </div>
@@ -142,20 +142,20 @@ export default function OfferListPage() {
           <div className="flex h-48 flex-col items-center justify-center gap-3">
             <FileText size={32} className="text-ck-text-faint" />
             <p className="text-sm text-ck-text-muted">
-              {search || typeFilter || statusFilter ? 'Geen offertes gevonden' : 'Nog geen offertes'}
+              {search || typeFilter || statusFilter ? t('noOffersFound') : t('noOffersMessage')}
             </p>
           </div>
         ) : (
           <table className="w-full">
             <thead>
               <tr className="border-b border-ck-border text-left text-[11px] uppercase tracking-wider text-ck-text-muted">
-                <th className="px-4 py-3 font-medium">Offerte</th>
-                <th className="px-4 py-3 font-medium">Type</th>
-                <th className="px-4 py-3 font-medium">Klant</th>
-                <th className="px-4 py-3 font-medium">Voertuig</th>
-                <th className="px-4 py-3 font-medium">Totaal</th>
-                <th className="px-4 py-3 font-medium">Status</th>
-                <th className="px-4 py-3 font-medium">Datum</th>
+                <th className="px-4 py-3 font-medium">{t('offer')}</th>
+                <th className="px-4 py-3 font-medium">{t('type')}</th>
+                <th className="px-4 py-3 font-medium">{t('customer')}</th>
+                <th className="px-4 py-3 font-medium">{t('vehicle')}</th>
+                <th className="px-4 py-3 font-medium">{t('total')}</th>
+                <th className="px-4 py-3 font-medium">{t('status')}</th>
+                <th className="px-4 py-3 font-medium">{t('validUntil')}</th>
               </tr>
             </thead>
             <tbody>
@@ -173,7 +173,7 @@ export default function OfferListPage() {
                     </td>
                     <td className="px-4 py-3">
                       <span className={`inline-block rounded-full px-2 py-0.5 text-[10px] font-medium ${TYPE_COLORS[offer.type]}`}>
-                        {TYPE_LABELS[offer.type]}
+                        {t(TYPE_KEYS[offer.type])}
                       </span>
                     </td>
                     <td className="px-4 py-3 text-sm text-ck-text-2">{offer.customers?.name ?? '—'}</td>
@@ -189,7 +189,7 @@ export default function OfferListPage() {
                     </td>
                     <td className="px-4 py-3">
                       <span className={`inline-flex items-center gap-1 rounded-full px-2 py-0.5 text-[10px] font-medium ${STATUS_COLORS[offer.status]}`}>
-                        {STATUS_LABELS[offer.status]}
+                        {t(STATUS_KEYS[offer.status])}
                       </span>
                     </td>
                     <td className="px-4 py-3 font-mono text-xs tabular-nums text-ck-text-muted">

@@ -2,6 +2,7 @@
 
 import { useState, useEffect, useCallback } from 'react';
 import Link from 'next/link';
+import { useTranslations } from 'next-intl';
 import {
   Search, CheckSquare, Plus, Play, Square, Clock,
   AlertTriangle, ChevronDown, ChevronRight, User,
@@ -32,13 +33,6 @@ type ActiveEntry = {
   clock_in: string;
 } | null;
 
-const STATUS_LABELS: Record<TaskStatus, string> = {
-  in_progress: 'Bezig',
-  todo: 'Te doen',
-  blocked: 'Geblokkeerd',
-  done: 'Afgerond',
-};
-
 const STATUS_COLORS: Record<TaskStatus, string> = {
   in_progress: 'text-blue-400 bg-blue-400/10',
   todo: 'text-amber-400 bg-amber-400/10',
@@ -64,6 +58,17 @@ function elapsedSince(iso: string): string {
 }
 
 export default function TasksPage() {
+  const t = useTranslations('tk');
+  const tc = useTranslations('common');
+  const statusLabel = (s: TaskStatus) => {
+    const map: Record<TaskStatus, string> = {
+      in_progress: t('inProgress'),
+      todo: t('todo'),
+      blocked: t('blocked'),
+      done: t('done'),
+    };
+    return map[s];
+  };
   const [tasks, setTasks] = useState<TaskRow[]>([]);
   const [search, setSearch] = useState('');
   const [staffFilter, setStaffFilter] = useState('');
@@ -163,9 +168,9 @@ export default function TasksPage() {
         <div className="flex items-center gap-3">
           <ScreenBadge code="TS05" />
           <div>
-            <h1 className="text-base font-medium text-ck-text">Taken</h1>
+            <h1 className="text-base font-medium text-ck-text">{t('title')}</h1>
             <p className="mt-0.5 text-[11px] text-ck-text-muted">
-              Alle taken en voortgang
+              {t('allTasks')}
             </p>
           </div>
         </div>
@@ -174,7 +179,7 @@ export default function TasksPage() {
           className="inline-flex items-center gap-1.5 rounded-[10px] bg-ck-red px-4 py-2 text-sm font-medium text-white hover:bg-ck-red-hover transition-colors"
         >
           <Plus size={14} />
-          Nieuwe taak
+          {t('createTask')}
         </Link>
       </div>
 
@@ -185,7 +190,7 @@ export default function TasksPage() {
             <div className="h-2 w-2 animate-pulse rounded-full bg-blue-400" />
             <Clock size={16} className="text-blue-400" />
             <span className="text-sm text-ck-text">
-              Ingeklokt: {elapsedSince(activeEntry.clock_in)}
+              {t('clockedIn', { elapsed: elapsedSince(activeEntry.clock_in) })}
             </span>
           </div>
           <button
@@ -193,7 +198,7 @@ export default function TasksPage() {
             className="inline-flex items-center gap-1.5 rounded-[10px] border-[0.5px] border-ck-border bg-ck-surface px-3 py-1.5 text-sm text-ck-text hover:bg-ck-surface-2 transition-colors"
           >
             <Square size={12} />
-            Uitklokken
+            {t('clockOut')}
           </button>
         </div>
       )}
@@ -204,7 +209,7 @@ export default function TasksPage() {
           <Search size={16} className="absolute left-3 top-1/2 -translate-y-1/2 text-ck-text-muted" />
           <input
             type="text"
-            placeholder="Zoek op taaknaam..."
+            placeholder={t('searchPlaceholder')}
             value={search}
             onChange={e => setSearch(e.target.value)}
             className="w-full rounded-[10px] border-[0.5px] border-ck-border bg-ck-surface py-2 pl-10 pr-4 text-sm text-ck-text placeholder:text-ck-text-muted focus:border-ck-red focus:outline-none"
@@ -212,7 +217,7 @@ export default function TasksPage() {
         </div>
         <input
           type="text"
-          placeholder="Filter op medewerker-ID..."
+          placeholder={t('filterStaff')}
           value={staffFilter}
           onChange={e => setStaffFilter(e.target.value)}
           className="rounded-[10px] border-[0.5px] border-ck-border bg-ck-surface px-3 py-2 text-sm text-ck-text placeholder:text-ck-text-muted focus:border-ck-red focus:outline-none"
@@ -228,7 +233,7 @@ export default function TasksPage() {
         <div className="flex h-48 flex-col items-center justify-center gap-3 rounded-[10px] border-[0.5px] border-ck-border bg-ck-surface">
           <CheckSquare size={32} className="text-ck-text-faint" />
           <p className="text-sm text-ck-text-muted">
-            {search || staffFilter ? 'Geen taken gevonden' : 'Nog geen taken'}
+            {search || staffFilter ? t('noTasksFound') : t('noTasks')}
           </p>
         </div>
       ) : (
@@ -247,10 +252,10 @@ export default function TasksPage() {
                 >
                   <CollapseIcon size={14} className="text-ck-text-muted" />
                   <span className={`inline-flex items-center rounded-full px-2 py-0.5 text-[10px] font-medium ${STATUS_COLORS[status]}`}>
-                    {STATUS_LABELS[status]}
+                    {statusLabel(status)}
                   </span>
                   <span className="text-[11px] text-ck-text-muted">
-                    {group.length} {group.length === 1 ? 'taak' : 'taken'}
+                    {group.length === 1 ? t('taskCount', { count: group.length }) : t('taskCountPlural', { count: group.length })}
                   </span>
                 </button>
 
@@ -302,7 +307,7 @@ export default function TasksPage() {
                               className="inline-flex items-center gap-1 rounded-[10px] border-[0.5px] border-ck-border px-2.5 py-1 text-[11px] text-ck-text hover:bg-ck-surface-2 transition-colors"
                             >
                               <Play size={10} />
-                              Start
+                              {t('start')}
                             </button>
                           )}
                           {status === 'in_progress' && (
@@ -312,7 +317,7 @@ export default function TasksPage() {
                                 className="inline-flex items-center gap-1 rounded-[10px] border-[0.5px] border-emerald-400/30 bg-emerald-400/5 px-2.5 py-1 text-[11px] text-emerald-400 hover:bg-emerald-400/10 transition-colors"
                               >
                                 <CheckSquare size={10} />
-                                Klaar
+                                {t('complete')}
                               </button>
                               {!activeEntry?.task_id || activeEntry.task_id !== task.id ? (
                                 <button
@@ -320,7 +325,7 @@ export default function TasksPage() {
                                   className="inline-flex items-center gap-1 rounded-[10px] border-[0.5px] border-blue-400/30 bg-blue-400/5 px-2.5 py-1 text-[11px] text-blue-400 hover:bg-blue-400/10 transition-colors"
                                 >
                                   <Clock size={10} />
-                                  Inklokken
+                                  {t('clockIn')}
                                 </button>
                               ) : (
                                 <span className="flex items-center gap-1 text-[11px] text-blue-400">
@@ -335,19 +340,19 @@ export default function TasksPage() {
                               onClick={() => handleStatusChange(task.id, 'todo')}
                               className="inline-flex items-center gap-1 rounded-[10px] border-[0.5px] border-ck-border px-2.5 py-1 text-[11px] text-ck-text hover:bg-ck-surface-2 transition-colors"
                             >
-                              Deblokkeren
+                              {t('unblock')}
                             </button>
                           )}
                           {(status === 'todo' || status === 'in_progress') && (
                             <button
                               onClick={() => {
-                                const reason = prompt('Reden van blokkade:');
+                                const reason = prompt(t('blockReasonPrompt'));
                                 if (reason) handleStatusChange(task.id, 'blocked', reason);
                               }}
                               className="inline-flex items-center gap-1 rounded-[10px] border-[0.5px] border-red-400/30 px-2.5 py-1 text-[11px] text-red-400 hover:bg-red-400/5 transition-colors"
                             >
                               <AlertTriangle size={10} />
-                              Blokkeren
+                              {t('block')}
                             </button>
                           )}
                         </div>

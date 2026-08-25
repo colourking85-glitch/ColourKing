@@ -4,6 +4,7 @@ import { useState, useEffect } from 'react';
 import { useParams, useRouter } from 'next/navigation';
 import Link from 'next/link';
 import { ArrowLeft, Clock, MessageCircle, FileText, Trophy, XCircle } from 'lucide-react';
+import { useTranslations } from 'next-intl';
 import { ScreenBadge } from '@/components/ui/ScreenBadge';
 
 type Lead = {
@@ -23,14 +24,6 @@ type Lead = {
   vehicles: { id: string; kenteken: string | null; make: string | null; model: string | null; colour: string | null } | null;
 };
 
-const STATUS_CONFIG: Record<string, { label: string; color: string; icon: typeof Clock }> = {
-  new: { label: 'Nieuw', color: 'text-blue-400 bg-blue-400/10 border-blue-400/30', icon: Clock },
-  contacted: { label: 'Benaderd', color: 'text-amber-400 bg-amber-400/10 border-amber-400/30', icon: MessageCircle },
-  quoted: { label: 'Offerte', color: 'text-purple-400 bg-purple-400/10 border-purple-400/30', icon: FileText },
-  won: { label: 'Gewonnen', color: 'text-green-400 bg-green-400/10 border-green-400/30', icon: Trophy },
-  lost: { label: 'Verloren', color: 'text-red-400 bg-red-400/10 border-red-400/30', icon: XCircle },
-};
-
 const TRANSITIONS: Record<string, string[]> = {
   new: ['contacted', 'lost'],
   contacted: ['quoted', 'lost'],
@@ -40,6 +33,17 @@ const TRANSITIONS: Record<string, string[]> = {
 };
 
 export default function LeadDetailPage() {
+  const t = useTranslations('ld');
+  const tCommon = useTranslations('common');
+
+  const STATUS_CONFIG: Record<string, { label: string; color: string; icon: typeof Clock }> = {
+    new: { label: t('new_status'), color: 'text-blue-400 bg-blue-400/10 border-blue-400/30', icon: Clock },
+    contacted: { label: t('contacted'), color: 'text-amber-400 bg-amber-400/10 border-amber-400/30', icon: MessageCircle },
+    quoted: { label: t('quoted'), color: 'text-purple-400 bg-purple-400/10 border-purple-400/30', icon: FileText },
+    won: { label: t('won'), color: 'text-green-400 bg-green-400/10 border-green-400/30', icon: Trophy },
+    lost: { label: t('lost'), color: 'text-red-400 bg-red-400/10 border-red-400/30', icon: XCircle },
+  };
+
   const { id } = useParams<{ id: string }>();
   const router = useRouter();
   const [lead, setLead] = useState<Lead | null>(null);
@@ -57,7 +61,7 @@ export default function LeadDetailPage() {
     setUpdating(true);
     let lostReason: string | undefined;
     if (newStatus === 'lost') {
-      lostReason = prompt('Reden voor verlies:') ?? undefined;
+      lostReason = prompt(t('lostReasonPrompt')) ?? undefined;
       if (lostReason === undefined) { setUpdating(false); return; }
     }
 
@@ -76,8 +80,8 @@ export default function LeadDetailPage() {
     setUpdating(false);
   }
 
-  if (loading) return <div className="p-8 text-center text-ck-muted">Laden...</div>;
-  if (!lead) return <div className="p-8 text-center text-ck-muted">Lead niet gevonden</div>;
+  if (loading) return <div className="p-8 text-center text-ck-muted">{tCommon('loading')}</div>;
+  if (!lead) return <div className="p-8 text-center text-ck-muted">{tCommon('notFound')}</div>;
 
   const cfg = STATUS_CONFIG[lead.status] ?? STATUS_CONFIG.new;
   const Icon = cfg.icon;
@@ -117,26 +121,26 @@ export default function LeadDetailPage() {
       <div className="grid grid-cols-1 gap-6 lg:grid-cols-2">
         <div className="space-y-6">
           <div className="rounded-lg border border-ck-dark-border bg-ck-dark-card p-6">
-            <h2 className="mb-4 text-sm font-semibold uppercase text-ck-muted">Contact</h2>
+            <h2 className="mb-4 text-sm font-semibold uppercase text-ck-muted">{t('contact')}</h2>
             <dl className="space-y-3">
-              <Row label="Email" value={lead.contact_email} />
-              <Row label="Telefoon" value={lead.contact_phone} />
-              <Row label="Kenteken" value={lead.kenteken} mono />
-              <Row label="Gewenste datum" value={lead.preferred_date ? new Date(lead.preferred_date).toLocaleDateString('nl-NL') : null} />
-              <Row label="Bron" value={lead.origin} />
-              <Row label="Taal" value={lead.locale?.toUpperCase()} />
-              <Row label="Aangemaakt" value={new Date(lead.created_at).toLocaleDateString('nl-NL', { day: 'numeric', month: 'long', year: 'numeric', hour: '2-digit', minute: '2-digit' })} />
+              <Row label={t('email')} value={lead.contact_email} />
+              <Row label={t('phone')} value={lead.contact_phone} />
+              <Row label={t('kenteken')} value={lead.kenteken} mono />
+              <Row label={t('preferredDate')} value={lead.preferred_date ? new Date(lead.preferred_date).toLocaleDateString('nl-NL') : null} />
+              <Row label={t('source')} value={lead.origin} />
+              <Row label={t('status')} value={lead.locale?.toUpperCase()} />
+              <Row label={tCommon('create')} value={new Date(lead.created_at).toLocaleDateString('nl-NL', { day: 'numeric', month: 'long', year: 'numeric', hour: '2-digit', minute: '2-digit' })} />
             </dl>
             {lead.lost_reason && (
               <div className="mt-4 rounded-lg border border-red-500/20 bg-red-500/5 p-3">
-                <p className="text-xs text-red-400">Reden verlies: {lead.lost_reason}</p>
+                <p className="text-xs text-red-400">{t('lostReason')}: {lead.lost_reason}</p>
               </div>
             )}
           </div>
 
           {lead.damage_description && (
             <div className="rounded-lg border border-ck-dark-border bg-ck-dark-card p-6">
-              <h2 className="mb-3 text-sm font-semibold uppercase text-ck-muted">Schadenomschrijving</h2>
+              <h2 className="mb-3 text-sm font-semibold uppercase text-ck-muted">{t('damage')}</h2>
               <p className="text-sm text-ck-muted-light whitespace-pre-wrap">{lead.damage_description}</p>
             </div>
           )}
@@ -144,36 +148,36 @@ export default function LeadDetailPage() {
 
         <div className="space-y-6">
           <div className="rounded-lg border border-ck-dark-border bg-ck-dark-card p-6">
-            <h2 className="mb-4 text-sm font-semibold uppercase text-ck-muted">Klant</h2>
+            <h2 className="mb-4 text-sm font-semibold uppercase text-ck-muted">{tCommon('customer')}</h2>
             {lead.customers ? (
               <Link href={`/app/klanten/${lead.customers.id}`} className="text-sm text-white hover:text-ck-red">
                 {lead.customers.name}
               </Link>
             ) : (
-              <p className="text-sm text-ck-muted">Nog niet gekoppeld</p>
+              <p className="text-sm text-ck-muted">{tCommon('notLinked')}</p>
             )}
           </div>
 
           <div className="rounded-lg border border-ck-dark-border bg-ck-dark-card p-6">
-            <h2 className="mb-4 text-sm font-semibold uppercase text-ck-muted">Voertuig</h2>
+            <h2 className="mb-4 text-sm font-semibold uppercase text-ck-muted">{tCommon('vehicle')}</h2>
             {lead.vehicles ? (
               <Link href={`/app/voertuigen/${lead.vehicles.id}`} className="text-sm text-white hover:text-ck-red">
-                {lead.vehicles.kenteken ?? 'Onbekend'} — {lead.vehicles.make} {lead.vehicles.model}
+                {lead.vehicles.kenteken ?? tCommon('unknown')} — {lead.vehicles.make} {lead.vehicles.model}
               </Link>
             ) : (
-              <p className="text-sm text-ck-muted">Nog niet gekoppeld</p>
+              <p className="text-sm text-ck-muted">{tCommon('notLinked')}</p>
             )}
           </div>
 
           <div className="rounded-lg border border-ck-dark-border bg-ck-dark-card p-6">
-            <h2 className="mb-4 text-sm font-semibold uppercase text-ck-muted">Acties</h2>
+            <h2 className="mb-4 text-sm font-semibold uppercase text-ck-muted">{tCommon('actions')}</h2>
             <div className="space-y-2">
               {lead.status === 'quoted' || lead.status === 'contacted' ? (
                 <Link
                   href={`/app/offertes/nieuw?lead=${id}`}
                   className="block w-full rounded-lg bg-ck-red px-4 py-2 text-center text-sm font-semibold text-white hover:bg-ck-red-hover"
                 >
-                  Offerte maken
+                  {t('createOffer')}
                 </Link>
               ) : null}
               {!lead.customers && (
@@ -181,7 +185,7 @@ export default function LeadDetailPage() {
                   onClick={() => router.push(`/app/klanten/nieuw?from_lead=${id}`)}
                   className="block w-full rounded-lg border border-ck-dark-border px-4 py-2 text-center text-sm text-ck-muted-light hover:text-white"
                 >
-                  Klant aanmaken
+                  {t('createCustomer')}
                 </button>
               )}
             </div>

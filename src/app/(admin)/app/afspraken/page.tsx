@@ -3,6 +3,7 @@
 import { useState, useEffect, useMemo } from 'react';
 import Link from 'next/link';
 import { ChevronLeft, ChevronRight, Plus, Calendar, Filter } from 'lucide-react';
+import { useTranslations } from 'next-intl';
 import { ScreenBadge } from '@/components/ui/ScreenBadge';
 import type { AppointmentType, AppointmentStatus } from '@/types/database';
 
@@ -27,11 +28,11 @@ type ResourceRow = {
   name: string;
 };
 
-const TYPE_LABELS: Record<AppointmentType, string> = {
-  inspection: 'Inspectie',
-  drop_off: 'Afleveren',
-  collection: 'Ophalen',
-  repair_slot: 'Reparatie',
+const TYPE_KEYS: Record<AppointmentType, string> = {
+  inspection: 'inspection',
+  drop_off: 'drop_off',
+  collection: 'collection',
+  repair_slot: 'repair_slot',
 };
 
 const TYPE_COLORS: Record<AppointmentType, string> = {
@@ -48,7 +49,7 @@ const STATUS_STYLES: Record<AppointmentStatus, string> = {
   completed: 'border-solid opacity-70',
 };
 
-const DAY_NAMES = ['Ma', 'Di', 'Wo', 'Do', 'Vr', 'Za', 'Zo'];
+const DAY_KEYS = ['dayMo', 'dayTu', 'dayWe', 'dayTh', 'dayFr', 'daySa', 'daySu'] as const;
 
 function getMonday(date: Date): Date {
   const d = new Date(date);
@@ -70,6 +71,8 @@ function formatDateDisplay(d: Date): string {
 const HOURS = Array.from({ length: 12 }, (_, i) => i + 7); // 07:00 - 18:00
 
 export default function AppointmentCalendarPage() {
+  const t = useTranslations('ap');
+  const tc = useTranslations('common');
   const [weekStart, setWeekStart] = useState(() => getMonday(new Date()));
   const [appointments, setAppointments] = useState<AppointmentRow[]>([]);
   const [resources, setResources] = useState<ResourceRow[]>([]);
@@ -151,9 +154,9 @@ export default function AppointmentCalendarPage() {
         <div className="flex items-center gap-3">
           <ScreenBadge code="AP05" />
           <div>
-            <h1 className="text-base font-medium text-ck-text">Agenda</h1>
+            <h1 className="text-base font-medium text-ck-text">{t('agenda')}</h1>
             <p className="mt-0.5 text-[11px] text-ck-text-muted">
-              Weekoverzicht afspraken
+              {t('weekOverview')}
             </p>
           </div>
         </div>
@@ -162,7 +165,7 @@ export default function AppointmentCalendarPage() {
           className="flex items-center gap-2 rounded-[10px] bg-ck-red px-4 py-2 text-sm font-medium text-white hover:bg-ck-red-hover transition-colors"
         >
           <Plus size={16} />
-          Nieuwe afspraak
+          {t('new')}
         </Link>
       </div>
 
@@ -179,7 +182,7 @@ export default function AppointmentCalendarPage() {
             onClick={goToday}
             className="rounded-[10px] border-[0.5px] border-ck-border bg-ck-surface px-3 py-2 text-sm text-ck-text-2 hover:bg-ck-surface-2 transition-colors"
           >
-            Vandaag
+            {t('today')}
           </button>
           <button
             onClick={nextWeek}
@@ -201,9 +204,9 @@ export default function AppointmentCalendarPage() {
             onChange={e => setTypeFilter(e.target.value)}
             className="rounded-[10px] border-[0.5px] border-ck-border bg-ck-surface px-3 py-1.5 text-sm text-ck-text focus:border-ck-red focus:outline-none"
           >
-            <option value="">Alle types</option>
-            {(Object.keys(TYPE_LABELS) as AppointmentType[]).map(t => (
-              <option key={t} value={t}>{TYPE_LABELS[t]}</option>
+            <option value="">{t('allTypes')}</option>
+            {(Object.keys(TYPE_KEYS) as AppointmentType[]).map(k => (
+              <option key={k} value={k}>{t(TYPE_KEYS[k])}</option>
             ))}
           </select>
           <select
@@ -211,7 +214,7 @@ export default function AppointmentCalendarPage() {
             onChange={e => setResourceFilter(e.target.value)}
             className="rounded-[10px] border-[0.5px] border-ck-border bg-ck-surface px-3 py-1.5 text-sm text-ck-text focus:border-ck-red focus:outline-none"
           >
-            <option value="">Alle resources</option>
+            <option value="">{t('allResources')}</option>
             {resources.map(r => (
               <option key={r.id} value={r.id}>{r.name}</option>
             ))}
@@ -253,7 +256,7 @@ export default function AppointmentCalendarPage() {
                       isToday ? 'bg-ck-red/10 text-ck-red font-medium' : 'text-ck-text-muted'
                     }`}
                   >
-                    <span>{DAY_NAMES[i]}</span>
+                    <span>{t(DAY_KEYS[i])}</span>
                     <span className={isToday ? 'rounded-full bg-ck-red px-1.5 py-0.5 text-white text-[10px]' : ''}>
                       {formatDateDisplay(day)}
                     </span>
@@ -284,7 +287,7 @@ export default function AppointmentCalendarPage() {
                           </div>
                           {height > 30 && (
                             <div className="text-[9px] opacity-70 truncate">
-                              {TYPE_LABELS[appt.type]}
+                              {t(TYPE_KEYS[appt.type])}
                               {appt.resources ? ` · ${appt.resources.name}` : ''}
                             </div>
                           )}
@@ -306,16 +309,16 @@ export default function AppointmentCalendarPage() {
 
       {/* Legend */}
       <div className="flex items-center gap-4 text-[10px] text-ck-text-muted">
-        {(Object.keys(TYPE_LABELS) as AppointmentType[]).map(t => (
-          <div key={t} className="flex items-center gap-1.5">
-            <div className={`h-2.5 w-2.5 rounded-sm ${TYPE_COLORS[t].split(' ')[0]}`} />
-            <span>{TYPE_LABELS[t]}</span>
+        {(Object.keys(TYPE_KEYS) as AppointmentType[]).map(k => (
+          <div key={k} className="flex items-center gap-1.5">
+            <div className={`h-2.5 w-2.5 rounded-sm ${TYPE_COLORS[k].split(' ')[0]}`} />
+            <span>{t(TYPE_KEYS[k])}</span>
           </div>
         ))}
         <span className="ml-4">|</span>
-        <span className="ml-2">---  = aangevraagd</span>
-        <span>___  = bevestigd</span>
-        <span className="line-through">abc = geannuleerd</span>
+        <span className="ml-2">---  = {t('legendRequested')}</span>
+        <span>___  = {t('legendConfirmed')}</span>
+        <span className="line-through">abc = {t('legendCancelled')}</span>
       </div>
     </div>
   );

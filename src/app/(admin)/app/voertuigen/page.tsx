@@ -3,6 +3,7 @@
 import { useState, useEffect } from 'react';
 import Link from 'next/link';
 import { Plus, Search, AlertTriangle } from 'lucide-react';
+import { useTranslations } from 'next-intl';
 import { ScreenBadge } from '@/components/ui/ScreenBadge';
 
 type Vehicle = {
@@ -17,6 +18,8 @@ type Vehicle = {
 };
 
 export default function VehiclesPage() {
+  const t = useTranslations('vh');
+  const tCommon = useTranslations('common');
   const [vehicles, setVehicles] = useState<Vehicle[]>([]);
   const [search, setSearch] = useState('');
   const [loading, setLoading] = useState(true);
@@ -35,14 +38,14 @@ export default function VehiclesPage() {
       <div className="flex items-center justify-between">
         <div className="flex items-center gap-3">
           <ScreenBadge code="VH05" />
-          <h1 className="font-display text-2xl font-bold text-white">Voertuigen</h1>
+          <h1 className="font-display text-2xl font-bold text-white">{t('title')}</h1>
         </div>
         <Link
           href="/app/voertuigen/nieuw"
           className="flex items-center gap-2 rounded-lg bg-ck-red px-4 py-2 text-sm font-semibold text-white hover:bg-ck-red-hover"
         >
           <Plus size={16} />
-          Nieuw voertuig
+          {t('new')}
         </Link>
       </div>
 
@@ -50,7 +53,7 @@ export default function VehiclesPage() {
         <Search size={16} className="absolute left-3 top-1/2 -translate-y-1/2 text-ck-muted" />
         <input
           type="text"
-          placeholder="Zoek op kenteken, merk of model..."
+          placeholder={t('searchPlaceholder')}
           value={search}
           onChange={e => setSearch(e.target.value)}
           className="w-full rounded-lg border border-ck-dark-border bg-ck-dark-card py-2 pl-10 pr-4 text-sm text-white placeholder:text-ck-muted focus:border-ck-red focus:outline-none"
@@ -59,20 +62,20 @@ export default function VehiclesPage() {
 
       <div className="rounded-lg border border-ck-dark-border bg-ck-dark-card">
         {loading ? (
-          <div className="p-8 text-center text-ck-muted">Laden...</div>
+          <div className="p-8 text-center text-ck-muted">{tCommon('loading')}</div>
         ) : vehicles.length === 0 ? (
           <div className="p-8 text-center text-ck-muted">
-            {search ? 'Geen voertuigen gevonden' : 'Nog geen voertuigen.'}
+            {search ? t('noVehiclesFound') : t('noVehiclesMessage')}
           </div>
         ) : (
           <table className="w-full">
             <thead>
               <tr className="border-b border-ck-dark-border text-left text-xs uppercase text-ck-muted">
-                <th className="px-4 py-3">Kenteken</th>
-                <th className="px-4 py-3">Voertuig</th>
-                <th className="px-4 py-3">Kleur</th>
-                <th className="px-4 py-3">Eigenaar</th>
-                <th className="px-4 py-3">Status</th>
+                <th className="px-4 py-3">{t('kenteken')}</th>
+                <th className="px-4 py-3">{tCommon('vehicle')}</th>
+                <th className="px-4 py-3">{t('colour')}</th>
+                <th className="px-4 py-3">{t('owner')}</th>
+                <th className="px-4 py-3">{t('status')}</th>
               </tr>
             </thead>
             <tbody>

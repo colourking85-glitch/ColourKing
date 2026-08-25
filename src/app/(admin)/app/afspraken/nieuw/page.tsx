@@ -2,6 +2,7 @@
 
 import { useState, useEffect } from 'react';
 import { useRouter } from 'next/navigation';
+import { useTranslations } from 'next-intl';
 import { ScreenBadge } from '@/components/ui/ScreenBadge';
 import type { AppointmentType } from '@/types/database';
 
@@ -17,25 +18,27 @@ type ResourceRow = {
   name: string;
 };
 
-const TYPE_LABELS: Record<AppointmentType, string> = {
-  inspection: 'Inspectie',
-  drop_off: 'Afleveren',
-  collection: 'Ophalen',
-  repair_slot: 'Reparatie',
+const TYPE_KEYS: Record<AppointmentType, string> = {
+  inspection: 'inspection',
+  drop_off: 'drop_off',
+  collection: 'collection',
+  repair_slot: 'repair_slot',
 };
 
 const DURATION_OPTIONS = [
-  { value: 15, label: '15 min' },
-  { value: 30, label: '30 min' },
-  { value: 45, label: '45 min' },
-  { value: 60, label: '1 uur' },
-  { value: 90, label: '1,5 uur' },
-  { value: 120, label: '2 uur' },
-  { value: 180, label: '3 uur' },
-  { value: 240, label: '4 uur' },
+  { value: 15, key: 'dur15' },
+  { value: 30, key: 'dur30' },
+  { value: 45, key: 'dur45' },
+  { value: 60, key: 'dur60' },
+  { value: 90, key: 'dur90' },
+  { value: 120, key: 'dur120' },
+  { value: 180, key: 'dur180' },
+  { value: 240, key: 'dur240' },
 ];
 
 export default function NewAppointmentPage() {
+  const t = useTranslations('ap');
+  const tc = useTranslations('common');
   const router = useRouter();
   const [saving, setSaving] = useState(false);
   const [error, setError] = useState('');
@@ -95,7 +98,7 @@ export default function NewAppointmentPage() {
       router.push('/app/afspraken');
     } else {
       const err = await res.json();
-      setError(err.error ?? 'Opslaan mislukt');
+      setError(err.error ?? tc('saveFailed'));
       setSaving(false);
     }
   }
@@ -107,9 +110,9 @@ export default function NewAppointmentPage() {
       <div className="flex items-center gap-3">
         <ScreenBadge code="AP01" />
         <div>
-          <h1 className="text-base font-medium text-ck-text">Nieuwe afspraak</h1>
+          <h1 className="text-base font-medium text-ck-text">{t('new')}</h1>
           <p className="mt-0.5 text-[11px] text-ck-text-muted">
-            Plan een inspectie, aflevering, ophaalmoment of reparatie
+            {t('planDesc')}
           </p>
         </div>
       </div>
@@ -123,20 +126,20 @@ export default function NewAppointmentPage() {
       <form onSubmit={handleSubmit} className="space-y-4 rounded-[10px] border-[0.5px] border-ck-border bg-ck-surface p-6">
         {/* Type */}
         <div>
-          <label className="mb-1 block text-[11px] font-medium text-ck-text-muted">Type afspraak *</label>
+          <label className="mb-1 block text-[11px] font-medium text-ck-text-muted">{t('typeLabel')}</label>
           <div className="grid grid-cols-4 gap-2">
-            {(Object.keys(TYPE_LABELS) as AppointmentType[]).map(t => (
+            {(Object.keys(TYPE_KEYS) as AppointmentType[]).map(k => (
               <button
-                key={t}
+                key={k}
                 type="button"
-                onClick={() => setType(t)}
+                onClick={() => setType(k)}
                 className={`rounded-[10px] border-[0.5px] px-3 py-2 text-sm transition-colors ${
-                  type === t
+                  type === k
                     ? 'border-ck-red bg-ck-red/10 text-ck-red'
                     : 'border-ck-border bg-ck-surface-2 text-ck-text-2 hover:border-ck-text-muted'
                 }`}
               >
-                {TYPE_LABELS[t]}
+                {t(TYPE_KEYS[k])}
               </button>
             ))}
           </div>
@@ -144,7 +147,7 @@ export default function NewAppointmentPage() {
 
         {/* Contact info */}
         <div>
-          <label className="mb-1 block text-[11px] font-medium text-ck-text-muted">Contactnaam *</label>
+          <label className="mb-1 block text-[11px] font-medium text-ck-text-muted">{t('contactName')}</label>
           <input
             name="contact_name"
             required
@@ -154,14 +157,14 @@ export default function NewAppointmentPage() {
 
         <div className="grid grid-cols-2 gap-4">
           <div>
-            <label className="mb-1 block text-[11px] font-medium text-ck-text-muted">Telefoon</label>
+            <label className="mb-1 block text-[11px] font-medium text-ck-text-muted">{t('phone')}</label>
             <input
               name="contact_phone"
               className="w-full rounded-[10px] border-[0.5px] border-ck-border bg-ck-surface-2 px-3 py-2 text-sm text-ck-text focus:border-ck-red focus:outline-none"
             />
           </div>
           <div>
-            <label className="mb-1 block text-[11px] font-medium text-ck-text-muted">Email</label>
+            <label className="mb-1 block text-[11px] font-medium text-ck-text-muted">{t('email')}</label>
             <input
               name="contact_email"
               type="email"
@@ -173,7 +176,7 @@ export default function NewAppointmentPage() {
         {/* Date & Time */}
         <div className="grid grid-cols-2 gap-4">
           <div>
-            <label className="mb-1 block text-[11px] font-medium text-ck-text-muted">Datum *</label>
+            <label className="mb-1 block text-[11px] font-medium text-ck-text-muted">{t('dateRequired')}</label>
             <input
               type="date"
               value={date}
@@ -184,11 +187,11 @@ export default function NewAppointmentPage() {
             />
           </div>
           <div>
-            <label className="mb-1 block text-[11px] font-medium text-ck-text-muted">Tijd *</label>
+            <label className="mb-1 block text-[11px] font-medium text-ck-text-muted">{t('timeRequired')}</label>
             {loadingSlots ? (
               <div className="flex h-[38px] items-center rounded-[10px] border-[0.5px] border-ck-border bg-ck-surface-2 px-3">
                 <div className="h-4 w-4 animate-spin rounded-full border-2 border-ck-border border-t-ck-red" />
-                <span className="ml-2 text-sm text-ck-text-muted">Laden...</span>
+                <span className="ml-2 text-sm text-ck-text-muted">{tc('loading')}</span>
               </div>
             ) : (
               <select
@@ -196,9 +199,9 @@ export default function NewAppointmentPage() {
                 required
                 className="w-full rounded-[10px] border-[0.5px] border-ck-border bg-ck-surface-2 px-3 py-2 text-sm text-ck-text focus:border-ck-red focus:outline-none"
               >
-                {!date && <option value="">Kies eerst een datum</option>}
+                {!date && <option value="">{t('chooseDate')}</option>}
                 {date && availableSlots.length === 0 && (
-                  <option value="">Geen beschikbare tijden</option>
+                  <option value="">{t('noTimes')}</option>
                 )}
                 {availableSlots.map(s => (
                   <option key={s.time} value={s.time}>{s.time}</option>
@@ -210,24 +213,24 @@ export default function NewAppointmentPage() {
 
         <div className="grid grid-cols-2 gap-4">
           <div>
-            <label className="mb-1 block text-[11px] font-medium text-ck-text-muted">Duur</label>
+            <label className="mb-1 block text-[11px] font-medium text-ck-text-muted">{t('durationLabel')}</label>
             <select
               name="duration_minutes"
               defaultValue={type === 'repair_slot' ? 60 : 30}
               className="w-full rounded-[10px] border-[0.5px] border-ck-border bg-ck-surface-2 px-3 py-2 text-sm text-ck-text focus:border-ck-red focus:outline-none"
             >
               {DURATION_OPTIONS.map(d => (
-                <option key={d.value} value={d.value}>{d.label}</option>
+                <option key={d.value} value={d.value}>{t(d.key)}</option>
               ))}
             </select>
           </div>
           <div>
-            <label className="mb-1 block text-[11px] font-medium text-ck-text-muted">Resource</label>
+            <label className="mb-1 block text-[11px] font-medium text-ck-text-muted">{t('resource')}</label>
             <select
               name="resource_id"
               className="w-full rounded-[10px] border-[0.5px] border-ck-border bg-ck-surface-2 px-3 py-2 text-sm text-ck-text focus:border-ck-red focus:outline-none"
             >
-              <option value="">Automatisch</option>
+              <option value="">{t('automatic')}</option>
               {resources.map(r => (
                 <option key={r.id} value={r.id}>{r.name}</option>
               ))}
@@ -238,7 +241,7 @@ export default function NewAppointmentPage() {
         {/* Optional links */}
         <div className="grid grid-cols-2 gap-4">
           <div>
-            <label className="mb-1 block text-[11px] font-medium text-ck-text-muted">Klant-ID (optioneel)</label>
+            <label className="mb-1 block text-[11px] font-medium text-ck-text-muted">{t('customerId')}</label>
             <input
               name="customer_id"
               placeholder="UUID"
@@ -246,7 +249,7 @@ export default function NewAppointmentPage() {
             />
           </div>
           <div>
-            <label className="mb-1 block text-[11px] font-medium text-ck-text-muted">Voertuig-ID (optioneel)</label>
+            <label className="mb-1 block text-[11px] font-medium text-ck-text-muted">{t('vehicleId')}</label>
             <input
               name="vehicle_id"
               placeholder="UUID"
@@ -257,11 +260,11 @@ export default function NewAppointmentPage() {
 
         {/* Notes */}
         <div>
-          <label className="mb-1 block text-[11px] font-medium text-ck-text-muted">Notities</label>
+          <label className="mb-1 block text-[11px] font-medium text-ck-text-muted">{t('notes')}</label>
           <textarea
             name="notes"
             rows={3}
-            placeholder="Extra informatie..."
+            placeholder={t('extraInfo')}
             className="w-full rounded-[10px] border-[0.5px] border-ck-border bg-ck-surface-2 px-3 py-2 text-sm text-ck-text focus:border-ck-red focus:outline-none"
           />
         </div>
@@ -270,7 +273,7 @@ export default function NewAppointmentPage() {
         {date && !loadingSlots && (
           <div className="rounded-[10px] border-[0.5px] border-ck-border bg-ck-surface-2 px-4 py-3">
             <p className="text-[11px] text-ck-text-muted">
-              {availableSlots.length} beschikbare tijdsloten op{' '}
+              {availableSlots.length} {t('slotInfo')}{' '}
               {new Date(date + 'T00:00:00').toLocaleDateString('nl-NL', {
                 weekday: 'long',
                 day: 'numeric',
@@ -287,14 +290,14 @@ export default function NewAppointmentPage() {
             disabled={saving}
             className="rounded-[10px] bg-ck-red px-6 py-2 text-sm font-medium text-white hover:bg-ck-red-hover disabled:opacity-50 transition-colors"
           >
-            {saving ? 'Opslaan...' : 'Opslaan'}
+            {saving ? tc('saving') : tc('save')}
           </button>
           <button
             type="button"
             onClick={() => router.back()}
             className="rounded-[10px] border-[0.5px] border-ck-border px-6 py-2 text-sm text-ck-text-2 hover:bg-ck-surface-2 transition-colors"
           >
-            Annuleren
+            {tc('cancel')}
           </button>
         </div>
       </form>

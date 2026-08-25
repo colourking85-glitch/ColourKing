@@ -7,6 +7,7 @@ import {
   Volume2, VolumeX, RefreshCw, Maximize, LogOut, Filter,
   Car, Clock, Calendar, Timer, TrendingUp, Activity,
 } from 'lucide-react';
+import { useTranslations } from 'next-intl';
 import { signOut } from '@/lib/auth';
 import type { NotificationType } from '@/types/database';
 
@@ -31,34 +32,24 @@ type MonitorJob = {
   vehicles: { id: string; kenteken: string | null; make: string | null; model: string | null; colour: string | null } | null;
 };
 
-const TYPE_META: Record<NotificationType, { icon: React.ElementType; color: string; bg: string; label: string; hex: string }> = {
-  new_lead: { icon: Inbox, color: 'text-amber-400', bg: 'bg-amber-400/10', label: 'Lead', hex: '#fbbf24' },
-  stage_change: { icon: Wrench, color: 'text-cyan-400', bg: 'bg-cyan-400/10', label: 'Fase', hex: '#22d3ee' },
-  new_email: { icon: Mail, color: 'text-blue-400', bg: 'bg-blue-400/10', label: 'E-mail', hex: '#60a5fa' },
-  appointment_confirmed: { icon: CalendarCheck, color: 'text-green-400', bg: 'bg-green-400/10', label: 'Afspraak', hex: '#4ade80' },
-  appointment_cancelled: { icon: CalendarCheck, color: 'text-red-400', bg: 'bg-red-400/10', label: 'Annulering', hex: '#f87171' },
-  part_received: { icon: Package, color: 'text-orange-400', bg: 'bg-orange-400/10', label: 'Onderdeel', hex: '#fb923c' },
-  payment_received: { icon: CreditCard, color: 'text-emerald-400', bg: 'bg-emerald-400/10', label: 'Betaling', hex: '#34d399' },
-  document_issued: { icon: FileText, color: 'text-rose-400', bg: 'bg-rose-400/10', label: 'Document', hex: '#fb7185' },
-  system: { icon: AlertCircle, color: 'text-slate-400', bg: 'bg-slate-400/10', label: 'Systeem', hex: '#94a3b8' },
+const TYPE_META: Record<NotificationType, { icon: React.ElementType; color: string; bg: string; hex: string }> = {
+  new_lead: { icon: Inbox, color: 'text-amber-400', bg: 'bg-amber-400/10', hex: '#fbbf24' },
+  stage_change: { icon: Wrench, color: 'text-cyan-400', bg: 'bg-cyan-400/10', hex: '#22d3ee' },
+  new_email: { icon: Mail, color: 'text-blue-400', bg: 'bg-blue-400/10', hex: '#60a5fa' },
+  appointment_confirmed: { icon: CalendarCheck, color: 'text-green-400', bg: 'bg-green-400/10', hex: '#4ade80' },
+  appointment_cancelled: { icon: CalendarCheck, color: 'text-red-400', bg: 'bg-red-400/10', hex: '#f87171' },
+  part_received: { icon: Package, color: 'text-orange-400', bg: 'bg-orange-400/10', hex: '#fb923c' },
+  payment_received: { icon: CreditCard, color: 'text-emerald-400', bg: 'bg-emerald-400/10', hex: '#34d399' },
+  document_issued: { icon: FileText, color: 'text-rose-400', bg: 'bg-rose-400/10', hex: '#fb7185' },
+  system: { icon: AlertCircle, color: 'text-slate-400', bg: 'bg-slate-400/10', hex: '#94a3b8' },
 };
 
-const STAGE_LABELS: Record<string, { label: string; color: string; border: string; hex: string }> = {
-  checked_in: { label: 'Ingecheckt', color: 'text-blue-400 bg-blue-400/10', border: 'border-blue-400/30', hex: '#60a5fa' },
-  in_progress: { label: 'In bewerking', color: 'text-amber-400 bg-amber-400/10', border: 'border-amber-400/30', hex: '#fbbf24' },
-  qc: { label: 'QC', color: 'text-purple-400 bg-purple-400/10', border: 'border-purple-400/30', hex: '#c084fc' },
-  scheduled: { label: 'Gepland', color: 'text-cyan-400 bg-cyan-400/10', border: 'border-cyan-400/30', hex: '#22d3ee' },
+const STAGE_STYLES: Record<string, { color: string; border: string; hex: string }> = {
+  checked_in: { color: 'text-blue-400 bg-blue-400/10', border: 'border-blue-400/30', hex: '#60a5fa' },
+  in_progress: { color: 'text-amber-400 bg-amber-400/10', border: 'border-amber-400/30', hex: '#fbbf24' },
+  qc: { color: 'text-purple-400 bg-purple-400/10', border: 'border-purple-400/30', hex: '#c084fc' },
+  scheduled: { color: 'text-cyan-400 bg-cyan-400/10', border: 'border-cyan-400/30', hex: '#22d3ee' },
 };
-
-function timeAgo(dateStr: string): string {
-  const diff = Date.now() - new Date(dateStr).getTime();
-  const mins = Math.floor(diff / 60000);
-  if (mins < 1) return 'Zojuist';
-  if (mins < 60) return `${mins}m`;
-  const hrs = Math.floor(mins / 60);
-  if (hrs < 24) return `${hrs}u`;
-  return `${Math.floor(hrs / 24)}d`;
-}
 
 function durationStr(dateStr: string): string {
   const diff = Date.now() - new Date(dateStr).getTime();
@@ -172,6 +163,7 @@ function useAlertSound() {
 }
 
 export default function MonitorDashboard() {
+  const t = useTranslations('monitor');
   const [notifications, setNotifications] = useState<Notification[]>([]);
   const [ongoing, setOngoing] = useState<MonitorJob[]>([]);
   const [scheduled, setScheduled] = useState<MonitorJob[]>([]);
@@ -188,6 +180,34 @@ export default function MonitorDashboard() {
   const lastCountRef = useRef(0);
   const alertTimeoutRef = useRef<ReturnType<typeof setTimeout>>();
   const playAlert = useAlertSound();
+
+  const typeLabel = (type: NotificationType): string => {
+    const map: Record<NotificationType, string> = {
+      new_lead: t('typeLead'), stage_change: t('typeStage'), new_email: t('typeEmail'),
+      appointment_confirmed: t('typeAppointment'), appointment_cancelled: t('typeCancellation'),
+      part_received: t('typePart'), payment_received: t('typePayment'),
+      document_issued: t('typeDocument'), system: t('typeSystem'),
+    };
+    return map[type] ?? type;
+  };
+
+  const stageLabel = (stage: string): string => {
+    const map: Record<string, string> = {
+      checked_in: t('stageCheckedIn'), in_progress: t('stageInProgress'),
+      qc: t('stageQC'), scheduled: t('stageScheduled'),
+    };
+    return map[stage] ?? stage;
+  };
+
+  const timeAgoLabel = (dateStr: string): string => {
+    const diff = Date.now() - new Date(dateStr).getTime();
+    const mins = Math.floor(diff / 60000);
+    if (mins < 1) return t('timeJustNow');
+    if (mins < 60) return `${mins}${t('timeMinAgo')}`;
+    const hrs = Math.floor(mins / 60);
+    if (hrs < 24) return `${hrs}${t('timeHourAgo')}`;
+    return `${Math.floor(hrs / 24)}${t('timeDayAgo')}`;
+  };
 
   const triggerAlert = useCallback(() => {
     setAlertActive(true);
@@ -289,32 +309,31 @@ export default function MonitorDashboard() {
   const recentUnread = notifications.filter(n => !n.read).slice(0, 8);
   const tickerItems = recentUnread.length > 0
     ? recentUnread.map(n => {
-        const meta = TYPE_META[n.type] ?? TYPE_META.system;
-        return `${meta.label}: ${n.title}${n.body ? ` — ${n.body}` : ''}`;
+        return `${typeLabel(n.type)}: ${n.title}${n.body ? ` — ${n.body}` : ''}`;
       })
-    : ['Geen nieuwe meldingen — systeem draait normaal'];
+    : [t('noNewNotifications')];
   const tickerText = tickerItems.join('     ●     ');
 
-  const notifByType = Object.entries(TYPE_META).map(([type, meta]) => ({
-    label: meta.label,
+  const notifByType = Object.entries(TYPE_META).map(([type]) => ({
+    label: typeLabel(type as NotificationType),
     value: notifications.filter(n => n.type === type && !n.read).length,
-    color: meta.hex,
+    color: TYPE_META[type as NotificationType].hex,
   })).filter(i => i.value > 0);
 
   const stageDistribution = [
-    { label: 'Ingecheckt', value: ongoing.filter(j => j.stage === 'checked_in').length, color: '#60a5fa' },
-    { label: 'In bewerking', value: ongoing.filter(j => j.stage === 'in_progress').length, color: '#fbbf24' },
-    { label: 'QC', value: ongoing.filter(j => j.stage === 'qc').length, color: '#c084fc' },
-    { label: 'Gepland', value: scheduled.length, color: '#22d3ee' },
+    { label: stageLabel('checked_in'), value: ongoing.filter(j => j.stage === 'checked_in').length, color: '#60a5fa' },
+    { label: stageLabel('in_progress'), value: ongoing.filter(j => j.stage === 'in_progress').length, color: '#fbbf24' },
+    { label: stageLabel('qc'), value: ongoing.filter(j => j.stage === 'qc').length, color: '#c084fc' },
+    { label: stageLabel('scheduled'), value: scheduled.length, color: '#22d3ee' },
   ];
 
   const statCards = [
-    { label: 'Ongelezen', value: unreadCount, color: 'text-[#E8364E]', pulse: unreadCount > 0 },
-    { label: 'In bewerking', value: ongoing.length, color: 'text-amber-400' },
-    { label: 'Gepland', value: scheduled.length, color: 'text-cyan-400' },
-    { label: 'Leads', value: notifications.filter(n => n.type === 'new_lead' && !n.read).length, color: 'text-yellow-400' },
-    { label: 'E-mails', value: notifications.filter(n => n.type === 'new_email' && !n.read).length, color: 'text-blue-400' },
-    { label: 'Betalingen', value: notifications.filter(n => n.type === 'payment_received' && !n.read).length, color: 'text-emerald-400' },
+    { label: t('unread'), value: unreadCount, color: 'text-[#E8364E]', pulse: unreadCount > 0 },
+    { label: t('inProgress'), value: ongoing.length, color: 'text-amber-400' },
+    { label: t('scheduled'), value: scheduled.length, color: 'text-cyan-400' },
+    { label: t('leads'), value: notifications.filter(n => n.type === 'new_lead' && !n.read).length, color: 'text-yellow-400' },
+    { label: t('emails'), value: notifications.filter(n => n.type === 'new_email' && !n.read).length, color: 'text-blue-400' },
+    { label: t('payments'), value: notifications.filter(n => n.type === 'payment_received' && !n.read).length, color: 'text-emerald-400' },
   ];
 
   const avgDuration = ongoing.length > 0
@@ -368,8 +387,8 @@ export default function MonitorDashboard() {
             <span className="text-sm font-extrabold tracking-tight text-white">CK</span>
           </div>
           <div>
-            <h1 className="text-sm font-bold tracking-widest text-white uppercase">Monitoring</h1>
-            <p className="text-[10px] text-[#3a3a50] tracking-wide">Autospuitbedrijf Colour King</p>
+            <h1 className="text-sm font-bold tracking-widest text-white uppercase">{t('title')}</h1>
+            <p className="text-[10px] text-[#3a3a50] tracking-wide">{t('subtitle')}</p>
           </div>
           {unreadCount > 0 && (
             <span className={`flex items-center gap-1.5 rounded-full bg-[#E8364E]/20 px-3 py-1 text-xs font-bold text-[#E8364E] ${alertActive ? '' : 'animate-pulse'}`}>
@@ -382,7 +401,7 @@ export default function MonitorDashboard() {
           {alertActive && (
             <span className="flex items-center gap-1.5 rounded-full bg-[#E8364E] px-3 py-1 text-[10px] font-bold uppercase tracking-wider text-white animate-pulse">
               <span className="h-2 w-2 rounded-full bg-white animate-ping" />
-              Nieuwe melding
+              {t('newNotification')}
             </span>
           )}
         </div>
@@ -417,7 +436,7 @@ export default function MonitorDashboard() {
           <button
             onClick={manualRefresh}
             className="flex h-9 w-9 items-center justify-center rounded-xl border border-[#1e1e2a] text-[#6b6b80] transition-colors hover:text-white hover:border-[#3a3a50]"
-            title="Nu vernieuwen"
+            title={t('refreshNow')}
           >
             <RefreshCw size={14} />
           </button>
@@ -426,14 +445,14 @@ export default function MonitorDashboard() {
             className={`flex h-9 w-9 items-center justify-center rounded-xl border transition-colors ${
               soundEnabled ? 'border-green-400/30 text-green-400 bg-green-400/5' : 'border-[#1e1e2a] text-[#6b6b80]'
             }`}
-            title={soundEnabled ? 'Geluid aan' : 'Geluid uit'}
+            title={soundEnabled ? t('soundOn') : t('soundOff')}
           >
             {soundEnabled ? <Volume2 size={14} /> : <VolumeX size={14} />}
           </button>
           <button
             onClick={goFullscreen}
             className="flex h-9 w-9 items-center justify-center rounded-xl border border-[#1e1e2a] text-[#6b6b80] transition-colors hover:text-white"
-            title="Volledig scherm"
+            title={t('fullscreen')}
           >
             <Maximize size={14} />
           </button>
@@ -442,13 +461,13 @@ export default function MonitorDashboard() {
               onClick={markAllRead}
               className="flex h-9 items-center gap-1.5 rounded-xl bg-[#E8364E] px-4 text-xs font-semibold text-white hover:bg-[#d42e44] transition-colors"
             >
-              <CheckCheck size={13} /> Alles gelezen
+              <CheckCheck size={13} /> {t('allRead')}
             </button>
           )}
           <button
             onClick={() => signOut().then(() => window.location.href = '/monitor/login')}
             className="flex h-9 w-9 items-center justify-center rounded-xl border border-[#1e1e2a] text-[#6b6b80] transition-colors hover:text-red-400"
-            title="Uitloggen"
+            title={t('signOut')}
           >
             <LogOut size={14} />
           </button>
@@ -492,29 +511,29 @@ export default function MonitorDashboard() {
           <div className="border-b border-[#1e1e2a] p-4">
             <div className="mb-3 flex items-center gap-2">
               <Car size={14} className="text-amber-400" />
-              <h2 className="text-[11px] font-bold uppercase tracking-widest text-white">In bewerking</h2>
+              <h2 className="text-[11px] font-bold uppercase tracking-widest text-white">{t('inProgress')}</h2>
               <span className="rounded-full bg-amber-400/10 px-2 py-0.5 text-[10px] font-bold tabular-nums text-amber-400">{ongoing.length}</span>
             </div>
             {ongoing.length === 0 ? (
               <div className="rounded-xl border border-dashed border-[#1e1e2a] p-8 text-center text-xs text-[#3a3a50]">
-                Geen voertuigen in bewerking
+                {t('noVehiclesInProgress')}
               </div>
             ) : (
               <div className="space-y-2">
                 {ongoing.map((job, i) => {
-                  const stage = STAGE_LABELS[job.stage] ?? { label: job.stage, color: 'text-slate-400 bg-slate-400/10', border: 'border-slate-400/30', hex: '#94a3b8' };
+                  const style = STAGE_STYLES[job.stage] ?? { color: 'text-slate-400 bg-slate-400/10', border: 'border-slate-400/30', hex: '#94a3b8' };
                   const hours = durationHours(job.created_at);
                   const isOvertime = hours > 48;
                   const isWarning = hours > 24 && !isOvertime;
                   return (
-                    <div key={job.id} className={`slide-in rounded-xl border bg-[#12121a] p-3 transition-all ${stage.border}`} style={{ animationDelay: `${i * 60}ms` }}>
+                    <div key={job.id} className={`slide-in rounded-xl border bg-[#12121a] p-3 transition-all ${style.border}`} style={{ animationDelay: `${i * 60}ms` }}>
                       <div className="flex items-center justify-between">
                         <div className="flex items-center gap-2">
                           <span className="font-mono text-sm font-bold tracking-wide text-white">
                             {job.vehicles?.kenteken ?? '—'}
                           </span>
-                          <span className={`rounded-full px-1.5 py-0.5 text-[8px] font-bold uppercase tracking-wider ${stage.color}`}>
-                            {stage.label}
+                          <span className={`rounded-full px-1.5 py-0.5 text-[8px] font-bold uppercase tracking-wider ${style.color}`}>
+                            {stageLabel(job.stage)}
                           </span>
                         </div>
                         <span className="font-mono text-[10px] tabular-nums text-[#3a3a50]">#{job.number}</span>
@@ -554,12 +573,12 @@ export default function MonitorDashboard() {
           <div className="border-b border-[#1e1e2a] p-4">
             <div className="mb-3 flex items-center gap-2">
               <Calendar size={14} className="text-cyan-400" />
-              <h2 className="text-[11px] font-bold uppercase tracking-widest text-white">Gepland (4 dagen)</h2>
+              <h2 className="text-[11px] font-bold uppercase tracking-widest text-white">{t('scheduledDays')}</h2>
               <span className="rounded-full bg-cyan-400/10 px-2 py-0.5 text-[10px] font-bold tabular-nums text-cyan-400">{scheduled.length}</span>
             </div>
             {scheduled.length === 0 ? (
               <div className="rounded-xl border border-dashed border-[#1e1e2a] p-8 text-center text-xs text-[#3a3a50]">
-                Geen geplande voertuigen
+                {t('noScheduled')}
               </div>
             ) : (
               <div className="space-y-2">
@@ -571,7 +590,7 @@ export default function MonitorDashboard() {
                           {job.vehicles?.kenteken ?? '—'}
                         </span>
                         <span className="rounded-full bg-cyan-400/10 px-1.5 py-0.5 text-[8px] font-bold uppercase tracking-wider text-cyan-400">
-                          Gepland
+                          {t('scheduled')}
                         </span>
                       </div>
                       <span className="font-mono text-[10px] tabular-nums text-[#3a3a50]">#{job.number}</span>
@@ -594,7 +613,7 @@ export default function MonitorDashboard() {
           <div className="p-4">
             <div className="mb-4 flex items-center gap-2">
               <Activity size={14} className="text-emerald-400" />
-              <h2 className="text-[11px] font-bold uppercase tracking-widest text-white">Prestatie-indicatoren</h2>
+              <h2 className="text-[11px] font-bold uppercase tracking-widest text-white">{t('performanceIndicators')}</h2>
             </div>
 
             {/* KPI cards */}
@@ -603,26 +622,26 @@ export default function MonitorDashboard() {
                 <div className={`font-mono text-xl font-bold tabular-nums ${avgDuration > 36 ? 'text-amber-400' : 'text-emerald-400'}`}>
                   {ongoing.length > 0 ? `${avgDuration}u` : '—'}
                 </div>
-                <div className="mt-1 text-[9px] font-medium uppercase tracking-wider text-[#4a4a60]">Gem. doorlooptijd</div>
+                <div className="mt-1 text-[9px] font-medium uppercase tracking-wider text-[#4a4a60]">{t('avgCycleTime')}</div>
               </div>
               <div className="rounded-xl border border-[#1e1e2a] bg-[#12121a] p-3 text-center">
                 <div className={`font-mono text-xl font-bold tabular-nums ${delayedCount > 0 ? 'text-red-400' : 'text-green-400'}`}>
                   {delayedCount}
                 </div>
-                <div className="mt-1 text-[9px] font-medium uppercase tracking-wider text-[#4a4a60]">Vertraagd (&gt;48u)</div>
+                <div className="mt-1 text-[9px] font-medium uppercase tracking-wider text-[#4a4a60]">{t('delayed')}</div>
               </div>
             </div>
 
             {/* Stage distribution bar chart */}
             <div className="rounded-xl border border-[#1e1e2a] bg-[#12121a] p-3">
-              <div className="mb-2 text-[9px] font-medium uppercase tracking-wider text-[#4a4a60]">Fase-verdeling</div>
+              <div className="mb-2 text-[9px] font-medium uppercase tracking-wider text-[#4a4a60]">{t('stageDistribution')}</div>
               <BarChart items={stageDistribution} />
             </div>
 
             {/* Notification type distribution */}
             {notifByType.length > 0 && (
               <div className="mt-2 rounded-xl border border-[#1e1e2a] bg-[#12121a] p-3">
-                <div className="mb-2 text-[9px] font-medium uppercase tracking-wider text-[#4a4a60]">Ongelezen per type</div>
+                <div className="mb-2 text-[9px] font-medium uppercase tracking-wider text-[#4a4a60]">{t('unreadByType')}</div>
                 <BarChart items={notifByType} />
               </div>
             )}
@@ -635,12 +654,12 @@ export default function MonitorDashboard() {
           <div className="flex shrink-0 items-center gap-2 border-b border-[#1e1e2a] bg-[#0c0c14] px-6 py-2.5">
             <Filter size={12} className="text-[#4a4a60]" />
             {[
-              { value: 'all', label: 'Alles' },
-              { value: 'new_lead', label: 'Leads' },
-              { value: 'stage_change', label: 'Fases' },
-              { value: 'new_email', label: 'E-mail' },
-              { value: 'appointment_confirmed', label: 'Afspraken' },
-              { value: 'payment_received', label: 'Betalingen' },
+              { value: 'all', label: t('filterAll') },
+              { value: 'new_lead', label: t('filterLeads') },
+              { value: 'stage_change', label: t('filterStages') },
+              { value: 'new_email', label: t('filterEmail') },
+              { value: 'appointment_confirmed', label: t('filterAppointments') },
+              { value: 'payment_received', label: t('filterPayments') },
             ].map(f => (
               <button
                 key={f.value}
@@ -666,11 +685,11 @@ export default function MonitorDashboard() {
               <div className="flex h-full flex-col items-center justify-center gap-4">
                 <BellOff size={48} className="text-[#1e1e2a]" />
                 <div className="text-sm text-[#4a4a60]">
-                  {filter === 'all' ? 'Geen meldingen — alles is rustig' : 'Geen meldingen van dit type'}
+                  {filter === 'all' ? t('noNotifications') : t('noNotificationsType')}
                 </div>
                 <div className="flex items-center gap-1.5 text-[11px] text-[#3a3a50]">
                   <RefreshCw size={10} className="animate-spin" />
-                  Automatisch vernieuwen actief ({refreshInterval >= 60 ? `${refreshInterval / 60} min` : `${refreshInterval}s`})
+                  {t('autoRefreshActive')} ({refreshInterval >= 60 ? `${refreshInterval / 60} min` : `${refreshInterval}${t('seconds')}`})
                 </div>
               </div>
             ) : (
@@ -695,7 +714,7 @@ export default function MonitorDashboard() {
                         <div className="flex items-center gap-2">
                           <span className="text-[13px] font-semibold text-white">{n.title}</span>
                           <span className={`rounded-full px-1.5 py-0.5 text-[8px] font-bold uppercase tracking-wider ${meta.bg} ${meta.color}`}>
-                            {meta.label}
+                            {typeLabel(n.type)}
                           </span>
                           {!n.read && (
                             <span className="h-2 w-2 rounded-full bg-[#E8364E] animate-pulse" />
@@ -706,7 +725,7 @@ export default function MonitorDashboard() {
                         )}
                       </div>
                       <div className="flex items-center gap-3">
-                        <span className="font-mono text-[11px] tabular-nums text-[#3a3a50]">{timeAgo(n.created_at)}</span>
+                        <span className="font-mono text-[11px] tabular-nums text-[#3a3a50]">{timeAgoLabel(n.created_at)}</span>
                         {!n.read && (
                           <button
                             onClick={() => markRead(n.id)}
@@ -730,10 +749,10 @@ export default function MonitorDashboard() {
         <span className="font-medium tracking-wider">monitor.colourking.nl</span>
         <span className="flex items-center gap-1.5">
           <span className={`h-1.5 w-1.5 rounded-full ${alertActive ? 'bg-[#E8364E] animate-ping' : 'bg-green-500'}`} />
-          {alertActive ? 'Alert actief' : `Verbonden — vernieuwt elke ${refreshInterval >= 60 ? `${refreshInterval / 60} min` : `${refreshInterval}s`}`}
-          {lastUpdated && <span className="ml-2 tabular-nums">· laatst: {timeStr(lastUpdated)}</span>}
+          {alertActive ? t('alertActive') : `${t('connected')} ${refreshInterval >= 60 ? `${refreshInterval / 60} min` : `${refreshInterval}${t('seconds')}`}`}
+          {lastUpdated && <span className="ml-2 tabular-nums">· {t('lastRefresh')} {timeStr(lastUpdated)}</span>}
         </span>
-        <span className="tabular-nums">{ongoing.length} actief · {scheduled.length} gepland · {notifications.length} meldingen</span>
+        <span className="tabular-nums">{ongoing.length} {t('activeLabel')} · {scheduled.length} {t('scheduledLabel')} · {notifications.length} {t('notificationsLabel')}</span>
       </footer>
     </div>
   );

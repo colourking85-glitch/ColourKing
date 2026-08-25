@@ -1,8 +1,27 @@
 'use client';
 
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
+import { useTranslations } from 'next-intl';
+import { formatCurrency } from '@/lib/format';
+import { useAppLocale } from '@/components/AdminIntlProvider';
 
-/* ── Demo data (until time-tracking & material tables exist) ─────── */
+/* ── Types ──────────────────────────────────────────────────────────── */
+
+interface DashboardKPIs {
+  active_jobs: number;
+  pending_offers: number;
+  overdue_invoices: number;
+  today_appointments: number;
+  outstanding_cents: number;
+  revenue_this_month_cents: number;
+}
+
+interface JobStageCount {
+  stage: string;
+  count: number;
+}
+
+/* ── Demo data fallback (used until real data is available) ──────── */
 
 const DEMO_KPIS = [
   { label: 'Afgeleverd', value: '7', unit: '/ 8 gepland', delta: 'Eén vastgehouden voor kleurcorrectie', tone: 'caution' as const, bar: 88 },
@@ -105,79 +124,179 @@ const TONE_BAR = {
   muted: 'bg-white/20',
 } as const;
 
+/* ── Helpers ─────────────────────────────────────────────────────────── */
+
 /* ── Component ────────────────────────────────────────────────────── */
 
 export default function DashboardPage() {
-  const [tab, setTab] = useState<'shift' | 'vehicle'>('shift');
+  const t = useTranslations('dashboard');
+  const tRp = useTranslations('rp');
+  const { locale } = useAppLocale();
+  const centsToEuro = (c: number) => formatCurrency(c, locale);
+
+  const [tab, setTab] = useState<'shift' | 'vehicle' | 'live'>('live');
   const [selectedVehicle, setSelectedVehicle] = useState(0);
+
+  const [kpis, setKpis] = useState<DashboardKPIs | null>(null);
+  const [stages, setStages] = useState<JobStageCount[]>([]);
+  const [kpiLoading, setKpiLoading] = useState(true);
+
+  // Fetch real KPIs
+  useEffect(() => {
+    async function loadKPIs() {
+      try {
+        const [dashRes, jobsRes] = await Promise.all([
+          fetch('/api/reports?type=dashboard'),
+          fetch(`/api/reports?type=jobs&startDate=${new Date().getFullYear()}-01-01&endDate=${new Date().toISOString().slice(0, 10)}`),
+        ]);
+        if (dashRes.ok) {
+          const data: DashboardKPIs = await dashRes.json();
+          setKpis(data);
+        }
+        if (jobsRes.ok) {
+          const data = await jobsRes.json();
+          if (data.stages_snapshot) setStages(data.stages_snapshot);
+        }
+      } catch {
+        // Gracefully fall back to no data
+      } finally {
+        setKpiLoading(false);
+      }
+    }
+    loadKPIs();
+  }, []);
 
   const v = DEMO_VEHICLES[selectedVehicle];
   const filteredTimeline = v.timeline.filter(s => s[1] > 0);
   const tlTotal = filteredTimeline.reduce((a, s) => a + s[1], 0) || 1;
 
   const tabs = [
+    { id: 'live' as const, label: t('todayOverview') },
     { id: 'shift' as const, label: 'Dienstoverzicht' },
     { id: 'vehicle' as const, label: 'Per voertuig' },
   ];
 
   return (
     <div className="space-y-6">
-      {/* Alert strip */}
-      <div className="flex items-center gap-3 rounded-[10px] border border-ck-red-border/50 bg-ck-red-bg px-4 py-2.5">
-        <span className="text-ck-red">&#9888;</span>
-        <span className="flex-1 text-[11px] text-ck-red-text">
-          2 opdrachten wachten op onderdelen — Škoda Octavia (CD-455-MN) is over de planning
-        </span>
-        <button className="text-[11px] font-medium text-ck-red hover:underline">Bekijk →</button>
-      </div>
-
       {/* Header */}
       <div className="flex items-end justify-between border-b border-ck-border pb-4">
         <div>
           <h2 className="text-base font-medium tracking-tight text-ck-text">
-            Body & paint prestaties
+            {t('title')}
           </h2>
           <div className="mt-1 flex items-center gap-2 text-[11px] text-ck-text-muted">
-            <span>Dienst 2</span>
-            <span className="text-ck-text-faint">·</span>
             <span>{new Date().toLocaleDateString('nl-NL', { weekday: 'long', day: 'numeric', month: 'long' })}</span>
-            <span className="text-ck-text-faint">·</span>
-            <span>14:00 – 22:00</span>
-            <span className="text-ck-text-faint">·</span>
-            <span>11 technici op de vloer</span>
-          </div>
-        </div>
-        <div className="flex items-center gap-3">
-          <div className="flex items-center gap-1.5 text-[11px] font-medium uppercase tracking-wider text-ck-green">
-            <span className="inline-block h-1.5 w-1.5 rounded-full bg-ck-green" />
-            Live · 6 min geleden
-          </div>
-          <div className="rounded-lg border border-ck-border bg-ck-surface-2 px-1 py-1 text-xs">
-            <span className="rounded bg-ck-amber-bg px-2 py-1 text-[11px] font-medium text-ck-amber">Demo</span>
           </div>
         </div>
       </div>
 
       {/* Tabs */}
       <nav className="flex gap-6 border-b border-ck-border">
-        {tabs.map(t => (
+        {tabs.map(tb => (
           <button
-            key={t.id}
-            onClick={() => setTab(t.id)}
+            key={tb.id}
+            onClick={() => setTab(tb.id)}
             className={`pb-3 text-sm transition-colors -mb-px border-b-2 ${
-              tab === t.id
+              tab === tb.id
                 ? 'border-ck-red font-medium text-ck-text'
                 : 'border-transparent text-ck-text-muted hover:text-ck-text'
             }`}
           >
-            {t.label}
+            {tb.label}
           </button>
         ))}
       </nav>
 
-      {/* ── SHIFT OVERVIEW ────────────────────────────────────────── */}
+      {/* ── LIVE OVERVIEW (real data) ─────────────────────────────── */}
+      {tab === 'live' && (
+        <div className="space-y-5">
+          {/* Real KPI cards */}
+          {kpiLoading ? (
+            <div className="grid grid-cols-2 gap-2.5 lg:grid-cols-3 xl:grid-cols-6">
+              {[...Array(6)].map((_, i) => (
+                <div key={i} className="rounded-[10px] border-[0.5px] border-ck-border bg-ck-surface p-4 animate-pulse">
+                  <div className="h-3 w-16 rounded bg-white/5" />
+                  <div className="mt-3 h-6 w-12 rounded bg-white/5" />
+                </div>
+              ))}
+            </div>
+          ) : kpis ? (
+            <div className="grid grid-cols-2 gap-2.5 lg:grid-cols-3 xl:grid-cols-6">
+              <div className="rounded-[10px] border-[0.5px] border-ck-border bg-ck-surface p-4">
+                <div className="text-[10px] uppercase tracking-wider text-ck-text-muted">{tRp('kpi.activeJobs')}</div>
+                <div className="mt-2 font-mono text-xl font-medium tabular-nums tracking-tight text-ck-text leading-none">{kpis.active_jobs}</div>
+              </div>
+              <div className="rounded-[10px] border-[0.5px] border-ck-border bg-ck-surface p-4">
+                <div className="text-[10px] uppercase tracking-wider text-ck-text-muted">{tRp('kpi.pendingOffers')}</div>
+                <div className="mt-2 font-mono text-xl font-medium tabular-nums tracking-tight text-ck-text leading-none">{kpis.pending_offers}</div>
+              </div>
+              <div className="rounded-[10px] border-[0.5px] border-ck-border bg-ck-surface p-4">
+                <div className="text-[10px] uppercase tracking-wider text-ck-text-muted">{tRp('kpi.overdueInvoices')}</div>
+                <div className="mt-2 font-mono text-xl font-medium tabular-nums tracking-tight text-ck-text leading-none">{kpis.overdue_invoices}</div>
+                {kpis.overdue_invoices > 0 && <div className="mt-2 text-[12px] text-red-400">{centsToEuro(kpis.outstanding_cents)}</div>}
+              </div>
+              <div className="rounded-[10px] border-[0.5px] border-ck-border bg-ck-surface p-4">
+                <div className="text-[10px] uppercase tracking-wider text-ck-text-muted">{tRp('kpi.todayAppointments')}</div>
+                <div className="mt-2 font-mono text-xl font-medium tabular-nums tracking-tight text-ck-text leading-none">{kpis.today_appointments}</div>
+              </div>
+              <div className="rounded-[10px] border-[0.5px] border-ck-border bg-ck-surface p-4">
+                <div className="text-[10px] uppercase tracking-wider text-ck-text-muted">{tRp('kpi.outstanding')}</div>
+                <div className="mt-2 font-mono text-xl font-medium tabular-nums tracking-tight text-ck-text leading-none">{centsToEuro(kpis.outstanding_cents)}</div>
+              </div>
+              <div className="rounded-[10px] border-[0.5px] border-ck-border bg-ck-surface p-4">
+                <div className="text-[10px] uppercase tracking-wider text-ck-text-muted">{tRp('kpi.revenueThisMonth')}</div>
+                <div className="mt-2 font-mono text-xl font-medium tabular-nums tracking-tight text-ck-text leading-none">{centsToEuro(kpis.revenue_this_month_cents)}</div>
+              </div>
+            </div>
+          ) : (
+            <div className="flex items-center justify-center rounded-[10px] border-[0.5px] border-dashed border-ck-border bg-ck-surface p-8 text-center">
+              <p className="text-sm text-ck-text-muted">{tRp('noData')}</p>
+            </div>
+          )}
+
+          {/* Jobs by stage */}
+          {stages.length > 0 && (
+            <section className="rounded-[10px] border-[0.5px] border-ck-border bg-ck-surface p-5">
+              <h3 className="text-xs font-medium text-ck-text-2">{t('jobsByStage')}</h3>
+              <div className="mt-5 space-y-3">
+                {stages.map((s) => {
+                  const maxCount = Math.max(...stages.map((x) => x.count), 1);
+                  return (
+                    <div key={s.stage} className="space-y-1">
+                      <div className="flex items-baseline justify-between gap-2">
+                        <span className="text-xs text-ck-text capitalize">{s.stage.replace(/_/g, ' ')}</span>
+                        <span className="shrink-0 font-mono text-xs tabular-nums text-ck-text-muted">{s.count}</span>
+                      </div>
+                      <div className="h-5 overflow-hidden rounded bg-white/5">
+                        <div
+                          className="h-full rounded bg-ck-red transition-all duration-700 ease-out"
+                          style={{ width: `${Math.round((s.count / maxCount) * 100)}%` }}
+                        />
+                      </div>
+                    </div>
+                  );
+                })}
+              </div>
+            </section>
+          )}
+        </div>
+      )}
+
+      {/* ── SHIFT OVERVIEW (demo data) ────────────────────────────── */}
       {tab === 'shift' && (
         <div className="space-y-5">
+          {/* Alert strip */}
+          <div className="flex items-center gap-3 rounded-[10px] border border-ck-red-border/50 bg-ck-red-bg px-4 py-2.5">
+            <span className="text-ck-red">&#9888;</span>
+            <span className="flex-1 text-[11px] text-ck-red-text">
+              2 opdrachten wachten op onderdelen
+            </span>
+          </div>
+
+          <div className="rounded-lg border border-ck-border bg-ck-surface-2 px-3 py-1.5 inline-block">
+            <span className="rounded bg-ck-amber-bg px-2 py-1 text-[11px] font-medium text-ck-amber">Demo</span>
+          </div>
+
           {/* KPI cards */}
           <div className="grid grid-cols-2 gap-2.5 lg:grid-cols-3 xl:grid-cols-6">
             {DEMO_KPIS.map(k => (
@@ -219,7 +338,7 @@ export default function DashboardPage() {
               <div className="mt-5 flex items-start gap-3 rounded-lg bg-white/5 p-3">
                 <span className="shrink-0 rounded bg-ck-red/20 px-2 py-0.5 text-[11px] font-medium text-ck-red">Bottleneck</span>
                 <p className="text-[13px] leading-relaxed text-ck-muted-light">
-                  Spuitcabine op 95% van bakcapaciteit terwijl plaatwerk 6 voertuigen vasthoudt. Twee van de vijf cabinecycli vanavond zijn enkelpaneelklussen — batch op kleurcode om ca. 1.4 uur cabinetijd vrij te maken.
+                  Spuitcabine op 95% van bakcapaciteit terwijl plaatwerk 6 voertuigen vasthoudt.
                 </p>
               </div>
             </section>
@@ -255,20 +374,20 @@ export default function DashboardPage() {
                 <div className="text-right text-[11px] font-medium uppercase tracking-wider text-ck-muted">Geklokt</div>
                 <div className="text-right text-[11px] font-medium uppercase tracking-wider text-ck-muted">Geproduceerd</div>
                 <div className="text-[11px] font-medium uppercase tracking-wider text-ck-muted">Efficiëntie</div>
-                {DEMO_TECHS.map(t => {
-                  const tone = t.eff >= 100 ? 'positive' : t.eff >= 88 ? 'caution' : 'critical';
+                {DEMO_TECHS.map(tc => {
+                  const tone = tc.eff >= 100 ? 'positive' : tc.eff >= 88 ? 'caution' : 'critical';
                   return [
-                    <div key={`${t.name}-name`} className="flex flex-col">
-                      <span className="text-sm font-medium text-ck-text">{t.name}</span>
-                      <span className="text-xs text-ck-muted">{t.role}</span>
+                    <div key={`${tc.name}-name`} className="flex flex-col">
+                      <span className="text-sm font-medium text-ck-text">{tc.name}</span>
+                      <span className="text-xs text-ck-muted">{tc.role}</span>
                     </div>,
-                    <div key={`${t.name}-clocked`} className="text-right font-mono text-sm tabular-nums text-ck-muted">{t.clocked}</div>,
-                    <div key={`${t.name}-produced`} className="text-right font-mono text-sm tabular-nums text-ck-muted-light">{t.produced}</div>,
-                    <div key={`${t.name}-eff`} className="flex items-center gap-2">
+                    <div key={`${tc.name}-clocked`} className="text-right font-mono text-sm tabular-nums text-ck-muted">{tc.clocked}</div>,
+                    <div key={`${tc.name}-produced`} className="text-right font-mono text-sm tabular-nums text-ck-muted-light">{tc.produced}</div>,
+                    <div key={`${tc.name}-eff`} className="flex items-center gap-2">
                       <div className="flex-1 h-1 overflow-hidden rounded-full bg-white/5">
-                        <div className={`h-full rounded-full ${TONE_BAR[tone]}`} style={{ width: `${Math.min(100, Math.round(t.eff / 1.3))}%` }} />
+                        <div className={`h-full rounded-full ${TONE_BAR[tone]}`} style={{ width: `${Math.min(100, Math.round(tc.eff / 1.3))}%` }} />
                       </div>
-                      <span className={`font-mono text-xs font-medium tabular-nums ${TONE_COLOR[tone]}`} style={{ width: 38, textAlign: 'right' }}>{t.eff}%</span>
+                      <span className={`font-mono text-xs font-medium tabular-nums ${TONE_COLOR[tone]}`} style={{ width: 38, textAlign: 'right' }}>{tc.eff}%</span>
                     </div>,
                   ];
                 })}
@@ -295,14 +414,17 @@ export default function DashboardPage() {
         </div>
       )}
 
-      {/* ── PER VEHICLE ───────────────────────────────────────────── */}
+      {/* ── PER VEHICLE (demo data) ───────────────────────────────── */}
       {tab === 'vehicle' && (
         <div className="grid gap-5 xl:grid-cols-[1.15fr_1fr] items-start">
           {/* Vehicle list */}
           <section className="rounded-[10px] border-[0.5px] border-ck-border bg-ck-surface p-5">
             <div className="flex items-baseline justify-between">
               <h3 className="text-xs font-medium text-ck-text-2">Werk in uitvoering</h3>
-              <span className="text-[11px] text-ck-muted">23 op locatie · 6 levering vandaag</span>
+              <div className="flex items-center gap-2">
+                <span className="text-[11px] text-ck-muted">23 op locatie</span>
+                <span className="rounded bg-ck-amber-bg px-2 py-0.5 text-[11px] font-medium text-ck-amber">Demo</span>
+              </div>
             </div>
             <div className="mt-5 grid grid-cols-[1fr_104px_74px_74px_92px] items-center gap-x-3 gap-y-1">
               <div className="text-[11px] font-medium uppercase tracking-wider text-ck-muted">Voertuig</div>

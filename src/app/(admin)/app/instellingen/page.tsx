@@ -1,33 +1,23 @@
 'use client';
 
 import { useState } from 'react';
+import { useTranslations } from 'next-intl';
 import { Settings, Palette, Globe, Building2, Bell, Check } from 'lucide-react';
 import { ScreenBadge } from '@/components/ui/ScreenBadge';
-
-const ACCENT_COLORS = [
-  { name: 'Rood', value: '#E8364E', class: 'bg-[#E8364E]' },
-  { name: 'Blauw', value: '#3B82F6', class: 'bg-blue-500' },
-  { name: 'Groen', value: '#22C55E', class: 'bg-green-500' },
-  { name: 'Oranje', value: '#F97316', class: 'bg-orange-500' },
-  { name: 'Paars', value: '#A855F7', class: 'bg-purple-500' },
-  { name: 'Cyaan', value: '#06B6D4', class: 'bg-cyan-500' },
-];
-
-const THEMES = [
-  { id: 'dark', label: 'Donker', desc: 'Standaard donker thema', preview: 'bg-[#0f0f12]' },
-  { id: 'light', label: 'Licht', desc: 'Licht thema (binnenkort)', preview: 'bg-gray-100', disabled: true },
-  { id: 'system', label: 'Systeem', desc: 'Volg systeemvoorkeur', preview: 'bg-gradient-to-r from-[#0f0f12] to-gray-100', disabled: true },
-];
+import { useAppLocale } from '@/components/AdminIntlProvider';
 
 type Tab = 'appearance' | 'general' | 'notifications';
 
 export default function SettingsPage() {
+  const tSy = useTranslations('sy');
+  const tCommon = useTranslations('common');
+  const { locale, setLocale } = useAppLocale();
   const [tab, setTab] = useState<Tab>('appearance');
   const [accent, setAccent] = useState('#E8364E');
   const [theme, setTheme] = useState('dark');
   const [compact, setCompact] = useState(false);
   const [sidebarCollapsed, setSidebarCollapsed] = useState(false);
-  const [language, setLanguage] = useState('nl');
+  const [language, setLanguage] = useState<'nl' | 'en' | 'tr'>(locale);
   const [companyName, setCompanyName] = useState('Colourking');
   const [dateFormat, setDateFormat] = useState('dd-MM-yyyy');
   const [saved, setSaved] = useState(false);
@@ -38,21 +28,39 @@ export default function SettingsPage() {
   const [notifAppointment, setNotifAppointment] = useState(false);
 
   function handleSave() {
+    if (language !== locale) {
+      setLocale(language as 'nl' | 'en' | 'tr');
+    }
     setSaved(true);
     setTimeout(() => setSaved(false), 2000);
   }
 
+  const ACCENT_COLORS = [
+    { name: tSy('colorRed'), value: '#E8364E', class: 'bg-[#E8364E]' },
+    { name: tSy('colorBlue'), value: '#3B82F6', class: 'bg-blue-500' },
+    { name: tSy('colorGreen'), value: '#22C55E', class: 'bg-green-500' },
+    { name: tSy('colorOrange'), value: '#F97316', class: 'bg-orange-500' },
+    { name: tSy('colorPurple'), value: '#A855F7', class: 'bg-purple-500' },
+    { name: tSy('colorCyan'), value: '#06B6D4', class: 'bg-cyan-500' },
+  ];
+
+  const THEMES = [
+    { id: 'dark', label: tSy('themeDark'), desc: tSy('themeDescDark'), preview: 'bg-[#0f0f12]' },
+    { id: 'light', label: tSy('themeLight'), desc: tSy('themeDescLight'), preview: 'bg-gray-100', disabled: true },
+    { id: 'system', label: tSy('themeSystem'), desc: tSy('themeDescSystem'), preview: 'bg-gradient-to-r from-[#0f0f12] to-gray-100', disabled: true },
+  ];
+
   const tabs: { id: Tab; label: string; icon: React.ElementType }[] = [
-    { id: 'appearance', label: 'Weergave', icon: Palette },
-    { id: 'general', label: 'Algemeen', icon: Building2 },
-    { id: 'notifications', label: 'Meldingen', icon: Bell },
+    { id: 'appearance', label: tSy('appearance'), icon: Palette },
+    { id: 'general', label: tSy('general'), icon: Building2 },
+    { id: 'notifications', label: tSy('notifications'), icon: Bell },
   ];
 
   return (
     <div className="space-y-6">
       <div className="flex items-center gap-3">
         <ScreenBadge code="SY01" />
-        <h1 className="font-display text-2xl font-bold text-white">Instellingen</h1>
+        <h1 className="font-display text-2xl font-bold text-white">{tSy('title')}</h1>
       </div>
 
       <div className="flex gap-6">
@@ -82,7 +90,7 @@ export default function SettingsPage() {
               {/* Theme */}
               <section className="rounded-lg border border-ck-dark-border bg-ck-dark-card p-6">
                 <h2 className="mb-4 flex items-center gap-2 text-sm font-semibold text-white">
-                  <Palette size={16} /> Thema
+                  <Palette size={16} /> {tSy('theme')}
                 </h2>
                 <div className="grid grid-cols-3 gap-3">
                   {THEMES.map(t => (
@@ -110,7 +118,7 @@ export default function SettingsPage() {
                       )}
                       {t.disabled && (
                         <span className="absolute right-2 top-2 rounded bg-ck-dark-border px-1.5 py-0.5 text-[9px] font-bold uppercase text-ck-muted">
-                          Soon
+                          {tCommon('soon')}
                         </span>
                       )}
                     </button>
@@ -120,7 +128,7 @@ export default function SettingsPage() {
 
               {/* Accent Color */}
               <section className="rounded-lg border border-ck-dark-border bg-ck-dark-card p-6">
-                <h2 className="mb-4 text-sm font-semibold text-white">Accentkleur</h2>
+                <h2 className="mb-4 text-sm font-semibold text-white">{tSy('accentColor')}</h2>
                 <div className="flex gap-3">
                   {ACCENT_COLORS.map(c => (
                     <button
@@ -136,18 +144,18 @@ export default function SettingsPage() {
                   ))}
                 </div>
                 <p className="mt-3 text-xs text-ck-muted">
-                  Wijzigt knoppen, badges en navigatie-accenten door de hele applicatie.
+                  {tSy('accentDesc')}
                 </p>
               </section>
 
               {/* Display */}
               <section className="rounded-lg border border-ck-dark-border bg-ck-dark-card p-6">
-                <h2 className="mb-4 text-sm font-semibold text-white">Weergaveopties</h2>
+                <h2 className="mb-4 text-sm font-semibold text-white">{tSy('displayOptions')}</h2>
                 <div className="space-y-4">
                   <label className="flex items-center justify-between">
                     <div>
-                      <div className="text-sm text-white">Compacte modus</div>
-                      <div className="text-xs text-ck-muted">Minder witruimte, meer informatie op het scherm</div>
+                      <div className="text-sm text-white">{tSy('compactMode')}</div>
+                      <div className="text-xs text-ck-muted">{tSy('compactDesc')}</div>
                     </div>
                     <button
                       onClick={() => setCompact(!compact)}
@@ -164,8 +172,8 @@ export default function SettingsPage() {
                   </label>
                   <label className="flex items-center justify-between">
                     <div>
-                      <div className="text-sm text-white">Zijbalk standaard ingeklapt</div>
-                      <div className="text-xs text-ck-muted">Zijbalk start in icoon-modus</div>
+                      <div className="text-sm text-white">{tSy('sidebarStartCollapsed')}</div>
+                      <div className="text-xs text-ck-muted">{tSy('sidebarDesc')}</div>
                     </div>
                     <button
                       onClick={() => setSidebarCollapsed(!sidebarCollapsed)}
@@ -190,11 +198,11 @@ export default function SettingsPage() {
             <>
               <section className="rounded-lg border border-ck-dark-border bg-ck-dark-card p-6">
                 <h2 className="mb-4 flex items-center gap-2 text-sm font-semibold text-white">
-                  <Building2 size={16} /> Bedrijfsinformatie
+                  <Building2 size={16} /> {tSy('companyInfo')}
                 </h2>
                 <div className="space-y-4">
                   <div>
-                    <label className="mb-1 block text-xs text-ck-muted">Bedrijfsnaam</label>
+                    <label className="mb-1 block text-xs text-ck-muted">{tSy('companyName')}</label>
                     <input
                       type="text"
                       value={companyName}
@@ -203,9 +211,9 @@ export default function SettingsPage() {
                     />
                   </div>
                   <div>
-                    <label className="mb-1 block text-xs text-ck-muted">Bedrijfslogo</label>
+                    <label className="mb-1 block text-xs text-ck-muted">{tSy('companyLogo')}</label>
                     <div className="flex h-20 items-center justify-center rounded-lg border-2 border-dashed border-ck-dark-border text-sm text-ck-muted transition-colors hover:border-ck-muted/50">
-                      Klik of sleep om een logo te uploaden
+                      {tSy('uploadLogo')}
                     </div>
                   </div>
                 </div>
@@ -213,23 +221,23 @@ export default function SettingsPage() {
 
               <section className="rounded-lg border border-ck-dark-border bg-ck-dark-card p-6">
                 <h2 className="mb-4 flex items-center gap-2 text-sm font-semibold text-white">
-                  <Globe size={16} /> Regio & Taal
+                  <Globe size={16} /> {tSy('regionLang')}
                 </h2>
                 <div className="grid grid-cols-2 gap-4">
                   <div>
-                    <label className="mb-1 block text-xs text-ck-muted">Taal</label>
+                    <label className="mb-1 block text-xs text-ck-muted">{tSy('language')}</label>
                     <select
                       value={language}
-                      onChange={e => setLanguage(e.target.value)}
+                      onChange={e => setLanguage(e.target.value as 'nl' | 'en' | 'tr')}
                       className="w-full rounded-lg border border-ck-dark-border bg-ck-dark-surface px-3 py-2 text-sm text-white focus:border-ck-red focus:outline-none"
                     >
                       <option value="nl">Nederlands</option>
                       <option value="en">English</option>
-                      <option value="tr">Türkçe</option>
+                      <option value="tr">Turkce</option>
                     </select>
                   </div>
                   <div>
-                    <label className="mb-1 block text-xs text-ck-muted">Datumformaat</label>
+                    <label className="mb-1 block text-xs text-ck-muted">{tSy('dateFormat')}</label>
                     <select
                       value={dateFormat}
                       onChange={e => setDateFormat(e.target.value)}
@@ -241,7 +249,7 @@ export default function SettingsPage() {
                     </select>
                   </div>
                   <div>
-                    <label className="mb-1 block text-xs text-ck-muted">Tijdzone</label>
+                    <label className="mb-1 block text-xs text-ck-muted">{tSy('timezone')}</label>
                     <select
                       className="w-full rounded-lg border border-ck-dark-border bg-ck-dark-surface px-3 py-2 text-sm text-white focus:border-ck-red focus:outline-none"
                       defaultValue="Europe/Amsterdam"
@@ -252,14 +260,14 @@ export default function SettingsPage() {
                     </select>
                   </div>
                   <div>
-                    <label className="mb-1 block text-xs text-ck-muted">Valuta</label>
+                    <label className="mb-1 block text-xs text-ck-muted">{tSy('currency')}</label>
                     <select
                       className="w-full rounded-lg border border-ck-dark-border bg-ck-dark-surface px-3 py-2 text-sm text-white focus:border-ck-red focus:outline-none"
                       defaultValue="EUR"
                     >
-                      <option value="EUR">EUR (€)</option>
-                      <option value="GBP">GBP (£)</option>
-                      <option value="TRY">TRY (₺)</option>
+                      <option value="EUR">EUR (&#8364;)</option>
+                      <option value="GBP">GBP (&#163;)</option>
+                      <option value="TRY">TRY (&#8378;)</option>
                     </select>
                   </div>
                 </div>
@@ -271,17 +279,17 @@ export default function SettingsPage() {
           {tab === 'notifications' && (
             <section className="rounded-lg border border-ck-dark-border bg-ck-dark-card p-6">
               <h2 className="mb-4 flex items-center gap-2 text-sm font-semibold text-white">
-                <Bell size={16} /> Meldingsvoorkeuren
+                <Bell size={16} /> {tSy('notifPrefs')}
               </h2>
               <p className="mb-4 text-xs text-ck-muted">
-                Kies welke meldingen je wilt ontvangen via de bel in de header en op het monitoring scherm.
+                {tSy('notifPrefsDesc')}
               </p>
               <div className="space-y-4">
                 {[
-                  { label: 'Nieuwe lead ontvangen', desc: 'Melding bij een nieuw contactformulier of inloop', state: notifLead, set: setNotifLead },
-                  { label: 'Fasewijziging opdracht', desc: 'Melding wanneer een opdracht van fase verandert', state: notifStage, set: setNotifStage },
-                  { label: 'Nieuwe e-mail', desc: 'Melding bij inkomende e-mail aan een opdracht', state: notifEmail, set: setNotifEmail },
-                  { label: 'Afspraakbevestiging', desc: 'Melding wanneer een klant een afspraak bevestigt', state: notifAppointment, set: setNotifAppointment },
+                  { label: tSy('notifLeadLabel'), desc: tSy('notifLeadDesc'), state: notifLead, set: setNotifLead },
+                  { label: tSy('notifStageLabel'), desc: tSy('notifStageDesc'), state: notifStage, set: setNotifStage },
+                  { label: tSy('notifEmailLabel'), desc: tSy('notifEmailDesc'), state: notifEmail, set: setNotifEmail },
+                  { label: tSy('notifAppointLabel'), desc: tSy('notifAppointDesc'), state: notifAppointment, set: setNotifAppointment },
                 ].map(n => (
                   <label key={n.label} className="flex items-center justify-between">
                     <div>
@@ -313,11 +321,11 @@ export default function SettingsPage() {
               className="flex items-center gap-2 rounded-lg bg-ck-red px-6 py-2.5 text-sm font-semibold text-white transition-colors hover:bg-ck-red-hover"
             >
               <Settings size={14} />
-              Opslaan
+              {tCommon('save')}
             </button>
             {saved && (
               <span className="flex items-center gap-1.5 text-sm text-green-400">
-                <Check size={14} /> Instellingen opgeslagen
+                <Check size={14} /> {tSy('saved')}
               </span>
             )}
           </div>
