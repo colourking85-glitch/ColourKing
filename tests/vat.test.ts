@@ -325,27 +325,27 @@ describe('Box amount computation', () => {
 
 // ─── Period date range ──────────────────────────────────────────────────────
 describe('Period date range', () => {
-  it('returns correct Q1 range', () => {
-    const { start, end } = getPeriodDateRange(2026, 1, 'quarter');
+  it('returns correct Q1 range', async () => {
+    const { start, end } = await getPeriodDateRange(2026, 1, 'quarter');
     expect(new Date(start).getMonth()).toBe(0); // January
     expect(new Date(end).getMonth()).toBe(2);   // March
   });
 
-  it('returns correct Q4 range', () => {
-    const { start, end } = getPeriodDateRange(2026, 4, 'quarter');
+  it('returns correct Q4 range', async () => {
+    const { start, end } = await getPeriodDateRange(2026, 4, 'quarter');
     expect(new Date(start).getMonth()).toBe(9);  // October
     expect(new Date(end).getMonth()).toBe(11);   // December
   });
 
-  it('returns correct monthly range for June', () => {
-    const { start, end } = getPeriodDateRange(2026, 6, 'month');
+  it('returns correct monthly range for June', async () => {
+    const { start, end } = await getPeriodDateRange(2026, 6, 'month');
     expect(new Date(start).getMonth()).toBe(5);  // June (0-indexed)
     expect(new Date(end).getMonth()).toBe(5);    // June
     expect(new Date(end).getDate()).toBe(30);    // June has 30 days
   });
 
-  it('returns correct monthly range for February', () => {
-    const { start, end } = getPeriodDateRange(2026, 2, 'month');
+  it('returns correct monthly range for February', async () => {
+    const { start, end } = await getPeriodDateRange(2026, 2, 'month');
     expect(new Date(start).getMonth()).toBe(1);
     expect(new Date(end).getMonth()).toBe(1);
     expect(new Date(end).getDate()).toBe(28); // 2026 is not a leap year

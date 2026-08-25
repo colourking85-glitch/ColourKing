@@ -21,11 +21,11 @@ const TAX_RATES: Record<string, number> = {
  * For quarters: Q1=Jan-Mar, Q2=Apr-Jun, Q3=Jul-Sep, Q4=Oct-Dec
  * For months: 1=Jan, 2=Feb, etc.
  */
-export function getPeriodDateRange(
+export async function getPeriodDateRange(
   year: number,
   period: number,
   periodType: VatPeriodType
-): { start: string; end: string } {
+): Promise<{ start: string; end: string }> {
   if (periodType === 'quarter') {
     const startMonth = (period - 1) * 3; // 0-indexed
     const start = new Date(year, startMonth, 1);
@@ -57,7 +57,7 @@ export async function calculateVatReturn(
   CalculateVatSchema.parse({ year, period, period_type: periodType });
 
   const supabase = createClient();
-  const { start, end } = getPeriodDateRange(year, period, periodType);
+  const { start, end } = await getPeriodDateRange(year, period, periodType);
 
   // Get all invoice lines from issued/paid/overdue invoices in the period
   const { data: invoices, error: invErr } = await supabase
