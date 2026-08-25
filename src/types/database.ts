@@ -1,4 +1,4 @@
-// Auto-generated types — reflects migrations 0001-0015.
+// Auto-generated types — reflects migrations 0001-0018.
 // Regenerate after every migration: supabase gen types typescript --local > src/types/database.ts
 
 export type Json =
@@ -332,6 +332,60 @@ export interface TimeEntry {
   updated_at: string;
 }
 
+export interface VatReturn {
+  id: string;
+  period_type: VatPeriodType;
+  year: number;
+  period: number;
+  status: VatReturnStatus;
+  box1a_supplies_high: number;
+  box1b_supplies_low: number;
+  box1c_supplies_other: number;
+  box1d_private_use: number;
+  box1e_supplies_zero: number;
+  box2a_supplies_from_eu: number;
+  box4a_vat_on_supplies: number;
+  box4b_vat_on_eu: number;
+  box5a_vat_deductible: number;
+  box5b_vat_balance: number;
+  box5c_small_business: number;
+  box5d_estimate_previous: number;
+  box5e_total_payable: number;
+  box5f_total_refund: number;
+  filed_at: string | null;
+  filed_by: string | null;
+  notes: string | null;
+  locked: boolean;
+  created_at: string;
+  updated_at: string;
+}
+
+export type PurchaseCategory = 'general' | 'parts' | 'paint' | 'materials' | 'tools' | 'rent' | 'utilities' | 'insurance' | 'other';
+
+export interface Purchase {
+  id: string;
+  purchase_number: string | null;
+  supplier_name: string;
+  supplier_vat_number: string | null;
+  invoice_date: string;
+  due_date: string | null;
+  subtotal_cents: number;
+  vat_cents: number;
+  total_cents: number;
+  tax_code: TaxCode;
+  category: PurchaseCategory;
+  description: string | null;
+  reference: string | null;
+  paid: boolean;
+  paid_at: string | null;
+  payment_method: PaymentMethod | null;
+  receipt_path: string | null;
+  job_id: string | null;
+  created_by: string | null;
+  created_at: string;
+  updated_at: string;
+}
+
 export interface Database {
   public: {
     Tables: {
@@ -429,6 +483,16 @@ export interface Database {
         Row: TimeEntry;
         Insert: Omit<TimeEntry, 'id' | 'created_at' | 'updated_at'> & { id?: string };
         Update: Partial<Omit<TimeEntry, 'id' | 'created_at' | 'updated_at'>>;
+      };
+      vat_returns: {
+        Row: VatReturn;
+        Insert: Omit<VatReturn, 'id' | 'created_at' | 'updated_at'> & { id?: string };
+        Update: Partial<Omit<VatReturn, 'id' | 'created_at' | 'updated_at'>>;
+      };
+      purchases: {
+        Row: Purchase;
+        Insert: Omit<Purchase, 'id' | 'created_at' | 'updated_at'> & { id?: string };
+        Update: Partial<Omit<Purchase, 'id' | 'created_at' | 'updated_at'>>;
       };
     };
     Views: Record<string, never>;

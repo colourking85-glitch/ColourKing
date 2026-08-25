@@ -21,10 +21,18 @@
 | 7 | Invoice + Payment | DONE | FA01/05/10 | 0016 |
 | 8 | Appointments | DONE | AP01/05 | 0013 |
 | 9 | Tasks & Timesheet | DONE | TS01/05/10 | 0015 |
+| 10 | Public Website | DONE | 7 public pages | — |
+| 11 | Communication | DONE | Email API | — |
+| 12 | Languages | DONE | 48 components, 1078 keys | — |
+| 13 | Reporting + Hardening | DONE | RP10 | — |
+| 14 | VAT Returns | DONE | BW05 | 0017 |
+| 15 | Purchase Register | DONE | PU01/05 | 0018 |
+| 16 | Bookkeeping Export | DONE | BK10 | — |
+| 17 | BTW Calculator | DONE | BW40 | — |
 
 ---
 
-## Completed Sprints
+## Tier 1 Sprints (Complete — The Working Chain)
 
 ### Sprint 0: Foundation
 - Next.js 14 + TypeScript + Tailwind + pnpm
@@ -53,7 +61,7 @@
 - Settings page (SY01): theme, accent, company info, locale
 - Monitor dashboard: real-time notification feed, auto-refresh, sound alerts
 - Notification system (migration 0009): API, mark read, bell badge
-- KPI Dashboard (RP01): shift overview, 6 KPI cards, phase flow, technician table, per-vehicle detail (demo data)
+- KPI Dashboard (RP01): shift overview, 6 KPI cards, phase flow, technician table
 - Color system refined: ck-surface/border/text tokens
 
 ### Sprint 3: Document Engine
@@ -62,20 +70,8 @@
 - Document lifecycle: draft → issued → cancelled
 - Payload freezing at issue time with SHA-256 hash
 - Invoice cancel blocked — must use credit note
-- Screens: DO05 archive (search, filters, table), DO03 detail (info, integrity, chain, actions)
-- API: list/create/detail/issue/cancel/delete
-- i18n: doc namespace (30+ keys in nl/en/tr)
-- 10 document schema tests (34 total)
-
-### Sprint 5: Parts + Board
-- Parts table (migration 0012) with blocking flag
-- Parts CRUD with status transitions (needed→ordered→shipped→received, needed→returned)
-- Blocking parts prevent job stage changes
-- Screens: PT05 parts list (color-coded status), PT01 create part form
-- API: list/detail/create/update/status change/delete
-- 27 parts schema + status transition tests
-
----
+- Screens: DO05 archive, DO03 detail
+- 10 document schema tests
 
 ### Sprint 4: Offers (built in parallel with 5+8)
 - Offers + offer_lines tables (migration 0011)
@@ -83,53 +79,115 @@
 - Line items: labour/part/material/other kinds, VAT calculation, auto-recalculate totals
 - Money in cents (integers) throughout
 - Versioning: supersedeOffer copies lines to new draft
-- Screens: ES01 create (line editor), ES05 list (search/filters), ES10 detail (actions, version chain)
-- API: offers CRUD + lines CRUD + send/approve/reject/supersede actions
+- Screens: ES01 create, ES05 list, ES10 detail
 - 55 tests (schemas + state machine)
+
+### Sprint 5: Parts + Board
+- Parts table (migration 0012) with blocking flag
+- Parts CRUD with status transitions (needed→ordered→shipped→received, needed→returned)
+- Blocking parts prevent job stage changes
+- Screens: PT05 parts list, PT01 create part
+- 27 parts schema + status transition tests
+
+### Sprint 6: Repair Order + Handover
+- Repair order + handover note document templates
+- Tablet signature capture (SignatureCanvas component, canvas → PNG)
+- Screens: DO20 repair order detail, DO21 handover note detail
+- Signatures table (migration 0014), gallery_consent on documents
+- 18 tests
+
+### Sprint 7: Invoice + Payment
+- Invoices + invoice_lines + payments tables (migration 0016)
+- Invoice from approved offer: copies lines, calculates VAT per tax code
+- Credit note: negative mirror invoice, no direct cancellation
+- State machine: draft → sent → paid/overdue/credited
+- Professional HTML invoice template with company letterhead
+- Mollie payment integration: iDEAL, card, bank transfer
+- Public payment page: /s/[token], webhook for status updates
+- Screens: FA01 create, FA05 list, FA10 detail
+- 96 tests
 
 ### Sprint 8: Appointments (built in parallel with 4+5)
 - Resources + opening_hours + blackouts + appointments tables (migration 0013)
 - Slot engine: available slots from opening hours - appointments - blackouts - capacity
 - Auto-confirm inspections, manual confirm for others
-- Seed data: Mon-Fri 08:00-17:00, Bay 1 + Bay 2
-- Screens: AP05 week calendar (time grid, colored blocks), AP01 create (dynamic slot loading)
-- API: appointments CRUD + slots + resources CRUD
-- 32 tests (schemas + status transitions + auto-confirm)
-
----
-
-### Sprint 6: Repair Order + Handover
-- Repair order document template (vehicle, mileage, existing damage, terms)
-- Handover note template (work summary, mileage out, warranty)
-- Tablet signature capture (SignatureCanvas component, canvas → PNG)
-- Screens: DO20 repair order detail, DO21 handover note detail
-- API: repair-orders CRUD + sign, handover-notes CRUD
-- Signatures table (migration 0014), gallery_consent on documents
-- 18 tests (schemas + status transitions + signature validation)
+- Screens: AP05 week calendar, AP01 create
+- 32 tests
 
 ### Sprint 9: Tasks & Timesheet
 - job_tasks + time_entries tables (migration 0015)
 - Auto-generate tasks from offer lines on approval
 - Task status machine: todo → in_progress → done, any → blocked, blocked → todo
 - Clock in/out per task with duration computation
-- Screens: TS01 create task, TS05 my tasks, TS10 timesheet/planner
-- API: tasks CRUD + generate, time-entries CRUD + active timer
-- 33 tests (schemas + status transitions + time entry validation)
+- Screens: TS01 create task, TS05 my tasks, TS10 planner
+- 33 tests
 
 ---
 
-### Sprint 7: Invoice + Payment
-- Invoices + invoice_lines + payments tables (migration 0016)
-- Invoice from approved offer: copies lines, calculates VAT per tax code
-- Credit note: negative mirror invoice, links via credit_note_id, marks original as credited
-- Invoice cancel via credit note only — no direct cancellation
-- State machine: draft → sent → paid/overdue/credited
-- Professional HTML invoice template: company letterhead, line items, VAT breakdown, payment info
-- Mollie payment integration: iDEAL, card, bank transfer
-- Public payment page: /s/[token] (token-based, no auth)
-- Webhook: /api/webhooks/mollie for payment status updates
-- Screens: FA01 create (from offer), FA05 list (search/filters), FA10 detail (preview, actions, payments)
-- 96 tests (schemas, state machine, line calculations, VAT, credit notes, payments)
+## Tier 2 Sprints (Complete — v1 Feature Set)
+
+### Sprint 10: Public Website
+- Full public website replacing Coming Soon page at colourking.nl
+- 7 pages: homepage (hero, stats, services, testimonials), services (8 categories), gallery (before/after grid), about, contact with quote form
+- Locale-aware routing via next-intl (NL/EN/TR)
+- Quote request API creates leads (origin: website)
+- SEO metadata on all pages
+
+### Sprint 11: Communication
+- Email template system: 7 locale-aware HTML templates (offer, invoice, appointment confirmation, appointment reminder, payment received, lead received, repair complete)
+- Resend API integration with dry-run mode when API key not set
+- Business event trigger functions (onOfferSent, onInvoiceIssued, etc.)
+- Email preview API for staff
+- 45 email tests
+
+### Sprint 12: Languages (full NL/EN/TR)
+- Audited and replaced hardcoded strings in 48 components with useTranslations()
+- Created locale-aware formatters: formatCurrency, formatDate, formatDateShort, formatNumber
+- AdminIntlProvider for client components with locale switching
+- Reconciled all 3 locale files to 1078 keys each (perfect parity)
+- 39 i18n tests
+
+### Sprint 13: Reporting + Hardening
+- Reports dashboard (RP10): revenue, job performance, workload, customer metrics
+- CSS-only charts (no external libraries)
+- Connected KPI dashboard (RP01) to real Supabase data
+- Health check API (/api/health)
+- React ErrorBoundary component
+- 39 report tests
+
+---
+
+## Tier 3 Sprints (Complete — BTW & Bookkeeping)
+
+### Sprint 14: VAT Returns
+- vat_returns table (migration 0017) with Dutch BTW aangifte box structure
+- Auto-calculate VAT from invoices grouped by tax code
+- VAT return lifecycle: open → draft → filed (locked) → corrected
+- Filed returns are locked — edits only via correction
+- BW05 BTW Dashboard: year view, quarter/month toggle, box amounts, filing
+- 49 tests
+
+### Sprint 15: Purchase Register
+- purchases table (migration 0018) for inkoopfacturen
+- Categories: parts, paint, materials, tools, rent, utilities, insurance, other
+- Track deductible input VAT (feeds into VAT return box 5a)
+- Screens: PU05 purchase list, PU01 create purchase
+- Paid/unpaid tracking
+- 68 tests
+
+### Sprint 16: Bookkeeping Export
+- CSV export of invoices, purchases, VAT returns for accountant
+- Profit/loss summary with revenue, costs by category, net profit
+- Period-based export (month/quarter/year)
+- BK10 Bookkeeping Export page with download cards
+- API routes for CSV download and summary
+- 45 tests
+
+### Sprint 17: BTW Calculator
+- BW40 quick VAT calculator tool
+- Input amount → show ex-VAT, VAT, incl-VAT for each rate (21%, 9%, 0%)
+- Real-time calculation, all math in integer cents
+- 31 tests
 
 ---
 
@@ -138,43 +196,38 @@
 ```
 Sprint 0 ─→ Sprint 1 ─→ Sprint 2 ─→ Sprint 2.5
                 │                        │
-                ├─→ Sprint 3 (done) ─────┤
+                ├─→ Sprint 3 ────────────┤
                 │                        │
-                ├─→ Sprint 5 (done) ◄────┤
+                ├─→ Sprint 5 ◄───────────┤
                 │                        │
-                └─→ Sprint 4 (parallel) ─┼─→ Sprint 6 ─→ Sprint 7
-                                         │
-                    Sprint 8 (parallel) ──┘─→ Sprint 9
+                └─→ Sprint 4 (parallel) ─┼─→ Sprint 6 ─→ Sprint 7 ─→ Sprint 14
+                                         │                           Sprint 15
+                    Sprint 8 (parallel) ──┘─→ Sprint 9         ↓
+                                                          Sprint 16+17
+                Sprint 10 ──┐
+                Sprint 11 ──┼── Tier 2 (independent)
+                Sprint 12 ──┤
+                Sprint 13 ──┘
 ```
 
-Sprints 4, 5, 8 run in parallel (no dependencies between them).
-Sprint 6 needs Sprint 4 (offers → repair order).
-Sprint 7 needs Sprint 4 + 6 (offers + repair order → invoice).
-Sprint 9 needs Sprint 4 (offer lines → auto-generated tasks).
-
 ---
 
-## Post-Tier 1 Sprints
-
-| Sprint | Name | Est. Days |
-|--------|------|-----------|
-| 10 | Public Website (7 pages, SEO, gallery, quote form) | 7 |
-| 11 | Communication (Resend templates, inbound email, /s/[token]) | 6 |
-| 12 | Languages (full NL/EN/TR, locale-aware documents) | 4 |
-| 13 | Reporting + Hardening (cycle time, workload, Sentry, backups) | 6 |
-| 14–17 | BTW & Bookkeeping (scope TBD: 4d minimal or 16d full) | 4–16 |
-
----
-
-## Tier 1 Gate — The Working Chain
-The full flow must work end-to-end:
+## Tier 1 Gate — The Working Chain ✅
 Lead → Offer → Approval → Repair Order → Job → Parts → Tasks → Handover → Invoice → Paid → Delivered
 
-## Tier 2 Gate — Complete v1
+## Tier 2 Gate — Complete v1 ✅
 - All 40+ screens operational
-- Three locales complete (NL/EN/TR)
-- Email in and out working
-- Public website live
+- Three locales complete (NL/EN/TR) — 1078 keys each
+- Email templates ready (7 types, 3 locales)
+- Public website live (7 pages)
+- 418 tests across 13 test files
+
+## Tier 3 Gate — Financial Compliance ✅
+- VAT returns auto-calculated from invoices
+- Purchase register with deductible VAT
+- Bookkeeping export for accountant
+- BTW calculator
+- 193 tests across Sprints 14-17
 
 ---
 
@@ -198,6 +251,8 @@ Lead → Offer → Approval → Repair Order → Job → Parts → Tasks → Han
 | 0014 | repair_handover | signatures, gallery_consent column | Yes |
 | 0015 | tasks_timesheet | job_tasks, time_entries | Yes |
 | 0016 | invoices | invoices, invoice_lines, payments | Yes |
+| 0017 | vat_returns | vat_returns | Pending |
+| 0018 | purchases | purchases | Pending |
 
 ---
 
@@ -208,9 +263,34 @@ Lead → Offer → Approval → Repair Order → Job → Parts → Tasks → Han
 | GitHub repo (colourking85-glitch/ColourKing) | Active |
 | Supabase (stvbekakfhqizvbyyyzo, eu-west-1) | Active |
 | Vercel hosting | Active |
-| colourking.nl (Coming Soon) | Live |
+| colourking.nl | Live (full website) |
 | admin.colourking.nl | Live |
 | monitor.colourking.nl | Configured |
 | Cloudflare DNS | Active (proxy OFF for Vercel SSL) |
 | Mollie (payments) | Pending setup |
-| Resend (email) | Not started |
+| Resend (email) | Pending API key |
+
+---
+
+## Test Coverage
+
+| Test File | Tests | Sprint |
+|-----------|-------|--------|
+| tests/rdw.test.ts | 3 | 1 |
+| tests/codes.test.ts | 4 | 0 |
+| tests/machine.test.ts | 7 | 2 |
+| tests/schema.test.ts | 20 | 3 |
+| tests/offers.test.ts | 55 | 4 |
+| tests/parts.test.ts | 27 | 5 |
+| tests/appointments.test.ts | 32 | 8 |
+| tests/repair-orders.test.ts | 18 | 6 |
+| tests/tasks.test.ts | 33 | 9 |
+| tests/invoices.test.ts | 96 | 7 |
+| tests/email.test.ts | 45 | 11 |
+| tests/i18n.test.ts | 39 | 12 |
+| tests/reports.test.ts | 39 | 13 |
+| tests/vat.test.ts | 49 | 14 |
+| tests/purchases.test.ts | 68 | 15 |
+| tests/bookkeeping.test.ts | 45 | 16 |
+| tests/btw-calculator.test.ts | 31 | 17 |
+| **Total** | **611** | |

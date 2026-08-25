@@ -7,7 +7,7 @@ import { useTranslations } from 'next-intl';
 import {
   LayoutDashboard, Inbox, Users, Car, FileText, Wrench,
   Package, Receipt, FolderOpen, CalendarDays, ClipboardList,
-  BarChart3, Calculator, ShoppingCart, Settings, Bell,
+  BarChart3, Calculator, ShoppingCart, BookOpen, Settings, Bell,
   ChevronLeft, ChevronRight, ChevronDown,
 } from 'lucide-react';
 import { ScreenBadge } from '@/components/ui/ScreenBadge';
@@ -85,6 +85,7 @@ const NAV: NavSection[] = [
       { label: 'vat', href: '/app/btw', icon: Calculator, code: 'BW05', permission: 'vat.read', soon: true },
       { label: 'purchases', href: '/app/inkoop', icon: ShoppingCart, code: 'PU05', permission: 'purchases.read', soon: true },
       { label: 'reports', href: '/app/rapportage', icon: BarChart3, code: 'RP10', soon: true },
+      { label: 'bookkeeping', href: '/app/boekhouding', icon: BookOpen, code: 'BK10', permission: 'bookkeeping.read' },
     ],
   },
   {

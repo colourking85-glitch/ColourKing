@@ -20,6 +20,7 @@ export const MODULE_COLORS: Record<string, string> = {
   RP: 'bg-violet-900/30 text-violet-400',
   BW: 'bg-lime-900/30 text-lime-400',
   PU: 'bg-pink-900/30 text-pink-400',
+  BK: 'bg-teal-900/30 text-teal-400',
   SY: 'bg-slate-700/30 text-slate-400',
 };
 
@@ -81,9 +82,14 @@ export const SCREEN_REGISTRY: Record<string, ScreenMeta> = {
 
   // VAT
   '/app/btw': { id: 'BW05', title: 'VAT Dashboard', titleNl: 'BTW Dashboard', module: 'BW', route: '/app/btw' },
+  '/app/btw-calculator': { id: 'BW40', title: 'BTW Calculator', titleNl: 'BTW Calculator', module: 'BW', route: '/app/btw-calculator' },
 
   // Purchases
   '/app/inkoop': { id: 'PU05', title: 'Purchase Register', titleNl: 'Inkoopregister', module: 'PU', route: '/app/inkoop' },
+  '/app/inkoop/nieuw': { id: 'PU01', title: 'Create Purchase', titleNl: 'Inkoop Aanmaken', module: 'PU', route: '/app/inkoop/nieuw' },
+
+  // Bookkeeping
+  '/app/boekhouding': { id: 'BK10', title: 'Bookkeeping Export', titleNl: 'Boekhouding Export', module: 'BK', route: '/app/boekhouding' },
 
   // Settings
   '/app/instellingen': { id: 'SY01', title: 'Settings', titleNl: 'Instellingen', module: 'SY', route: '/app/instellingen' },
