@@ -44,7 +44,8 @@ export async function middleware(req: NextRequest) {
       return NextResponse.next();
     }
 
-    const dest = pathname === '/' ? '/app' : `/app${pathname}`;
+    // If the path already starts with /app, use it as-is (sidebar links include /app prefix)
+    const dest = pathname === '/' ? '/app' : pathname.startsWith('/app') ? pathname : `/app${pathname}`;
 
     // Auth check for admin subdomain when Supabase is configured
     if (hasSupabaseConfig()) {
