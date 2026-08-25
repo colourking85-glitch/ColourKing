@@ -1,3 +1,4 @@
+import Image from 'next/image';
 import { getTranslations } from 'next-intl/server';
 import { Link } from '@/i18n/routing';
 
@@ -22,19 +23,16 @@ export default async function HomePage({
 
   return (
     <>
-      {/* Hero — full-screen with gradient overlay */}
+      {/* Hero — full-screen with photo background */}
       <section className="relative flex min-h-screen items-end overflow-hidden pb-24">
-        {/* Background with CSS gradient simulating a dramatic automotive photo */}
-        <div className="absolute inset-0">
-          <div className="absolute inset-0 bg-gradient-to-br from-ck-dark via-[#1a1020] to-[#0d0d15]" />
-          <div
-            className="absolute inset-0 opacity-30"
-            style={{
-              backgroundImage:
-                'radial-gradient(ellipse 80% 50% at 70% 60%, rgba(232,54,78,0.15), transparent), radial-gradient(ellipse 60% 40% at 30% 40%, rgba(100,60,120,0.1), transparent)',
-            }}
-          />
-        </div>
+        <Image
+          src="/images/hero.webp"
+          alt=""
+          fill
+          priority
+          className="object-cover"
+          sizes="100vw"
+        />
         <div className="absolute inset-0 bg-gradient-to-t from-black/90 via-black/50 to-black/20 pointer-events-none" />
         <div className="absolute inset-0 bg-gradient-to-r from-black/60 to-transparent pointer-events-none" />
 
@@ -118,10 +116,14 @@ export default async function HomePage({
           <div className="flex flex-col gap-6">
             {/* Service 1 — image left, text right */}
             <div className="grid grid-cols-1 overflow-hidden border border-ck-border transition-colors duration-300 hover:border-[#E8364E]/40 md:grid-cols-2">
-              <div className="relative h-64 overflow-hidden bg-gradient-to-br from-[#1a1520] to-[#0d0d15] md:h-auto md:min-h-[260px]">
-                <div className="absolute inset-0 flex items-center justify-center text-6xl opacity-30">
-                  &#128736;
-                </div>
+              <div className="relative h-64 overflow-hidden md:h-auto md:min-h-[260px]">
+                <Image
+                  src="/images/service-scratch-repair.webp"
+                  alt=""
+                  fill
+                  className="object-cover"
+                  sizes="(min-width: 768px) 50vw, 100vw"
+                />
               </div>
               <div className="flex flex-col justify-center bg-ck-surface p-8 md:p-12">
                 <p className="mb-3 text-xs font-semibold uppercase tracking-[0.2em] text-[#E8364E]">
@@ -161,19 +163,27 @@ export default async function HomePage({
                   {t('homeServices.two.detail')}
                 </p>
               </div>
-              <div className="relative h-64 overflow-hidden bg-gradient-to-br from-[#15101a] to-[#0d0d15] order-1 md:order-2 md:h-auto md:min-h-[260px]">
-                <div className="absolute inset-0 flex items-center justify-center text-6xl opacity-30">
-                  &#128296;
-                </div>
+              <div className="relative h-64 overflow-hidden order-1 md:order-2 md:h-auto md:min-h-[260px]">
+                <Image
+                  src="/images/service-dent-removal.webp"
+                  alt=""
+                  fill
+                  className="object-cover"
+                  sizes="(min-width: 768px) 50vw, 100vw"
+                />
               </div>
             </div>
 
             {/* Service 3 — image left, text right */}
             <div className="grid grid-cols-1 overflow-hidden border border-ck-border transition-colors duration-300 hover:border-[#E8364E]/40 md:mr-12 md:grid-cols-2">
-              <div className="relative h-64 overflow-hidden bg-gradient-to-br from-[#101520] to-[#0d0d15] md:h-auto md:min-h-[260px]">
-                <div className="absolute inset-0 flex items-center justify-center text-6xl opacity-30">
-                  &#127912;
-                </div>
+              <div className="relative h-64 overflow-hidden md:h-auto md:min-h-[260px]">
+                <Image
+                  src="/images/service-respray.webp"
+                  alt=""
+                  fill
+                  className="object-cover"
+                  sizes="(min-width: 768px) 50vw, 100vw"
+                />
               </div>
               <div className="flex flex-col justify-center bg-ck-surface p-8 md:p-12">
                 <p className="mb-3 text-xs font-semibold uppercase tracking-[0.2em] text-[#E8364E]">
@@ -227,15 +237,30 @@ export default async function HomePage({
               </div>
             </div>
             <div className="relative overflow-hidden border border-ck-border">
-              <div className="flex h-80 bg-gradient-to-br from-[#1a1520] via-[#12121a] to-[#0d0d15]">
-                <div className="flex flex-1 items-end p-4">
-                  <span className="bg-black/70 px-3 py-1.5 text-xs font-semibold uppercase tracking-widest text-white">
+              <div className="relative flex h-80">
+                <div className="relative flex-1">
+                  <Image
+                    src="/images/before-after.webp"
+                    alt=""
+                    fill
+                    className="object-cover"
+                    sizes="(min-width: 1024px) 25vw, 50vw"
+                    style={{ filter: 'grayscale(0.6) brightness(0.7)' }}
+                  />
+                  <span className="absolute bottom-4 left-4 bg-black/70 px-3 py-1.5 text-xs font-semibold uppercase tracking-widest text-white">
                     {t('gallery.before')}
                   </span>
                 </div>
                 <div className="w-px bg-white/30" />
-                <div className="flex flex-1 items-end justify-end p-4">
-                  <span className="bg-[#E8364E] px-3 py-1.5 text-xs font-semibold uppercase tracking-widest text-white">
+                <div className="relative flex-1">
+                  <Image
+                    src="/images/before-after.webp"
+                    alt=""
+                    fill
+                    className="object-cover"
+                    sizes="(min-width: 1024px) 25vw, 50vw"
+                  />
+                  <span className="absolute bottom-4 right-4 bg-[#E8364E] px-3 py-1.5 text-xs font-semibold uppercase tracking-widest text-white">
                     {t('gallery.after')}
                   </span>
                 </div>
@@ -281,7 +306,15 @@ export default async function HomePage({
       </section>
 
       {/* CTA — prominent with phone number */}
-      <section className="relative overflow-hidden bg-ck-dark py-28">
+      <section className="relative overflow-hidden py-28">
+        <Image
+          src="/images/dark.png"
+          alt=""
+          fill
+          className="object-cover"
+          sizes="100vw"
+        />
+        <div className="absolute inset-0 bg-black/70 pointer-events-none" />
         <div
           className="absolute inset-0 opacity-5 pointer-events-none"
           style={{
@@ -301,7 +334,7 @@ export default async function HomePage({
               >
                 {t('cta.title')}
               </h2>
-              <p className="mt-4 text-lg leading-relaxed text-ck-text-muted">
+              <p className="mt-4 text-lg leading-relaxed text-white/70">
                 {t('cta.subtitle')}
               </p>
             </div>
