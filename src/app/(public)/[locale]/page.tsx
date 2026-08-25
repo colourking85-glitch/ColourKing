@@ -11,7 +11,7 @@ export default function HomePage() {
         </h1>
 
         <p className="mt-3 text-lg text-[#6b6b80]">
-          Vakkundige lakschadeherstel — Amsterdam
+          Autospuitbedrijf — Rotterdam
         </p>
 
         <div className="my-10 h-px bg-gradient-to-r from-transparent via-[#E8364E]/30 to-transparent" />
@@ -24,11 +24,11 @@ export default function HomePage() {
 
           <div className="mt-6 space-y-3 text-sm">
             <a
-              href="tel:+31207372727"
+              href="tel:+31681631020"
               className="flex items-center justify-center gap-2 rounded-xl border border-[#1e1e2a] bg-[#0f0f17] px-4 py-3 text-white transition-colors hover:border-[#E8364E]/30"
             >
               <span className="text-[#E8364E]">&#9742;</span>
-              020 - 737 27 27
+              06 - 81 63 10 20
             </a>
             <a
               href="mailto:info@colourking.nl"
@@ -38,10 +38,15 @@ export default function HomePage() {
               info@colourking.nl
             </a>
           </div>
+
+          <div className="mt-6 text-xs text-[#6b6b80] leading-relaxed">
+            <p>Satijnbloem 6</p>
+            <p>3068 JP Rotterdam</p>
+          </div>
         </div>
 
         <p className="mt-8 text-xs text-[#3a3a50]">
-          Colourking B.V. — Amsterdam
+          Autospuitbedrijf Colour King — Rotterdam
         </p>
       </div>
     </div>
