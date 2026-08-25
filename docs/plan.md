@@ -29,7 +29,7 @@
 | 15 | Purchase Register | DONE | PU01/05 | 0018 |
 | 16 | Bookkeeping Export | DONE | BK10 | — |
 | 17 | BTW Calculator | DONE | BW40 | — |
-| 18 | Production Auth & Cleanup | IN PROGRESS | SY02/SY03 | — |
+| 18 | Production Auth & Cleanup | DONE | SY02/SY03, login | — |
 
 ---
 
@@ -192,18 +192,21 @@
 
 ---
 
-## Tier 4 Sprints (In Progress — Production Readiness)
+## Tier 4 Sprints (Complete — Production Readiness)
 
 ### Sprint 18: Production Auth & Cleanup
-- Real Supabase auth: login page, password reset, session management
-- Staff management screen (SY02): invite, deactivate, role assignment
-- Number ranges settings screen (SY03): configure document numbering prefixes
-- Remove dev bypass / mock admin from auth.ts
-- Protected API routes: validate session on all endpoints
-- Remove all `soon: true` flags from sidebar (all screens are built)
-- Delete orphaned files from failed Sprint 10 attempt
-- Fix leads table column mismatch in quote-request API
-- Clean up untracked files (.gitignore for drive-download, web/, root plan.md)
+- Login page (/login): email/password, loading states, error display
+- Password reset flow: request reset, set new password via email link
+- Auth middleware: protects all /app/* routes, redirects to /login
+- Staff management screen (SY02): list, invite, toggle active, change role
+- Number ranges settings screen (SY03): edit document prefixes, preview next number
+- Staff API: GET list, POST invite, PATCH update role/active
+- Numbering API: GET list ranges, PATCH update prefix
+- Cleaned auth.ts: mock session for dev, real Supabase auth in production
+- Removed all `soon: true` flags — every sidebar link is now active
+- Deleted orphaned Sprint 10 files, updated .gitignore
+- Verified leads column names match migration (no mismatch)
+- 56 tests
 
 ---
 
@@ -244,6 +247,12 @@ Lead → Offer → Approval → Repair Order → Job → Parts → Tasks → Han
 - Bookkeeping export for accountant
 - BTW calculator
 - 193 tests across Sprints 14-17
+
+## Tier 4 Gate — Production Readiness ✅
+- Auth: login, password reset, session middleware
+- Staff management + number ranges settings
+- All sidebar links active (no more "soon" badges)
+- 56 auth tests
 
 ---
 
@@ -309,4 +318,5 @@ Lead → Offer → Approval → Repair Order → Job → Parts → Tasks → Han
 | tests/purchases.test.ts | 68 | 15 |
 | tests/bookkeeping.test.ts | 45 | 16 |
 | tests/btw-calculator.test.ts | 31 | 17 |
-| **Total** | **611** | |
+| tests/auth.test.ts | 56 | 18 |
+| **Total** | **667** | |
