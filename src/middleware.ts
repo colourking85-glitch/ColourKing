@@ -29,7 +29,7 @@ export async function middleware(req: NextRequest) {
 
   // monitor.colourking.nl -> rewrite to /monitor routes
   if (host.startsWith('monitor.')) {
-    const dest = pathname === '/' ? '/monitor' : `/monitor${pathname}`;
+    const dest = pathname === '/' ? '/monitor' : pathname.startsWith('/monitor') ? pathname : `/monitor${pathname}`;
     const url = req.nextUrl.clone();
     url.pathname = dest;
     const res = NextResponse.rewrite(url);
