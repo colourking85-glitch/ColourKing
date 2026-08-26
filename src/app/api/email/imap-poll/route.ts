@@ -35,7 +35,10 @@ export async function POST(req: NextRequest) {
 
   const admin = getAdminClient();
   if (!admin) {
-    return NextResponse.json({ error: 'Service key not configured' }, { status: 500 });
+    return NextResponse.json(
+      { ok: false, error: 'SUPABASE_SERVICE_ROLE_KEY not configured. Set it in Vercel env vars (Supabase Dashboard → Settings → API → service_role secret).', logs: [] },
+      { status: 500 }
+    );
   }
 
   const imapHost = process.env.IMAP_HOST || 'imappro.zoho.eu';

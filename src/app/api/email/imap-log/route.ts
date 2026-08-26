@@ -2,21 +2,23 @@ import { NextResponse } from 'next/server';
 
 export const dynamic = 'force-dynamic';
 
-function getAdminClient() {
+function getSupabaseClient() {
   const supabaseUrl = process.env.NEXT_PUBLIC_SUPABASE_URL;
   const serviceKey = process.env.SUPABASE_SERVICE_ROLE_KEY;
-  if (!supabaseUrl || !serviceKey) return null;
+  const anonKey = process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY;
+  const key = serviceKey || anonKey;
+  if (!supabaseUrl || !key) return null;
   // eslint-disable-next-line
   const { createClient: create } = require('@supabase/supabase-js');
-  return create(supabaseUrl, serviceKey);
+  return create(supabaseUrl, key);
 }
 
 export async function GET() {
-  const admin = getAdminClient();
+  const client = getSupabaseClient();
 
   let recentEmails: unknown[] = [];
-  if (admin) {
-    const { data } = await admin
+  if (client) {
+    const { data } = await client
       .from('email_log')
       .select('id, entity_type, entity_id, from_email, subject, snippet, received_at, created_at')
       .order('created_at', { ascending: false })
