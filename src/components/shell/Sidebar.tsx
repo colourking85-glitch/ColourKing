@@ -8,7 +8,7 @@ import {
   LayoutDashboard, Inbox, Users, Car, FileText, Wrench,
   Package, Receipt, FolderOpen, CalendarDays, ClipboardList,
   BarChart3, Calculator, ShoppingCart, BookOpen, Settings, Bell,
-  ChevronLeft, ChevronRight, ChevronDown, BookOpenCheck, Clock, Bot, Mail,
+  ChevronLeft, ChevronRight, ChevronDown, BookOpenCheck, Clock, Bot, Mail, HardDrive,
 } from 'lucide-react';
 import { ScreenBadge } from '@/components/ui/ScreenBadge';
 import { SCREEN_REGISTRY } from '@/lib/codes';
@@ -104,6 +104,7 @@ const NAV: NavSection[] = [
           { label: 'cronJobs', href: '/app/cron-jobs', icon: Clock, code: 'SY15' },
           { label: 'aiAgents', href: '/app/ai-agents', icon: Bot, code: 'SY20' },
           { label: 'emailMonitor', href: '/app/instellingen/email-monitor', icon: Mail, code: 'SY25' },
+          { label: 'googleDrive', href: '/app/drive', icon: HardDrive, code: 'SY30' },
         ],
       },
     ],

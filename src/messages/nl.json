@@ -74,7 +74,8 @@
     "manual": "Handleiding",
     "cronJobs": "Cron Jobs",
     "aiAgents": "AI Agents",
-    "emailMonitor": "E-mail Monitor"
+    "emailMonitor": "E-mail Monitor",
+    "googleDrive": "Google Drive"
   },
   "header": {
     "quickCreate": "Snel aanmaken",
@@ -1586,6 +1587,24 @@
       "nextActions": "Stel volgende acties voor"
     },
     "noApiKey": "AI-functies vereisen een API-sleutel. Configureer in Instellingen."
+  },
+  "drive": {
+    "title": "Google Drive",
+    "subtitle": "Bestandsbrowser voor colourking85@gmail.com",
+    "upload": "Uploaden",
+    "uploading": "Uploaden…",
+    "newFolder": "Nieuwe Map",
+    "searchPlaceholder": "Bestanden zoeken…",
+    "searchBtn": "Zoeken",
+    "searchResults": "zoekresultaten",
+    "folderNamePlaceholder": "Mapnaam",
+    "create": "Aanmaken",
+    "cancel": "Annuleren",
+    "delete": "Verwijderen",
+    "confirmDelete": "Weet je zeker dat je wilt verwijderen",
+    "loading": "Bestanden laden…",
+    "empty": "Deze map is leeg",
+    "items": "items"
   },
   "imap": {
     "title": "IMAP E-mail Monitor",

@@ -110,6 +110,9 @@ export const SCREEN_REGISTRY: Record<string, ScreenMeta> = {
 
   // Email Monitor
   '/app/instellingen/email-monitor': { id: 'SY25', title: 'IMAP Email Monitor', titleNl: 'IMAP E-mail Monitor', module: 'SY', route: '/app/instellingen/email-monitor' },
+
+  // Google Drive
+  '/app/drive': { id: 'SY30', title: 'Google Drive', titleNl: 'Google Drive', module: 'SY', route: '/app/drive' },
 };
 
 export function getScreen(pathname: string): ScreenMeta | undefined {

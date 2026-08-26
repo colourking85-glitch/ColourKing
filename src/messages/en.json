@@ -74,7 +74,8 @@
     "manual": "Manual",
     "cronJobs": "Cron Jobs",
     "aiAgents": "AI Agents",
-    "emailMonitor": "Email Monitor"
+    "emailMonitor": "Email Monitor",
+    "googleDrive": "Google Drive"
   },
   "header": {
     "quickCreate": "Quick create",
@@ -1586,6 +1587,24 @@
       "nextActions": "Suggest next actions"
     },
     "noApiKey": "AI features require an API key. Configure in Settings."
+  },
+  "drive": {
+    "title": "Google Drive",
+    "subtitle": "File browser for colourking85@gmail.com",
+    "upload": "Upload",
+    "uploading": "Uploading…",
+    "newFolder": "New Folder",
+    "searchPlaceholder": "Search files…",
+    "searchBtn": "Search",
+    "searchResults": "search results",
+    "folderNamePlaceholder": "Folder name",
+    "create": "Create",
+    "cancel": "Cancel",
+    "delete": "Delete",
+    "confirmDelete": "Are you sure you want to delete",
+    "loading": "Loading files…",
+    "empty": "This folder is empty",
+    "items": "items"
   },
   "imap": {
     "title": "IMAP Email Monitor",

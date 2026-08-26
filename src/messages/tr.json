@@ -74,7 +74,8 @@
     "manual": "Kılavuz",
     "cronJobs": "Cron İşleri",
     "aiAgents": "AI Ajanları",
-    "emailMonitor": "E-posta Izleme"
+    "emailMonitor": "E-posta Izleme",
+    "googleDrive": "Google Drive"
   },
   "header": {
     "quickCreate": "Hızlı oluştur",
@@ -1586,6 +1587,24 @@
       "nextActions": "Sonraki adimlari oner"
     },
     "noApiKey": "AI ozellikleri bir API anahtari gerektirir. Ayarlar'dan yapilandirin."
+  },
+  "drive": {
+    "title": "Google Drive",
+    "subtitle": "colourking85@gmail.com dosya tarayicisi",
+    "upload": "Yukle",
+    "uploading": "Yukleniyor…",
+    "newFolder": "Yeni Klasor",
+    "searchPlaceholder": "Dosya ara…",
+    "searchBtn": "Ara",
+    "searchResults": "arama sonuclari",
+    "folderNamePlaceholder": "Klasor adi",
+    "create": "Olustur",
+    "cancel": "Iptal",
+    "delete": "Sil",
+    "confirmDelete": "Silmek istediginizden emin misiniz",
+    "loading": "Dosyalar yukleniyor…",
+    "empty": "Bu klasor bos",
+    "items": "oge"
   },
   "imap": {
     "title": "IMAP E-posta Izleme",
