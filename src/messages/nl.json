@@ -75,7 +75,8 @@
     "cronJobs": "Cron Jobs",
     "aiAgents": "AI Agents",
     "emailMonitor": "E-mail Monitor",
-    "googleDrive": "Google Drive"
+    "googleDrive": "Google Drive",
+    "infrastructure": "Infrastructuur"
   },
   "header": {
     "quickCreate": "Snel aanmaken",
@@ -1587,6 +1588,21 @@
       "nextActions": "Stel volgende acties voor"
     },
     "noApiKey": "AI-functies vereisen een API-sleutel. Configureer in Instellingen."
+  },
+  "infra": {
+    "title": "Infrastructuur",
+    "subtitle": "Systeemservices, integraties en platformstatus",
+    "loading": "Infrastructuurstatus laden…",
+    "platformTitle": "Platform",
+    "framework": "Framework",
+    "runtime": "Runtime",
+    "hosting": "Hosting",
+    "region": "Regio",
+    "environment": "Omgeving",
+    "gitCommit": "Git Commit",
+    "domain": "Domein",
+    "servicesStatus": "Services",
+    "active": "actief"
   },
   "drive": {
     "title": "Google Drive",

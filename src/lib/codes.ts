@@ -113,6 +113,9 @@ export const SCREEN_REGISTRY: Record<string, ScreenMeta> = {
 
   // Google Drive
   '/app/drive': { id: 'SY30', title: 'Google Drive', titleNl: 'Google Drive', module: 'SY', route: '/app/drive' },
+
+  // Infrastructure
+  '/app/instellingen/infrastructuur': { id: 'SY35', title: 'Infrastructure', titleNl: 'Infrastructuur', module: 'SY', route: '/app/instellingen/infrastructuur' },
 };
 
 export function getScreen(pathname: string): ScreenMeta | undefined {

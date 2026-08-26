@@ -75,7 +75,8 @@
     "cronJobs": "Cron İşleri",
     "aiAgents": "AI Ajanları",
     "emailMonitor": "E-posta Izleme",
-    "googleDrive": "Google Drive"
+    "googleDrive": "Google Drive",
+    "infrastructure": "Altyapi"
   },
   "header": {
     "quickCreate": "Hızlı oluştur",
@@ -1587,6 +1588,21 @@
       "nextActions": "Sonraki adimlari oner"
     },
     "noApiKey": "AI ozellikleri bir API anahtari gerektirir. Ayarlar'dan yapilandirin."
+  },
+  "infra": {
+    "title": "Altyapi",
+    "subtitle": "Sistem servisleri, entegrasyonlar ve platform durumu",
+    "loading": "Altyapi durumu yukleniyor…",
+    "platformTitle": "Platform",
+    "framework": "Framework",
+    "runtime": "Calisma Ortami",
+    "hosting": "Barindirma",
+    "region": "Bolge",
+    "environment": "Ortam",
+    "gitCommit": "Git Commit",
+    "domain": "Alan Adi",
+    "servicesStatus": "Servisler",
+    "active": "aktif"
   },
   "drive": {
     "title": "Google Drive",

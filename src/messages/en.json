@@ -75,7 +75,8 @@
     "cronJobs": "Cron Jobs",
     "aiAgents": "AI Agents",
     "emailMonitor": "Email Monitor",
-    "googleDrive": "Google Drive"
+    "googleDrive": "Google Drive",
+    "infrastructure": "Infrastructure"
   },
   "header": {
     "quickCreate": "Quick create",
@@ -1587,6 +1588,21 @@
       "nextActions": "Suggest next actions"
     },
     "noApiKey": "AI features require an API key. Configure in Settings."
+  },
+  "infra": {
+    "title": "Infrastructure",
+    "subtitle": "System services, integrations and platform status",
+    "loading": "Loading infrastructure status…",
+    "platformTitle": "Platform",
+    "framework": "Framework",
+    "runtime": "Runtime",
+    "hosting": "Hosting",
+    "region": "Region",
+    "environment": "Environment",
+    "gitCommit": "Git Commit",
+    "domain": "Domain",
+    "servicesStatus": "Services",
+    "active": "active"
   },
   "drive": {
     "title": "Google Drive",
