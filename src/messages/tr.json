@@ -73,7 +73,8 @@
     "general": "Genel",
     "manual": "Kılavuz",
     "cronJobs": "Cron İşleri",
-    "aiAgents": "AI Ajanları"
+    "aiAgents": "AI Ajanları",
+    "emailMonitor": "E-posta Izleme"
   },
   "header": {
     "quickCreate": "Hızlı oluştur",
@@ -1585,5 +1586,27 @@
       "nextActions": "Sonraki adimlari oner"
     },
     "noApiKey": "AI ozellikleri bir API anahtari gerektirir. Ayarlar'dan yapilandirin."
+  },
+  "imap": {
+    "title": "IMAP E-posta Izleme",
+    "subtitle": "Zoho gelen kutusu yoklama — musteri e-posta yanitlarini takip",
+    "refresh": "Yenile",
+    "cronTitle": "Cron Gorevi — Zamanlanmis Yoklama",
+    "jobName": "Gorev adi",
+    "schedule": "Zamanlama",
+    "frequency": "Siklik",
+    "inbox": "Gelen Kutusu",
+    "imapHost": "IMAP Sunucu",
+    "status": "Durum",
+    "nextRun": "Sonraki calistirma",
+    "pollNow": "Simdi Yokla",
+    "polling": "Yoklaniyor…",
+    "processed": "islendi",
+    "pollLog": "Yoklama Kaydi",
+    "lastPoll": "son yoklama",
+    "noLogs": "Yoklayiciyi baslatmak ve ciktiyi burada gormek icin \"Simdi Yokla\"ya tiklayin",
+    "capturedReplies": "Yakalanan E-posta Yanitlari",
+    "recent": "son",
+    "noEmails": "Henuz musteri yaniti yakalanmadi. Konuda [JB-ID] veya [LD-ID] iceren yanitlar burada gorunecek."
   }
 }

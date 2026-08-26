@@ -107,6 +107,9 @@ export const SCREEN_REGISTRY: Record<string, ScreenMeta> = {
 
   // AI Agent Definitions
   '/app/ai-agents': { id: 'SY20', title: 'AI Agents', titleNl: 'AI Agents', module: 'SY', route: '/app/ai-agents' },
+
+  // Email Monitor
+  '/app/instellingen/email-monitor': { id: 'SY25', title: 'IMAP Email Monitor', titleNl: 'IMAP E-mail Monitor', module: 'SY', route: '/app/instellingen/email-monitor' },
 };
 
 export function getScreen(pathname: string): ScreenMeta | undefined {

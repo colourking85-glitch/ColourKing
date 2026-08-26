@@ -73,7 +73,8 @@
     "general": "General",
     "manual": "Manual",
     "cronJobs": "Cron Jobs",
-    "aiAgents": "AI Agents"
+    "aiAgents": "AI Agents",
+    "emailMonitor": "Email Monitor"
   },
   "header": {
     "quickCreate": "Quick create",
@@ -1585,5 +1586,27 @@
       "nextActions": "Suggest next actions"
     },
     "noApiKey": "AI features require an API key. Configure in Settings."
+  },
+  "imap": {
+    "title": "IMAP Email Monitor",
+    "subtitle": "Zoho inbox polling — customer email reply tracking",
+    "refresh": "Refresh",
+    "cronTitle": "Cron Job — Scheduled Polling",
+    "jobName": "Job name",
+    "schedule": "Schedule",
+    "frequency": "Frequency",
+    "inbox": "Inbox",
+    "imapHost": "IMAP Host",
+    "status": "Status",
+    "nextRun": "Next scheduled run in",
+    "pollNow": "Poll Now",
+    "polling": "Polling…",
+    "processed": "processed",
+    "pollLog": "Poll Log",
+    "lastPoll": "last poll",
+    "noLogs": "Click \"Poll Now\" to run the poller and see output here",
+    "capturedReplies": "Captured Email Replies",
+    "recent": "recent",
+    "noEmails": "No customer replies captured yet. Replies matching [JB-ID] or [LD-ID] in the subject will appear here."
   }
 }

@@ -73,7 +73,8 @@
     "general": "Algemeen",
     "manual": "Handleiding",
     "cronJobs": "Cron Jobs",
-    "aiAgents": "AI Agents"
+    "aiAgents": "AI Agents",
+    "emailMonitor": "E-mail Monitor"
   },
   "header": {
     "quickCreate": "Snel aanmaken",
@@ -1585,5 +1586,27 @@
       "nextActions": "Stel volgende acties voor"
     },
     "noApiKey": "AI-functies vereisen een API-sleutel. Configureer in Instellingen."
+  },
+  "imap": {
+    "title": "IMAP E-mail Monitor",
+    "subtitle": "Zoho inbox polling — e-mailreacties van klanten bijhouden",
+    "refresh": "Vernieuwen",
+    "cronTitle": "Cron Job — Geplande Polling",
+    "jobName": "Taaknaam",
+    "schedule": "Schema",
+    "frequency": "Frequentie",
+    "inbox": "Inbox",
+    "imapHost": "IMAP Host",
+    "status": "Status",
+    "nextRun": "Volgende run over",
+    "pollNow": "Nu Pollen",
+    "polling": "Bezig…",
+    "processed": "verwerkt",
+    "pollLog": "Poll Log",
+    "lastPoll": "laatste poll",
+    "noLogs": "Klik op \"Nu Pollen\" om de poller te starten en de uitvoer hier te zien",
+    "capturedReplies": "Ontvangen E-mailreacties",
+    "recent": "recent",
+    "noEmails": "Nog geen klantreacties ontvangen. Antwoorden met [JB-ID] of [LD-ID] in het onderwerp verschijnen hier."
   }
 }
