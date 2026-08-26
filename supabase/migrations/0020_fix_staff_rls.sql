@@ -2,6 +2,7 @@
 -- The staff RLS policy references staff in its own subquery, which Postgres
 -- resolves by returning empty (RLS applied recursively), blocking all reads.
 -- Fix: SECURITY DEFINER functions that bypass RLS to check staff membership.
+-- Each table section is guarded so it only runs if the table exists.
 
 create or replace function is_active_staff()
 returns boolean
@@ -45,6 +46,8 @@ $$;
 -- ── Staff ────────────────────────────────────────────────
 drop policy if exists "staff can read staff" on staff;
 drop policy if exists "admin can manage staff" on staff;
+drop policy if exists "Staff can read own row" on staff;
+drop policy if exists "Admin can manage all staff" on staff;
 
 create policy "staff can read staff"
   on staff for select using (is_active_staff());
@@ -55,344 +58,323 @@ create policy "admin can manage staff"
   with check (is_admin_staff());
 
 -- ── Settings ─────────────────────────────────────────────
-drop policy if exists "staff can read settings" on settings;
-drop policy if exists "admin can manage settings" on settings;
-
-create policy "staff can read settings"
-  on settings for select using (is_active_staff());
-
-create policy "admin can manage settings"
-  on settings for all
-  using (is_admin_staff())
-  with check (is_admin_staff());
+DO $$ BEGIN
+IF EXISTS (SELECT 1 FROM information_schema.tables WHERE table_schema='public' AND table_name='settings') THEN
+  DROP POLICY IF EXISTS "staff can read settings" ON settings;
+  DROP POLICY IF EXISTS "admin can manage settings" ON settings;
+  DROP POLICY IF EXISTS "Staff can read settings" ON settings;
+  DROP POLICY IF EXISTS "Admin can manage settings" ON settings;
+  CREATE POLICY "staff can read settings" ON settings FOR SELECT USING (is_active_staff());
+  CREATE POLICY "admin can manage settings" ON settings FOR ALL USING (is_admin_staff()) WITH CHECK (is_admin_staff());
+END IF;
+END $$;
 
 -- ── Customers ────────────────────────────────────────────
-drop policy if exists "staff can read customers" on customers;
-drop policy if exists "staff can manage customers" on customers;
-
-create policy "staff can read customers"
-  on customers for select using (is_active_staff());
-
-create policy "staff can manage customers"
-  on customers for all
-  using (is_active_staff())
-  with check (is_active_staff());
+DO $$ BEGIN
+IF EXISTS (SELECT 1 FROM information_schema.tables WHERE table_schema='public' AND table_name='customers') THEN
+  DROP POLICY IF EXISTS "staff can read customers" ON customers;
+  DROP POLICY IF EXISTS "staff can manage customers" ON customers;
+  DROP POLICY IF EXISTS "Staff can read customers" ON customers;
+  DROP POLICY IF EXISTS "Staff can manage customers" ON customers;
+  CREATE POLICY "staff can read customers" ON customers FOR SELECT USING (is_active_staff());
+  CREATE POLICY "staff can manage customers" ON customers FOR ALL USING (is_active_staff()) WITH CHECK (is_active_staff());
+END IF;
+END $$;
 
 -- ── Vehicles ─────────────────────────────────────────────
-drop policy if exists "staff can read vehicles" on vehicles;
-drop policy if exists "staff can manage vehicles" on vehicles;
-
-create policy "staff can read vehicles"
-  on vehicles for select using (is_active_staff());
-
-create policy "staff can manage vehicles"
-  on vehicles for all
-  using (is_active_staff())
-  with check (is_active_staff());
+DO $$ BEGIN
+IF EXISTS (SELECT 1 FROM information_schema.tables WHERE table_schema='public' AND table_name='vehicles') THEN
+  DROP POLICY IF EXISTS "staff can read vehicles" ON vehicles;
+  DROP POLICY IF EXISTS "staff can manage vehicles" ON vehicles;
+  DROP POLICY IF EXISTS "Staff can read vehicles" ON vehicles;
+  DROP POLICY IF EXISTS "Staff can manage vehicles" ON vehicles;
+  CREATE POLICY "staff can read vehicles" ON vehicles FOR SELECT USING (is_active_staff());
+  CREATE POLICY "staff can manage vehicles" ON vehicles FOR ALL USING (is_active_staff()) WITH CHECK (is_active_staff());
+END IF;
+END $$;
 
 -- ── Leads ────────────────────────────────────────────────
-drop policy if exists "staff can read leads" on leads;
-drop policy if exists "staff can manage leads" on leads;
-
-create policy "staff can read leads"
-  on leads for select using (is_active_staff());
-
-create policy "staff can manage leads"
-  on leads for all
-  using (is_active_staff())
-  with check (is_active_staff());
+DO $$ BEGIN
+IF EXISTS (SELECT 1 FROM information_schema.tables WHERE table_schema='public' AND table_name='leads') THEN
+  DROP POLICY IF EXISTS "staff can read leads" ON leads;
+  DROP POLICY IF EXISTS "staff can manage leads" ON leads;
+  DROP POLICY IF EXISTS "Staff can read leads" ON leads;
+  DROP POLICY IF EXISTS "Staff can manage leads" ON leads;
+  CREATE POLICY "staff can read leads" ON leads FOR SELECT USING (is_active_staff());
+  CREATE POLICY "staff can manage leads" ON leads FOR ALL USING (is_active_staff()) WITH CHECK (is_active_staff());
+END IF;
+END $$;
 
 -- ── Lead photos ──────────────────────────────────────────
-drop policy if exists "staff can read lead_photos" on lead_photos;
-drop policy if exists "staff can manage lead_photos" on lead_photos;
-
-create policy "staff can read lead_photos"
-  on lead_photos for select using (is_active_staff());
-
-create policy "staff can manage lead_photos"
-  on lead_photos for all
-  using (is_active_staff())
-  with check (is_active_staff());
+DO $$ BEGIN
+IF EXISTS (SELECT 1 FROM information_schema.tables WHERE table_schema='public' AND table_name='lead_photos') THEN
+  DROP POLICY IF EXISTS "staff can read lead_photos" ON lead_photos;
+  DROP POLICY IF EXISTS "staff can manage lead_photos" ON lead_photos;
+  DROP POLICY IF EXISTS "Staff can read lead_photos" ON lead_photos;
+  DROP POLICY IF EXISTS "Staff can manage lead_photos" ON lead_photos;
+  CREATE POLICY "staff can read lead_photos" ON lead_photos FOR SELECT USING (is_active_staff());
+  CREATE POLICY "staff can manage lead_photos" ON lead_photos FOR ALL USING (is_active_staff()) WITH CHECK (is_active_staff());
+END IF;
+END $$;
 
 -- ── Jobs ─────────────────────────────────────────────────
-drop policy if exists "staff can read jobs" on jobs;
-drop policy if exists "staff can manage jobs" on jobs;
-
-create policy "staff can read jobs"
-  on jobs for select using (is_active_staff());
-
-create policy "staff can manage jobs"
-  on jobs for all
-  using (is_active_staff())
-  with check (is_active_staff());
+DO $$ BEGIN
+IF EXISTS (SELECT 1 FROM information_schema.tables WHERE table_schema='public' AND table_name='jobs') THEN
+  DROP POLICY IF EXISTS "staff can read jobs" ON jobs;
+  DROP POLICY IF EXISTS "staff can manage jobs" ON jobs;
+  DROP POLICY IF EXISTS "Staff can read jobs" ON jobs;
+  DROP POLICY IF EXISTS "Staff can manage jobs" ON jobs;
+  CREATE POLICY "staff can read jobs" ON jobs FOR SELECT USING (is_active_staff());
+  CREATE POLICY "staff can manage jobs" ON jobs FOR ALL USING (is_active_staff()) WITH CHECK (is_active_staff());
+END IF;
+END $$;
 
 -- ── Job events ───────────────────────────────────────────
-drop policy if exists "staff can read job_events" on job_events;
-drop policy if exists "staff can insert job_events" on job_events;
-
-create policy "staff can read job_events"
-  on job_events for select using (is_active_staff());
-
-create policy "staff can insert job_events"
-  on job_events for insert
-  with check (is_active_staff());
+DO $$ BEGIN
+IF EXISTS (SELECT 1 FROM information_schema.tables WHERE table_schema='public' AND table_name='job_events') THEN
+  DROP POLICY IF EXISTS "staff can read job_events" ON job_events;
+  DROP POLICY IF EXISTS "staff can insert job_events" ON job_events;
+  DROP POLICY IF EXISTS "Staff can read job_events" ON job_events;
+  DROP POLICY IF EXISTS "Staff can insert job_events" ON job_events;
+  CREATE POLICY "staff can read job_events" ON job_events FOR SELECT USING (is_active_staff());
+  CREATE POLICY "staff can insert job_events" ON job_events FOR INSERT WITH CHECK (is_active_staff());
+END IF;
+END $$;
 
 -- ── Job photos ───────────────────────────────────────────
-drop policy if exists "staff can read job_photos" on job_photos;
-drop policy if exists "staff can insert job_photos" on job_photos;
-
-create policy "staff can read job_photos"
-  on job_photos for select using (is_active_staff());
-
-create policy "staff can insert job_photos"
-  on job_photos for insert
-  with check (is_active_staff());
+DO $$ BEGIN
+IF EXISTS (SELECT 1 FROM information_schema.tables WHERE table_schema='public' AND table_name='job_photos') THEN
+  DROP POLICY IF EXISTS "staff can read job_photos" ON job_photos;
+  DROP POLICY IF EXISTS "staff can insert job_photos" ON job_photos;
+  DROP POLICY IF EXISTS "Staff can read job_photos" ON job_photos;
+  DROP POLICY IF EXISTS "Staff can insert job_photos" ON job_photos;
+  CREATE POLICY "staff can read job_photos" ON job_photos FOR SELECT USING (is_active_staff());
+  CREATE POLICY "staff can insert job_photos" ON job_photos FOR INSERT WITH CHECK (is_active_staff());
+END IF;
+END $$;
 
 -- ── Notifications ────────────────────────────────────────
-drop policy if exists "staff can read notifications" on notifications;
-drop policy if exists "staff can manage notifications" on notifications;
+DO $$ BEGIN
+IF EXISTS (SELECT 1 FROM information_schema.tables WHERE table_schema='public' AND table_name='notifications') THEN
+  DROP POLICY IF EXISTS "staff can read notifications" ON notifications;
+  DROP POLICY IF EXISTS "staff can manage notifications" ON notifications;
+  DROP POLICY IF EXISTS "Staff can read notifications" ON notifications;
+  DROP POLICY IF EXISTS "Staff can manage notifications" ON notifications;
+  CREATE POLICY "staff can read notifications" ON notifications FOR SELECT USING (is_active_staff());
+  CREATE POLICY "staff can manage notifications" ON notifications FOR ALL USING (is_active_staff()) WITH CHECK (is_active_staff());
+END IF;
+END $$;
 
-create policy "staff can read notifications"
-  on notifications for select using (is_active_staff());
+-- ── Number ranges ────────────────────────────────────────
+DO $$ BEGIN
+IF EXISTS (SELECT 1 FROM information_schema.tables WHERE table_schema='public' AND table_name='number_ranges') THEN
+  DROP POLICY IF EXISTS "staff can read number_ranges" ON number_ranges;
+  DROP POLICY IF EXISTS "office/admin can manage number_ranges" ON number_ranges;
+  DROP POLICY IF EXISTS "Staff can read number_ranges" ON number_ranges;
+  DROP POLICY IF EXISTS "Office/admin can manage number_ranges" ON number_ranges;
+  CREATE POLICY "staff can read number_ranges" ON number_ranges FOR SELECT USING (is_active_staff());
+  CREATE POLICY "office/admin can manage number_ranges" ON number_ranges FOR ALL USING (is_office_or_admin_staff()) WITH CHECK (is_office_or_admin_staff());
+END IF;
+END $$;
 
-create policy "staff can manage notifications"
-  on notifications for all
-  using (is_active_staff())
-  with check (is_active_staff());
+-- ── Documents ────────────────────────────────────────────
+DO $$ BEGIN
+IF EXISTS (SELECT 1 FROM information_schema.tables WHERE table_schema='public' AND table_name='documents') THEN
+  DROP POLICY IF EXISTS "staff can read documents" ON documents;
+  DROP POLICY IF EXISTS "staff can manage documents" ON documents;
+  DROP POLICY IF EXISTS "Staff can read documents" ON documents;
+  DROP POLICY IF EXISTS "Staff can manage documents" ON documents;
+  CREATE POLICY "staff can read documents" ON documents FOR SELECT USING (is_active_staff());
+  CREATE POLICY "staff can manage documents" ON documents FOR ALL USING (is_active_staff()) WITH CHECK (is_active_staff());
+END IF;
+END $$;
 
--- ── Documents / number ranges ────────────────────────────
-drop policy if exists "staff can read number_ranges" on number_ranges;
-drop policy if exists "office/admin can manage number_ranges" on number_ranges;
+-- ── Resources ────────────────────────────────────────────
+DO $$ BEGIN
+IF EXISTS (SELECT 1 FROM information_schema.tables WHERE table_schema='public' AND table_name='resources') THEN
+  DROP POLICY IF EXISTS "staff can read resources" ON resources;
+  DROP POLICY IF EXISTS "staff can manage resources" ON resources;
+  DROP POLICY IF EXISTS "Staff can read resources" ON resources;
+  DROP POLICY IF EXISTS "Staff can manage resources" ON resources;
+  CREATE POLICY "staff can read resources" ON resources FOR SELECT USING (is_active_staff());
+  CREATE POLICY "staff can manage resources" ON resources FOR ALL USING (is_active_staff()) WITH CHECK (is_active_staff());
+END IF;
+END $$;
 
-create policy "staff can read number_ranges"
-  on number_ranges for select using (is_active_staff());
+-- ── Opening hours ────────────────────────────────────────
+DO $$ BEGIN
+IF EXISTS (SELECT 1 FROM information_schema.tables WHERE table_schema='public' AND table_name='opening_hours') THEN
+  DROP POLICY IF EXISTS "staff can read opening_hours" ON opening_hours;
+  DROP POLICY IF EXISTS "staff can manage opening_hours" ON opening_hours;
+  DROP POLICY IF EXISTS "Staff can read opening_hours" ON opening_hours;
+  DROP POLICY IF EXISTS "Staff can manage opening_hours" ON opening_hours;
+  CREATE POLICY "staff can read opening_hours" ON opening_hours FOR SELECT USING (is_active_staff());
+  CREATE POLICY "staff can manage opening_hours" ON opening_hours FOR ALL USING (is_active_staff()) WITH CHECK (is_active_staff());
+END IF;
+END $$;
 
-create policy "office/admin can manage number_ranges"
-  on number_ranges for all
-  using (is_office_or_admin_staff())
-  with check (is_office_or_admin_staff());
-
-drop policy if exists "staff can read documents" on documents;
-drop policy if exists "staff can manage documents" on documents;
-
-create policy "staff can read documents"
-  on documents for select using (is_active_staff());
-
-create policy "staff can manage documents"
-  on documents for all
-  using (is_active_staff())
-  with check (is_active_staff());
-
--- ── Resources / Opening hours / Blackouts ────────────────
-drop policy if exists "staff can read resources" on resources;
-drop policy if exists "staff can manage resources" on resources;
-
-create policy "staff can read resources"
-  on resources for select using (is_active_staff());
-
-create policy "staff can manage resources"
-  on resources for all
-  using (is_active_staff())
-  with check (is_active_staff());
-
-drop policy if exists "staff can read opening_hours" on opening_hours;
-drop policy if exists "staff can manage opening_hours" on opening_hours;
-
-create policy "staff can read opening_hours"
-  on opening_hours for select using (is_active_staff());
-
-create policy "staff can manage opening_hours"
-  on opening_hours for all
-  using (is_active_staff())
-  with check (is_active_staff());
-
-drop policy if exists "staff can read blackouts" on blackouts;
-drop policy if exists "staff can manage blackouts" on blackouts;
-
-create policy "staff can read blackouts"
-  on blackouts for select using (is_active_staff());
-
-create policy "staff can manage blackouts"
-  on blackouts for all
-  using (is_active_staff())
-  with check (is_active_staff());
+-- ── Blackouts ────────────────────────────────────────────
+DO $$ BEGIN
+IF EXISTS (SELECT 1 FROM information_schema.tables WHERE table_schema='public' AND table_name='blackouts') THEN
+  DROP POLICY IF EXISTS "staff can read blackouts" ON blackouts;
+  DROP POLICY IF EXISTS "staff can manage blackouts" ON blackouts;
+  DROP POLICY IF EXISTS "Staff can read blackouts" ON blackouts;
+  DROP POLICY IF EXISTS "Staff can manage blackouts" ON blackouts;
+  CREATE POLICY "staff can read blackouts" ON blackouts FOR SELECT USING (is_active_staff());
+  CREATE POLICY "staff can manage blackouts" ON blackouts FOR ALL USING (is_active_staff()) WITH CHECK (is_active_staff());
+END IF;
+END $$;
 
 -- ── Appointments ─────────────────────────────────────────
-drop policy if exists "staff can read appointments" on appointments;
-drop policy if exists "staff can manage appointments" on appointments;
+DO $$ BEGIN
+IF EXISTS (SELECT 1 FROM information_schema.tables WHERE table_schema='public' AND table_name='appointments') THEN
+  DROP POLICY IF EXISTS "staff can read appointments" ON appointments;
+  DROP POLICY IF EXISTS "staff can manage appointments" ON appointments;
+  DROP POLICY IF EXISTS "Staff can read appointments" ON appointments;
+  DROP POLICY IF EXISTS "Staff can manage appointments" ON appointments;
+  CREATE POLICY "staff can read appointments" ON appointments FOR SELECT USING (is_active_staff());
+  CREATE POLICY "staff can manage appointments" ON appointments FOR ALL USING (is_active_staff()) WITH CHECK (is_active_staff());
+END IF;
+END $$;
 
-create policy "staff can read appointments"
-  on appointments for select using (is_active_staff());
+-- ── Job tasks ────────────────────────────────────────────
+DO $$ BEGIN
+IF EXISTS (SELECT 1 FROM information_schema.tables WHERE table_schema='public' AND table_name='job_tasks') THEN
+  DROP POLICY IF EXISTS "staff can read job_tasks" ON job_tasks;
+  DROP POLICY IF EXISTS "staff can manage job_tasks" ON job_tasks;
+  DROP POLICY IF EXISTS "Staff can read job_tasks" ON job_tasks;
+  DROP POLICY IF EXISTS "Staff can manage job_tasks" ON job_tasks;
+  CREATE POLICY "staff can read job_tasks" ON job_tasks FOR SELECT USING (is_active_staff());
+  CREATE POLICY "staff can manage job_tasks" ON job_tasks FOR ALL USING (is_active_staff()) WITH CHECK (is_active_staff());
+END IF;
+END $$;
 
-create policy "staff can manage appointments"
-  on appointments for all
-  using (is_active_staff())
-  with check (is_active_staff());
+-- ── Time entries ─────────────────────────────────────────
+DO $$ BEGIN
+IF EXISTS (SELECT 1 FROM information_schema.tables WHERE table_schema='public' AND table_name='time_entries') THEN
+  DROP POLICY IF EXISTS "staff can read time_entries" ON time_entries;
+  DROP POLICY IF EXISTS "staff can manage time_entries" ON time_entries;
+  DROP POLICY IF EXISTS "Staff can read time_entries" ON time_entries;
+  DROP POLICY IF EXISTS "Staff can manage time_entries" ON time_entries;
+  CREATE POLICY "staff can read time_entries" ON time_entries FOR SELECT USING (is_active_staff());
+  CREATE POLICY "staff can manage time_entries" ON time_entries FOR ALL USING (is_active_staff()) WITH CHECK (is_active_staff());
+END IF;
+END $$;
 
--- ── Tasks / Time entries ─────────────────────────────────
-drop policy if exists "staff can read job_tasks" on job_tasks;
-drop policy if exists "staff can manage job_tasks" on job_tasks;
+-- ── Invoices ─────────────────────────────────────────────
+DO $$ BEGIN
+IF EXISTS (SELECT 1 FROM information_schema.tables WHERE table_schema='public' AND table_name='invoices') THEN
+  DROP POLICY IF EXISTS "staff can read invoices" ON invoices;
+  DROP POLICY IF EXISTS "staff can manage invoices" ON invoices;
+  DROP POLICY IF EXISTS "Staff can read invoices" ON invoices;
+  DROP POLICY IF EXISTS "Staff can manage invoices" ON invoices;
+  CREATE POLICY "staff can read invoices" ON invoices FOR SELECT USING (is_active_staff());
+  CREATE POLICY "staff can manage invoices" ON invoices FOR ALL USING (is_active_staff()) WITH CHECK (is_active_staff());
+END IF;
+END $$;
 
-create policy "staff can read job_tasks"
-  on job_tasks for select using (is_active_staff());
+-- ── Invoice lines ────────────────────────────────────────
+DO $$ BEGIN
+IF EXISTS (SELECT 1 FROM information_schema.tables WHERE table_schema='public' AND table_name='invoice_lines') THEN
+  DROP POLICY IF EXISTS "staff can read invoice_lines" ON invoice_lines;
+  DROP POLICY IF EXISTS "staff can manage invoice_lines" ON invoice_lines;
+  DROP POLICY IF EXISTS "Staff can read invoice_lines" ON invoice_lines;
+  DROP POLICY IF EXISTS "Staff can manage invoice_lines" ON invoice_lines;
+  CREATE POLICY "staff can read invoice_lines" ON invoice_lines FOR SELECT USING (is_active_staff());
+  CREATE POLICY "staff can manage invoice_lines" ON invoice_lines FOR ALL USING (is_active_staff()) WITH CHECK (is_active_staff());
+END IF;
+END $$;
 
-create policy "staff can manage job_tasks"
-  on job_tasks for all
-  using (is_active_staff())
-  with check (is_active_staff());
+-- ── Payments ─────────────────────────────────────────────
+DO $$ BEGIN
+IF EXISTS (SELECT 1 FROM information_schema.tables WHERE table_schema='public' AND table_name='payments') THEN
+  DROP POLICY IF EXISTS "staff can read payments" ON payments;
+  DROP POLICY IF EXISTS "staff can manage payments" ON payments;
+  DROP POLICY IF EXISTS "Staff can read payments" ON payments;
+  DROP POLICY IF EXISTS "Staff can manage payments" ON payments;
+  CREATE POLICY "staff can read payments" ON payments FOR SELECT USING (is_active_staff());
+  CREATE POLICY "staff can manage payments" ON payments FOR ALL USING (is_active_staff()) WITH CHECK (is_active_staff());
+END IF;
+END $$;
 
-drop policy if exists "staff can read time_entries" on time_entries;
-drop policy if exists "staff can manage time_entries" on time_entries;
+-- ── Offers ───────────────────────────────────────────────
+DO $$ BEGIN
+IF EXISTS (SELECT 1 FROM information_schema.tables WHERE table_schema='public' AND table_name='offers') THEN
+  DROP POLICY IF EXISTS "offers_select" ON offers;
+  DROP POLICY IF EXISTS "offers_insert" ON offers;
+  DROP POLICY IF EXISTS "offers_update" ON offers;
+  DROP POLICY IF EXISTS "offers_delete" ON offers;
+  CREATE POLICY "offers_select" ON offers FOR SELECT USING (is_active_staff());
+  CREATE POLICY "offers_insert" ON offers FOR INSERT WITH CHECK (is_active_staff());
+  CREATE POLICY "offers_update" ON offers FOR UPDATE USING (is_active_staff()) WITH CHECK (is_active_staff());
+  CREATE POLICY "offers_delete" ON offers FOR DELETE USING (is_active_staff());
+END IF;
+END $$;
 
-create policy "staff can read time_entries"
-  on time_entries for select using (is_active_staff());
-
-create policy "staff can manage time_entries"
-  on time_entries for all
-  using (is_active_staff())
-  with check (is_active_staff());
-
--- ── Invoices / Invoice lines / Payments ──────────────────
-drop policy if exists "staff can read invoices" on invoices;
-drop policy if exists "staff can manage invoices" on invoices;
-
-create policy "staff can read invoices"
-  on invoices for select using (is_active_staff());
-
-create policy "staff can manage invoices"
-  on invoices for all
-  using (is_active_staff())
-  with check (is_active_staff());
-
-drop policy if exists "staff can read invoice_lines" on invoice_lines;
-drop policy if exists "staff can manage invoice_lines" on invoice_lines;
-
-create policy "staff can read invoice_lines"
-  on invoice_lines for select using (is_active_staff());
-
-create policy "staff can manage invoice_lines"
-  on invoice_lines for all
-  using (is_active_staff())
-  with check (is_active_staff());
-
-drop policy if exists "staff can read payments" on payments;
-drop policy if exists "staff can manage payments" on payments;
-
-create policy "staff can read payments"
-  on payments for select using (is_active_staff());
-
-create policy "staff can manage payments"
-  on payments for all
-  using (is_active_staff())
-  with check (is_active_staff());
-
--- ── Offers / Offer lines ─────────────────────────────────
-drop policy if exists "offers_select" on offers;
-drop policy if exists "offers_insert" on offers;
-drop policy if exists "offers_update" on offers;
-drop policy if exists "offers_delete" on offers;
-
-create policy "offers_select"
-  on offers for select using (is_active_staff());
-
-create policy "offers_insert"
-  on offers for insert
-  with check (is_active_staff());
-
-create policy "offers_update"
-  on offers for update
-  using (is_active_staff())
-  with check (is_active_staff());
-
-create policy "offers_delete"
-  on offers for delete
-  using (is_active_staff());
-
-drop policy if exists "offer_lines_select" on offer_lines;
-drop policy if exists "offer_lines_insert" on offer_lines;
-drop policy if exists "offer_lines_update" on offer_lines;
-drop policy if exists "offer_lines_delete" on offer_lines;
-
-create policy "offer_lines_select"
-  on offer_lines for select using (is_active_staff());
-
-create policy "offer_lines_insert"
-  on offer_lines for insert
-  with check (is_active_staff());
-
-create policy "offer_lines_update"
-  on offer_lines for update
-  using (is_active_staff())
-  with check (is_active_staff());
-
-create policy "offer_lines_delete"
-  on offer_lines for delete
-  using (is_active_staff());
+-- ── Offer lines ──────────────────────────────────────────
+DO $$ BEGIN
+IF EXISTS (SELECT 1 FROM information_schema.tables WHERE table_schema='public' AND table_name='offer_lines') THEN
+  DROP POLICY IF EXISTS "offer_lines_select" ON offer_lines;
+  DROP POLICY IF EXISTS "offer_lines_insert" ON offer_lines;
+  DROP POLICY IF EXISTS "offer_lines_update" ON offer_lines;
+  DROP POLICY IF EXISTS "offer_lines_delete" ON offer_lines;
+  CREATE POLICY "offer_lines_select" ON offer_lines FOR SELECT USING (is_active_staff());
+  CREATE POLICY "offer_lines_insert" ON offer_lines FOR INSERT WITH CHECK (is_active_staff());
+  CREATE POLICY "offer_lines_update" ON offer_lines FOR UPDATE USING (is_active_staff()) WITH CHECK (is_active_staff());
+  CREATE POLICY "offer_lines_delete" ON offer_lines FOR DELETE USING (is_active_staff());
+END IF;
+END $$;
 
 -- ── Parts ────────────────────────────────────────────────
-drop policy if exists "Staff can read parts" on parts;
-drop policy if exists "Staff can insert parts" on parts;
-drop policy if exists "Staff can update parts" on parts;
-drop policy if exists "Staff can delete parts" on parts;
-
-create policy "Staff can read parts"
-  on parts for select using (is_active_staff());
-
-create policy "Staff can insert parts"
-  on parts for insert
-  with check (is_active_staff());
-
-create policy "Staff can update parts"
-  on parts for update
-  using (is_active_staff())
-  with check (is_active_staff());
-
-create policy "Staff can delete parts"
-  on parts for delete
-  using (is_active_staff());
+DO $$ BEGIN
+IF EXISTS (SELECT 1 FROM information_schema.tables WHERE table_schema='public' AND table_name='parts') THEN
+  DROP POLICY IF EXISTS "Staff can read parts" ON parts;
+  DROP POLICY IF EXISTS "Staff can insert parts" ON parts;
+  DROP POLICY IF EXISTS "Staff can update parts" ON parts;
+  DROP POLICY IF EXISTS "Staff can delete parts" ON parts;
+  CREATE POLICY "Staff can read parts" ON parts FOR SELECT USING (is_active_staff());
+  CREATE POLICY "Staff can insert parts" ON parts FOR INSERT WITH CHECK (is_active_staff());
+  CREATE POLICY "Staff can update parts" ON parts FOR UPDATE USING (is_active_staff()) WITH CHECK (is_active_staff());
+  CREATE POLICY "Staff can delete parts" ON parts FOR DELETE USING (is_active_staff());
+END IF;
+END $$;
 
 -- ── Signatures ───────────────────────────────────────────
-drop policy if exists "Staff can view signatures" on signatures;
-drop policy if exists "Staff can insert signatures" on signatures;
-
-create policy "Staff can view signatures"
-  on signatures for select using (is_active_staff());
-
-create policy "Staff can insert signatures"
-  on signatures for insert
-  with check (is_active_staff());
+DO $$ BEGIN
+IF EXISTS (SELECT 1 FROM information_schema.tables WHERE table_schema='public' AND table_name='signatures') THEN
+  DROP POLICY IF EXISTS "Staff can view signatures" ON signatures;
+  DROP POLICY IF EXISTS "Staff can insert signatures" ON signatures;
+  CREATE POLICY "Staff can view signatures" ON signatures FOR SELECT USING (is_active_staff());
+  CREATE POLICY "Staff can insert signatures" ON signatures FOR INSERT WITH CHECK (is_active_staff());
+END IF;
+END $$;
 
 -- ── VAT returns ──────────────────────────────────────────
-drop policy if exists "Staff can read vat_returns" on vat_returns;
-drop policy if exists "Admin can manage vat_returns" on vat_returns;
-
-create policy "Staff can read vat_returns"
-  on vat_returns for select using (is_active_staff());
-
-create policy "Admin can manage vat_returns"
-  on vat_returns for all
-  using (is_admin_staff())
-  with check (is_admin_staff());
+DO $$ BEGIN
+IF EXISTS (SELECT 1 FROM information_schema.tables WHERE table_schema='public' AND table_name='vat_returns') THEN
+  DROP POLICY IF EXISTS "Staff can read vat_returns" ON vat_returns;
+  DROP POLICY IF EXISTS "Admin can manage vat_returns" ON vat_returns;
+  CREATE POLICY "Staff can read vat_returns" ON vat_returns FOR SELECT USING (is_active_staff());
+  CREATE POLICY "Admin can manage vat_returns" ON vat_returns FOR ALL USING (is_admin_staff()) WITH CHECK (is_admin_staff());
+END IF;
+END $$;
 
 -- ── Purchases ────────────────────────────────────────────
-drop policy if exists "Staff can read purchases" on purchases;
-drop policy if exists "Office/admin can manage purchases" on purchases;
-
-create policy "Staff can read purchases"
-  on purchases for select using (is_active_staff());
-
-create policy "Office/admin can manage purchases"
-  on purchases for all
-  using (is_office_or_admin_staff())
-  with check (is_office_or_admin_staff());
+DO $$ BEGIN
+IF EXISTS (SELECT 1 FROM information_schema.tables WHERE table_schema='public' AND table_name='purchases') THEN
+  DROP POLICY IF EXISTS "Staff can read purchases" ON purchases;
+  DROP POLICY IF EXISTS "Office/admin can manage purchases" ON purchases;
+  CREATE POLICY "Staff can read purchases" ON purchases FOR SELECT USING (is_active_staff());
+  CREATE POLICY "Office/admin can manage purchases" ON purchases FOR ALL USING (is_office_or_admin_staff()) WITH CHECK (is_office_or_admin_staff());
+END IF;
+END $$;
 
 -- ── Internal notes ───────────────────────────────────────
-drop policy if exists "Staff can read all notes" on internal_notes;
-drop policy if exists "Staff can create notes" on internal_notes;
-
-create policy "Staff can read all notes"
-  on internal_notes for select using (is_active_staff());
-
-create policy "Staff can create notes"
-  on internal_notes for insert
-  with check (is_active_staff());
+DO $$ BEGIN
+IF EXISTS (SELECT 1 FROM information_schema.tables WHERE table_schema='public' AND table_name='internal_notes') THEN
+  DROP POLICY IF EXISTS "Staff can read all notes" ON internal_notes;
+  DROP POLICY IF EXISTS "Staff can create notes" ON internal_notes;
+  CREATE POLICY "Staff can read all notes" ON internal_notes FOR SELECT USING (is_active_staff());
+  CREATE POLICY "Staff can create notes" ON internal_notes FOR INSERT WITH CHECK (is_active_staff());
+END IF;
+END $$;
