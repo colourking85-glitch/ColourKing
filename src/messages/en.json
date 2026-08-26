@@ -917,7 +917,15 @@
     "prefix": "Prefix",
     "nextNumber": "Next number",
     "preview": "Preview",
-    "noRanges": "No number ranges configured"
+    "noRanges": "No number ranges configured",
+    "createdAt": "Created",
+    "addNewUser": "Add new user",
+    "passwordLabel": "Password",
+    "passwordPlaceholder": "Min. 8 characters (leave empty for email invite)",
+    "createUser": "Create user",
+    "roleAdminDesc": "Full access — manage everything including Users & Settings",
+    "roleOfficeDesc": "Can manage Leads, Customers, Vehicles, Jobs, Invoices & Documents",
+    "roleTechDesc": "Read-only access — can view jobs, log time and upload photos"
   },
   "signature": {
     "signHere": "Sign here",

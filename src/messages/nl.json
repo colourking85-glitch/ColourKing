@@ -917,7 +917,15 @@
     "prefix": "Prefix",
     "nextNumber": "Volgend nummer",
     "preview": "Voorbeeld",
-    "noRanges": "Geen nummerreeksen geconfigureerd"
+    "noRanges": "Geen nummerreeksen geconfigureerd",
+    "createdAt": "Aangemaakt",
+    "addNewUser": "Nieuwe gebruiker toevoegen",
+    "passwordLabel": "Wachtwoord",
+    "passwordPlaceholder": "Min. 8 tekens (leeg = e-mail uitnodiging)",
+    "createUser": "Gebruiker aanmaken",
+    "roleAdminDesc": "Volledige toegang — beheer alles inclusief Gebruikers & Instellingen",
+    "roleOfficeDesc": "Kan Leads, Klanten, Voertuigen, Opdrachten, Facturen & Documenten beheren",
+    "roleTechDesc": "Alleen-lezen — kan opdrachten bekijken, tijd registreren en foto's uploaden"
   },
   "signature": {
     "signHere": "Hier tekenen",

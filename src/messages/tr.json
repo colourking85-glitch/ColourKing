@@ -917,7 +917,15 @@
     "prefix": "Ön ek",
     "nextNumber": "Sonraki numara",
     "preview": "Önizleme",
-    "noRanges": "Yapılandırılmış numara aralığı yok"
+    "noRanges": "Yapılandırılmış numara aralığı yok",
+    "createdAt": "Oluşturuldu",
+    "addNewUser": "Yeni kullanıcı ekle",
+    "passwordLabel": "Şifre",
+    "passwordPlaceholder": "Min. 8 karakter (boş = e-posta daveti)",
+    "createUser": "Kullanıcı oluştur",
+    "roleAdminDesc": "Tam erişim — Kullanıcılar ve Ayarlar dahil her şeyi yönet",
+    "roleOfficeDesc": "Müşteri adayları, Müşteriler, Araçlar, İşler, Faturalar ve Belgeleri yönetebilir",
+    "roleTechDesc": "Salt okunur erişim — işleri görüntüleyebilir, süre girebilir ve fotoğraf yükleyebilir"
   },
   "signature": {
     "signHere": "Buraya imza atın",

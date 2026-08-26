@@ -24,8 +24,8 @@ export default function CreateJobPage() {
   });
 
   useEffect(() => {
-    fetch('/api/customers').then(r => r.json()).then(setCustomers);
-    fetch('/api/vehicles').then(r => r.json()).then(setVehicles);
+    fetch('/api/customers').then(r => r.json()).then(d => { if (Array.isArray(d)) setCustomers(d); });
+    fetch('/api/vehicles').then(r => r.json()).then(d => { if (Array.isArray(d)) setVehicles(d); });
   }, []);
 
   const set = (field: string) => (e: React.ChangeEvent<HTMLInputElement | HTMLSelectElement | HTMLTextAreaElement>) =>

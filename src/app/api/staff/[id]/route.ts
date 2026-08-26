@@ -1,14 +1,26 @@
 import { NextRequest, NextResponse } from 'next/server';
 import { createClient } from '@/lib/supabase/server';
 
-async function requireAdmin(supabase: ReturnType<typeof createClient>) {
+function getAdminClient() {
+  const supabaseUrl = process.env.NEXT_PUBLIC_SUPABASE_URL;
+  const serviceKey = process.env.SUPABASE_SERVICE_ROLE_KEY;
+  if (!supabaseUrl || !serviceKey) return null;
+  const { createClient: create } = require('@supabase/supabase-js'); // dynamic require to avoid bundling service key
+  return create(supabaseUrl, serviceKey);
+}
+
+async function requireAdmin() {
+  const supabase = createClient();
   const {
     data: { user },
   } = await supabase.auth.getUser();
 
   if (!user) return { error: 'Unauthorized', status: 401 } as const;
 
-  const { data: staff } = await supabase
+  const admin = getAdminClient();
+  if (!admin) return { error: 'Service key not configured', status: 500 } as const;
+
+  const { data: staff } = await admin
     .from('staff')
     .select('role')
     .eq('id', user.id)
@@ -25,17 +37,14 @@ export async function PATCH(
   req: NextRequest,
   { params }: { params: { id: string } }
 ) {
-  const supabaseUrl = process.env.NEXT_PUBLIC_SUPABASE_URL;
-  const supabaseKey = process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY;
-
-  if (!supabaseUrl || !supabaseKey) {
-    return NextResponse.json({ error: 'Not available in dev mode' }, { status: 400 });
-  }
-
-  const supabase = createClient();
-  const auth = await requireAdmin(supabase);
+  const auth = await requireAdmin();
   if ('error' in auth) {
     return NextResponse.json({ error: auth.error }, { status: auth.status });
+  }
+
+  const admin = getAdminClient();
+  if (!admin) {
+    return NextResponse.json({ error: 'Not available' }, { status: 500 });
   }
 
   const body = await req.json();
@@ -52,11 +61,15 @@ export async function PATCH(
     updates.active = Boolean(body.active);
   }
 
+  if (body.name !== undefined) {
+    updates.name = body.name;
+  }
+
   if (Object.keys(updates).length === 0) {
     return NextResponse.json({ error: 'No valid fields to update' }, { status: 400 });
   }
 
-  const { data, error } = await supabase
+  const { data, error } = await admin
     .from('staff')
     .update(updates)
     .eq('id', params.id)
@@ -74,15 +87,7 @@ export async function DELETE(
   _req: NextRequest,
   { params }: { params: { id: string } }
 ) {
-  const supabaseUrl = process.env.NEXT_PUBLIC_SUPABASE_URL;
-  const serviceKey = process.env.SUPABASE_SERVICE_ROLE_KEY;
-
-  if (!supabaseUrl || !serviceKey) {
-    return NextResponse.json({ error: 'Not available' }, { status: 400 });
-  }
-
-  const supabase = createClient();
-  const auth = await requireAdmin(supabase);
+  const auth = await requireAdmin();
   if ('error' in auth) {
     return NextResponse.json({ error: auth.error }, { status: auth.status });
   }
@@ -91,10 +96,12 @@ export async function DELETE(
     return NextResponse.json({ error: 'Cannot delete your own account' }, { status: 400 });
   }
 
-  const { createClient: createAdminClient } = await import('@supabase/supabase-js');
-  const adminSupabase = createAdminClient(supabaseUrl, serviceKey);
+  const admin = getAdminClient();
+  if (!admin) {
+    return NextResponse.json({ error: 'Not available' }, { status: 500 });
+  }
 
-  const { error: staffError } = await adminSupabase
+  const { error: staffError } = await admin
     .from('staff')
     .delete()
     .eq('id', params.id);
@@ -103,7 +110,7 @@ export async function DELETE(
     return NextResponse.json({ error: staffError.message }, { status: 500 });
   }
 
-  const { error: authError } = await adminSupabase.auth.admin.deleteUser(params.id);
+  const { error: authError } = await admin.auth.admin.deleteUser(params.id);
 
   if (authError) {
     return NextResponse.json({ error: authError.message }, { status: 500 });
