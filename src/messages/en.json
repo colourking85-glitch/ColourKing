@@ -1607,6 +1607,7 @@
   "drive": {
     "title": "Google Drive",
     "subtitle": "File browser for colourking85@gmail.com",
+    "refresh": "Refresh",
     "upload": "Upload",
     "uploading": "Uploading…",
     "newFolder": "New Folder",

@@ -1607,6 +1607,7 @@
   "drive": {
     "title": "Google Drive",
     "subtitle": "Bestandsbrowser voor colourking85@gmail.com",
+    "refresh": "Vernieuwen",
     "upload": "Uploaden",
     "uploading": "Uploaden…",
     "newFolder": "Nieuwe Map",

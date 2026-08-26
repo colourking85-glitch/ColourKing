@@ -1607,6 +1607,7 @@
   "drive": {
     "title": "Google Drive",
     "subtitle": "colourking85@gmail.com dosya tarayicisi",
+    "refresh": "Yenile",
     "upload": "Yukle",
     "uploading": "Yukleniyor…",
     "newFolder": "Yeni Klasor",
