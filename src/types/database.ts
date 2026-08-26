@@ -1,4 +1,4 @@
-// Auto-generated types — reflects migrations 0001-0018.
+// Auto-generated types — reflects migrations 0001-0019.
 // Regenerate after every migration: supabase gen types typescript --local > src/types/database.ts
 
 export type Json =
@@ -32,6 +32,16 @@ export type VatReturnStatus = 'open' | 'draft' | 'filed' | 'corrected';
 export type VatPeriodType = 'quarter' | 'month';
 export type TaxCode = 'H21' | 'L9' | 'N0' | 'V0' | 'M0' | 'ICP' | 'EX';
 export type NotificationType = 'new_lead' | 'stage_change' | 'new_email' | 'appointment_confirmed' | 'appointment_cancelled' | 'part_received' | 'payment_received' | 'document_issued' | 'system';
+export type NoteEntityType = 'job' | 'lead' | 'customer' | 'vehicle' | 'invoice' | 'offer';
+
+export interface InternalNote {
+  id: string;
+  entity_type: NoteEntityType;
+  entity_id: string;
+  author_id: string | null;
+  body: string;
+  created_at: string;
+}
 
 export interface Staff {
   id: string;

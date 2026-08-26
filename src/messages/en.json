@@ -95,7 +95,15 @@
     "timeMinAgo": "{count} min ago",
     "timeHourAgo": "{count} hour ago",
     "timeDayAgo": "{count}d ago",
-    "system": "System"
+    "system": "System",
+    "ai": "AI",
+    "myWork": "My Work",
+    "envDev": "DEV",
+    "envProd": "PROD",
+    "shopCode": "CK01",
+    "searchByCode": "Search by screen code or description...",
+    "chat": "Chat",
+    "viewer": "viewer"
   },
   "auth": {
     "email": "Email address",
@@ -103,7 +111,9 @@
     "signIn": "Sign in",
     "signInTitle": "Sign in to Colourking",
     "signInSubtitle": "Admin console",
-    "invalidCredentials": "Invalid credentials",
+    "invalidCredentials": "Invalid email or password.",
+    "noStaffRecord": "No staff account found. Contact your administrator.",
+    "accountDeactivated": "Your account has been deactivated. Contact your administrator.",
     "sessionExpired": "Session expired, please sign in again",
     "emailPlaceholder": "name@colourking.nl",
     "signingIn": "Signing in...",
@@ -894,6 +904,12 @@
     "inviteSent": "Invitation sent successfully",
     "inviteFailed": "Failed to send invitation",
     "noStaff": "No staff members yet",
+    "resetPassword": "Reset password",
+    "resetSent": "Password reset email sent to {email}",
+    "resetFailed": "Failed to send password reset",
+    "confirmDelete": "Yes, delete",
+    "userDeleted": "User deleted successfully",
+    "deleteFailed": "Failed to delete user",
     "numberingTitle": "Number ranges",
     "numberingSubtitle": "Configure document number prefixes and counters",
     "docType": "Document type",
@@ -1485,5 +1501,81 @@
     "emptyPurchases": "No purchases in this period",
     "emptyVat": "No filed VAT returns for this year",
     "emptyProfitLoss": "No financial data in this period"
+  },
+  "shortcuts": {
+    "title": "Keyboard shortcuts",
+    "hint": "Press ? or ⌘/ to toggle this panel",
+    "groups": {
+      "navigation": "Navigation",
+      "lists": "Lists & panels",
+      "actions": "Actions"
+    },
+    "actions": {
+      "searchScreens": "Search screens & records",
+      "quickCreate": "Quick create",
+      "toggleSidebar": "Toggle sidebar",
+      "toggleShortcuts": "Show shortcuts",
+      "navigateList": "Navigate list",
+      "openRecord": "Open record",
+      "closePanel": "Close panel / dialog",
+      "save": "Save",
+      "edit": "Edit",
+      "aiAssistant": "Open AI assistant"
+    }
+  },
+  "favorites": {
+    "title": "Favorites",
+    "empty": "No favorites yet",
+    "addFavorite": "Add to favorites",
+    "removeFavorite": "Remove from favorites",
+    "recentItems": "Recent items"
+  },
+  "myWork": {
+    "title": "My Work",
+    "assignedTasks": "Assigned tasks",
+    "upcomingAppointments": "Upcoming appointments",
+    "overdueItems": "Overdue items",
+    "jobsInQueue": "Jobs in my queue",
+    "noTasks": "No assigned tasks",
+    "noAppointments": "No upcoming appointments",
+    "noOverdue": "All caught up",
+    "noJobs": "No jobs in queue",
+    "dueToday": "Due today",
+    "overdue": "Overdue",
+    "upcoming": "Upcoming"
+  },
+  "activity": {
+    "title": "Activity",
+    "recentActivity": "Recent activity",
+    "noActivity": "No recent activity",
+    "leadCreated": "New lead created",
+    "offerSent": "Offer sent",
+    "jobStageChanged": "Job stage changed",
+    "invoicePaid": "Invoice paid",
+    "appointmentBooked": "Appointment booked",
+    "taskCompleted": "Task completed",
+    "customerCreated": "Customer created",
+    "vehicleAdded": "Vehicle added",
+    "viewAll": "View all activity"
+  },
+  "notes": {
+    "title": "Notes",
+    "placeholder": "Write a note...",
+    "send": "Send",
+    "noNotes": "No notes yet",
+    "internalNote": "Internal note"
+  },
+  "aiPanel": {
+    "title": "AI Assistant",
+    "placeholder": "Ask anything about this screen...",
+    "send": "Send",
+    "thinking": "Thinking...",
+    "welcome": "How can I help you?",
+    "suggestions": {
+      "summarize": "Summarize this record",
+      "draftEmail": "Draft a customer email",
+      "nextActions": "Suggest next actions"
+    },
+    "noApiKey": "AI features require an API key. Configure in Settings."
   }
 }

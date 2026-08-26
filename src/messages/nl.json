@@ -95,7 +95,15 @@
     "timeMinAgo": "{count} min geleden",
     "timeHourAgo": "{count} uur geleden",
     "timeDayAgo": "{count}d geleden",
-    "system": "Systeem"
+    "system": "Systeem",
+    "ai": "AI",
+    "myWork": "Mijn Werk",
+    "envDev": "DEV",
+    "envProd": "PROD",
+    "shopCode": "CK01",
+    "searchByCode": "Zoek op schermcode of omschrijving...",
+    "chat": "Chat",
+    "viewer": "viewer"
   },
   "auth": {
     "email": "E-mailadres",
@@ -103,7 +111,9 @@
     "signIn": "Inloggen",
     "signInTitle": "Inloggen bij Colourking",
     "signInSubtitle": "Beheerconsole",
-    "invalidCredentials": "Onjuiste inloggegevens",
+    "invalidCredentials": "Onjuist e-mailadres of wachtwoord.",
+    "noStaffRecord": "Geen medewerkeraccount gevonden. Neem contact op met uw beheerder.",
+    "accountDeactivated": "Uw account is gedeactiveerd. Neem contact op met uw beheerder.",
     "sessionExpired": "Sessie verlopen, log opnieuw in",
     "emailPlaceholder": "naam@colourking.nl",
     "signingIn": "Inloggen...",
@@ -894,6 +904,12 @@
     "inviteSent": "Uitnodiging succesvol verstuurd",
     "inviteFailed": "Uitnodiging versturen mislukt",
     "noStaff": "Nog geen medewerkers",
+    "resetPassword": "Wachtwoord resetten",
+    "resetSent": "Wachtwoord reset e-mail verstuurd naar {email}",
+    "resetFailed": "Wachtwoord reset versturen mislukt",
+    "confirmDelete": "Ja, verwijderen",
+    "userDeleted": "Gebruiker succesvol verwijderd",
+    "deleteFailed": "Gebruiker verwijderen mislukt",
     "numberingTitle": "Nummering",
     "numberingSubtitle": "Configureer documentnummer-prefixen en tellers",
     "docType": "Documenttype",
@@ -1485,5 +1501,81 @@
     "emptyPurchases": "Geen inkopen in deze periode",
     "emptyVat": "Geen ingediende BTW-aangiften voor dit jaar",
     "emptyProfitLoss": "Geen financiele gegevens in deze periode"
+  },
+  "shortcuts": {
+    "title": "Sneltoetsen",
+    "hint": "Druk op ? of ⌘/ om dit paneel te wisselen",
+    "groups": {
+      "navigation": "Navigatie",
+      "lists": "Lijsten & panelen",
+      "actions": "Acties"
+    },
+    "actions": {
+      "searchScreens": "Zoek schermen & records",
+      "quickCreate": "Snel aanmaken",
+      "toggleSidebar": "Zijbalk wisselen",
+      "toggleShortcuts": "Sneltoetsen tonen",
+      "navigateList": "Lijst navigeren",
+      "openRecord": "Record openen",
+      "closePanel": "Paneel / dialoog sluiten",
+      "save": "Opslaan",
+      "edit": "Bewerken",
+      "aiAssistant": "AI-assistent openen"
+    }
+  },
+  "favorites": {
+    "title": "Favorieten",
+    "empty": "Nog geen favorieten",
+    "addFavorite": "Toevoegen aan favorieten",
+    "removeFavorite": "Verwijderen uit favorieten",
+    "recentItems": "Recente items"
+  },
+  "myWork": {
+    "title": "Mijn Werk",
+    "assignedTasks": "Toegewezen taken",
+    "upcomingAppointments": "Komende afspraken",
+    "overdueItems": "Achterstallige items",
+    "jobsInQueue": "Opdrachten in mijn wachtrij",
+    "noTasks": "Geen toegewezen taken",
+    "noAppointments": "Geen komende afspraken",
+    "noOverdue": "Alles bijgewerkt",
+    "noJobs": "Geen opdrachten in wachtrij",
+    "dueToday": "Vandaag verlopen",
+    "overdue": "Achterstallig",
+    "upcoming": "Komend"
+  },
+  "activity": {
+    "title": "Activiteit",
+    "recentActivity": "Recente activiteit",
+    "noActivity": "Geen recente activiteit",
+    "leadCreated": "Nieuwe lead aangemaakt",
+    "offerSent": "Offerte verzonden",
+    "jobStageChanged": "Opdrachtstatus gewijzigd",
+    "invoicePaid": "Factuur betaald",
+    "appointmentBooked": "Afspraak geboekt",
+    "taskCompleted": "Taak voltooid",
+    "customerCreated": "Klant aangemaakt",
+    "vehicleAdded": "Voertuig toegevoegd",
+    "viewAll": "Alle activiteit bekijken"
+  },
+  "notes": {
+    "title": "Notities",
+    "placeholder": "Schrijf een notitie...",
+    "send": "Verzenden",
+    "noNotes": "Nog geen notities",
+    "internalNote": "Interne notitie"
+  },
+  "aiPanel": {
+    "title": "AI-assistent",
+    "placeholder": "Vraag iets over dit scherm...",
+    "send": "Verzenden",
+    "thinking": "Nadenken...",
+    "welcome": "Hoe kan ik helpen?",
+    "suggestions": {
+      "summarize": "Vat dit record samen",
+      "draftEmail": "Stel een klant-e-mail op",
+      "nextActions": "Stel volgende acties voor"
+    },
+    "noApiKey": "AI-functies vereisen een API-sleutel. Configureer in Instellingen."
   }
 }

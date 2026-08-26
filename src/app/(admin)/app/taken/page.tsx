@@ -6,6 +6,7 @@ import { useTranslations } from 'next-intl';
 import {
   Search, CheckSquare, Plus, Play, Square, Clock,
   AlertTriangle, ChevronDown, ChevronRight, User,
+  CalendarDays, Wrench, ClipboardList,
 } from 'lucide-react';
 import { ScreenBadge } from '@/components/ui/ScreenBadge';
 import type { TaskStatus } from '@/types/database';
@@ -162,8 +163,60 @@ export default function TasksPage() {
     }
   };
 
+  const tw = useTranslations('myWork');
+
+  const [stats, setStats] = useState({ tasks: 0, appointments: 0, overdue: 0, jobs: 0 });
+  useEffect(() => {
+    const todoCount = tasks.filter(t => t.status === 'todo' || t.status === 'in_progress').length;
+    const overdueCount = tasks.filter(t => t.status === 'in_progress' && t.started_at && (Date.now() - new Date(t.started_at).getTime() > 24 * 3600000)).length;
+    setStats(prev => ({ ...prev, tasks: todoCount, overdue: overdueCount }));
+  }, [tasks]);
+
+  useEffect(() => {
+    fetch('/api/appointments?upcoming=true&limit=5')
+      .then(r => r.ok ? r.json() : [])
+      .then((data: unknown[]) => setStats(prev => ({ ...prev, appointments: data.length })))
+      .catch(() => {});
+    fetch('/api/jobs?stage=in_progress&limit=50')
+      .then(r => r.ok ? r.json() : [])
+      .then((data: unknown[]) => setStats(prev => ({ ...prev, jobs: data.length })))
+      .catch(() => {});
+  }, []);
+
   return (
     <div className="space-y-6">
+      {/* My Work overview cards */}
+      <div className="grid grid-cols-2 gap-3 lg:grid-cols-4">
+        <div className="rounded-lg border border-ck-dark-border bg-ck-dark-surface p-4">
+          <div className="flex items-center gap-2 text-white/40">
+            <ClipboardList size={14} />
+            <span className="text-[11px] font-medium uppercase tracking-wider">{tw('assignedTasks')}</span>
+          </div>
+          <p className="mt-2 text-2xl font-semibold text-white">{stats.tasks}</p>
+        </div>
+        <div className="rounded-lg border border-ck-dark-border bg-ck-dark-surface p-4">
+          <div className="flex items-center gap-2 text-white/40">
+            <CalendarDays size={14} />
+            <span className="text-[11px] font-medium uppercase tracking-wider">{tw('upcomingAppointments')}</span>
+          </div>
+          <p className="mt-2 text-2xl font-semibold text-white">{stats.appointments}</p>
+        </div>
+        <div className="rounded-lg border border-ck-dark-border bg-ck-dark-surface p-4">
+          <div className="flex items-center gap-2 text-red-400/60">
+            <AlertTriangle size={14} />
+            <span className="text-[11px] font-medium uppercase tracking-wider">{tw('overdueItems')}</span>
+          </div>
+          <p className={`mt-2 text-2xl font-semibold ${stats.overdue > 0 ? 'text-red-400' : 'text-white'}`}>{stats.overdue}</p>
+        </div>
+        <div className="rounded-lg border border-ck-dark-border bg-ck-dark-surface p-4">
+          <div className="flex items-center gap-2 text-white/40">
+            <Wrench size={14} />
+            <span className="text-[11px] font-medium uppercase tracking-wider">{tw('jobsInQueue')}</span>
+          </div>
+          <p className="mt-2 text-2xl font-semibold text-white">{stats.jobs}</p>
+        </div>
+      </div>
+
       <div className="flex items-center justify-between">
         <div className="flex items-center gap-3">
           <ScreenBadge code="TS05" />

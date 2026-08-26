@@ -94,12 +94,7 @@ export async function getSession(): Promise<Session> {
     // fall through
   }
 
-  return {
-    id: user.id,
-    email: user.email ?? '',
-    name: '',
-    role: 'tech',
-  };
+  return null;
 }
 
 export async function signIn(
@@ -107,10 +102,32 @@ export async function signIn(
   password: string
 ): Promise<{ error?: string }> {
   if (USING_MOCK || !supabase) return {};
-  const { error } = await supabase.auth.signInWithPassword({ email, password });
-  return error ? { error: error.message } : {};
+
+  const { data, error } = await supabase.auth.signInWithPassword({ email, password });
+  if (error) return { error: error.message };
+
+  if (!data.user) return { error: 'Authentication failed' };
+
+  const { data: staff } = await supabase
+    .from('staff')
+    .select('active')
+    .eq('id', data.user.id)
+    .single();
+
+  if (!staff) {
+    await supabase.auth.signOut();
+    return { error: 'NO_STAFF_RECORD' };
+  }
+
+  if (!staff.active) {
+    await supabase.auth.signOut();
+    return { error: 'ACCOUNT_DEACTIVATED' };
+  }
+
+  return {};
 }
 
 export async function signOut() {
   if (supabase) await supabase.auth.signOut();
+  window.location.href = '/login';
 }

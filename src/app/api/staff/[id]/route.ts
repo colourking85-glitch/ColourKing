@@ -1,6 +1,26 @@
 import { NextRequest, NextResponse } from 'next/server';
 import { createClient } from '@/lib/supabase/server';
 
+async function requireAdmin(supabase: ReturnType<typeof createClient>) {
+  const {
+    data: { user },
+  } = await supabase.auth.getUser();
+
+  if (!user) return { error: 'Unauthorized', status: 401 } as const;
+
+  const { data: staff } = await supabase
+    .from('staff')
+    .select('role')
+    .eq('id', user.id)
+    .single();
+
+  if (!staff || staff.role !== 'admin') {
+    return { error: 'Forbidden: admin only', status: 403 } as const;
+  }
+
+  return { user, staff } as const;
+}
+
 export async function PATCH(
   req: NextRequest,
   { params }: { params: { id: string } }
@@ -13,24 +33,9 @@ export async function PATCH(
   }
 
   const supabase = createClient();
-
-  // Check that the caller is admin
-  const {
-    data: { user },
-  } = await supabase.auth.getUser();
-
-  if (!user) {
-    return NextResponse.json({ error: 'Unauthorized' }, { status: 401 });
-  }
-
-  const { data: callerStaff } = await supabase
-    .from('staff')
-    .select('role')
-    .eq('id', user.id)
-    .single();
-
-  if (!callerStaff || callerStaff.role !== 'admin') {
-    return NextResponse.json({ error: 'Forbidden: admin only' }, { status: 403 });
+  const auth = await requireAdmin(supabase);
+  if ('error' in auth) {
+    return NextResponse.json({ error: auth.error }, { status: auth.status });
   }
 
   const body = await req.json();
@@ -63,4 +68,46 @@ export async function PATCH(
   }
 
   return NextResponse.json(data);
+}
+
+export async function DELETE(
+  _req: NextRequest,
+  { params }: { params: { id: string } }
+) {
+  const supabaseUrl = process.env.NEXT_PUBLIC_SUPABASE_URL;
+  const serviceKey = process.env.SUPABASE_SERVICE_ROLE_KEY;
+
+  if (!supabaseUrl || !serviceKey) {
+    return NextResponse.json({ error: 'Not available' }, { status: 400 });
+  }
+
+  const supabase = createClient();
+  const auth = await requireAdmin(supabase);
+  if ('error' in auth) {
+    return NextResponse.json({ error: auth.error }, { status: auth.status });
+  }
+
+  if (auth.user.id === params.id) {
+    return NextResponse.json({ error: 'Cannot delete your own account' }, { status: 400 });
+  }
+
+  const { createClient: createAdminClient } = await import('@supabase/supabase-js');
+  const adminSupabase = createAdminClient(supabaseUrl, serviceKey);
+
+  const { error: staffError } = await adminSupabase
+    .from('staff')
+    .delete()
+    .eq('id', params.id);
+
+  if (staffError) {
+    return NextResponse.json({ error: staffError.message }, { status: 500 });
+  }
+
+  const { error: authError } = await adminSupabase.auth.admin.deleteUser(params.id);
+
+  if (authError) {
+    return NextResponse.json({ error: authError.message }, { status: 500 });
+  }
+
+  return NextResponse.json({ ok: true });
 }

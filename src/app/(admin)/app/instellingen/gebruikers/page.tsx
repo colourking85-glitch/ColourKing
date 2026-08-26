@@ -25,6 +25,8 @@ export default function StaffManagementPage() {
   const [inviteLoading, setInviteLoading] = useState(false);
   const [error, setError] = useState('');
   const [success, setSuccess] = useState('');
+  const [confirmDelete, setConfirmDelete] = useState<string | null>(null);
+  const [actionLoading, setActionLoading] = useState<string | null>(null);
 
   useEffect(() => {
     loadStaff();
@@ -111,6 +113,46 @@ export default function StaffManagementPage() {
     }
   }
 
+  async function handleDelete(memberId: string) {
+    setActionLoading(memberId);
+    setError('');
+    try {
+      const res = await fetch(`/api/staff/${memberId}`, { method: 'DELETE' });
+      if (res.ok) {
+        setSuccess(t('userDeleted'));
+        setConfirmDelete(null);
+        await loadStaff();
+      } else {
+        const data = await res.json();
+        setError(data.error || t('deleteFailed'));
+      }
+    } catch {
+      setError(t('deleteFailed'));
+    } finally {
+      setActionLoading(null);
+    }
+  }
+
+  async function handleResetPassword(member: StaffMember) {
+    setActionLoading(member.id);
+    setError('');
+    try {
+      const res = await fetch(`/api/staff/${member.id}/reset-password`, {
+        method: 'POST',
+      });
+      if (res.ok) {
+        setSuccess(t('resetSent', { email: member.email }));
+      } else {
+        const data = await res.json();
+        setError(data.error || t('resetFailed'));
+      }
+    } catch {
+      setError(t('resetFailed'));
+    } finally {
+      setActionLoading(null);
+    }
+  }
+
   const roleLabel = (role: string) => {
     switch (role) {
       case 'admin':
@@ -125,7 +167,7 @@ export default function StaffManagementPage() {
   };
 
   return (
-    <div className="mx-auto max-w-4xl p-6">
+    <div className="mx-auto max-w-5xl p-6">
       {/* Header */}
       <div className="mb-6 flex items-center justify-between">
         <div className="flex items-center gap-3">
@@ -134,29 +176,31 @@ export default function StaffManagementPage() {
         </div>
         <button
           onClick={() => setShowInvite(!showInvite)}
-          className="rounded-[10px] bg-[#E8364E] px-4 py-2 text-sm font-medium text-white transition-opacity hover:opacity-90"
+          className="rounded-[10px] bg-ck-red px-4 py-2 text-sm font-medium text-white transition-opacity hover:opacity-90"
         >
           {t('inviteStaff')}
         </button>
       </div>
 
-      <p className="mb-6 text-sm text-[#6b6b80]">{t('staffSubtitle')}</p>
+      <p className="mb-6 text-sm text-ck-text-muted">{t('staffSubtitle')}</p>
 
       {/* Success/error messages */}
       {success && (
         <div className="mb-4 rounded-[10px] border-[0.5px] border-green-500/30 bg-green-500/10 px-3 py-2 text-sm text-green-400">
           {success}
+          <button onClick={() => setSuccess('')} className="ml-2 text-green-400/60 hover:text-green-400">&times;</button>
         </div>
       )}
       {error && (
-        <div className="mb-4 rounded-[10px] border-[0.5px] border-[#E8364E]/30 bg-[#E8364E]/10 px-3 py-2 text-sm text-[#E8364E]">
+        <div className="mb-4 rounded-[10px] border-[0.5px] border-ck-red/30 bg-ck-red/10 px-3 py-2 text-sm text-ck-red">
           {error}
+          <button onClick={() => setError('')} className="ml-2 text-ck-red/60 hover:text-ck-red">&times;</button>
         </div>
       )}
 
       {/* Invite form */}
       {showInvite && (
-        <div className="mb-6 rounded-[10px] border-[0.5px] border-[#1e1e2a] bg-[#12121a] p-4">
+        <div className="mb-6 rounded-[10px] border-[0.5px] border-ck-border bg-ck-surface p-4">
           <h2 className="mb-3 text-sm font-medium text-white">{t('inviteStaff')}</h2>
           <form onSubmit={handleInvite} className="flex flex-wrap gap-3">
             <input
@@ -165,7 +209,7 @@ export default function StaffManagementPage() {
               placeholder={t('staffName')}
               value={inviteName}
               onChange={(e) => setInviteName(e.target.value)}
-              className="flex-1 rounded-[10px] border-[0.5px] border-[#1e1e2a] bg-[#0a0a0f] px-3 py-2 text-sm text-white placeholder-[#6b6b80]/50 outline-none focus:border-[#E8364E]/50"
+              className="flex-1 rounded-[10px] border-[0.5px] border-ck-border bg-ck-bg px-3 py-2 text-sm text-white placeholder:text-ck-text-faint outline-none focus:border-ck-red/50"
             />
             <input
               type="email"
@@ -173,12 +217,12 @@ export default function StaffManagementPage() {
               placeholder={t('staffEmail')}
               value={inviteEmail}
               onChange={(e) => setInviteEmail(e.target.value)}
-              className="flex-1 rounded-[10px] border-[0.5px] border-[#1e1e2a] bg-[#0a0a0f] px-3 py-2 text-sm text-white placeholder-[#6b6b80]/50 outline-none focus:border-[#E8364E]/50"
+              className="flex-1 rounded-[10px] border-[0.5px] border-ck-border bg-ck-bg px-3 py-2 text-sm text-white placeholder:text-ck-text-faint outline-none focus:border-ck-red/50"
             />
             <select
               value={inviteRole}
               onChange={(e) => setInviteRole(e.target.value)}
-              className="rounded-[10px] border-[0.5px] border-[#1e1e2a] bg-[#0a0a0f] px-3 py-2 text-sm text-white outline-none focus:border-[#E8364E]/50"
+              className="rounded-[10px] border-[0.5px] border-ck-border bg-ck-bg px-3 py-2 text-sm text-white outline-none focus:border-ck-red/50"
             >
               <option value="admin">{t('roleAdmin')}</option>
               <option value="office">{t('roleOffice')}</option>
@@ -187,7 +231,7 @@ export default function StaffManagementPage() {
             <button
               type="submit"
               disabled={inviteLoading}
-              className="rounded-[10px] bg-[#E8364E] px-4 py-2 text-sm font-medium text-white transition-opacity hover:opacity-90 disabled:opacity-50"
+              className="rounded-[10px] bg-ck-red px-4 py-2 text-sm font-medium text-white transition-opacity hover:opacity-90 disabled:opacity-50"
             >
               {inviteLoading ? tCommon('loading') : tCommon('submit')}
             </button>
@@ -197,27 +241,27 @@ export default function StaffManagementPage() {
 
       {/* Staff list */}
       {loading ? (
-        <p className="text-sm text-[#6b6b80]">{tCommon('loading')}</p>
+        <p className="text-sm text-ck-text-muted">{tCommon('loading')}</p>
       ) : staff.length === 0 ? (
-        <p className="text-sm text-[#6b6b80]">{t('noStaff')}</p>
+        <p className="text-sm text-ck-text-muted">{t('noStaff')}</p>
       ) : (
-        <div className="overflow-x-auto rounded-[10px] border-[0.5px] border-[#1e1e2a]">
+        <div className="overflow-x-auto rounded-[10px] border-[0.5px] border-ck-border">
           <table className="w-full text-sm">
             <thead>
-              <tr className="border-b border-[#1e1e2a] bg-[#12121a]">
-                <th className="px-4 py-3 text-left font-medium text-[#6b6b80]">
+              <tr className="border-b border-ck-border bg-ck-surface">
+                <th className="px-4 py-3 text-left font-medium text-ck-text-muted">
                   {t('staffName')}
                 </th>
-                <th className="px-4 py-3 text-left font-medium text-[#6b6b80]">
+                <th className="px-4 py-3 text-left font-medium text-ck-text-muted">
                   {t('staffEmail')}
                 </th>
-                <th className="px-4 py-3 text-left font-medium text-[#6b6b80]">
+                <th className="px-4 py-3 text-left font-medium text-ck-text-muted">
                   {t('staffRole')}
                 </th>
-                <th className="px-4 py-3 text-left font-medium text-[#6b6b80]">
+                <th className="px-4 py-3 text-left font-medium text-ck-text-muted">
                   {t('staffStatus')}
                 </th>
-                <th className="px-4 py-3 text-right font-medium text-[#6b6b80]">
+                <th className="px-4 py-3 text-right font-medium text-ck-text-muted">
                   {tCommon('actions')}
                 </th>
               </tr>
@@ -226,15 +270,15 @@ export default function StaffManagementPage() {
               {staff.map((member) => (
                 <tr
                   key={member.id}
-                  className="border-b border-[#1e1e2a] last:border-0"
+                  className="border-b border-ck-border last:border-0"
                 >
                   <td className="px-4 py-3 text-white">{member.name}</td>
-                  <td className="px-4 py-3 text-[#6b6b80]">{member.email}</td>
+                  <td className="px-4 py-3 text-ck-text-muted">{member.email}</td>
                   <td className="px-4 py-3">
                     <select
                       value={member.role}
                       onChange={(e) => changeRole(member, e.target.value)}
-                      className="rounded-[10px] border-[0.5px] border-[#1e1e2a] bg-[#0a0a0f] px-2 py-1 text-xs text-white outline-none"
+                      className="rounded-[10px] border-[0.5px] border-ck-border bg-ck-bg px-2 py-1 text-xs text-white outline-none"
                     >
                       <option value="admin">{t('roleAdmin')}</option>
                       <option value="office">{t('roleOffice')}</option>
@@ -253,12 +297,45 @@ export default function StaffManagementPage() {
                     </span>
                   </td>
                   <td className="px-4 py-3 text-right">
-                    <button
-                      onClick={() => toggleActive(member)}
-                      className="text-xs text-[#6b6b80] transition-colors hover:text-white"
-                    >
-                      {member.active ? t('deactivate') : t('activate')}
-                    </button>
+                    <div className="flex items-center justify-end gap-2">
+                      <button
+                        onClick={() => toggleActive(member)}
+                        className="rounded px-2 py-1 text-xs text-ck-text-muted transition-colors hover:bg-white/5 hover:text-white"
+                      >
+                        {member.active ? t('deactivate') : t('activate')}
+                      </button>
+                      <button
+                        onClick={() => handleResetPassword(member)}
+                        disabled={actionLoading === member.id}
+                        className="rounded px-2 py-1 text-xs text-ck-blue transition-colors hover:bg-ck-blue/10 disabled:opacity-50"
+                      >
+                        {t('resetPassword')}
+                      </button>
+                      {confirmDelete === member.id ? (
+                        <div className="flex items-center gap-1">
+                          <button
+                            onClick={() => handleDelete(member.id)}
+                            disabled={actionLoading === member.id}
+                            className="rounded bg-red-500/20 px-2 py-1 text-xs font-medium text-red-400 transition-colors hover:bg-red-500/30 disabled:opacity-50"
+                          >
+                            {actionLoading === member.id ? '...' : t('confirmDelete')}
+                          </button>
+                          <button
+                            onClick={() => setConfirmDelete(null)}
+                            className="rounded px-2 py-1 text-xs text-ck-text-muted hover:text-white"
+                          >
+                            {tCommon('cancel')}
+                          </button>
+                        </div>
+                      ) : (
+                        <button
+                          onClick={() => setConfirmDelete(member.id)}
+                          className="rounded px-2 py-1 text-xs text-red-400 transition-colors hover:bg-red-500/10"
+                        >
+                          {tCommon('delete')}
+                        </button>
+                      )}
+                    </div>
                   </td>
                 </tr>
               ))}

@@ -3,6 +3,7 @@
 import { useState, FormEvent } from 'react';
 import { useTranslations } from 'next-intl';
 import { supabase } from '@/lib/supabase/client';
+import { LanguageSwitcher } from '@/components/auth/LanguageSwitcher';
 
 export default function ResetPasswordPage() {
   const t = useTranslations('auth');
@@ -99,6 +100,10 @@ export default function ResetPasswordPage() {
             </div>
           </form>
         )}
+
+        <div className="mt-8">
+          <LanguageSwitcher />
+        </div>
       </div>
     </div>
   );

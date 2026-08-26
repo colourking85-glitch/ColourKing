@@ -95,7 +95,15 @@
     "timeMinAgo": "{count} dk önce",
     "timeHourAgo": "{count} saat önce",
     "timeDayAgo": "{count}g önce",
-    "system": "Sistem"
+    "system": "Sistem",
+    "ai": "AI",
+    "myWork": "İşlerim",
+    "envDev": "DEV",
+    "envProd": "PROD",
+    "shopCode": "CK01",
+    "searchByCode": "Ekran kodu veya açıklamaya göre ara...",
+    "chat": "Chat",
+    "viewer": "viewer"
   },
   "auth": {
     "email": "E-posta adresi",
@@ -103,7 +111,9 @@
     "signIn": "Giriş yap",
     "signInTitle": "Colourking'e giriş yapın",
     "signInSubtitle": "Yönetim konsolu",
-    "invalidCredentials": "Geçersiz kimlik bilgileri",
+    "invalidCredentials": "Gecersiz e-posta veya sifre.",
+    "noStaffRecord": "Personel hesabi bulunamadi. Yoneticinizle iletisime gecin.",
+    "accountDeactivated": "Hesabiniz devre disi birakildi. Yoneticinizle iletisime gecin.",
     "sessionExpired": "Oturum süresi doldu, lütfen tekrar giriş yapın",
     "emailPlaceholder": "ad@colourking.nl",
     "signingIn": "Giriş yapılıyor...",
@@ -894,6 +904,12 @@
     "inviteSent": "Davet başarıyla gönderildi",
     "inviteFailed": "Davet gönderilemedi",
     "noStaff": "Henüz personel yok",
+    "resetPassword": "Sifre sifirla",
+    "resetSent": "{email} adresine sifre sifirlama e-postasi gonderildi",
+    "resetFailed": "Sifre sifirlama gonderilemedi",
+    "confirmDelete": "Evet, sil",
+    "userDeleted": "Kullanici basariyla silindi",
+    "deleteFailed": "Kullanici silinemedi",
     "numberingTitle": "Numaralandırma",
     "numberingSubtitle": "Belge numarası ön eklerini ve sayaçları yapılandırın",
     "docType": "Belge türü",
@@ -1485,5 +1501,81 @@
     "emptyPurchases": "Bu donemde satin alma bulunmuyor",
     "emptyVat": "Bu yil icin verilmis KDV beyannamesi bulunmuyor",
     "emptyProfitLoss": "Bu donemde finansal veri bulunmuyor"
+  },
+  "shortcuts": {
+    "title": "Klavye kisayollari",
+    "hint": "Bu paneli acmak icin ? veya ⌘/ basin",
+    "groups": {
+      "navigation": "Gezinme",
+      "lists": "Listeler ve paneller",
+      "actions": "Islemler"
+    },
+    "actions": {
+      "searchScreens": "Ekran ve kayit ara",
+      "quickCreate": "Hizli olustur",
+      "toggleSidebar": "Kenar cubugunu ac/kapat",
+      "toggleShortcuts": "Kisayollari goster",
+      "navigateList": "Listede gezin",
+      "openRecord": "Kaydi ac",
+      "closePanel": "Panel / diyalogu kapat",
+      "save": "Kaydet",
+      "edit": "Duzenle",
+      "aiAssistant": "AI asistanini ac"
+    }
+  },
+  "favorites": {
+    "title": "Favoriler",
+    "empty": "Henuz favori yok",
+    "addFavorite": "Favorilere ekle",
+    "removeFavorite": "Favorilerden kaldir",
+    "recentItems": "Son ogeler"
+  },
+  "myWork": {
+    "title": "Islerim",
+    "assignedTasks": "Atanan gorevler",
+    "upcomingAppointments": "Yaklasan randevular",
+    "overdueItems": "Geciken ogeler",
+    "jobsInQueue": "Siramdaki isler",
+    "noTasks": "Atanan gorev yok",
+    "noAppointments": "Yaklasan randevu yok",
+    "noOverdue": "Her sey guncel",
+    "noJobs": "Sirada is yok",
+    "dueToday": "Bugun bitmeli",
+    "overdue": "Gecikli",
+    "upcoming": "Yaklasan"
+  },
+  "activity": {
+    "title": "Aktivite",
+    "recentActivity": "Son aktivite",
+    "noActivity": "Son aktivite yok",
+    "leadCreated": "Yeni musteri adayi olusturuldu",
+    "offerSent": "Teklif gonderildi",
+    "jobStageChanged": "Is asamasi degisti",
+    "invoicePaid": "Fatura odendi",
+    "appointmentBooked": "Randevu alindi",
+    "taskCompleted": "Gorev tamamlandi",
+    "customerCreated": "Musteri olusturuldu",
+    "vehicleAdded": "Arac eklendi",
+    "viewAll": "Tum aktiviteyi goruntule"
+  },
+  "notes": {
+    "title": "Notlar",
+    "placeholder": "Bir not yazin...",
+    "send": "Gonder",
+    "noNotes": "Henuz not yok",
+    "internalNote": "Dahili not"
+  },
+  "aiPanel": {
+    "title": "AI Asistani",
+    "placeholder": "Bu ekran hakkinda bir sey sorun...",
+    "send": "Gonder",
+    "thinking": "Dusunuyor...",
+    "welcome": "Nasil yardimci olabilirim?",
+    "suggestions": {
+      "summarize": "Bu kaydi ozetle",
+      "draftEmail": "Musteri e-postasi hazirla",
+      "nextActions": "Sonraki adimlari oner"
+    },
+    "noApiKey": "AI ozellikleri bir API anahtari gerektirir. Ayarlar'dan yapilandirin."
   }
 }

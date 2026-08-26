@@ -4,6 +4,7 @@ import { useState, useEffect } from 'react';
 import { useTranslations } from 'next-intl';
 import { formatCurrency } from '@/lib/format';
 import { useAppLocale } from '@/components/AdminIntlProvider';
+import { ActivityFeed } from '@/components/dashboard/ActivityFeed';
 
 /* ── Types ──────────────────────────────────────────────────────────── */
 
@@ -254,31 +255,36 @@ export default function DashboardPage() {
             </div>
           )}
 
-          {/* Jobs by stage */}
-          {stages.length > 0 && (
-            <section className="rounded-[10px] border-[0.5px] border-ck-border bg-ck-surface p-5">
-              <h3 className="text-xs font-medium text-ck-text-2">{t('jobsByStage')}</h3>
-              <div className="mt-5 space-y-3">
-                {stages.map((s) => {
-                  const maxCount = Math.max(...stages.map((x) => x.count), 1);
-                  return (
-                    <div key={s.stage} className="space-y-1">
-                      <div className="flex items-baseline justify-between gap-2">
-                        <span className="text-xs text-ck-text capitalize">{s.stage.replace(/_/g, ' ')}</span>
-                        <span className="shrink-0 font-mono text-xs tabular-nums text-ck-text-muted">{s.count}</span>
+          <div className="grid gap-5 xl:grid-cols-2">
+            {/* Jobs by stage */}
+            {stages.length > 0 && (
+              <section className="rounded-[10px] border-[0.5px] border-ck-border bg-ck-surface p-5">
+                <h3 className="text-xs font-medium text-ck-text-2">{t('jobsByStage')}</h3>
+                <div className="mt-5 space-y-3">
+                  {stages.map((s) => {
+                    const maxCount = Math.max(...stages.map((x) => x.count), 1);
+                    return (
+                      <div key={s.stage} className="space-y-1">
+                        <div className="flex items-baseline justify-between gap-2">
+                          <span className="text-xs text-ck-text capitalize">{s.stage.replace(/_/g, ' ')}</span>
+                          <span className="shrink-0 font-mono text-xs tabular-nums text-ck-text-muted">{s.count}</span>
+                        </div>
+                        <div className="h-5 overflow-hidden rounded bg-white/5">
+                          <div
+                            className="h-full rounded bg-ck-red transition-all duration-700 ease-out"
+                            style={{ width: `${Math.round((s.count / maxCount) * 100)}%` }}
+                          />
+                        </div>
                       </div>
-                      <div className="h-5 overflow-hidden rounded bg-white/5">
-                        <div
-                          className="h-full rounded bg-ck-red transition-all duration-700 ease-out"
-                          style={{ width: `${Math.round((s.count / maxCount) * 100)}%` }}
-                        />
-                      </div>
-                    </div>
-                  );
-                })}
-              </div>
-            </section>
-          )}
+                    );
+                  })}
+                </div>
+              </section>
+            )}
+
+            {/* Activity Feed */}
+            <ActivityFeed />
+          </div>
         </div>
       )}
 
