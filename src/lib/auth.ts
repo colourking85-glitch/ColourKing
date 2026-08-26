@@ -118,23 +118,23 @@ export async function signIn(
 
     if (!res.ok) {
       await supabase.auth.signOut();
-      return { error: `VERIFY_FAILED:${res.status}` };
+      return { error: 'NO_STAFF_RECORD' };
     }
 
     const staff = await res.json();
 
     if (!staff.exists) {
       await supabase.auth.signOut();
-      return { error: `NO_STAFF_RECORD:${data.user.id}:${JSON.stringify(staff.debug || {})}` };
+      return { error: 'NO_STAFF_RECORD' };
     }
 
     if (!staff.active) {
       await supabase.auth.signOut();
       return { error: 'ACCOUNT_DEACTIVATED' };
     }
-  } catch (e) {
+  } catch {
     await supabase.auth.signOut();
-    return { error: `FETCH_ERROR:${e instanceof Error ? e.message : String(e)}` };
+    return { error: 'NO_STAFF_RECORD' };
   }
 
   return {};

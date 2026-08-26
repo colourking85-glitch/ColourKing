@@ -1,7 +1,6 @@
 'use client';
 
 import { useState, FormEvent } from 'react';
-import { useRouter } from 'next/navigation';
 import { useTranslations } from 'next-intl';
 import { signIn } from '@/lib/auth';
 import { LanguageSwitcher } from '@/components/auth/LanguageSwitcher';
@@ -26,7 +25,6 @@ function EyeIcon({ open }: { open: boolean }) {
 }
 
 export default function LoginPage() {
-  const router = useRouter();
   const t = useTranslations('auth');
   const [email, setEmail] = useState('');
   const [password, setPassword] = useState('');
@@ -42,19 +40,17 @@ export default function LoginPage() {
     try {
       const result = await signIn(email, password);
       if (result.error) {
-        if (result.error.startsWith('NO_STAFF_RECORD')) {
-          setError(`${t('noStaffRecord')} [DEBUG: ${result.error}]`);
+        if (result.error === 'NO_STAFF_RECORD') {
+          setError(t('noStaffRecord'));
         } else if (result.error === 'ACCOUNT_DEACTIVATED') {
           setError(t('accountDeactivated'));
-        } else if (result.error.startsWith('VERIFY_FAILED') || result.error.startsWith('FETCH_ERROR')) {
-          setError(`Login check failed: ${result.error}`);
         } else {
           setError(t('invalidCredentials'));
         }
         setLoading(false);
         return;
       }
-      router.replace('/app');
+      window.location.href = '/app';
     } catch {
       setError(t('invalidCredentials'));
       setLoading(false);

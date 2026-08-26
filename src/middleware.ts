@@ -23,6 +23,29 @@ function hasSupabaseConfig(): boolean {
   );
 }
 
+/** Create Supabase server client that refreshes session cookies */
+function createSupabaseMiddleware(req: NextRequest, res: NextResponse) {
+  return createServerClient(
+    process.env.NEXT_PUBLIC_SUPABASE_URL!,
+    process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY!,
+    {
+      cookies: {
+        get(name: string) {
+          return req.cookies.get(name)?.value;
+        },
+        set(name: string, value: string, options: CookieOptions) {
+          req.cookies.set({ name, value });
+          res.cookies.set({ name, value, ...options });
+        },
+        remove(name: string, options: CookieOptions) {
+          req.cookies.set({ name, value: '' });
+          res.cookies.set({ name, value: '', ...options });
+        },
+      },
+    }
+  );
+}
+
 export async function middleware(req: NextRequest) {
   const host = req.headers.get('host') ?? '';
   const { pathname } = req.nextUrl;
@@ -39,67 +62,23 @@ export async function middleware(req: NextRequest) {
 
   // admin.colourking.nl -> rewrite to /app routes
   if (host.startsWith('admin.')) {
-    // Allow login, reset-password, and API routes on admin subdomain
+    // Public routes and API routes pass through directly
     if (pathname === '/login' || pathname.startsWith('/reset-password') || pathname.startsWith('/api/')) {
       return NextResponse.next();
     }
 
-    // If the path already starts with /app, use it as-is (sidebar links include /app prefix)
     const dest = pathname === '/' ? '/app' : pathname.startsWith('/app') ? pathname : `/app${pathname}`;
-
-    // Auth check for admin subdomain when Supabase is configured
-    if (hasSupabaseConfig()) {
-      const supabaseResponse = NextResponse.next({
-        request: { headers: req.headers },
-      });
-
-      const supabase = createServerClient(
-        process.env.NEXT_PUBLIC_SUPABASE_URL!,
-        process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY!,
-        {
-          cookies: {
-            get(name: string) {
-              return req.cookies.get(name)?.value;
-            },
-            set(name: string, value: string, options: CookieOptions) {
-              req.cookies.set({ name, value });
-              supabaseResponse.cookies.set({ name, value, ...options });
-            },
-            remove(name: string, options: CookieOptions) {
-              req.cookies.set({ name, value: '' });
-              supabaseResponse.cookies.set({ name, value: '', ...options });
-            },
-          },
-        }
-      );
-
-      const {
-        data: { user },
-      } = await supabase.auth.getUser();
-
-      if (!user) {
-        const loginUrl = req.nextUrl.clone();
-        loginUrl.pathname = '/login';
-        loginUrl.searchParams.set('next', pathname);
-        return NextResponse.redirect(loginUrl);
-      }
-
-      // Rewrite to /app path with refreshed cookies
-      const url = req.nextUrl.clone();
-      url.pathname = dest;
-      const rewriteRes = NextResponse.rewrite(url);
-      supabaseResponse.cookies.getAll().forEach(c => {
-        rewriteRes.cookies.set(c);
-      });
-      rewriteRes.headers.set('X-Robots-Tag', 'noindex, nofollow');
-      return rewriteRes;
-    }
-
-    // No Supabase config — dev mode, rewrite directly
     const url = req.nextUrl.clone();
     url.pathname = dest;
     const res = NextResponse.rewrite(url);
     res.headers.set('X-Robots-Tag', 'noindex, nofollow');
+
+    // Refresh Supabase session cookies if configured
+    if (hasSupabaseConfig()) {
+      const supabase = createSupabaseMiddleware(req, res);
+      await supabase.auth.getUser();
+    }
+
     return res;
   }
 
@@ -113,54 +92,18 @@ export async function middleware(req: NextRequest) {
     return NextResponse.next();
   }
 
-  // Admin routes — require auth when Supabase is configured
+  // Admin routes (/app/*)
   if (pathname.startsWith('/app')) {
     const res = NextResponse.next();
     res.headers.set('X-Robots-Tag', 'noindex, nofollow');
 
-    if (!hasSupabaseConfig()) {
-      // Dev mode without Supabase — allow through
-      return res;
+    // Refresh Supabase session cookies if configured
+    if (hasSupabaseConfig()) {
+      const supabase = createSupabaseMiddleware(req, res);
+      await supabase.auth.getUser();
     }
 
-    // Refresh session via Supabase middleware pattern
-    const supabaseResponse = NextResponse.next({
-      request: { headers: req.headers },
-    });
-
-    const supabase = createServerClient(
-      process.env.NEXT_PUBLIC_SUPABASE_URL!,
-      process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY!,
-      {
-        cookies: {
-          get(name: string) {
-            return req.cookies.get(name)?.value;
-          },
-          set(name: string, value: string, options: CookieOptions) {
-            req.cookies.set({ name, value });
-            supabaseResponse.cookies.set({ name, value, ...options });
-          },
-          remove(name: string, options: CookieOptions) {
-            req.cookies.set({ name, value: '' });
-            supabaseResponse.cookies.set({ name, value: '', ...options });
-          },
-        },
-      }
-    );
-
-    const {
-      data: { user },
-    } = await supabase.auth.getUser();
-
-    if (!user) {
-      const loginUrl = req.nextUrl.clone();
-      loginUrl.pathname = '/login';
-      loginUrl.searchParams.set('next', pathname);
-      return NextResponse.redirect(loginUrl);
-    }
-
-    supabaseResponse.headers.set('X-Robots-Tag', 'noindex, nofollow');
-    return supabaseResponse;
+    return res;
   }
 
   // Monitor routes — standalone monitoring dashboard
