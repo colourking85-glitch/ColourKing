@@ -108,20 +108,27 @@ export async function signIn(
 
   if (!data.user) return { error: 'Authentication failed' };
 
-  const { data: staff } = await supabase
-    .from('staff')
-    .select('active')
-    .eq('id', data.user.id)
-    .single();
+  // Verify staff record server-side (bypasses RLS)
+  try {
+    const res = await fetch('/api/auth/verify-staff', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ userId: data.user.id }),
+    });
+    const staff = await res.json();
 
-  if (!staff) {
+    if (!staff.exists) {
+      await supabase.auth.signOut();
+      return { error: 'NO_STAFF_RECORD' };
+    }
+
+    if (!staff.active) {
+      await supabase.auth.signOut();
+      return { error: 'ACCOUNT_DEACTIVATED' };
+    }
+  } catch {
     await supabase.auth.signOut();
     return { error: 'NO_STAFF_RECORD' };
-  }
-
-  if (!staff.active) {
-    await supabase.auth.signOut();
-    return { error: 'ACCOUNT_DEACTIVATED' };
   }
 
   return {};
