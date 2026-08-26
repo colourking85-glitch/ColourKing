@@ -42,10 +42,12 @@ export default function LoginPage() {
     try {
       const result = await signIn(email, password);
       if (result.error) {
-        if (result.error === 'NO_STAFF_RECORD') {
-          setError(t('noStaffRecord'));
+        if (result.error.startsWith('NO_STAFF_RECORD')) {
+          setError(`${t('noStaffRecord')} [DEBUG: ${result.error}]`);
         } else if (result.error === 'ACCOUNT_DEACTIVATED') {
           setError(t('accountDeactivated'));
+        } else if (result.error.startsWith('VERIFY_FAILED') || result.error.startsWith('FETCH_ERROR')) {
+          setError(`Login check failed: ${result.error}`);
         } else {
           setError(t('invalidCredentials'));
         }

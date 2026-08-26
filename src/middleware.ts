@@ -39,8 +39,8 @@ export async function middleware(req: NextRequest) {
 
   // admin.colourking.nl -> rewrite to /app routes
   if (host.startsWith('admin.')) {
-    // Allow login and reset-password on admin subdomain
-    if (pathname === '/login' || pathname.startsWith('/reset-password')) {
+    // Allow login, reset-password, and API routes on admin subdomain
+    if (pathname === '/login' || pathname.startsWith('/reset-password') || pathname.startsWith('/api/')) {
       return NextResponse.next();
     }
 
