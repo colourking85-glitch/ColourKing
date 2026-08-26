@@ -5,7 +5,7 @@ export async function POST(req: NextRequest) {
   const serviceKey = process.env.SUPABASE_SERVICE_ROLE_KEY;
 
   if (!supabaseUrl || !serviceKey) {
-    return NextResponse.json({ active: true });
+    return NextResponse.json({ exists: true, active: true });
   }
 
   const { userId } = await req.json();
