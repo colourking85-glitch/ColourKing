@@ -117,27 +117,12 @@ export function Navbar({ locale }: { locale: string }) {
       }`}
     >
       <nav className="mx-auto flex max-w-7xl items-center justify-between px-6">
-        {/* Logo + Instagram */}
-        <div className="flex items-center gap-4">
-          <Link href="/" className="flex items-center shrink-0">
-            <span className="font-heading text-2xl font-bold tracking-tight text-white">
-              COLOUR<span className="text-[#E8364E]">KING</span>
-            </span>
-          </Link>
-          <a
-            href="https://www.instagram.com/autoschadeherstelcolourking/"
-            target="_blank"
-            rel="noopener noreferrer"
-            className="group flex h-8 w-8 items-center justify-center border border-white/20 transition-colors hover:border-white/50 hover:bg-white/10"
-            aria-label="Instagram"
-          >
-            <svg className="h-4 w-4 text-white/60 transition-colors group-hover:text-white" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
-              <rect x="2" y="2" width="20" height="20" rx="5" />
-              <circle cx="12" cy="12" r="5" />
-              <circle cx="17.5" cy="6.5" r="1.5" fill="currentColor" stroke="none" />
-            </svg>
-          </a>
-        </div>
+        {/* Logo */}
+        <Link href="/" className="flex items-center shrink-0">
+          <span className="font-heading text-2xl font-bold tracking-tight text-white">
+            COLOUR<span className="text-[#E8364E]">KING</span>
+          </span>
+        </Link>
 
         {/* Desktop nav */}
         <div className="hidden items-center gap-8 md:flex">
@@ -198,6 +183,21 @@ export function Navbar({ locale }: { locale: string }) {
               </div>
             )}
           </div>
+
+          {/* Instagram */}
+          <a
+            href="https://www.instagram.com/autoschadeherstelcolourking/"
+            target="_blank"
+            rel="noopener noreferrer"
+            className="group flex h-8 w-8 items-center justify-center border border-white/20 transition-colors hover:border-white/50 hover:bg-white/10"
+            aria-label="Instagram"
+          >
+            <svg className="h-4 w-4 text-white/60 transition-colors group-hover:text-white" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+              <rect x="2" y="2" width="20" height="20" rx="5" />
+              <circle cx="12" cy="12" r="5" />
+              <circle cx="17.5" cy="6.5" r="1.5" fill="currentColor" stroke="none" />
+            </svg>
+          </a>
 
           {/* CTAs */}
           <Link
