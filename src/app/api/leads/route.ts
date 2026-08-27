@@ -6,13 +6,20 @@ export async function GET(req: NextRequest) {
   const supabase = createClient();
   const search = req.nextUrl.searchParams.get('search');
   const status = req.nextUrl.searchParams.get('status');
+  const origin = req.nextUrl.searchParams.get('origin');
+  const sortBy = req.nextUrl.searchParams.get('sort') ?? 'created_at';
+  const sortDir = req.nextUrl.searchParams.get('dir') === 'asc' ? true : false;
+
+  const allowedSorts = ['created_at', 'contact_name', 'status', 'origin'];
+  const sortColumn = allowedSorts.includes(sortBy) ? sortBy : 'created_at';
 
   let query = supabase
     .from('leads')
     .select('id, contact_name, contact_email, contact_phone, kenteken, damage_description, status, origin, preferred_date, created_at, customers(id, name), vehicles(id, kenteken, make, model)')
-    .order('created_at', { ascending: false });
+    .order(sortColumn, { ascending: sortDir });
 
   if (status) query = query.eq('status', status);
+  if (origin) query = query.eq('origin', origin);
   if (search) {
     query = query.or(`contact_name.ilike.%${search}%,contact_email.ilike.%${search}%,kenteken.ilike.%${search}%`);
   }

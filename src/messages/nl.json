@@ -32,6 +32,7 @@
     "notFound": "Niet gevonden",
     "details": "Details",
     "actions": "Acties",
+    "date": "Datum",
     "signOut": "Uitloggen",
     "customer": "Klant",
     "vehicle": "Voertuig",
@@ -343,7 +344,9 @@
     "quickReply": "Snel antwoord",
     "replyPlaceholder": "Typ je antwoord...",
     "sendReply": "Verzenden",
-    "replySent": "Antwoord verzonden!"
+    "replySent": "Antwoord verzonden!",
+    "refresh": "Vernieuwen",
+    "filters": "Filters"
   },
   "jb": {
     "title": "Opdrachten",

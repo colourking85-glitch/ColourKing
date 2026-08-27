@@ -32,6 +32,7 @@
     "notFound": "Not found",
     "details": "Details",
     "actions": "Actions",
+    "date": "Date",
     "signOut": "Sign out",
     "customer": "Customer",
     "vehicle": "Vehicle",
@@ -343,7 +344,9 @@
     "quickReply": "Quick reply",
     "replyPlaceholder": "Type your reply...",
     "sendReply": "Send",
-    "replySent": "Reply sent!"
+    "replySent": "Reply sent!",
+    "refresh": "Refresh",
+    "filters": "Filters"
   },
   "jb": {
     "title": "Jobs",

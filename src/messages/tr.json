@@ -32,6 +32,7 @@
     "notFound": "Bulunamadı",
     "details": "Detaylar",
     "actions": "İşlemler",
+    "date": "Tarih",
     "signOut": "Çıkış yap",
     "customer": "Müşteri",
     "vehicle": "Araç",
@@ -343,7 +344,9 @@
     "quickReply": "Hızlı yanıt",
     "replyPlaceholder": "Yanıtınızı yazın...",
     "sendReply": "Gönder",
-    "replySent": "Yanıt gönderildi!"
+    "replySent": "Yanıt gönderildi!",
+    "refresh": "Yenile",
+    "filters": "Filtreler"
   },
   "jb": {
     "title": "İşler",
