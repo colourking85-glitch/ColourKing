@@ -52,6 +52,9 @@ export async function middleware(req: NextRequest) {
 
   // monitor.colourking.nl -> rewrite to /monitor routes
   if (host.startsWith('monitor.')) {
+    if (pathname.startsWith('/api/') || pathname.startsWith('/_next/')) {
+      return NextResponse.next();
+    }
     const dest = pathname === '/' ? '/monitor' : pathname.startsWith('/monitor') ? pathname : `/monitor${pathname}`;
     const url = req.nextUrl.clone();
     url.pathname = dest;

@@ -4,7 +4,7 @@ import { useState } from 'react';
 import { useRouter } from 'next/navigation';
 import { useTranslations } from 'next-intl';
 import { signIn } from '@/lib/auth';
-import { Monitor } from 'lucide-react';
+import { Monitor, Eye, EyeOff } from 'lucide-react';
 
 export default function MonitorLoginPage() {
   const router = useRouter();
@@ -12,6 +12,7 @@ export default function MonitorLoginPage() {
   const tAuth = useTranslations('auth');
   const [email, setEmail] = useState('');
   const [password, setPassword] = useState('');
+  const [showPassword, setShowPassword] = useState(false);
   const [error, setError] = useState('');
   const [loading, setLoading] = useState(false);
 
@@ -55,14 +56,23 @@ export default function MonitorLoginPage() {
           </div>
           <div>
             <label className="mb-1 block text-xs text-[#6b6b80]">{tAuth('password')}</label>
-            <input
-              type="password"
-              value={password}
-              onChange={e => setPassword(e.target.value)}
-              required
-              className="w-full rounded-lg border border-[#1e1e2a] bg-[#12121a] px-4 py-2.5 text-sm text-white placeholder:text-[#3a3a50] focus:border-[#E8364E] focus:outline-none"
-              placeholder="••••••••"
-            />
+            <div className="relative">
+              <input
+                type={showPassword ? 'text' : 'password'}
+                value={password}
+                onChange={e => setPassword(e.target.value)}
+                required
+                className="w-full rounded-lg border border-[#1e1e2a] bg-[#12121a] px-4 py-2.5 pr-11 text-sm text-white placeholder:text-[#3a3a50] focus:border-[#E8364E] focus:outline-none"
+                placeholder="••••••••"
+              />
+              <button
+                type="button"
+                onClick={() => setShowPassword(!showPassword)}
+                className="absolute right-3 top-1/2 -translate-y-1/2 text-[#6b6b80] transition-colors hover:text-white"
+              >
+                {showPassword ? <EyeOff size={16} /> : <Eye size={16} />}
+              </button>
+            </div>
           </div>
 
           {error && (
