@@ -16,7 +16,7 @@ export const metadata: Metadata = {
   title: 'Colourking',
   description: 'Autospuitbedrijf Colour King — Rotterdam',
   icons: {
-    icon: '/favicon.svg',
+    icon: [{ url: '/favicon.svg', type: 'image/svg+xml' }],
     apple: '/favicon.svg',
   },
 };
