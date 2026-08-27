@@ -73,10 +73,12 @@ export async function POST(req: NextRequest) {
   }
 
   try {
+    log(`Connecting to ${imapHost}:${imapPort} as ${imapUser}...`);
     await client.connect();
-    log('Connected');
+    log('Connected and authenticated');
 
     await client.mailboxOpen('INBOX');
+    log('INBOX opened');
 
     const since = new Date(Date.now() - 48 * 60 * 60 * 1000);
     const uids = await client.search({ since }, { uid: true });
@@ -190,7 +192,14 @@ export async function POST(req: NextRequest) {
     }
   } catch (err: unknown) {
     const message = err instanceof Error ? err.message : String(err);
-    log(`ERROR: ${message}`);
+    const stack = err instanceof Error ? err.stack?.split('\n').slice(0, 3).join(' | ') : '';
+    if (message.includes('Command failed') || message.includes('LOGIN')) {
+      log(`ERROR: Authentication failed — check IMAP_PASS is a Zoho App Password (not account password). Detail: ${message}`);
+    } else if (message.includes('ECONNREFUSED') || message.includes('ENOTFOUND') || message.includes('timeout')) {
+      log(`ERROR: Connection failed to ${imapHost}:${imapPort} — check IMAP_HOST and IMAP_PORT. Detail: ${message}`);
+    } else {
+      log(`ERROR: ${message}${stack ? ` | ${stack}` : ''}`);
+    }
     return NextResponse.json(
       { ok: false, error: message, processed, skippedDedup, logs },
       { status: 500 }
