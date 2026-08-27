@@ -1,6 +1,7 @@
 import Image from 'next/image';
 import { getTranslations } from 'next-intl/server';
 import { Link } from '@/i18n/routing';
+import HeroSlideshow from '@/modules/public/HeroSlideshow';
 
 export async function generateMetadata({
   params: { locale },
@@ -25,14 +26,7 @@ export default async function HomePage({
     <>
       {/* Hero — full-screen with photo background */}
       <section className="relative flex min-h-screen items-end overflow-hidden pb-24">
-        <Image
-          src="/images/hero.webp"
-          alt=""
-          fill
-          priority
-          className="object-cover"
-          sizes="100vw"
-        />
+        <HeroSlideshow />
         <div className="absolute inset-0 bg-gradient-to-t from-black/90 via-black/50 to-black/20 pointer-events-none" />
         <div className="absolute inset-0 bg-gradient-to-r from-black/60 to-transparent pointer-events-none" />
 
