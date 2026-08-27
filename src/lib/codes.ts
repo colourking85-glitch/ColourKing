@@ -73,6 +73,7 @@ export const SCREEN_REGISTRY: Record<string, ScreenMeta> = {
   // Appointments
   '/app/afspraken': { id: 'AP05', title: 'Appointment Calendar', titleNl: 'Afsprakenkalender', module: 'AP', route: '/app/afspraken' },
   '/app/afspraken/nieuw': { id: 'AP01', title: 'Create Appointment', titleNl: 'Afspraak Aanmaken', module: 'AP', route: '/app/afspraken/nieuw' },
+  '/app/afspraken/[id]': { id: 'AP10', title: 'Appointment Detail', titleNl: 'Afspraakdetail', module: 'AP', route: '/app/afspraken/[id]' },
 
   // Tasks & Planning
   '/app/taken': { id: 'TS05', title: 'My Tasks', titleNl: 'Mijn Taken', module: 'TS', route: '/app/taken' },

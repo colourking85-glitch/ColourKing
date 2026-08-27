@@ -15,6 +15,10 @@ const mono = JetBrains_Mono({
 export const metadata: Metadata = {
   title: 'Colourking',
   description: 'Autospuitbedrijf Colour King — Rotterdam',
+  icons: {
+    icon: '/favicon.svg',
+    apple: '/favicon.svg',
+  },
 };
 
 export default function RootLayout({
