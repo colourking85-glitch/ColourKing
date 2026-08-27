@@ -74,10 +74,15 @@ export default function ContactPage() {
     if (!selected) return;
     const next = [...files];
     for (let i = 0; i < selected.length && next.length < MAX_FILES; i++) {
-      next.push(selected[i]);
+      const f = selected[i];
+      if (f.type && !f.type.startsWith('image/')) continue;
+      next.push(f);
     }
     const total = next.reduce((s, f) => s + f.size, 0);
-    if (total > MAX_TOTAL_BYTES) return;
+    if (total > MAX_TOTAL_BYTES) {
+      alert(t('contact.filesTooLarge'));
+      return;
+    }
     setFiles(next);
   }
 
@@ -240,9 +245,9 @@ export default function ContactPage() {
                     ref={fileRef}
                     type="file"
                     multiple
-                    accept="image/jpeg,image/png,image/webp,image/heic"
+                    accept="image/*"
                     className="hidden"
-                    onChange={e => handleFiles(e.target.files)}
+                    onChange={e => { handleFiles(e.target.files); e.target.value = ''; }}
                   />
                   <p className="mt-1 text-[10px] text-white/30">{t('contact.photosHint')}</p>
                 </div>

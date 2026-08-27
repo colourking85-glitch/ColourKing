@@ -2,10 +2,16 @@ import { NextRequest, NextResponse } from 'next/server';
 import { admin } from '@/lib/supabase/admin';
 
 const BUCKET = 'lead-photos';
-const ALLOWED_TYPES = ['image/jpeg', 'image/png', 'image/webp', 'image/heic'];
-const MAX_FILE_SIZE = 5 * 1024 * 1024; // 5 MB per file
+const ALLOWED_EXTENSIONS = ['jpg', 'jpeg', 'png', 'webp', 'heic', 'heif'];
+const MAX_FILE_SIZE = 20 * 1024 * 1024; // 20 MB per file
 const MAX_FILES = 5;
 const MAX_TOTAL_SIZE = 20 * 1024 * 1024; // 20 MB total
+
+function isImageFile(file: File): boolean {
+  if (file.type && file.type.startsWith('image/')) return true;
+  const ext = file.name.split('.').pop()?.toLowerCase() ?? '';
+  return ALLOWED_EXTENSIONS.includes(ext);
+}
 
 export async function POST(req: NextRequest) {
   const formData = await req.formData();
@@ -40,11 +46,11 @@ export async function POST(req: NextRequest) {
 
   let totalSize = 0;
   for (const file of files) {
-    if (!ALLOWED_TYPES.includes(file.type)) {
+    if (!isImageFile(file)) {
       return NextResponse.json({ error: `Invalid file type: ${file.name}` }, { status: 400 });
     }
     if (file.size > MAX_FILE_SIZE) {
-      return NextResponse.json({ error: `File too large: ${file.name} (max 5 MB)` }, { status: 400 });
+      return NextResponse.json({ error: `File too large: ${file.name} (max 20 MB)` }, { status: 400 });
     }
     totalSize += file.size;
   }

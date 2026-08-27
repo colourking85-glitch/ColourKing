@@ -1370,6 +1370,7 @@
       "error": "Bir şeyler ters gitti. Lütfen daha sonra tekrar deneyin veya bizi doğrudan arayın.",
       "requiredField": "Bu alan zorunludur",
       "invalidEmail": "Lütfen geçerli bir e-posta adresi girin",
+      "filesTooLarge": "Toplam dosya boyutu 20 MB'ı aşıyor. Lütfen bazı fotoğrafları kaldırın.",
       "infoTitle": "İletişim bilgileri",
       "mapPlaceholder": "Harita"
     }

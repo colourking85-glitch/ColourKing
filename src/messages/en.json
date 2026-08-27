@@ -1421,6 +1421,7 @@
       "error": "Something went wrong. Please try again later or call us directly.",
       "requiredField": "This field is required",
       "invalidEmail": "Enter a valid email address",
+      "filesTooLarge": "Total file size exceeds 20 MB. Please remove some photos.",
       "infoTitle": "Contact details",
       "mapPlaceholder": "Map"
     }
