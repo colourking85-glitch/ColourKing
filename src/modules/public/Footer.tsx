@@ -14,9 +14,11 @@ export function Footer() {
           {/* Brand */}
           <div className="flex flex-col gap-5">
             <Link href="/">
-              <span className="font-heading text-xl font-bold tracking-tight text-white">
-                COLOUR<span className="text-[#E8364E]">KING</span>
-              </span>
+              <img
+                src="/images/logo-colourking.svg"
+                alt="Colourking"
+                className="h-10 w-auto"
+              />
             </Link>
             <p className="max-w-xs text-sm leading-relaxed text-ck-text-muted">
               {t('footer.description')}

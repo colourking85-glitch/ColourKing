@@ -39,7 +39,7 @@ const STRINGS: Record<string, EmailStrings> = {
     team: 'Het Colourking team',
     viewOnline: 'Online bekijken',
     unsubscribe: 'Afmelden',
-    companyFooter: 'Colourking B.V. | Satijnbloem 6, 3068 JP Rotterdam | KvK: 62022043 | BTW: NL620220430B03',
+    companyFooter: 'Autospuitbedrijf Colour King | Satijnbloem 6, 3068 JP Rotterdam | KvK: 82199884 | BTW: NL821998840B03',
 
     // Offer
     offerSubject: 'Uw offerte {offerNumber} van Colourking',
@@ -110,7 +110,7 @@ const STRINGS: Record<string, EmailStrings> = {
     team: 'The Colourking team',
     viewOnline: 'View online',
     unsubscribe: 'Unsubscribe',
-    companyFooter: 'Colourking B.V. | Satijnbloem 6, 3068 JP Rotterdam | CoC: 62022043 | VAT: NL620220430B03',
+    companyFooter: 'Autospuitbedrijf Colour King | Satijnbloem 6, 3068 JP Rotterdam | CoC: 82199884 | VAT: NL821998840B03',
 
     offerSubject: 'Your quote {offerNumber} from Colourking',
     offerIntro: 'Please find below our quote for the work on your vehicle.',
@@ -174,7 +174,7 @@ const STRINGS: Record<string, EmailStrings> = {
     team: 'Colourking ekibi',
     viewOnline: 'Online goruntuле',
     unsubscribe: 'Abonelikten cik',
-    companyFooter: 'Colourking B.V. | Satijnbloem 6, 3068 JP Rotterdam | Ticaret Sicil: 62022043 | KDV: NL620220430B03',
+    companyFooter: 'Autospuitbedrijf Colour King | Satijnbloem 6, 3068 JP Rotterdam | Ticaret Sicil: 82199884 | KDV: NL821998840B03',
 
     offerSubject: 'Colourking teklif {offerNumber}',
     offerIntro: 'Araciniz icin hazirlanan teklifimizi asagida bulabilirsiniz.',

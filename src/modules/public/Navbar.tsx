@@ -119,9 +119,11 @@ export function Navbar({ locale }: { locale: string }) {
       <nav className="mx-auto flex max-w-7xl items-center justify-between px-6">
         {/* Logo */}
         <Link href="/" className="flex items-center shrink-0">
-          <span className="font-heading text-2xl font-bold tracking-tight text-white">
-            COLOUR<span className="text-[#E8364E]">KING</span>
-          </span>
+          <img
+            src="/images/logo-colourking.svg"
+            alt="Colourking"
+            className="h-12 w-auto"
+          />
         </Link>
 
         {/* Desktop nav */}

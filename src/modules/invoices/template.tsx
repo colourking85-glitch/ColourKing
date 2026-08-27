@@ -231,9 +231,9 @@ export function InvoiceTemplate({ invoice }: { invoice: InvoiceData }) {
             <div>info@colourking.nl</div>
           </div>
           <div style={{ marginTop: '8px', fontSize: '11px', color: '#888' }}>
-            <span>{t.kvk}: 62022043</span>
+            <span>{t.kvk}: 82199884</span>
             <span style={{ margin: '0 8px' }}>|</span>
-            <span>{t.btw}: NL620220430B03</span>
+            <span>{t.btw}: NL821998840B03</span>
           </div>
         </div>
 
@@ -491,7 +491,7 @@ export function InvoiceTemplate({ invoice }: { invoice: InvoiceData }) {
               <div style={{ color: '#888', fontSize: '11px', marginBottom: '2px' }}>
                 {locale === 'nl' ? 'Ten name van' : locale === 'tr' ? 'Hesap sahibi' : 'Account holder'}
               </div>
-              <div style={{ fontWeight: 500, color: '#111' }}>Colourking B.V.</div>
+              <div style={{ fontWeight: 500, color: '#111' }}>Autospuitbedrijf Colour King</div>
             </div>
             {invoice.due_date && (
               <div>
@@ -534,7 +534,7 @@ export function InvoiceTemplate({ invoice }: { invoice: InvoiceData }) {
         textAlign: 'center',
         lineHeight: '1.6',
       }}>
-        <div>Colourking B.V. | Satijnbloem 6, 3068 JP Rotterdam | {t.kvk}: 62022043 | {t.btw}: NL620220430B03</div>
+        <div>Autospuitbedrijf Colour King | Satijnbloem 6, 3068 JP Rotterdam | {t.kvk}: 82199884 | {t.btw}: NL821998840B03</div>
         <div>IBAN: NL00 INGB 0000 0000 00 | BIC: INGBNL2A | info@colourking.nl | 06 81 63 10 20</div>
       </div>
     </div>

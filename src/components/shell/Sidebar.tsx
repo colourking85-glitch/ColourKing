@@ -317,17 +317,20 @@ export function Sidebar() {
         <div className="flex h-14 items-center justify-between border-b border-ck-dark-border px-4">
           {!collapsed && (
             <Link href="/app" className="flex items-center gap-2">
-              <div className="flex h-8 w-8 items-center justify-center rounded-lg bg-ck-red">
-                <span className="font-display text-sm font-bold text-white">CK</span>
-              </div>
-              <span className="font-display text-sm font-bold tracking-wide text-white">
-                COLOURKING
-              </span>
+              <img
+                src="/images/logo-colourking.svg"
+                alt="Colourking"
+                className="h-9 w-auto"
+              />
             </Link>
           )}
           {collapsed && (
-            <Link href="/app" className="mx-auto flex h-8 w-8 items-center justify-center rounded-lg bg-ck-red">
-              <span className="font-display text-sm font-bold text-white">CK</span>
+            <Link href="/app" className="mx-auto">
+              <img
+                src="/images/logo-colourking.svg"
+                alt="CK"
+                className="h-8 w-auto"
+              />
             </Link>
           )}
         </div>
