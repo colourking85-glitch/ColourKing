@@ -27,8 +27,6 @@ export default async function HomePage({
       {/* Hero — full-screen with photo background */}
       <section className="relative flex min-h-screen items-end overflow-hidden pb-24">
         <HeroSlideshow />
-        <div className="absolute inset-0 bg-gradient-to-t from-black/90 via-black/50 to-black/20 pointer-events-none" />
-        <div className="absolute inset-0 bg-gradient-to-r from-black/60 to-transparent pointer-events-none" />
 
         <div className="relative z-10 mx-auto w-full max-w-7xl px-6">
           <p className="mb-5 text-xs font-semibold uppercase tracking-[0.2em] text-[#E8364E]">

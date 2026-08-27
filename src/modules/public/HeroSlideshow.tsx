@@ -23,7 +23,7 @@ export default function HeroSlideshow() {
   }, []);
 
   return (
-    <>
+    <div className="absolute inset-0">
       {HERO_IMAGES.map((src, i) => (
         <Image
           key={src}
@@ -36,10 +36,11 @@ export default function HeroSlideshow() {
           style={{
             opacity: i === current ? 1 : 0,
             transition: `opacity ${TRANSITION_DURATION}ms ease-in-out`,
-            zIndex: i === current ? 1 : 0,
           }}
         />
       ))}
-    </>
+      <div className="absolute inset-0 bg-gradient-to-t from-black/90 via-black/50 to-black/20 pointer-events-none" />
+      <div className="absolute inset-0 bg-gradient-to-r from-black/60 to-transparent pointer-events-none" />
+    </div>
   );
 }
