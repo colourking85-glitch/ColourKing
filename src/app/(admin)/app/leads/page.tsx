@@ -2,7 +2,7 @@
 
 import { useState, useEffect, useCallback } from 'react';
 import Link from 'next/link';
-import { Plus, Search, Clock, MessageCircle, FileText, Trophy, XCircle, ArrowUpDown, ArrowUp, ArrowDown, RefreshCw, SlidersHorizontal } from 'lucide-react';
+import { Plus, Search, Clock, MessageCircle, FileText, Trophy, XCircle, ArrowUpDown, ArrowUp, ArrowDown, RefreshCw, SlidersHorizontal, Calendar } from 'lucide-react';
 import { useTranslations } from 'next-intl';
 import { ScreenBadge } from '@/components/ui/ScreenBadge';
 
@@ -15,6 +15,8 @@ type Lead = {
   damage_description: string | null;
   status: string;
   origin: string;
+  channel: string | null;
+  appointment_type: string | null;
   created_at: string;
 };
 
@@ -240,9 +242,17 @@ export default function LeadsPage() {
                     className="border-b border-ck-dark-border/50 bg-ck-dark-card hover:bg-ck-dark-surface/50 transition-colors"
                   >
                     <td className="px-4 py-3">
-                      <Link href={`/app/leads/${lead.id}`} className="font-medium text-white hover:text-ck-red">
-                        {lead.contact_name}
-                      </Link>
+                      <div className="flex items-center gap-2">
+                        <Link href={`/app/leads/${lead.id}`} className="font-medium text-white hover:text-ck-red">
+                          {lead.contact_name}
+                        </Link>
+                        {lead.channel === 'appointment_form' && (
+                          <span className="flex items-center gap-1 rounded-full bg-amber-400/10 border border-amber-400/30 px-2 py-0.5 text-[10px] font-medium text-amber-400" title={t('appointmentRequest')}>
+                            <Calendar size={10} />
+                            {t(`type_${lead.appointment_type ?? 'inspection'}`)}
+                          </span>
+                        )}
+                      </div>
                     </td>
                     <td className="px-4 py-3 text-xs text-ck-muted">
                       <div className="max-w-[200px] truncate">

@@ -12,10 +12,37 @@ const navLinks = [
   { href: '/contact', label: 'nav.contact' },
 ] as const;
 
+function FlagNL({ size = 20 }: { size?: number }) {
+  return (
+    <svg width={size} height={size * 0.7} viewBox="0 0 20 14" className="rounded-sm overflow-hidden shrink-0">
+      <rect width="20" height="4.67" fill="#AE1C28" />
+      <rect y="4.67" width="20" height="4.67" fill="#FFF" />
+      <rect y="9.33" width="20" height="4.67" fill="#21468B" />
+    </svg>
+  );
+}
+
+function FlagTR({ size = 20 }: { size?: number }) {
+  return (
+    <svg width={size} height={size * 0.7} viewBox="0 0 20 14" className="rounded-sm overflow-hidden shrink-0">
+      <rect width="20" height="14" fill="#E30A17" />
+      <circle cx="7.5" cy="7" r="3.5" fill="#FFF" />
+      <circle cx="8.3" cy="7" r="2.8" fill="#E30A17" />
+      <polygon points="10,7 11.5,5.8 10.3,7.3 11.8,7 10.3,7.7 11.5,8.2" fill="#FFF" transform="rotate(18 10.5 7)" />
+    </svg>
+  );
+}
+
+function FlagIcon({ code, size = 20 }: { code: string; size?: number }) {
+  if (code === 'nl') return <FlagNL size={size} />;
+  if (code === 'tr') return <FlagTR size={size} />;
+  return <Globe size={size - 4} className="shrink-0" />;
+}
+
 const LOCALES = [
-  { code: 'nl', label: 'Nederlands', flag: '🇳🇱' },
-  { code: 'en', label: 'English', flag: '🇬🇧' },
-  { code: 'tr', label: 'Türkçe', flag: '🇹🇷' },
+  { code: 'nl', label: 'Nederlands' },
+  { code: 'en', label: 'English' },
+  { code: 'tr', label: 'Türkçe' },
 ] as const;
 
 const BROWSER_LANG_MAP: Record<string, string> = {
@@ -123,7 +150,7 @@ export function Navbar({ locale }: { locale: string }) {
               onClick={() => setLangOpen(!langOpen)}
               className="flex items-center gap-2 rounded-lg px-3 py-1.5 text-sm font-medium text-white/80 transition-colors hover:text-white hover:bg-white/5"
             >
-              <span className="text-base">{currentLocale.flag}</span>
+              <FlagIcon code={currentLocale.code} />
               <ChevronDown size={14} className={`transition-transform ${langOpen ? 'rotate-180' : ''}`} />
             </button>
             {langOpen && (
@@ -139,7 +166,7 @@ export function Navbar({ locale }: { locale: string }) {
                           : 'text-white/70 hover:bg-white/5 hover:text-white'
                       }`}
                     >
-                      <span className="text-lg">{loc.flag}</span>
+                      <FlagIcon code={loc.code} />
                       <span>{loc.label}</span>
                     </button>
                   ))}
@@ -221,7 +248,7 @@ export function Navbar({ locale }: { locale: string }) {
                       : 'text-white/50 hover:text-white'
                   }`}
                 >
-                  <span>{loc.flag}</span>
+                  <FlagIcon code={loc.code} size={16} />
                   <span>{loc.label}</span>
                 </button>
               ))}

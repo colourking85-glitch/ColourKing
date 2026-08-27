@@ -10,6 +10,8 @@ const PublicAppointmentSchema = z.object({
   kenteken: z.string().optional(),
   scheduled_date: z.string().regex(/^\d{4}-\d{2}-\d{2}$/),
   scheduled_time: z.string().regex(/^\d{2}:\d{2}$/),
+  location: z.enum(['shop', 'other']).optional().default('shop'),
+  location_address: z.string().optional(),
   notes: z.string().optional(),
   locale: z.enum(['nl', 'en', 'tr']).optional().default('nl'),
 });
@@ -60,28 +62,31 @@ export async function POST(req: NextRequest) {
       );
     }
 
-    const { type, contact_name, contact_email, contact_phone, kenteken, scheduled_date, scheduled_time, notes } = parsed.data;
-
-    const defaultDuration = type === 'inspection' ? 30 : 30;
+    const { type, contact_name, contact_email, contact_phone, kenteken, scheduled_date, scheduled_time, location, location_address, notes, locale } = parsed.data;
 
     const { data, error } = await admin
-      .from('appointments')
+      .from('leads')
       .insert({
-        type,
-        status: 'requested',
         contact_name,
         contact_email: contact_email ?? null,
         contact_phone: contact_phone ?? null,
+        kenteken: kenteken ?? null,
+        origin: 'website',
+        channel: 'appointment_form',
+        status: 'new',
+        locale,
+        appointment_type: type,
         scheduled_date,
         scheduled_time,
-        duration_minutes: defaultDuration,
-        notes: [kenteken ? `Kenteken: ${kenteken}` : '', notes ?? ''].filter(Boolean).join('\n') || null,
+        location: location ?? 'shop',
+        location_address: location_address ?? null,
+        notes: notes ?? null,
       })
       .select('id')
       .single();
 
     if (error) {
-      return NextResponse.json({ error: 'Failed to book appointment' }, { status: 500 });
+      return NextResponse.json({ error: 'Failed to submit appointment request' }, { status: 500 });
     }
 
     return NextResponse.json({ success: true, id: data.id }, { status: 201 });

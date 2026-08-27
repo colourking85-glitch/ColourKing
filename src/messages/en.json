@@ -346,7 +346,21 @@
     "sendReply": "Send",
     "replySent": "Reply sent!",
     "refresh": "Refresh",
-    "filters": "Filters"
+    "filters": "Filters",
+    "appointmentRequest": "Appointment Request",
+    "appointmentType": "Type",
+    "type_inspection": "Inspection",
+    "type_drop_off": "Drop-off",
+    "type_collection": "Collection",
+    "time": "Time",
+    "locationLabel": "Location",
+    "locationShop": "At the shop",
+    "locationOther": "Other location",
+    "notesLabel": "Notes",
+    "confirmAppointment": "Confirm Appointment",
+    "declineAppointment": "Decline",
+    "declineReasonPrompt": "Reason for declining:",
+    "appointmentDeclined": "Appointment declined"
   },
   "jb": {
     "title": "Jobs",

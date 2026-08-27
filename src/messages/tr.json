@@ -346,7 +346,21 @@
     "sendReply": "Gönder",
     "replySent": "Yanıt gönderildi!",
     "refresh": "Yenile",
-    "filters": "Filtreler"
+    "filters": "Filtreler",
+    "appointmentRequest": "Randevu Talebi",
+    "appointmentType": "Tür",
+    "type_inspection": "İnceleme",
+    "type_drop_off": "Teslim",
+    "type_collection": "Teslim alma",
+    "time": "Saat",
+    "locationLabel": "Konum",
+    "locationShop": "Atölyede",
+    "locationOther": "Başka konum",
+    "notesLabel": "Notlar",
+    "confirmAppointment": "Randevuyu onayla",
+    "declineAppointment": "Reddet",
+    "declineReasonPrompt": "Reddetme nedeni:",
+    "appointmentDeclined": "Randevu reddedildi"
   },
   "jb": {
     "title": "İşler",

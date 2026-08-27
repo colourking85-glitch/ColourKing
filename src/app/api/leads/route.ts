@@ -15,7 +15,7 @@ export async function GET(req: NextRequest) {
 
   let query = supabase
     .from('leads')
-    .select('id, contact_name, contact_email, contact_phone, kenteken, damage_description, status, origin, preferred_date, created_at, customers(id, name), vehicles(id, kenteken, make, model)')
+    .select('id, contact_name, contact_email, contact_phone, kenteken, damage_description, status, origin, preferred_date, channel, appointment_type, created_at, customers(id, name), vehicles(id, kenteken, make, model)')
     .order(sortColumn, { ascending: sortDir });
 
   if (status) query = query.eq('status', status);

@@ -71,10 +71,11 @@ export default function BookingPage() {
           kenteken: kenteken || undefined,
           scheduled_date: date,
           scheduled_time: time,
-          notes: [
-            location === 'other' ? `Locatie: ${[street, [postcode, city].filter(Boolean).join(' ')].filter(Boolean).join(', ') || t('locationOther')}` : '',
-            notes,
-          ].filter(Boolean).join('\n') || undefined,
+          location,
+          location_address: location === 'other'
+            ? [street, [postcode, city].filter(Boolean).join(' ')].filter(Boolean).join(', ') || undefined
+            : undefined,
+          notes: notes || undefined,
         }),
       });
       if (res.ok) {

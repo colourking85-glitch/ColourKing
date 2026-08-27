@@ -346,7 +346,21 @@
     "sendReply": "Verzenden",
     "replySent": "Antwoord verzonden!",
     "refresh": "Vernieuwen",
-    "filters": "Filters"
+    "filters": "Filters",
+    "appointmentRequest": "Afspraakverzoek",
+    "appointmentType": "Type",
+    "type_inspection": "Inspectie",
+    "type_drop_off": "Inleveren",
+    "type_collection": "Ophalen",
+    "time": "Tijd",
+    "locationLabel": "Locatie",
+    "locationShop": "Bij de werkplaats",
+    "locationOther": "Andere locatie",
+    "notesLabel": "Opmerkingen",
+    "confirmAppointment": "Afspraak bevestigen",
+    "declineAppointment": "Afwijzen",
+    "declineReasonPrompt": "Reden voor afwijzing:",
+    "appointmentDeclined": "Afspraak afgewezen"
   },
   "jb": {
     "title": "Opdrachten",

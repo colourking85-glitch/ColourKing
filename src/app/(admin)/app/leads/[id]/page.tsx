@@ -3,7 +3,7 @@
 import { useState, useEffect, useRef, useCallback } from 'react';
 import { useParams, useRouter } from 'next/navigation';
 import Link from 'next/link';
-import { ArrowLeft, Clock, MessageCircle, FileText, Trophy, XCircle, Image as ImageIcon, X, Car, Send, Plus, Minus, RotateCcw } from 'lucide-react';
+import { ArrowLeft, Clock, MessageCircle, FileText, Trophy, XCircle, Image as ImageIcon, X, Car, Send, Plus, Minus, RotateCcw, Calendar, MapPin, CheckCircle2 } from 'lucide-react';
 import { useTranslations } from 'next-intl';
 import { ScreenBadge } from '@/components/ui/ScreenBadge';
 
@@ -22,6 +22,13 @@ type Lead = {
   locale: string;
   lost_reason: string | null;
   created_at: string;
+  channel: string | null;
+  notes: string | null;
+  appointment_type: string | null;
+  scheduled_date: string | null;
+  scheduled_time: string | null;
+  location: string | null;
+  location_address: string | null;
   customers: { id: string; name: string; email: string | null; phone: string | null } | null;
   vehicles: { id: string; kenteken: string | null; make: string | null; model: string | null; colour: string | null } | null;
 };
@@ -60,6 +67,7 @@ export default function LeadDetailPage() {
   const [replyText, setReplyText] = useState('');
   const [sending, setSending] = useState(false);
   const [sent, setSent] = useState(false);
+  const [confirming, setConfirming] = useState(false);
 
   const openPhoto = useCallback((url: string) => {
     setEnlargedPhoto(url);
@@ -141,6 +149,38 @@ export default function LeadDetailPage() {
     setUpdating(false);
   }
 
+  async function confirmAppointment() {
+    if (!lead?.appointment_type || !lead?.scheduled_date || !lead?.scheduled_time) return;
+    setConfirming(true);
+    try {
+      const res = await fetch(`/api/leads/${id}/confirm-appointment`, { method: 'POST' });
+      if (res.ok) {
+        const updated = await res.json();
+        setLead(prev => prev ? { ...prev, status: updated.lead_status ?? prev.status } : prev);
+      }
+    } finally {
+      setConfirming(false);
+    }
+  }
+
+  async function declineAppointment() {
+    const reason = prompt(t('declineReasonPrompt'));
+    if (reason === null) return;
+    setConfirming(true);
+    try {
+      const res = await fetch(`/api/leads/${id}`, {
+        method: 'PATCH',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ status: 'lost', lost_reason: reason || t('appointmentDeclined') }),
+      });
+      if (res.ok) {
+        setLead(await res.json());
+      }
+    } finally {
+      setConfirming(false);
+    }
+  }
+
   if (loading) return <div className="p-8 text-center text-ck-muted">{tCommon('loading')}</div>;
   if (!lead) return <div className="p-8 text-center text-ck-muted">{tCommon('notFound')}</div>;
 
@@ -203,6 +243,60 @@ export default function LeadDetailPage() {
             <div className="rounded-lg border border-ck-dark-border bg-ck-dark-card p-6">
               <h2 className="mb-3 text-sm font-semibold uppercase text-ck-muted">{t('damage')}</h2>
               <p className="text-sm text-ck-muted-light whitespace-pre-wrap">{lead.damage_description}</p>
+            </div>
+          )}
+
+          {lead.notes && !lead.appointment_type && (
+            <div className="rounded-lg border border-ck-dark-border bg-ck-dark-card p-6">
+              <h2 className="mb-3 text-sm font-semibold uppercase text-ck-muted">{t('notesLabel')}</h2>
+              <p className="text-sm text-ck-muted-light whitespace-pre-wrap">{lead.notes}</p>
+            </div>
+          )}
+
+          {lead.appointment_type && (
+            <div className="rounded-lg border border-amber-500/30 bg-amber-500/5 p-6">
+              <h2 className="mb-4 flex items-center gap-2 text-sm font-semibold uppercase text-amber-400">
+                <Calendar size={14} />
+                {t('appointmentRequest')}
+              </h2>
+              <dl className="space-y-3">
+                <Row label={t('appointmentType')} value={t(`type_${lead.appointment_type}`)} />
+                <Row label={tCommon('date')} value={lead.scheduled_date ? new Date(lead.scheduled_date).toLocaleDateString('nl-NL', { weekday: 'long', day: 'numeric', month: 'long', year: 'numeric' }) : null} />
+                <Row label={t('time')} value={lead.scheduled_time?.slice(0, 5) ?? null} />
+                <Row label={t('locationLabel')} value={lead.location === 'other' ? t('locationOther') : t('locationShop')} />
+                {lead.location === 'other' && lead.location_address && (
+                  <div className="flex items-start gap-2 rounded-lg border border-ck-dark-border bg-ck-dark-surface p-3">
+                    <MapPin size={14} className="mt-0.5 text-ck-muted shrink-0" />
+                    <p className="text-sm text-ck-muted-light">{lead.location_address}</p>
+                  </div>
+                )}
+              </dl>
+              {lead.notes && (
+                <div className="mt-3 rounded-lg border border-ck-dark-border bg-ck-dark-surface p-3">
+                  <p className="text-xs text-ck-muted mb-1">{t('notesLabel')}</p>
+                  <p className="text-sm text-ck-muted-light whitespace-pre-wrap">{lead.notes}</p>
+                </div>
+              )}
+              {lead.status !== 'won' && lead.status !== 'lost' && (
+                <div className="mt-4 flex gap-2">
+                  <button
+                    onClick={confirmAppointment}
+                    disabled={confirming}
+                    className="flex items-center gap-1.5 rounded-lg bg-green-600 px-4 py-2 text-xs font-semibold text-white hover:bg-green-700 disabled:opacity-50"
+                  >
+                    <CheckCircle2 size={14} />
+                    {t('confirmAppointment')}
+                  </button>
+                  <button
+                    onClick={declineAppointment}
+                    disabled={confirming}
+                    className="flex items-center gap-1.5 rounded-lg border border-red-500/30 px-4 py-2 text-xs font-semibold text-red-400 hover:bg-red-500/10 disabled:opacity-50"
+                  >
+                    <XCircle size={14} />
+                    {t('declineAppointment')}
+                  </button>
+                </div>
+              )}
             </div>
           )}
 
