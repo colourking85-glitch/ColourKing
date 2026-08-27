@@ -1,7 +1,7 @@
 'use client';
 
 import { useEffect, useState } from 'react';
-import { useRouter } from 'next/navigation';
+import { useRouter, usePathname } from 'next/navigation';
 import { useTranslations } from 'next-intl';
 import { getSession, type Session } from '@/lib/auth';
 import { AdminIntlProvider } from '@/components/AdminIntlProvider';
@@ -20,9 +20,13 @@ function MonitorLoading() {
 
 function MonitorShell({ children }: { children: React.ReactNode }) {
   const router = useRouter();
+  const pathname = usePathname();
   const [session, setSession] = useState<Session | undefined>(undefined);
 
+  const isLoginPage = pathname === '/monitor/login';
+
   useEffect(() => {
+    if (isLoginPage) return;
     let cancelled = false;
     getSession()
       .then(s => {
@@ -37,7 +41,15 @@ function MonitorShell({ children }: { children: React.ReactNode }) {
         if (!cancelled) router.replace('/monitor/login');
       });
     return () => { cancelled = true; };
-  }, [router]);
+  }, [router, isLoginPage]);
+
+  if (isLoginPage) {
+    return (
+      <div className="min-h-screen bg-[#0a0a0f]">
+        {children}
+      </div>
+    );
+  }
 
   if (session === undefined) {
     return <MonitorLoading />;
