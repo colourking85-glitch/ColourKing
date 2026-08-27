@@ -16,10 +16,11 @@ export default function NewVehiclePage() {
   const router = useRouter();
   const searchParams = useSearchParams();
   const presetCustomer = searchParams.get('customer');
+  const presetKenteken = searchParams.get('kenteken');
 
   const [saving, setSaving] = useState(false);
   const [error, setError] = useState('');
-  const [kentekenInput, setKentekenInput] = useState('');
+  const [kentekenInput, setKentekenInput] = useState(presetKenteken ?? '');
   const [rdwLoading, setRdwLoading] = useState(false);
   const [rdwData, setRdwData] = useState<Record<string, string | number | boolean | null> | null>(null);
   const [customers, setCustomers] = useState<{ id: string; name: string }[]>([]);

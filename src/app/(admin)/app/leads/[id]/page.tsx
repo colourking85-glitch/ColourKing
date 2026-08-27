@@ -1,9 +1,9 @@
 'use client';
 
-import { useState, useEffect } from 'react';
+import { useState, useEffect, useRef, useCallback } from 'react';
 import { useParams, useRouter } from 'next/navigation';
 import Link from 'next/link';
-import { ArrowLeft, Clock, MessageCircle, FileText, Trophy, XCircle, Image as ImageIcon, X } from 'lucide-react';
+import { ArrowLeft, Clock, MessageCircle, FileText, Trophy, XCircle, Image as ImageIcon, X, Car, Send, Plus, Minus, RotateCcw } from 'lucide-react';
 import { useTranslations } from 'next-intl';
 import { ScreenBadge } from '@/components/ui/ScreenBadge';
 
@@ -51,8 +51,62 @@ export default function LeadDetailPage() {
   const [lead, setLead] = useState<Lead | null>(null);
   const [photos, setPhotos] = useState<LeadPhoto[]>([]);
   const [enlargedPhoto, setEnlargedPhoto] = useState<string | null>(null);
+  const [zoom, setZoom] = useState(1);
+  const [pan, setPan] = useState({ x: 0, y: 0 });
+  const [dragging, setDragging] = useState(false);
+  const dragStart = useRef({ x: 0, y: 0, panX: 0, panY: 0 });
   const [loading, setLoading] = useState(true);
   const [updating, setUpdating] = useState(false);
+  const [replyText, setReplyText] = useState('');
+  const [sending, setSending] = useState(false);
+  const [sent, setSent] = useState(false);
+
+  const openPhoto = useCallback((url: string) => {
+    setEnlargedPhoto(url);
+    setZoom(1);
+    setPan({ x: 0, y: 0 });
+  }, []);
+
+  const handleWheel = useCallback((e: React.WheelEvent) => {
+    e.preventDefault();
+    setZoom(z => Math.min(10, Math.max(0.5, z - e.deltaY * 0.002)));
+  }, []);
+
+  const handlePointerDown = useCallback((e: React.PointerEvent) => {
+    if (zoom <= 1) return;
+    setDragging(true);
+    dragStart.current = { x: e.clientX, y: e.clientY, panX: pan.x, panY: pan.y };
+    (e.target as HTMLElement).setPointerCapture(e.pointerId);
+  }, [zoom, pan]);
+
+  const handlePointerMove = useCallback((e: React.PointerEvent) => {
+    if (!dragging) return;
+    setPan({
+      x: dragStart.current.panX + (e.clientX - dragStart.current.x),
+      y: dragStart.current.panY + (e.clientY - dragStart.current.y),
+    });
+  }, [dragging]);
+
+  const handlePointerUp = useCallback(() => setDragging(false), []);
+
+  async function handleReply() {
+    if (!replyText.trim() || !lead?.contact_email) return;
+    setSending(true);
+    try {
+      const res = await fetch(`/api/leads/${id}/reply`, {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ message: replyText, to: lead.contact_email }),
+      });
+      if (res.ok) {
+        setSent(true);
+        setReplyText('');
+        setTimeout(() => setSent(false), 3000);
+      }
+    } finally {
+      setSending(false);
+    }
+  }
 
   useEffect(() => {
     fetch(`/api/leads/${id}`)
@@ -162,7 +216,7 @@ export default function LeadDetailPage() {
                 {photos.map(p => (
                   <button
                     key={p.id}
-                    onClick={() => setEnlargedPhoto(p.url)}
+                    onClick={() => openPhoto(p.url)}
                     className="aspect-square overflow-hidden rounded-lg border border-ck-dark-border hover:border-ck-red transition-colors"
                   >
                     <img src={p.url} alt="" className="h-full w-full object-cover" />
@@ -199,36 +253,131 @@ export default function LeadDetailPage() {
           <div className="rounded-lg border border-ck-dark-border bg-ck-dark-card p-6">
             <h2 className="mb-4 text-sm font-semibold uppercase text-ck-muted">{tCommon('actions')}</h2>
             <div className="space-y-2">
-              {lead.status === 'quoted' || lead.status === 'contacted' ? (
+              <Link
+                href={`/app/offertes/nieuw?lead=${id}`}
+                className="block w-full rounded-lg bg-ck-red px-4 py-2 text-center text-sm font-semibold text-white hover:bg-ck-red-hover"
+              >
+                {t('createOffer')}
+              </Link>
+              {!lead.vehicles && (
                 <Link
-                  href={`/app/offertes/nieuw?lead=${id}`}
-                  className="block w-full rounded-lg bg-ck-red px-4 py-2 text-center text-sm font-semibold text-white hover:bg-ck-red-hover"
+                  href={`/app/voertuigen/nieuw${lead.kenteken ? `?kenteken=${encodeURIComponent(lead.kenteken)}` : ''}`}
+                  className="flex w-full items-center justify-center gap-2 rounded-lg border border-ck-dark-border px-4 py-2 text-sm text-ck-muted-light hover:text-white hover:border-ck-muted/50"
                 >
-                  {t('createOffer')}
+                  <Car size={14} />
+                  {t('createVehicle')}
                 </Link>
-              ) : null}
+              )}
               {!lead.customers && (
                 <button
                   onClick={() => router.push(`/app/klanten/nieuw?from_lead=${id}`)}
-                  className="block w-full rounded-lg border border-ck-dark-border px-4 py-2 text-center text-sm text-ck-muted-light hover:text-white"
+                  className="block w-full rounded-lg border border-ck-dark-border px-4 py-2 text-center text-sm text-ck-muted-light hover:text-white hover:border-ck-muted/50"
                 >
                   {t('createCustomer')}
                 </button>
               )}
             </div>
           </div>
+
+          {lead.contact_email && (
+            <div className="rounded-lg border border-ck-dark-border bg-ck-dark-card p-6">
+              <h2 className="mb-3 flex items-center gap-2 text-sm font-semibold uppercase text-ck-muted">
+                <Send size={14} />
+                {t('quickReply')}
+              </h2>
+              <p className="mb-2 text-xs text-ck-text-3">{lead.contact_email}</p>
+              <textarea
+                value={replyText}
+                onChange={e => setReplyText(e.target.value)}
+                rows={3}
+                placeholder={t('replyPlaceholder')}
+                className="w-full resize-none rounded-lg border border-ck-dark-border bg-ck-dark-surface px-3 py-2 text-sm text-white placeholder:text-ck-text-muted focus:border-ck-red focus:outline-none"
+              />
+              <div className="mt-2 flex items-center gap-2">
+                <button
+                  onClick={handleReply}
+                  disabled={sending || !replyText.trim()}
+                  className="flex items-center gap-1.5 rounded-lg bg-ck-red px-4 py-1.5 text-xs font-semibold text-white hover:bg-ck-red-hover disabled:opacity-50"
+                >
+                  <Send size={12} />
+                  {sending ? tCommon('loading') : t('sendReply')}
+                </button>
+                {sent && <span className="text-xs text-green-400">{t('replySent')}</span>}
+              </div>
+            </div>
+          )}
         </div>
       </div>
 
       {enlargedPhoto && (
         <div
-          className="fixed inset-0 z-50 flex items-center justify-center bg-black/80 p-8"
-          onClick={() => setEnlargedPhoto(null)}
+          className="fixed inset-0 z-50 flex flex-col items-center justify-center bg-black/90"
+          onClick={e => { if (e.target === e.currentTarget) setEnlargedPhoto(null); }}
         >
-          <button className="absolute right-4 top-4 text-white/70 hover:text-white">
-            <X size={24} />
-          </button>
-          <img src={enlargedPhoto} alt="" className="max-h-full max-w-full rounded-lg object-contain" />
+          <div className="absolute right-4 top-4 z-10 flex items-center gap-2">
+            <button
+              onClick={() => setZoom(z => Math.min(10, z + 0.5))}
+              className="rounded-full bg-white/10 p-2 text-white/70 hover:bg-white/20 hover:text-white"
+              title="Zoom in"
+            >
+              <Plus size={18} />
+            </button>
+            <button
+              onClick={() => { setZoom(z => Math.max(0.5, z - 0.5)); setPan({ x: 0, y: 0 }); }}
+              className="rounded-full bg-white/10 p-2 text-white/70 hover:bg-white/20 hover:text-white"
+              title="Zoom out"
+            >
+              <Minus size={18} />
+            </button>
+            <button
+              onClick={() => { setZoom(1); setPan({ x: 0, y: 0 }); }}
+              className="rounded-full bg-white/10 p-2 text-white/70 hover:bg-white/20 hover:text-white"
+              title="Reset"
+            >
+              <RotateCcw size={18} />
+            </button>
+            <span className="min-w-[3rem] text-center text-xs text-white/60">{Math.round(zoom * 100)}%</span>
+            <button
+              onClick={() => setEnlargedPhoto(null)}
+              className="rounded-full bg-white/10 p-2 text-white/70 hover:bg-white/20 hover:text-white"
+            >
+              <X size={18} />
+            </button>
+          </div>
+          {photos.length > 1 && (
+            <div className="absolute bottom-4 left-1/2 z-10 flex -translate-x-1/2 gap-1.5">
+              {photos.map(p => (
+                <button
+                  key={p.id}
+                  onClick={() => openPhoto(p.url)}
+                  className={`h-12 w-12 overflow-hidden rounded border-2 transition-colors ${p.url === enlargedPhoto ? 'border-ck-red' : 'border-white/20 hover:border-white/50'}`}
+                >
+                  <img src={p.url} alt="" className="h-full w-full object-cover" />
+                </button>
+              ))}
+            </div>
+          )}
+          <div
+            className="flex-1 w-full overflow-hidden cursor-grab active:cursor-grabbing"
+            onWheel={handleWheel}
+            onPointerDown={handlePointerDown}
+            onPointerMove={handlePointerMove}
+            onPointerUp={handlePointerUp}
+            style={{ touchAction: 'none' }}
+          >
+            <div className="flex h-full w-full items-center justify-center p-8">
+              <img
+                src={enlargedPhoto}
+                alt=""
+                className="max-h-full max-w-full object-contain select-none"
+                style={{
+                  transform: `scale(${zoom}) translate(${pan.x / zoom}px, ${pan.y / zoom}px)`,
+                  transition: dragging ? 'none' : 'transform 0.15s ease-out',
+                }}
+                draggable={false}
+              />
+            </div>
+          </div>
         </div>
       )}
     </div>

@@ -338,7 +338,12 @@
     "languageTr": "Turkish",
     "photos": "Photos",
     "addPhoto": "Add photo",
-    "photosHint": "Max 5 photos, 20 MB total. JPG, PNG or WebP."
+    "photosHint": "Max 5 photos, 20 MB total. JPG, PNG or WebP.",
+    "createVehicle": "Create vehicle",
+    "quickReply": "Quick reply",
+    "replyPlaceholder": "Type your reply...",
+    "sendReply": "Send",
+    "replySent": "Reply sent!"
   },
   "jb": {
     "title": "Jobs",

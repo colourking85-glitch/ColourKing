@@ -338,7 +338,12 @@
     "languageTr": "Turks",
     "photos": "Foto's",
     "addPhoto": "Foto toevoegen",
-    "photosHint": "Max 5 foto's, 20 MB totaal. JPG, PNG of WebP."
+    "photosHint": "Max 5 foto's, 20 MB totaal. JPG, PNG of WebP.",
+    "createVehicle": "Voertuig aanmaken",
+    "quickReply": "Snel antwoord",
+    "replyPlaceholder": "Typ je antwoord...",
+    "sendReply": "Verzenden",
+    "replySent": "Antwoord verzonden!"
   },
   "jb": {
     "title": "Opdrachten",

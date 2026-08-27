@@ -338,7 +338,12 @@
     "languageTr": "Türkçe",
     "photos": "Fotoğraflar",
     "addPhoto": "Fotoğraf ekle",
-    "photosHint": "Maks 5 fotoğraf, toplam 20 MB. JPG, PNG veya WebP."
+    "photosHint": "Maks 5 fotoğraf, toplam 20 MB. JPG, PNG veya WebP.",
+    "createVehicle": "Araç oluştur",
+    "quickReply": "Hızlı yanıt",
+    "replyPlaceholder": "Yanıtınızı yazın...",
+    "sendReply": "Gönder",
+    "replySent": "Yanıt gönderildi!"
   },
   "jb": {
     "title": "İşler",
