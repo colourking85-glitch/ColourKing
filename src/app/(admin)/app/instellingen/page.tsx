@@ -23,6 +23,7 @@ export default function SettingsPage() {
   const [navIcons, setNavIcons] = useState(settings.navIcons);
   const [compact, setCompact] = useState(settings.compact);
   const [sidebarCollapsed, setSidebarCollapsed] = useState(settings.sidebarCollapsed);
+  const [navGroupsExpanded, setNavGroupsExpanded] = useState(settings.navGroupsExpanded);
   const [language, setLanguage] = useState<'nl' | 'en' | 'tr'>(locale);
   const [companyName, setCompanyName] = useState(settings.companyName);
   const [dateFormat, setDateFormat] = useState(settings.dateFormat);
@@ -48,6 +49,7 @@ export default function SettingsPage() {
       navIcons,
       compact,
       sidebarCollapsed,
+      navGroupsExpanded,
       companyName,
       dateFormat,
       timezone,
@@ -276,6 +278,22 @@ export default function SettingsPage() {
                       }`}
                     >
                       <span className={`absolute top-0.5 h-5 w-5 rounded-full bg-white transition-transform ${sidebarCollapsed ? 'translate-x-[22px]' : 'translate-x-0.5'}`} />
+                    </button>
+                  </label>
+
+                  {/* Nav groups expanded */}
+                  <label className="flex items-center justify-between">
+                    <div>
+                      <div className="text-sm text-white">{tSy('navGroupsExpanded')}</div>
+                      <div className="text-xs text-ck-muted">{tSy('navGroupsExpandedDesc')}</div>
+                    </div>
+                    <button
+                      onClick={() => setNavGroupsExpanded(!navGroupsExpanded)}
+                      className={`relative h-6 w-11 rounded-full transition-colors ${
+                        navGroupsExpanded ? 'bg-ck-red' : 'bg-ck-dark-border'
+                      }`}
+                    >
+                      <span className={`absolute top-0.5 h-5 w-5 rounded-full bg-white transition-transform ${navGroupsExpanded ? 'translate-x-[22px]' : 'translate-x-0.5'}`} />
                     </button>
                   </label>
                 </div>

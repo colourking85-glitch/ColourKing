@@ -11,6 +11,7 @@ export interface AppSettings {
   navIcons: boolean;
   compact: boolean;
   sidebarCollapsed: boolean;
+  navGroupsExpanded: boolean;
   companyName: string;
   dateFormat: string;
   timezone: string;
@@ -25,6 +26,7 @@ const DEFAULTS: AppSettings = {
   navIcons: true,
   compact: false,
   sidebarCollapsed: false,
+  navGroupsExpanded: true,
   companyName: 'Colourking',
   dateFormat: 'dd-MM-yyyy',
   timezone: 'Europe/Amsterdam',

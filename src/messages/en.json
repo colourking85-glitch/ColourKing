@@ -979,6 +979,8 @@
     "compactDesc": "Less whitespace, more information on screen",
     "sidebarStartCollapsed": "Sidebar collapsed by default",
     "sidebarDesc": "Sidebar starts in icon mode",
+    "navGroupsExpanded": "Menu groups expanded by default",
+    "navGroupsExpandedDesc": "Show all navigation groups open on page load",
     "companyInfo": "Company information",
     "uploadLogo": "Click or drag to upload a logo",
     "regionLang": "Region & Language",

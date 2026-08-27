@@ -267,6 +267,7 @@ export function Sidebar() {
   const [collapsedSections, setCollapsedSections] = useState<Record<string, boolean>>({});
   const [flyout, setFlyout] = useState<{ section: NavSection; rect: DOMRect } | null>(null);
   const closeTimer = useRef<ReturnType<typeof setTimeout> | null>(null);
+  const initializedSections = useRef(false);
 
   // TODO: get from session context
   const role: Role = 'admin';
@@ -274,6 +275,16 @@ export function Sidebar() {
   useEffect(() => {
     setCollapsed(settings.sidebarCollapsed);
   }, [settings.sidebarCollapsed]);
+
+  useEffect(() => {
+    if (initializedSections.current) return;
+    initializedSections.current = true;
+    if (!settings.navGroupsExpanded) {
+      const allCollapsed: Record<string, boolean> = {};
+      NAV.forEach(s => { allCollapsed[s.group] = true; });
+      setCollapsedSections(allCollapsed);
+    }
+  }, [settings.navGroupsExpanded]);
 
   const scheduleFlyoutClose = useCallback(() => {
     closeTimer.current = setTimeout(() => setFlyout(null), 120);

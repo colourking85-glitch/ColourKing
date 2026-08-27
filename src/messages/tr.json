@@ -979,6 +979,8 @@
     "compactDesc": "Daha az boşluk, ekranda daha fazla bilgi",
     "sidebarStartCollapsed": "Kenar çubuğu varsayılan olarak daraltılmış",
     "sidebarDesc": "Kenar çubuğu simge modunda başlar",
+    "navGroupsExpanded": "Menü grupları varsayılan olarak açık",
+    "navGroupsExpandedDesc": "Tüm navigasyon gruplarını sayfa yüklendiğinde açık göster",
     "companyInfo": "Şirket bilgileri",
     "uploadLogo": "Logo yüklemek için tıklayın veya sürükleyin",
     "regionLang": "Bölge ve Dil",
