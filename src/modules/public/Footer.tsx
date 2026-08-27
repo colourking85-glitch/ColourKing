@@ -28,7 +28,7 @@ export function Footer() {
               </h3>
               <div className="flex gap-3">
                 <a
-                  href="https://www.instagram.com/colourking.nl/"
+                  href="https://www.instagram.com/autoschadeherstelcolourking/"
                   target="_blank"
                   rel="noopener noreferrer"
                   className="group flex items-center gap-3"
