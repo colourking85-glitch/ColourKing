@@ -1377,13 +1377,32 @@
       }
     },
     "contact": {
+      "title": "İletişim",
+      "subtitle": "Bir sorunuz mu var veya bizimle iletişime geçmek mi istiyorsunuz? Bize bir mesaj gönderin, en kısa sürede yanıt vereceğiz.",
+      "formTitle": "Mesaj gönderin",
+      "name": "Ad Soyad",
+      "email": "E-posta adresi",
+      "phone": "Telefon numarası",
+      "message": "Mesajınız",
+      "submit": "Mesaj gönder",
+      "submitting": "Gönderiliyor...",
+      "success": "Teşekkürler! Mesajınız gönderildi. En kısa sürede size geri döneceğiz.",
+      "error": "Bir şeyler ters gitti. Lütfen daha sonra tekrar deneyin veya bizi doğrudan arayın.",
+      "requiredField": "Bu alan zorunludur",
+      "invalidEmail": "Lütfen geçerli bir e-posta adresi girin",
+      "infoTitle": "İletişim bilgileri",
+      "address": "Adres",
+      "mapPlaceholder": "Harita"
+    },
+    "offerte": {
+      "title": "Teklif İsteyin",
+      "subtitle": "Hasarı açıklayın, size ücretsiz bir teklif gönderelim.",
       "formTitle": "Teklif isteyin",
       "name": "Ad Soyad",
       "email": "E-posta adresi",
       "phone": "Telefon numarası",
       "kenteken": "Plaka",
       "damageDescription": "Hasarın açıklaması",
-      "photoUpload": "Fotoğraf yükle",
       "photos": "Fotoğraflar",
       "photosHint": "Maks 5 fotoğraf, toplam 20 MB. JPG, PNG veya WebP.",
       "submit": "Gönder",
@@ -1392,9 +1411,7 @@
       "error": "Bir şeyler ters gitti. Lütfen daha sonra tekrar deneyin veya bizi doğrudan arayın.",
       "requiredField": "Bu alan zorunludur",
       "invalidEmail": "Lütfen geçerli bir e-posta adresi girin",
-      "filesTooLarge": "Toplam dosya boyutu 20 MB'ı aşıyor. Lütfen bazı fotoğrafları kaldırın.",
-      "infoTitle": "İletişim bilgileri",
-      "mapPlaceholder": "Harita"
+      "filesTooLarge": "Toplam dosya boyutu 20 MB'ı aşıyor. Lütfen bazı fotoğrafları kaldırın."
     },
     "booking": {
       "title": "Randevu Al",

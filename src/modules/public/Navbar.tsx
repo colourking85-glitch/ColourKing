@@ -192,7 +192,7 @@ export function Navbar({ locale }: { locale: string }) {
             {t('nav.appointment')}
           </Link>
           <Link
-            href="/contact"
+            href="/offerte"
             className="bg-[#E8364E] px-5 py-2.5 text-sm font-semibold uppercase tracking-wider text-white transition-colors duration-200 hover:bg-[#d02e44]"
           >
             {t('nav.quote')}
@@ -269,7 +269,7 @@ export function Navbar({ locale }: { locale: string }) {
                 {t('nav.appointment')}
               </Link>
               <Link
-                href="/contact"
+                href="/offerte"
                 onClick={() => setMenuOpen(false)}
                 className="bg-[#E8364E] px-4 py-2.5 text-xs font-semibold uppercase tracking-wider text-white"
               >

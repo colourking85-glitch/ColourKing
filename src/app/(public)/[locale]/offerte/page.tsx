@@ -1,10 +1,13 @@
 'use client';
 
-import { useState, FormEvent } from 'react';
+import { useState, useRef, FormEvent } from 'react';
 import { useTranslations } from 'next-intl';
 import { useParams } from 'next/navigation';
 
-export default function ContactPage() {
+const MAX_FILES = 5;
+const MAX_TOTAL_BYTES = 20 * 1024 * 1024;
+
+export default function OffertePage() {
   const t = useTranslations('pub');
   const { locale } = useParams<{ locale: string }>();
 
@@ -12,17 +15,19 @@ export default function ContactPage() {
     name: '',
     email: '',
     phone: '',
-    message: '',
+    kenteken: '',
+    damage: '',
   });
+  const [files, setFiles] = useState<File[]>([]);
+  const fileRef = useRef<HTMLInputElement>(null);
   const [errors, setErrors] = useState<Record<string, string>>({});
   const [status, setStatus] = useState<'idle' | 'sending' | 'success' | 'error'>('idle');
 
   function validate() {
     const e: Record<string, string> = {};
-    if (!form.name.trim()) e.name = t('contact.requiredField');
-    if (!form.message.trim()) e.message = t('contact.requiredField');
+    if (!form.name.trim()) e.name = t('offerte.requiredField');
     if (form.email && !/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(form.email)) {
-      e.email = t('contact.invalidEmail');
+      e.email = t('offerte.invalidEmail');
     }
     return e;
   }
@@ -35,24 +40,54 @@ export default function ContactPage() {
 
     setStatus('sending');
     try {
-      const res = await fetch('/api/public/contact', {
+      const res = await fetch('/api/public/quote-request', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({
           name: form.name,
           email: form.email || undefined,
           phone: form.phone || undefined,
-          message: form.message,
+          kenteken: form.kenteken || undefined,
+          damage: form.damage || undefined,
           locale: locale || 'nl',
         }),
       });
       if (!res.ok) throw new Error('failed');
+      const { id: leadId } = await res.json();
+
+      if (files.length > 0 && leadId) {
+        const fd = new FormData();
+        fd.append('lead_id', leadId);
+        for (const f of files) fd.append('files', f);
+        await fetch('/api/public/lead-photos', { method: 'POST', body: fd });
+      }
 
       setStatus('success');
-      setForm({ name: '', email: '', phone: '', message: '' });
+      setForm({ name: '', email: '', phone: '', kenteken: '', damage: '' });
+      setFiles([]);
     } catch {
       setStatus('error');
     }
+  }
+
+  function handleFiles(selected: FileList | null) {
+    if (!selected) return;
+    const next = [...files];
+    for (let i = 0; i < selected.length && next.length < MAX_FILES; i++) {
+      const f = selected[i];
+      if (f.type && !f.type.startsWith('image/')) continue;
+      next.push(f);
+    }
+    const total = next.reduce((s, f) => s + f.size, 0);
+    if (total > MAX_TOTAL_BYTES) {
+      alert(t('offerte.filesTooLarge'));
+      return;
+    }
+    setFiles(next);
+  }
+
+  function removeFile(idx: number) {
+    setFiles(prev => prev.filter((_, i) => i !== idx));
   }
 
   function handleChange(field: string, value: string) {
@@ -75,13 +110,13 @@ export default function ContactPage() {
         <div className="absolute inset-0 bg-gradient-to-b from-[#E8364E]/8 to-transparent" />
         <div className="relative mx-auto max-w-7xl">
           <p className="text-xs font-semibold uppercase tracking-[0.2em] text-[#E8364E]">
-            COLOURKING
+            {t('cta.eyebrow')}
           </p>
           <h1 className="mt-4 font-heading text-4xl font-bold uppercase tracking-tight text-white sm:text-5xl lg:text-6xl">
-            {t('contact.title')}
+            {t('offerte.title')}
           </h1>
           <p className="mt-5 max-w-2xl text-lg leading-relaxed text-white/60">
-            {t('contact.subtitle')}
+            {t('offerte.subtitle')}
           </p>
         </div>
       </section>
@@ -90,18 +125,18 @@ export default function ContactPage() {
         <div className="mx-auto grid max-w-7xl gap-px bg-ck-border lg:grid-cols-5">
           <div className="bg-ck-dark p-8 sm:p-12 lg:col-span-3">
             <h2 className="font-heading text-2xl font-bold uppercase tracking-tight text-white">
-              {t('contact.formTitle')}
+              {t('offerte.formTitle')}
             </h2>
 
             {status === 'success' ? (
               <div className="mt-8 border border-green-900/30 bg-green-950/20 p-6">
-                <p className="text-sm text-green-400">{t('contact.success')}</p>
+                <p className="text-sm text-green-400">{t('offerte.success')}</p>
               </div>
             ) : (
               <form onSubmit={handleSubmit} className="mt-8 space-y-5">
                 <div>
                   <label htmlFor="name" className="block text-xs font-semibold uppercase tracking-wider text-white/50">
-                    {t('contact.name')} *
+                    {t('offerte.name')} *
                   </label>
                   <input
                     id="name"
@@ -116,7 +151,7 @@ export default function ContactPage() {
                 <div className="grid gap-5 sm:grid-cols-2">
                   <div>
                     <label htmlFor="email" className="block text-xs font-semibold uppercase tracking-wider text-white/50">
-                      {t('contact.email')}
+                      {t('offerte.email')}
                     </label>
                     <input
                       id="email"
@@ -129,7 +164,7 @@ export default function ContactPage() {
                   </div>
                   <div>
                     <label htmlFor="phone" className="block text-xs font-semibold uppercase tracking-wider text-white/50">
-                      {t('contact.phone')}
+                      {t('offerte.phone')}
                     </label>
                     <input
                       id="phone"
@@ -142,21 +177,75 @@ export default function ContactPage() {
                 </div>
 
                 <div>
-                  <label htmlFor="message" className="block text-xs font-semibold uppercase tracking-wider text-white/50">
-                    {t('contact.message')} *
+                  <label htmlFor="kenteken" className="block text-xs font-semibold uppercase tracking-wider text-white/50">
+                    {t('offerte.kenteken')}
+                  </label>
+                  <input
+                    id="kenteken"
+                    type="text"
+                    value={form.kenteken}
+                    onChange={(e) => handleChange('kenteken', e.target.value)}
+                    className={inputClasses}
+                  />
+                </div>
+
+                <div>
+                  <label htmlFor="damage" className="block text-xs font-semibold uppercase tracking-wider text-white/50">
+                    {t('offerte.damageDescription')}
                   </label>
                   <textarea
-                    id="message"
+                    id="damage"
                     rows={5}
-                    value={form.message}
-                    onChange={(e) => handleChange('message', e.target.value)}
+                    value={form.damage}
+                    onChange={(e) => handleChange('damage', e.target.value)}
                     className={`${inputClasses} resize-none`}
                   />
-                  {errors.message && <p className="mt-1 text-xs text-[#E8364E]">{errors.message}</p>}
+                </div>
+
+                <div>
+                  <label className="block text-xs font-semibold uppercase tracking-wider text-white/50">
+                    {t('offerte.photos')} ({files.length}/{MAX_FILES})
+                  </label>
+                  <div className="mt-1 flex flex-wrap gap-2">
+                    {files.map((f, i) => (
+                      <div key={i} className="group relative h-20 w-20 overflow-hidden border border-ck-border">
+                        <img
+                          src={URL.createObjectURL(f)}
+                          alt={f.name}
+                          className="h-full w-full object-cover"
+                        />
+                        <button
+                          type="button"
+                          onClick={() => removeFile(i)}
+                          className="absolute right-0 top-0 bg-black/70 px-1.5 py-0.5 text-xs text-white opacity-0 transition-opacity group-hover:opacity-100"
+                        >
+                          &times;
+                        </button>
+                      </div>
+                    ))}
+                    {files.length < MAX_FILES && (
+                      <button
+                        type="button"
+                        onClick={() => fileRef.current?.click()}
+                        className="flex h-20 w-20 items-center justify-center border border-dashed border-white/20 text-white/30 transition-colors hover:border-[#E8364E]/50 hover:text-[#E8364E]"
+                      >
+                        +
+                      </button>
+                    )}
+                  </div>
+                  <input
+                    ref={fileRef}
+                    type="file"
+                    multiple
+                    accept="image/*"
+                    className="hidden"
+                    onChange={e => { handleFiles(e.target.files); e.target.value = ''; }}
+                  />
+                  <p className="mt-1 text-[10px] text-white/30">{t('offerte.photosHint')}</p>
                 </div>
 
                 {status === 'error' && (
-                  <p className="text-sm text-[#E8364E]">{t('contact.error')}</p>
+                  <p className="text-sm text-[#E8364E]">{t('offerte.error')}</p>
                 )}
 
                 <button
@@ -164,7 +253,7 @@ export default function ContactPage() {
                   disabled={status === 'sending'}
                   className="w-full bg-[#E8364E] px-6 py-4 text-sm font-semibold uppercase tracking-wider text-white transition-colors hover:bg-[#d02e44] disabled:opacity-50"
                 >
-                  {status === 'sending' ? t('contact.submitting') : t('contact.submit')}
+                  {status === 'sending' ? t('offerte.submitting') : t('offerte.submit')}
                 </button>
               </form>
             )}

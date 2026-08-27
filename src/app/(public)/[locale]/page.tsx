@@ -51,7 +51,7 @@ export default async function HomePage({
           </p>
           <div className="mt-10 flex flex-wrap gap-4">
             <Link
-              href="/contact"
+              href="/offerte"
               className="group inline-flex items-center gap-2 bg-[#E8364E] px-7 py-4 text-sm font-semibold uppercase tracking-wider text-white transition-all duration-200 hover:bg-[#d02e44] hover:-translate-y-0.5 hover:shadow-lg hover:shadow-[#E8364E]/30"
             >
               <span>{t('hero.ctaQuote')}</span>
@@ -349,7 +349,7 @@ export default async function HomePage({
               </a>
               <div className="flex flex-wrap gap-4">
                 <Link
-                  href="/contact"
+                  href="/offerte"
                   className="inline-flex items-center gap-2 bg-[#E8364E] px-7 py-4 text-sm font-semibold uppercase tracking-wider text-white transition-all duration-200 hover:bg-[#d02e44] hover:-translate-y-0.5 hover:shadow-lg hover:shadow-[#E8364E]/30"
                 >
                   <span>{t('cta.button')}</span>

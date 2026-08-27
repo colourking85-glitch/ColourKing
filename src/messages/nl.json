@@ -1377,13 +1377,32 @@
       }
     },
     "contact": {
+      "title": "Contact",
+      "subtitle": "Heeft u een vraag of wilt u contact opnemen? Stuur ons een bericht en wij reageren zo snel mogelijk.",
+      "formTitle": "Stuur een bericht",
+      "name": "Naam",
+      "email": "E-mailadres",
+      "phone": "Telefoonnummer",
+      "message": "Uw bericht",
+      "submit": "Bericht versturen",
+      "submitting": "Versturen...",
+      "success": "Bedankt! Uw bericht is verzonden. Wij nemen zo snel mogelijk contact met u op.",
+      "error": "Er is iets misgegaan. Probeer het later opnieuw of bel ons direct.",
+      "requiredField": "Dit veld is verplicht",
+      "invalidEmail": "Voer een geldig e-mailadres in",
+      "infoTitle": "Contactgegevens",
+      "address": "Adres",
+      "mapPlaceholder": "Kaart"
+    },
+    "offerte": {
+      "title": "Offerte aanvragen",
+      "subtitle": "Beschrijf de schade en wij sturen u een gratis offerte.",
       "formTitle": "Offerte aanvragen",
       "name": "Naam",
       "email": "E-mailadres",
       "phone": "Telefoonnummer",
       "kenteken": "Kenteken",
       "damageDescription": "Omschrijving van de schade",
-      "photoUpload": "Foto's uploaden",
       "photos": "Foto's",
       "photosHint": "Max 5 foto's, 20 MB totaal. JPG, PNG of WebP.",
       "submit": "Versturen",
@@ -1392,9 +1411,7 @@
       "error": "Er is iets misgegaan. Probeer het later opnieuw of bel ons direct.",
       "requiredField": "Dit veld is verplicht",
       "invalidEmail": "Voer een geldig e-mailadres in",
-      "filesTooLarge": "Totale bestandsgrootte overschrijdt 20 MB. Verwijder enkele foto's.",
-      "infoTitle": "Contactgegevens",
-      "mapPlaceholder": "Kaart"
+      "filesTooLarge": "Totale bestandsgrootte overschrijdt 20 MB. Verwijder enkele foto's."
     },
     "booking": {
       "title": "Afspraak maken",

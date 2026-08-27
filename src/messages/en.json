@@ -1428,13 +1428,32 @@
       }
     },
     "contact": {
+      "title": "Contact Us",
+      "subtitle": "Have a question or want to get in touch? Send us a message and we will respond as soon as possible.",
+      "formTitle": "Send a message",
+      "name": "Name",
+      "email": "Email address",
+      "phone": "Phone number",
+      "message": "Your message",
+      "submit": "Send message",
+      "submitting": "Sending...",
+      "success": "Thank you! Your message has been sent. We will get back to you shortly.",
+      "error": "Something went wrong. Please try again later or call us directly.",
+      "requiredField": "This field is required",
+      "invalidEmail": "Enter a valid email address",
+      "infoTitle": "Contact details",
+      "address": "Address",
+      "mapPlaceholder": "Map"
+    },
+    "offerte": {
+      "title": "Request a Quote",
+      "subtitle": "Describe the damage and we will send you a free quote.",
       "formTitle": "Request a quote",
       "name": "Name",
       "email": "Email address",
       "phone": "Phone number",
       "kenteken": "Registration",
       "damageDescription": "Description of the damage",
-      "photoUpload": "Upload photos",
       "photos": "Photos",
       "photosHint": "Max 5 photos, 20 MB total. JPG, PNG or WebP.",
       "submit": "Submit",
@@ -1443,9 +1462,7 @@
       "error": "Something went wrong. Please try again later or call us directly.",
       "requiredField": "This field is required",
       "invalidEmail": "Enter a valid email address",
-      "filesTooLarge": "Total file size exceeds 20 MB. Please remove some photos.",
-      "infoTitle": "Contact details",
-      "mapPlaceholder": "Map"
+      "filesTooLarge": "Total file size exceeds 20 MB. Please remove some photos."
     },
     "booking": {
       "title": "Book an Appointment",

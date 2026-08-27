@@ -101,7 +101,7 @@ export default async function ServicesPage({
                 </p>
               </div>
               <Link
-                href="/contact"
+                href="/offerte"
                 className="shrink-0 bg-[#E8364E] px-8 py-4 text-sm font-semibold uppercase tracking-wider text-white transition-colors hover:bg-[#d02e44]"
               >
                 {t('servicesPage.ctaButton')}
