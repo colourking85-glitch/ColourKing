@@ -10,6 +10,9 @@ type BoardJob = {
   id: string;
   number: number;
   stage: JobStage;
+  job_type: string | null;
+  priority: string | null;
+  payer_type: string | null;
   notes: string | null;
   created_at: string;
   customers: { id: string; name: string } | null;
@@ -17,6 +20,21 @@ type BoardJob = {
 };
 
 const BOARD_STAGES = JOB_STAGES.filter(s => s !== 'closed') as JobStage[];
+
+const PRIORITY_BADGE: Record<string, string> = {
+  urgent: 'bg-amber-500/20 text-amber-400',
+  rush: 'bg-red-500/20 text-red-400',
+};
+
+const TYPE_BADGE: Record<string, string> = {
+  bodywork: 'text-blue-400',
+  mechanical: 'text-cyan-400',
+  paint: 'text-purple-400',
+  electrical: 'text-yellow-400',
+  diagnostics: 'text-orange-400',
+  apk: 'text-green-400',
+  maintenance: 'text-teal-400',
+};
 
 export default function JobBoardPage() {
   const t = useTranslations('jb');
@@ -69,13 +87,34 @@ export default function JobBoardPage() {
                 <Link
                   key={j.id}
                   href={`/app/jobs/${j.id}`}
-                  className="block rounded-lg border border-ck-dark-border bg-ck-dark-card p-3 hover:border-ck-red/50"
+                  className={`block rounded-lg border bg-ck-dark-card p-3 hover:border-ck-red/50 ${
+                    j.priority === 'rush' ? 'border-red-500/40' :
+                    j.priority === 'urgent' ? 'border-amber-500/40' :
+                    'border-ck-dark-border'
+                  }`}
                 >
                   <div className="flex items-center justify-between">
                     <span className="font-mono text-sm font-medium text-white">#{j.number}</span>
                     <span className="text-xs text-ck-muted">
                       {new Date(j.created_at).toLocaleDateString('nl-NL')}
                     </span>
+                  </div>
+                  <div className="mt-1.5 flex flex-wrap gap-1">
+                    {j.job_type && (
+                      <span className={`text-[10px] font-medium ${TYPE_BADGE[j.job_type] ?? 'text-ck-muted'}`}>
+                        {t(`type_${j.job_type}` as 'type_bodywork')}
+                      </span>
+                    )}
+                    {j.priority && j.priority !== 'normal' && (
+                      <span className={`rounded px-1 py-0.5 text-[10px] font-semibold ${PRIORITY_BADGE[j.priority] ?? ''}`}>
+                        {t(`priority_${j.priority}` as 'priority_urgent')}
+                      </span>
+                    )}
+                    {j.payer_type && (
+                      <span className="text-[10px] text-ck-muted">
+                        {t(`payer_${j.payer_type}` as 'payer_casco')}
+                      </span>
+                    )}
                   </div>
                   {j.customers && (
                     <div className="mt-1 text-sm text-ck-muted-light">{j.customers.name}</div>

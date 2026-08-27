@@ -5,6 +5,7 @@ import { useRouter } from 'next/navigation';
 import { useTranslations } from 'next-intl';
 import { Shell } from '@/components/shell/Shell';
 import { AdminIntlProvider } from '@/components/AdminIntlProvider';
+import { SettingsProvider } from '@/components/SettingsProvider';
 import { getSession } from '@/lib/auth';
 
 function AuthGate({ children }: { children: React.ReactNode }) {
@@ -53,7 +54,9 @@ export default function AdminLayout({
 }) {
   return (
     <AdminIntlProvider>
-      <AuthGate>{children}</AuthGate>
+      <SettingsProvider>
+        <AuthGate>{children}</AuthGate>
+      </SettingsProvider>
     </AdminIntlProvider>
   );
 }

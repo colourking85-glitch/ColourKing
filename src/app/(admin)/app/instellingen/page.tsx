@@ -2,9 +2,10 @@
 
 import { useState } from 'react';
 import { useTranslations } from 'next-intl';
-import { Settings, Palette, Globe, Building2, Bell, Check } from 'lucide-react';
+import { Settings, Palette, Globe, Building2, Bell, Check, Type, Maximize2 } from 'lucide-react';
 import { ScreenBadge } from '@/components/ui/ScreenBadge';
 import { useAppLocale } from '@/components/AdminIntlProvider';
+import { useSettings } from '@/components/SettingsProvider';
 
 type Tab = 'appearance' | 'general' | 'notifications';
 
@@ -12,14 +13,21 @@ export default function SettingsPage() {
   const tSy = useTranslations('sy');
   const tCommon = useTranslations('common');
   const { locale, setLocale } = useAppLocale();
+  const { settings, updateSettings } = useSettings();
+
   const [tab, setTab] = useState<Tab>('appearance');
-  const [accent, setAccent] = useState('#E8364E');
-  const [theme, setTheme] = useState('dark');
-  const [compact, setCompact] = useState(false);
-  const [sidebarCollapsed, setSidebarCollapsed] = useState(false);
+  const [style, setStyle] = useState(settings.style);
+  const [textSize, setTextSize] = useState(settings.textSize);
+  const [density, setDensity] = useState(settings.density);
+  const [highContrast, setHighContrast] = useState(settings.highContrast);
+  const [navIcons, setNavIcons] = useState(settings.navIcons);
+  const [compact, setCompact] = useState(settings.compact);
+  const [sidebarCollapsed, setSidebarCollapsed] = useState(settings.sidebarCollapsed);
   const [language, setLanguage] = useState<'nl' | 'en' | 'tr'>(locale);
-  const [companyName, setCompanyName] = useState('Colourking');
-  const [dateFormat, setDateFormat] = useState('dd-MM-yyyy');
+  const [companyName, setCompanyName] = useState(settings.companyName);
+  const [dateFormat, setDateFormat] = useState(settings.dateFormat);
+  const [timezone, setTimezone] = useState(settings.timezone);
+  const [currency, setCurrency] = useState(settings.currency);
   const [saved, setSaved] = useState(false);
 
   const [notifLead, setNotifLead] = useState(true);
@@ -31,23 +39,44 @@ export default function SettingsPage() {
     if (language !== locale) {
       setLocale(language as 'nl' | 'en' | 'tr');
     }
+
+    updateSettings({
+      style,
+      textSize,
+      density,
+      highContrast,
+      navIcons,
+      compact,
+      sidebarCollapsed,
+      companyName,
+      dateFormat,
+      timezone,
+      currency,
+    });
+
     setSaved(true);
     setTimeout(() => setSaved(false), 2000);
   }
 
-  const ACCENT_COLORS = [
-    { name: tSy('colorRed'), value: '#E8364E', class: 'bg-[#E8364E]' },
-    { name: tSy('colorBlue'), value: '#3B82F6', class: 'bg-blue-500' },
-    { name: tSy('colorGreen'), value: '#22C55E', class: 'bg-green-500' },
-    { name: tSy('colorOrange'), value: '#F97316', class: 'bg-orange-500' },
-    { name: tSy('colorPurple'), value: '#A855F7', class: 'bg-purple-500' },
-    { name: tSy('colorCyan'), value: '#06B6D4', class: 'bg-cyan-500' },
+  const STYLES = [
+    { id: 'midnight', label: tSy('styleMidnight'), desc: tSy('styleMidnightDesc'), colors: ['#0f0f12', '#1a1a24', '#E8364E', '#6b7280'] },
+    { id: 'flat', label: tSy('styleFlat'), desc: tSy('styleFlatDesc'), colors: ['#111827', '#1f2937', '#3b82f6', '#9ca3af'] },
+    { id: 'corporate', label: tSy('styleCorporate'), desc: tSy('styleCorporateDesc'), colors: ['#0c1222', '#162032', '#0ea5e9', '#64748b'] },
+    { id: 'soft', label: tSy('styleSoft'), desc: tSy('styleSoftDesc'), colors: ['#18181b', '#27272a', '#a78bfa', '#a1a1aa'] },
+    { id: 'polaris', label: tSy('stylePolaris'), desc: tSy('stylePolarisDesc'), colors: ['#1a1f36', '#2d3250', '#6366f1', '#94a3b8'] },
+    { id: 'glossy', label: tSy('styleGlossy'), desc: tSy('styleGlossyDesc'), colors: ['#0a0a0f', '#15151e', '#f43f5e', '#71717a'], disabled: true },
   ];
 
-  const THEMES = [
-    { id: 'dark', label: tSy('themeDark'), desc: tSy('themeDescDark'), preview: 'bg-[#0f0f12]' },
-    { id: 'light', label: tSy('themeLight'), desc: tSy('themeDescLight'), preview: 'bg-gray-100', disabled: true },
-    { id: 'system', label: tSy('themeSystem'), desc: tSy('themeDescSystem'), preview: 'bg-gradient-to-r from-[#0f0f12] to-gray-100', disabled: true },
+  const TEXT_SIZES = [
+    { id: 'small', label: tSy('textSmall') },
+    { id: 'medium', label: tSy('textMedium') },
+    { id: 'large', label: tSy('textLarge') },
+  ];
+
+  const DENSITIES = [
+    { id: 'compact', label: tSy('densityCompact') },
+    { id: 'comfortable', label: tSy('densityComfortable') },
+    { id: 'spacious', label: tSy('densitySpacious') },
   ];
 
   const tabs: { id: Tab; label: string; icon: React.ElementType }[] = [
@@ -87,36 +116,44 @@ export default function SettingsPage() {
           {/* Appearance tab */}
           {tab === 'appearance' && (
             <>
-              {/* Theme */}
+              {/* Style */}
               <section className="rounded-lg border border-ck-dark-border bg-ck-dark-card p-6">
                 <h2 className="mb-4 flex items-center gap-2 text-sm font-semibold text-white">
-                  <Palette size={16} /> {tSy('theme')}
+                  <Palette size={16} /> {tSy('styleLabel')}
                 </h2>
                 <div className="grid grid-cols-3 gap-3">
-                  {THEMES.map(t => (
+                  {STYLES.map(s => (
                     <button
-                      key={t.id}
-                      disabled={t.disabled}
-                      onClick={() => !t.disabled && setTheme(t.id)}
+                      key={s.id}
+                      disabled={s.disabled}
+                      onClick={() => !s.disabled && setStyle(s.id)}
                       className={`group relative rounded-xl border-2 p-3 transition-all ${
-                        theme === t.id
+                        style === s.id
                           ? 'border-ck-red'
-                          : t.disabled
+                          : s.disabled
                           ? 'cursor-not-allowed border-ck-dark-border opacity-40'
                           : 'border-ck-dark-border hover:border-ck-muted/50'
                       }`}
                     >
-                      <div className={`mb-3 h-16 rounded-lg ${t.preview}`} />
-                      <div className="text-left">
-                        <div className="text-sm font-medium text-white">{t.label}</div>
-                        <div className="text-xs text-ck-muted">{t.desc}</div>
+                      <div className="mb-3 flex h-16 items-end gap-1 overflow-hidden rounded-lg p-2" style={{ backgroundColor: s.colors[0] }}>
+                        <div className="h-full w-3 rounded-sm" style={{ backgroundColor: s.colors[1] }} />
+                        <div className="flex flex-1 flex-col gap-1 pl-1">
+                          <div className="h-2 w-3/4 rounded-sm" style={{ backgroundColor: s.colors[2] }} />
+                          <div className="h-1.5 w-full rounded-sm" style={{ backgroundColor: s.colors[3], opacity: 0.4 }} />
+                          <div className="h-1.5 w-5/6 rounded-sm" style={{ backgroundColor: s.colors[3], opacity: 0.25 }} />
+                          <div className="h-1.5 w-2/3 rounded-sm" style={{ backgroundColor: s.colors[3], opacity: 0.15 }} />
+                        </div>
                       </div>
-                      {theme === t.id && (
+                      <div className="text-left">
+                        <div className="text-sm font-medium text-white">{s.label}</div>
+                        <div className="text-xs text-ck-muted">{s.desc}</div>
+                      </div>
+                      {style === s.id && (
                         <div className="absolute right-2 top-2 flex h-5 w-5 items-center justify-center rounded-full bg-ck-red">
                           <Check size={12} className="text-white" />
                         </div>
                       )}
-                      {t.disabled && (
+                      {s.disabled && (
                         <span className="absolute right-2 top-2 rounded bg-ck-dark-border px-1.5 py-0.5 text-[9px] font-bold uppercase text-ck-muted">
                           {tCommon('soon')}
                         </span>
@@ -126,32 +163,91 @@ export default function SettingsPage() {
                 </div>
               </section>
 
-              {/* Accent Color */}
+              {/* Display & Accessibility */}
               <section className="rounded-lg border border-ck-dark-border bg-ck-dark-card p-6">
-                <h2 className="mb-4 text-sm font-semibold text-white">{tSy('accentColor')}</h2>
-                <div className="flex gap-3">
-                  {ACCENT_COLORS.map(c => (
-                    <button
-                      key={c.value}
-                      onClick={() => setAccent(c.value)}
-                      className={`relative flex h-10 w-10 items-center justify-center rounded-full ${c.class} transition-transform hover:scale-110 ${
-                        accent === c.value ? 'ring-2 ring-white ring-offset-2 ring-offset-ck-dark' : ''
-                      }`}
-                      title={c.name}
-                    >
-                      {accent === c.value && <Check size={16} className="text-white" />}
-                    </button>
-                  ))}
-                </div>
-                <p className="mt-3 text-xs text-ck-muted">
-                  {tSy('accentDesc')}
-                </p>
-              </section>
+                <h2 className="mb-4 flex items-center gap-2 text-sm font-semibold text-white">
+                  <Maximize2 size={16} /> {tSy('displayAccessibility')}
+                </h2>
+                <div className="space-y-5">
+                  {/* Text size */}
+                  <div>
+                    <div className="mb-2 flex items-center gap-2">
+                      <Type size={14} className="text-ck-muted" />
+                      <span className="text-sm text-white">{tSy('textSizeLabel')}</span>
+                    </div>
+                    <div className="flex gap-2">
+                      {TEXT_SIZES.map(s => (
+                        <button
+                          key={s.id}
+                          onClick={() => setTextSize(s.id)}
+                          className={`rounded-lg border px-4 py-2 text-sm font-medium transition-colors ${
+                            textSize === s.id
+                              ? 'border-ck-red bg-ck-red/10 text-ck-red'
+                              : 'border-ck-dark-border text-ck-muted-light hover:border-ck-muted/50 hover:text-white'
+                          }`}
+                        >
+                          {s.label}
+                        </button>
+                      ))}
+                    </div>
+                  </div>
 
-              {/* Display */}
-              <section className="rounded-lg border border-ck-dark-border bg-ck-dark-card p-6">
-                <h2 className="mb-4 text-sm font-semibold text-white">{tSy('displayOptions')}</h2>
-                <div className="space-y-4">
+                  {/* Density */}
+                  <div>
+                    <div className="mb-2">
+                      <span className="text-sm text-white">{tSy('densityLabel')}</span>
+                      <p className="text-xs text-ck-muted">{tSy('densityDesc')}</p>
+                    </div>
+                    <div className="flex gap-2">
+                      {DENSITIES.map(d => (
+                        <button
+                          key={d.id}
+                          onClick={() => setDensity(d.id)}
+                          className={`rounded-lg border px-4 py-2 text-sm font-medium transition-colors ${
+                            density === d.id
+                              ? 'border-ck-red bg-ck-red/10 text-ck-red'
+                              : 'border-ck-dark-border text-ck-muted-light hover:border-ck-muted/50 hover:text-white'
+                          }`}
+                        >
+                          {d.label}
+                        </button>
+                      ))}
+                    </div>
+                  </div>
+
+                  {/* High contrast */}
+                  <label className="flex items-center justify-between">
+                    <div>
+                      <div className="text-sm text-white">{tSy('highContrast')}</div>
+                      <div className="text-xs text-ck-muted">{tSy('highContrastDesc')}</div>
+                    </div>
+                    <button
+                      onClick={() => setHighContrast(!highContrast)}
+                      className={`relative h-6 w-11 rounded-full transition-colors ${
+                        highContrast ? 'bg-ck-red' : 'bg-ck-dark-border'
+                      }`}
+                    >
+                      <span className={`absolute top-0.5 h-5 w-5 rounded-full bg-white transition-transform ${highContrast ? 'translate-x-[22px]' : 'translate-x-0.5'}`} />
+                    </button>
+                  </label>
+
+                  {/* Nav icons */}
+                  <label className="flex items-center justify-between">
+                    <div>
+                      <div className="text-sm text-white">{tSy('navIconsLabel')}</div>
+                      <div className="text-xs text-ck-muted">{tSy('navIconsDesc')}</div>
+                    </div>
+                    <button
+                      onClick={() => setNavIcons(!navIcons)}
+                      className={`relative h-6 w-11 rounded-full transition-colors ${
+                        navIcons ? 'bg-ck-red' : 'bg-ck-dark-border'
+                      }`}
+                    >
+                      <span className={`absolute top-0.5 h-5 w-5 rounded-full bg-white transition-transform ${navIcons ? 'translate-x-[22px]' : 'translate-x-0.5'}`} />
+                    </button>
+                  </label>
+
+                  {/* Compact mode */}
                   <label className="flex items-center justify-between">
                     <div>
                       <div className="text-sm text-white">{tSy('compactMode')}</div>
@@ -163,13 +259,11 @@ export default function SettingsPage() {
                         compact ? 'bg-ck-red' : 'bg-ck-dark-border'
                       }`}
                     >
-                      <span
-                        className={`absolute top-0.5 h-5 w-5 rounded-full bg-white transition-transform ${
-                          compact ? 'translate-x-[22px]' : 'translate-x-0.5'
-                        }`}
-                      />
+                      <span className={`absolute top-0.5 h-5 w-5 rounded-full bg-white transition-transform ${compact ? 'translate-x-[22px]' : 'translate-x-0.5'}`} />
                     </button>
                   </label>
+
+                  {/* Sidebar collapsed */}
                   <label className="flex items-center justify-between">
                     <div>
                       <div className="text-sm text-white">{tSy('sidebarStartCollapsed')}</div>
@@ -181,11 +275,7 @@ export default function SettingsPage() {
                         sidebarCollapsed ? 'bg-ck-red' : 'bg-ck-dark-border'
                       }`}
                     >
-                      <span
-                        className={`absolute top-0.5 h-5 w-5 rounded-full bg-white transition-transform ${
-                          sidebarCollapsed ? 'translate-x-[22px]' : 'translate-x-0.5'
-                        }`}
-                      />
+                      <span className={`absolute top-0.5 h-5 w-5 rounded-full bg-white transition-transform ${sidebarCollapsed ? 'translate-x-[22px]' : 'translate-x-0.5'}`} />
                     </button>
                   </label>
                 </div>
@@ -251,8 +341,9 @@ export default function SettingsPage() {
                   <div>
                     <label className="mb-1 block text-xs text-ck-muted">{tSy('timezone')}</label>
                     <select
+                      value={timezone}
+                      onChange={e => setTimezone(e.target.value)}
                       className="w-full rounded-lg border border-ck-dark-border bg-ck-dark-surface px-3 py-2 text-sm text-white focus:border-ck-red focus:outline-none"
-                      defaultValue="Europe/Amsterdam"
                     >
                       <option value="Europe/Amsterdam">Europe/Amsterdam (CET)</option>
                       <option value="Europe/London">Europe/London (GMT)</option>
@@ -262,8 +353,9 @@ export default function SettingsPage() {
                   <div>
                     <label className="mb-1 block text-xs text-ck-muted">{tSy('currency')}</label>
                     <select
+                      value={currency}
+                      onChange={e => setCurrency(e.target.value)}
                       className="w-full rounded-lg border border-ck-dark-border bg-ck-dark-surface px-3 py-2 text-sm text-white focus:border-ck-red focus:outline-none"
-                      defaultValue="EUR"
                     >
                       <option value="EUR">EUR (&#8364;)</option>
                       <option value="GBP">GBP (&#163;)</option>

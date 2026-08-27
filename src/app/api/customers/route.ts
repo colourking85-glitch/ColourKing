@@ -8,7 +8,7 @@ export async function GET(req: NextRequest) {
 
   let query = supabase
     .from('customers')
-    .select('id, type, name, email, phone, city, created_at')
+    .select('id, type, name, email, phone, city, status, created_at')
     .is('deleted_at', null)
     .order('created_at', { ascending: false });
 

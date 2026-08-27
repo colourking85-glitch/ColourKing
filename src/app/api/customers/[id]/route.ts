@@ -25,14 +25,26 @@ export async function PATCH(
   const supabase = createClient();
   const body = await req.json();
 
-  const parsed = CustomerSchema.partial().safeParse(body);
-  if (!parsed.success) {
+  const updateData: Record<string, unknown> = {};
+
+  if (body.status) {
+    const validStatuses = ['active', 'inactive', 'blocked'];
+    if (!validStatuses.includes(body.status)) {
+      return NextResponse.json({ error: 'Invalid status' }, { status: 400 });
+    }
+    updateData.status = body.status;
+  }
+
+  const { status: _s, ...rest } = body;
+  const parsed = CustomerSchema.partial().safeParse(rest);
+  if (!parsed.success && Object.keys(rest).length > 0) {
     return NextResponse.json({ error: parsed.error.issues[0].message }, { status: 400 });
   }
+  if (parsed.success) Object.assign(updateData, parsed.data);
 
   const { data, error } = await supabase
     .from('customers')
-    .update(parsed.data)
+    .update(updateData)
     .eq('id', params.id)
     .select()
     .single();

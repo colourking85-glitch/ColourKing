@@ -1,4 +1,4 @@
-// Auto-generated types — reflects migrations 0001-0019.
+// Auto-generated types — reflects migrations 0001-0031.
 // Regenerate after every migration: supabase gen types typescript --local > src/types/database.ts
 
 export type Json =
@@ -28,6 +28,25 @@ export type DocStatus = 'draft' | 'issued' | 'cancelled';
 export type InvoiceStatus = 'draft' | 'sent' | 'paid' | 'overdue' | 'cancelled' | 'credited';
 export type PaymentMethod = 'ideal' | 'bank_transfer' | 'cash' | 'card' | 'mollie';
 export type OfferLineKind = 'labour' | 'part' | 'material' | 'other';
+export type JobType = 'bodywork' | 'mechanical' | 'paint' | 'electrical' | 'diagnostics' | 'apk' | 'maintenance';
+export type JobPriority = 'normal' | 'urgent' | 'rush';
+export type PayerType = 'casco' | 'wa' | 'particulier' | 'lease';
+export interface LabourRate {
+  id: string;
+  name: string;
+  kind: OfferLineKind;
+  payer_type: PayerType | null;
+  description: string | null;
+  unit: string;
+  unit_price_cents: number;
+  tax_code: TaxCode;
+  is_default: boolean;
+  sort_order: number;
+  active: boolean;
+  created_at: string;
+  updated_at: string;
+}
+
 export type VatReturnStatus = 'open' | 'draft' | 'filed' | 'corrected';
 export type VatPeriodType = 'quarter' | 'month';
 export type TaxCode = 'H21' | 'L9' | 'N0' | 'V0' | 'M0' | 'ICP' | 'EX';
@@ -63,6 +82,8 @@ export interface Settings {
   updated_at: string;
 }
 
+export type CustomerStatus = 'active' | 'inactive' | 'blocked';
+
 export interface Customer {
   id: string;
   type: CustomerType;
@@ -77,6 +98,7 @@ export interface Customer {
   btw_number: string | null;
   locale: string;
   notes: string | null;
+  status: CustomerStatus;
   created_at: string;
   updated_at: string;
   deleted_at: string | null;
@@ -96,6 +118,8 @@ export interface Vehicle {
   body_type: string | null;
   rdw_snapshot: Json | null;
   wok: boolean;
+  notes: string | null;
+  plate_origin: string | null;
   created_at: string;
   updated_at: string;
   deleted_at: string | null;
@@ -195,6 +219,7 @@ export interface Offer {
   locale: string;
   valid_until: string | null;
   notes: string | null;
+  payer_type: PayerType | null;
   subtotal_cents: number;
   vat_cents: number;
   total_cents: number;
@@ -504,6 +529,11 @@ export interface Database {
         Insert: Omit<Purchase, 'id' | 'created_at' | 'updated_at'> & { id?: string };
         Update: Partial<Omit<Purchase, 'id' | 'created_at' | 'updated_at'>>;
       };
+      labour_rates: {
+        Row: LabourRate;
+        Insert: Omit<LabourRate, 'id' | 'created_at' | 'updated_at'> & { id?: string };
+        Update: Partial<Omit<LabourRate, 'id' | 'created_at' | 'updated_at'>>;
+      };
     };
     Views: Record<string, never>;
     Functions: Record<string, never>;
@@ -527,6 +557,9 @@ export interface Database {
       invoice_status: InvoiceStatus;
       payment_method: PaymentMethod;
       offer_line_kind: OfferLineKind;
+      job_type: JobType;
+      job_priority: JobPriority;
+      payer_type: PayerType;
       vat_return_status: VatReturnStatus;
       vat_period_type: VatPeriodType;
       tax_code: TaxCode;

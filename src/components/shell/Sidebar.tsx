@@ -9,9 +9,11 @@ import {
   Package, Receipt, FolderOpen, CalendarDays, ClipboardList,
   BarChart3, Calculator, ShoppingCart, BookOpen, Settings, Bell,
   ChevronLeft, ChevronRight, ChevronDown, BookOpenCheck, Clock, Bot, Mail, HardDrive, Server,
+  Plug, Zap, CarFront, Coins,
 } from 'lucide-react';
 import { ScreenBadge } from '@/components/ui/ScreenBadge';
 import { SCREEN_REGISTRY } from '@/lib/codes';
+import { useSettings } from '@/components/SettingsProvider';
 import { can, type Role } from '@/lib/auth';
 
 // ── Nav types ────────────────────────────────────────────────────────────────
@@ -51,6 +53,7 @@ const NAV: NavSection[] = [
     group: 'groupOverview',
     items: [
       { label: 'dashboard', href: '/app', icon: LayoutDashboard, code: 'RP01' },
+      { label: 'tasks', href: '/app/taken', icon: ClipboardList, code: 'TS05' },
     ],
   },
   {
@@ -97,17 +100,31 @@ const NAV: NavSection[] = [
         icon: Settings,
         subitems: [
           { label: 'general', href: '/app/instellingen', icon: Settings, code: 'SY01' },
-          { label: 'monitoring', href: '/app/monitoring', icon: Bell, code: 'SY05' },
           { label: 'users', href: '/app/instellingen/gebruikers', icon: Users, code: 'SY02' },
           { label: 'numbering', href: '/app/instellingen/nummering', icon: Receipt, code: 'SY03' },
-          { label: 'manual', href: '/app/handleiding', icon: BookOpenCheck, code: 'SY10' },
-          { label: 'cronJobs', href: '/app/cron-jobs', icon: Clock, code: 'SY15' },
-          { label: 'aiAgents', href: '/app/ai-agents', icon: Bot, code: 'SY20' },
+          { label: 'brandModels', href: '/app/instellingen/merken', icon: CarFront, code: 'SY40' },
+          { label: 'labourRates', href: '/app/instellingen/tarieven', icon: Coins, code: 'SY45' },
+        ],
+      },
+      {
+        label: 'integrations',
+        icon: Plug,
+        subitems: [
           { label: 'emailMonitor', href: '/app/instellingen/email-monitor', icon: Mail, code: 'SY25' },
           { label: 'googleDrive', href: '/app/drive', icon: HardDrive, code: 'SY30' },
           { label: 'infrastructure', href: '/app/instellingen/infrastructuur', icon: Server, code: 'SY35' },
         ],
       },
+      {
+        label: 'automation',
+        icon: Zap,
+        subitems: [
+          { label: 'monitoring', href: '/app/monitoring', icon: Bell, code: 'SY05' },
+          { label: 'cronJobs', href: '/app/cron-jobs', icon: Clock, code: 'SY15' },
+          { label: 'aiAgents', href: '/app/ai-agents', icon: Bot, code: 'SY20' },
+        ],
+      },
+      { label: 'manual', href: '/app/handleiding', icon: BookOpenCheck, code: 'SY10' },
     ],
   },
 ];
@@ -244,6 +261,7 @@ export function Sidebar() {
   const pathname = usePathname();
   const tNav = useTranslations('nav');
   const tCommon = useTranslations('common');
+  const { settings } = useSettings();
   const [collapsed, setCollapsed] = useState(false);
   const [expandedGroups, setExpandedGroups] = useState<Record<string, boolean>>({});
   const [collapsedSections, setCollapsedSections] = useState<Record<string, boolean>>({});
@@ -252,6 +270,10 @@ export function Sidebar() {
 
   // TODO: get from session context
   const role: Role = 'admin';
+
+  useEffect(() => {
+    setCollapsed(settings.sidebarCollapsed);
+  }, [settings.sidebarCollapsed]);
 
   const scheduleFlyoutClose = useCallback(() => {
     closeTimer.current = setTimeout(() => setFlyout(null), 120);
@@ -317,11 +339,26 @@ export function Sidebar() {
             if (visibleItems.length === 0) return null;
 
             return (
-              <div key={section.group} className="mb-4">
+              <div
+                key={section.group}
+                className={`mb-2 rounded-lg transition-colors ${
+                  !collapsed && !collapsedSections[section.group] && sectionActive(section, pathname)
+                    ? 'bg-ck-red/10 ring-1 ring-ck-red/20'
+                    : !collapsed && !collapsedSections[section.group]
+                      ? 'bg-white/[0.06] ring-1 ring-white/[0.06]'
+                      : ''
+                }`}
+              >
                 {!collapsed && (
                   <button
                     onClick={() => toggleSection(section.group)}
-                    className="mb-1 flex w-full items-center justify-between px-3 text-[10px] font-semibold uppercase tracking-[0.14em] text-ck-muted transition-colors hover:text-white"
+                    className={`mb-1 flex w-full items-center justify-between rounded-t-lg px-3 py-1.5 text-[10px] font-semibold uppercase tracking-[0.14em] transition-colors ${
+                      !collapsedSections[section.group] && sectionActive(section, pathname)
+                        ? 'text-ck-red hover:text-ck-red'
+                        : !collapsedSections[section.group]
+                          ? 'text-white/70 hover:text-white'
+                          : 'text-ck-muted hover:text-white'
+                    }`}
                   >
                     <span>{tNav(section.group)}</span>
                     <ChevronDown

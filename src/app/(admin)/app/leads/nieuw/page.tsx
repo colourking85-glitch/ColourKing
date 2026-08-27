@@ -1,9 +1,13 @@
 'use client';
 
-import { useState } from 'react';
+import { useState, useRef } from 'react';
 import { useRouter } from 'next/navigation';
 import { useTranslations } from 'next-intl';
 import { ScreenBadge } from '@/components/ui/ScreenBadge';
+import { Upload, X } from 'lucide-react';
+
+const MAX_FILES = 5;
+const MAX_TOTAL_BYTES = 20 * 1024 * 1024;
 
 export default function NewLeadPage() {
   const t = useTranslations('ld');
@@ -12,6 +16,8 @@ export default function NewLeadPage() {
   const router = useRouter();
   const [saving, setSaving] = useState(false);
   const [error, setError] = useState('');
+  const [files, setFiles] = useState<File[]>([]);
+  const fileRef = useRef<HTMLInputElement>(null);
 
   async function handleSubmit(e: React.FormEvent<HTMLFormElement>) {
     e.preventDefault();
@@ -38,12 +44,34 @@ export default function NewLeadPage() {
 
     if (res.ok) {
       const lead = await res.json();
+
+      for (const file of files) {
+        const fd = new FormData();
+        fd.append('file', file);
+        await fetch(`/api/leads/${lead.id}/photos`, { method: 'POST', body: fd });
+      }
+
       router.push(`/app/leads/${lead.id}`);
     } else {
       const err = await res.json();
       setError(err.error ?? tCommon('saveFailed'));
       setSaving(false);
     }
+  }
+
+  function handleFiles(selected: FileList | null) {
+    if (!selected) return;
+    const next = [...files];
+    for (let i = 0; i < selected.length && next.length < MAX_FILES; i++) {
+      next.push(selected[i]);
+    }
+    const total = next.reduce((s, f) => s + f.size, 0);
+    if (total > MAX_TOTAL_BYTES) return;
+    setFiles(next);
+  }
+
+  function removeFile(idx: number) {
+    setFiles(prev => prev.filter((_, i) => i !== idx));
   }
 
   return (
@@ -143,6 +171,43 @@ export default function NewLeadPage() {
             placeholder={t('damagePlaceholder')}
             className="w-full rounded-lg border border-ck-dark-border bg-ck-dark-surface px-3 py-2 text-sm text-white focus:border-ck-red focus:outline-none"
           />
+        </div>
+
+        <div>
+          <label className="mb-1 block text-xs text-ck-muted">{t('photos')} ({files.length}/{MAX_FILES})</label>
+          <div className="flex flex-wrap gap-2">
+            {files.map((f, i) => (
+              <div key={i} className="group relative h-20 w-20 overflow-hidden rounded-lg border border-ck-dark-border">
+                <img src={URL.createObjectURL(f)} alt={f.name} className="h-full w-full object-cover" />
+                <button
+                  type="button"
+                  onClick={() => removeFile(i)}
+                  className="absolute right-0.5 top-0.5 rounded bg-black/70 p-0.5 text-white opacity-0 transition-opacity group-hover:opacity-100"
+                >
+                  <X size={12} />
+                </button>
+              </div>
+            ))}
+            {files.length < MAX_FILES && (
+              <button
+                type="button"
+                onClick={() => fileRef.current?.click()}
+                className="flex h-20 w-20 flex-col items-center justify-center gap-1 rounded-lg border border-dashed border-ck-dark-border text-ck-muted hover:border-ck-red hover:text-ck-red transition-colors"
+              >
+                <Upload size={16} />
+                <span className="text-[9px]">{t('addPhoto')}</span>
+              </button>
+            )}
+          </div>
+          <input
+            ref={fileRef}
+            type="file"
+            multiple
+            accept="image/jpeg,image/png,image/webp,image/heic"
+            className="hidden"
+            onChange={e => handleFiles(e.target.files)}
+          />
+          <p className="mt-1 text-[10px] text-ck-muted">{t('photosHint')}</p>
         </div>
 
         <div className="flex gap-3 pt-2">

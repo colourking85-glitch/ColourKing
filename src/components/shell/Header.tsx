@@ -6,7 +6,7 @@ import { useTranslations } from 'next-intl';
 import {
   Search, User, LogOut, Plus, Settings, HelpCircle,
   Inbox, Users, Car, Wrench, Bell, Sparkles,
-  ClipboardList, ChevronDown,
+  ClipboardList, ChevronDown, Receipt, Star, FileText,
 } from 'lucide-react';
 import { getScreen, searchScreens, type ScreenMeta } from '@/lib/codes';
 import { ScreenBadge } from '@/components/ui/ScreenBadge';
@@ -14,7 +14,6 @@ import { signOut } from '@/lib/auth';
 import { getFavorites, getRecentItems, addRecentItem, type FavoriteItem } from '@/lib/favorites';
 import { supabase } from '@/lib/supabase/client';
 import Link from 'next/link';
-import { Star, FileText } from 'lucide-react';
 
 type EntityResult = {
   type: 'customer' | 'vehicle' | 'job' | 'lead' | 'invoice';
@@ -28,7 +27,10 @@ const QUICK_CREATE = [
   { labelKey: 'leads', href: '/app/leads/nieuw', icon: Inbox, color: 'text-amber-400' },
   { labelKey: 'customers', href: '/app/klanten/nieuw', icon: Users, color: 'text-purple-400' },
   { labelKey: 'vehicles', href: '/app/voertuigen/nieuw', icon: Car, color: 'text-blue-400' },
+  { labelKey: 'offers', href: '/app/offertes/nieuw', icon: FileText, color: 'text-green-400' },
   { labelKey: 'jobs', href: '/app/jobs/nieuw', icon: Wrench, color: 'text-cyan-400' },
+  { labelKey: 'tasks', href: '/app/taken/nieuw', icon: ClipboardList, color: 'text-orange-400' },
+  { labelKey: 'invoices', href: '/app/facturen/nieuw', icon: Receipt, color: 'text-emerald-400' },
 ];
 
 type SysRow =
@@ -292,15 +294,6 @@ export function Header() {
               </div>
             )}
           </div>
-
-          {/* My Work */}
-          <Link
-            href="/app/taken"
-            className="flex h-8 items-center gap-1.5 rounded-md border border-ck-dark-border px-3 text-xs font-medium text-white/50 transition-colors hover:bg-white/[0.06] hover:text-white/80"
-          >
-            <ClipboardList size={13} />
-            <span className="hidden sm:inline">{tHeader('myWork')}</span>
-          </Link>
 
           {/* Persistent search bar (desktop) */}
           <div className="ml-2 hidden flex-1 md:block">

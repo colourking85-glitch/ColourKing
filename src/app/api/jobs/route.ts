@@ -10,7 +10,7 @@ export async function GET(req: NextRequest) {
   let query = supabase
     .from('jobs')
     .select(
-      'id, number, stage, assigned_to, notes, created_at, updated_at, customers(id, name), vehicles(id, kenteken, make, model, colour)'
+      'id, number, stage, assigned_to, notes, job_type, priority, payer_type, estimated_hours, target_date, created_at, updated_at, customers(id, name), vehicles(id, kenteken, make, model, colour)'
     )
     .order('created_at', { ascending: false });
 

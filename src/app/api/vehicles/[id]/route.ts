@@ -25,14 +25,28 @@ export async function PATCH(
   const supabase = createClient();
   const body = await req.json();
 
-  const parsed = VehicleSchema.partial().safeParse(body);
-  if (!parsed.success) {
-    return NextResponse.json({ error: parsed.error.issues[0].message }, { status: 400 });
+  const updateData: Record<string, unknown> = {};
+
+  if (body.status) {
+    const validStatuses = ['created', 'in_progress', 'done', 'archived'];
+    if (!validStatuses.includes(body.status)) {
+      return NextResponse.json({ error: 'Invalid status' }, { status: 400 });
+    }
+    updateData.status = body.status;
+  }
+
+  const { status: _s, ...rest } = body;
+  if (Object.keys(rest).length > 0) {
+    const parsed = VehicleSchema.partial().safeParse(rest);
+    if (!parsed.success) {
+      return NextResponse.json({ error: parsed.error.issues[0].message }, { status: 400 });
+    }
+    Object.assign(updateData, parsed.data);
   }
 
   const { data, error } = await supabase
     .from('vehicles')
-    .update(parsed.data)
+    .update(updateData)
     .eq('id', params.id)
     .select()
     .single();

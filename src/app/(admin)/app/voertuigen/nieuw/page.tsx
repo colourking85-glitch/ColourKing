@@ -2,9 +2,13 @@
 
 import { useState, useEffect } from 'react';
 import { useRouter, useSearchParams } from 'next/navigation';
-import { Search } from 'lucide-react';
+import { Search, AlertTriangle } from 'lucide-react';
 import { useTranslations } from 'next-intl';
 import { ScreenBadge } from '@/components/ui/ScreenBadge';
+import { SearchableSelect } from '@/components/ui/SearchableSelect';
+
+type Brand = { id: string; name: string };
+type Model = { id: string; name: string };
 
 export default function NewVehiclePage() {
   const t = useTranslations('vh');
@@ -21,11 +25,49 @@ export default function NewVehiclePage() {
   const [customers, setCustomers] = useState<{ id: string; name: string }[]>([]);
   const [customerId, setCustomerId] = useState(presetCustomer ?? '');
 
+  const [brands, setBrands] = useState<Brand[]>([]);
+  const [models, setModels] = useState<Model[]>([]);
+  const [selectedBrandId, setSelectedBrandId] = useState('');
+  const [selectedMake, setSelectedMake] = useState('');
+  const [selectedModel, setSelectedModel] = useState('');
+
+  const [kentekenWarning, setKentekenWarning] = useState('');
+  const [formKenteken, setFormKenteken] = useState('');
+
   useEffect(() => {
-    fetch('/api/customers')
-      .then(r => r.ok ? r.json() : [])
-      .then(setCustomers);
+    fetch('/api/customers').then(r => r.ok ? r.json() : []).then(setCustomers);
+    fetch('/api/vehicle-brands').then(r => r.ok ? r.json() : []).then(setBrands);
   }, []);
+
+  useEffect(() => {
+    if (!selectedBrandId || selectedBrandId === '__custom') { setModels([]); return; }
+    fetch(`/api/vehicle-brands/${selectedBrandId}/models`)
+      .then(r => r.ok ? r.json() : [])
+      .then(setModels);
+  }, [selectedBrandId]);
+
+  useEffect(() => {
+    if (!formKenteken.trim()) { setKentekenWarning(''); return; }
+    const timeout = setTimeout(async () => {
+      const res = await fetch(`/api/vehicles/check-kenteken?kenteken=${encodeURIComponent(formKenteken)}`);
+      if (res.ok) {
+        const { exists } = await res.json();
+        setKentekenWarning(exists ? t('kentekenExists') : '');
+      }
+    }, 500);
+    return () => clearTimeout(timeout);
+  }, [formKenteken, t]);
+
+  function handleBrandChange(brandId: string) {
+    setSelectedBrandId(brandId);
+    if (brandId === '__custom') {
+      setSelectedMake('');
+    } else {
+      const brand = brands.find(b => b.id === brandId);
+      setSelectedMake(brand?.name ?? '');
+    }
+    setSelectedModel('');
+  }
 
   async function lookupRdw() {
     if (!kentekenInput.trim()) return;
@@ -33,7 +75,20 @@ export default function NewVehiclePage() {
     setError('');
     const res = await fetch(`/api/rdw?kenteken=${encodeURIComponent(kentekenInput)}`);
     if (res.ok) {
-      setRdwData(await res.json());
+      const data = await res.json();
+      setRdwData(data);
+      setFormKenteken(data.kenteken ?? kentekenInput);
+      if (data.make) {
+        const brand = brands.find(b => b.name.toLowerCase() === (data.make as string).toLowerCase());
+        if (brand) {
+          setSelectedBrandId(brand.id);
+          setSelectedMake(brand.name);
+        } else {
+          setSelectedBrandId('__custom');
+          setSelectedMake(data.make as string);
+        }
+      }
+      if (data.model) setSelectedModel(data.model as string);
     } else {
       setError(t('rdwNotFound'));
       setRdwData(null);
@@ -49,10 +104,10 @@ export default function NewVehiclePage() {
     const fd = new FormData(e.currentTarget);
     const body = {
       customer_id: customerId,
-      kenteken: fd.get('kenteken') || null,
+      kenteken: formKenteken || null,
       vin: fd.get('vin') || null,
-      make: fd.get('make') || null,
-      model: fd.get('model') || null,
+      make: selectedMake || null,
+      model: selectedModel || null,
       year: fd.get('year') ? Number(fd.get('year')) : null,
       colour: fd.get('colour') || null,
       paint_code: fd.get('paint_code') || null,
@@ -60,12 +115,21 @@ export default function NewVehiclePage() {
       body_type: fd.get('body_type') || null,
       wok: fd.get('wok') === 'on',
       rdw_snapshot: rdwData?.rdw_snapshot ?? null,
+      plate_origin: fd.get('plate_origin') || null,
+      notes: fd.get('notes') || null,
     };
 
     if (!body.customer_id) {
       setError(t('selectOwner'));
       setSaving(false);
       return;
+    }
+
+    if (kentekenWarning && body.kenteken) {
+      if (!confirm(t('kentekenExistsConfirm'))) {
+        setSaving(false);
+        return;
+      }
     }
 
     const res = await fetch('/api/vehicles', {
@@ -83,6 +147,9 @@ export default function NewVehiclePage() {
       setSaving(false);
     }
   }
+
+  const selectClass = 'w-full rounded-lg border border-ck-dark-border bg-ck-dark-surface px-3 py-2 text-sm text-white focus:border-ck-red focus:outline-none';
+  const inputClass = selectClass;
 
   return (
     <div className="mx-auto max-w-2xl space-y-6">
@@ -131,7 +198,7 @@ export default function NewVehiclePage() {
           <select
             value={customerId}
             onChange={e => setCustomerId(e.target.value)}
-            className="w-full rounded-lg border border-ck-dark-border bg-ck-dark-surface px-3 py-2 text-sm text-white focus:border-ck-red focus:outline-none"
+            className={selectClass}
           >
             <option value="">{t('selectOwner')}...</option>
             {customers.map(c => (
@@ -140,40 +207,83 @@ export default function NewVehiclePage() {
           </select>
         </div>
 
-        <div className="grid grid-cols-2 gap-4">
+        <div className="grid grid-cols-3 gap-4">
           <div>
             <label className="mb-1 block text-xs text-ck-muted">{t('kenteken')}</label>
             <input
               name="kenteken"
-              defaultValue={rdwData?.kenteken as string ?? ''}
-              className="w-full rounded-lg border border-ck-dark-border bg-ck-dark-surface px-3 py-2 font-mono text-sm uppercase text-white focus:border-ck-red focus:outline-none"
+              value={formKenteken}
+              onChange={e => setFormKenteken(e.target.value)}
+              className={`${inputClass} font-mono uppercase`}
+            />
+            {kentekenWarning && (
+              <p className="mt-1 flex items-center gap-1 text-xs text-amber-400">
+                <AlertTriangle size={12} /> {kentekenWarning}
+              </p>
+            )}
+          </div>
+          <div>
+            <label className="mb-1 block text-xs text-ck-muted">{t('plateOrigin')}</label>
+            <input
+              name="plate_origin"
+              placeholder={t('plateOriginPlaceholder')}
+              className={`${inputClass} uppercase`}
             />
           </div>
           <div>
             <label className="mb-1 block text-xs text-ck-muted">{t('vin')}</label>
-            <input
-              name="vin"
-              className="w-full rounded-lg border border-ck-dark-border bg-ck-dark-surface px-3 py-2 text-sm text-white focus:border-ck-red focus:outline-none"
-            />
+            <input name="vin" className={inputClass} />
           </div>
         </div>
 
         <div className="grid grid-cols-3 gap-4">
           <div>
             <label className="mb-1 block text-xs text-ck-muted">{t('make')}</label>
-            <input
-              name="make"
-              defaultValue={rdwData?.make as string ?? ''}
-              className="w-full rounded-lg border border-ck-dark-border bg-ck-dark-surface px-3 py-2 text-sm text-white focus:border-ck-red focus:outline-none"
+            <SearchableSelect
+              options={brands.map(b => ({ value: b.id, label: b.name }))}
+              value={selectedBrandId}
+              onChange={(val, label) => {
+                if (val === '__custom') {
+                  setSelectedBrandId('__custom');
+                  setSelectedMake(label);
+                } else {
+                  handleBrandChange(val);
+                }
+              }}
+              placeholder={`${t('selectMake')}...`}
+              searchPlaceholder={`${t('make')}...`}
+              allowCustom
+              customLabel={t('otherMake')}
             />
+            {selectedBrandId === '__custom' && (
+              <input
+                className={`${inputClass} mt-2`}
+                placeholder={t('make')}
+                value={selectedMake}
+                onChange={e => setSelectedMake(e.target.value)}
+              />
+            )}
           </div>
           <div>
             <label className="mb-1 block text-xs text-ck-muted">{t('model')}</label>
-            <input
-              name="model"
-              defaultValue={rdwData?.model as string ?? ''}
-              className="w-full rounded-lg border border-ck-dark-border bg-ck-dark-surface px-3 py-2 text-sm text-white focus:border-ck-red focus:outline-none"
-            />
+            {models.length > 0 && selectedBrandId !== '__custom' ? (
+              <SearchableSelect
+                options={models.map(m => ({ value: m.name, label: m.name }))}
+                value={selectedModel}
+                onChange={(_val, label) => setSelectedModel(label)}
+                placeholder={`${t('selectModel')}...`}
+                searchPlaceholder={`${t('model')}...`}
+                allowCustom
+                customLabel={t('otherModel')}
+              />
+            ) : (
+              <input
+                className={inputClass}
+                placeholder={t('model')}
+                value={selectedModel}
+                onChange={e => setSelectedModel(e.target.value)}
+              />
+            )}
           </div>
           <div>
             <label className="mb-1 block text-xs text-ck-muted">{t('year')}</label>
@@ -181,7 +291,7 @@ export default function NewVehiclePage() {
               name="year"
               type="number"
               defaultValue={rdwData?.year as number ?? ''}
-              className="w-full rounded-lg border border-ck-dark-border bg-ck-dark-surface px-3 py-2 text-sm text-white focus:border-ck-red focus:outline-none"
+              className={inputClass}
             />
           </div>
         </div>
@@ -192,22 +302,19 @@ export default function NewVehiclePage() {
             <input
               name="colour"
               defaultValue={rdwData?.colour as string ?? ''}
-              className="w-full rounded-lg border border-ck-dark-border bg-ck-dark-surface px-3 py-2 text-sm text-white focus:border-ck-red focus:outline-none"
+              className={inputClass}
             />
           </div>
           <div>
             <label className="mb-1 block text-xs text-ck-muted">{t('paintCode')}</label>
-            <input
-              name="paint_code"
-              className="w-full rounded-lg border border-ck-dark-border bg-ck-dark-surface px-3 py-2 text-sm text-white focus:border-ck-red focus:outline-none"
-            />
+            <input name="paint_code" className={inputClass} />
           </div>
           <div>
             <label className="mb-1 block text-xs text-ck-muted">{t('fuel')}</label>
             <input
               name="fuel"
               defaultValue={rdwData?.fuel as string ?? ''}
-              className="w-full rounded-lg border border-ck-dark-border bg-ck-dark-surface px-3 py-2 text-sm text-white focus:border-ck-red focus:outline-none"
+              className={inputClass}
             />
           </div>
         </div>
@@ -218,7 +325,7 @@ export default function NewVehiclePage() {
             <input
               name="body_type"
               defaultValue={rdwData?.body_type as string ?? ''}
-              className="w-full rounded-lg border border-ck-dark-border bg-ck-dark-surface px-3 py-2 text-sm text-white focus:border-ck-red focus:outline-none"
+              className={inputClass}
             />
           </div>
           <div className="flex items-end">
@@ -232,6 +339,16 @@ export default function NewVehiclePage() {
               {t('wok')}
             </label>
           </div>
+        </div>
+
+        <div>
+          <label className="mb-1 block text-xs text-ck-muted">{t('notes')}</label>
+          <textarea
+            name="notes"
+            rows={3}
+            placeholder={t('notesPlaceholder')}
+            className={`${inputClass} resize-y`}
+          />
         </div>
 
         <div className="flex gap-3 pt-2">

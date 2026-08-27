@@ -1,8 +1,11 @@
 'use client';
 
-import { useState, FormEvent } from 'react';
+import { useState, useRef, FormEvent } from 'react';
 import { useTranslations } from 'next-intl';
 import { useParams } from 'next/navigation';
+
+const MAX_FILES = 5;
+const MAX_TOTAL_BYTES = 20 * 1024 * 1024;
 
 export default function ContactPage() {
   const t = useTranslations('pub');
@@ -15,6 +18,8 @@ export default function ContactPage() {
     kenteken: '',
     damage: '',
   });
+  const [files, setFiles] = useState<File[]>([]);
+  const fileRef = useRef<HTMLInputElement>(null);
   const [errors, setErrors] = useState<Record<string, string>>({});
   const [status, setStatus] = useState<'idle' | 'sending' | 'success' | 'error'>('idle');
 
@@ -48,11 +53,36 @@ export default function ContactPage() {
         }),
       });
       if (!res.ok) throw new Error('failed');
+      const { id: leadId } = await res.json();
+
+      if (files.length > 0 && leadId) {
+        const fd = new FormData();
+        fd.append('lead_id', leadId);
+        for (const f of files) fd.append('files', f);
+        await fetch('/api/public/lead-photos', { method: 'POST', body: fd });
+      }
+
       setStatus('success');
       setForm({ name: '', email: '', phone: '', kenteken: '', damage: '' });
+      setFiles([]);
     } catch {
       setStatus('error');
     }
+  }
+
+  function handleFiles(selected: FileList | null) {
+    if (!selected) return;
+    const next = [...files];
+    for (let i = 0; i < selected.length && next.length < MAX_FILES; i++) {
+      next.push(selected[i]);
+    }
+    const total = next.reduce((s, f) => s + f.size, 0);
+    if (total > MAX_TOTAL_BYTES) return;
+    setFiles(next);
+  }
+
+  function removeFile(idx: number) {
+    setFiles(prev => prev.filter((_, i) => i !== idx));
   }
 
   function handleChange(field: string, value: string) {
@@ -173,6 +203,48 @@ export default function ContactPage() {
                     onChange={(e) => handleChange('damage', e.target.value)}
                     className={`${inputClasses} resize-none`}
                   />
+                </div>
+
+                <div>
+                  <label className="block text-xs font-semibold uppercase tracking-wider text-white/50">
+                    {t('contact.photos')} ({files.length}/{MAX_FILES})
+                  </label>
+                  <div className="mt-1 flex flex-wrap gap-2">
+                    {files.map((f, i) => (
+                      <div key={i} className="group relative h-20 w-20 overflow-hidden border border-ck-border">
+                        <img
+                          src={URL.createObjectURL(f)}
+                          alt={f.name}
+                          className="h-full w-full object-cover"
+                        />
+                        <button
+                          type="button"
+                          onClick={() => removeFile(i)}
+                          className="absolute right-0 top-0 bg-black/70 px-1.5 py-0.5 text-xs text-white opacity-0 transition-opacity group-hover:opacity-100"
+                        >
+                          &times;
+                        </button>
+                      </div>
+                    ))}
+                    {files.length < MAX_FILES && (
+                      <button
+                        type="button"
+                        onClick={() => fileRef.current?.click()}
+                        className="flex h-20 w-20 items-center justify-center border border-dashed border-white/20 text-white/30 transition-colors hover:border-[#E8364E]/50 hover:text-[#E8364E]"
+                      >
+                        +
+                      </button>
+                    )}
+                  </div>
+                  <input
+                    ref={fileRef}
+                    type="file"
+                    multiple
+                    accept="image/jpeg,image/png,image/webp,image/heic"
+                    className="hidden"
+                    onChange={e => handleFiles(e.target.files)}
+                  />
+                  <p className="mt-1 text-[10px] text-white/30">{t('contact.photosHint')}</p>
                 </div>
 
                 {status === 'error' && (

@@ -12,6 +12,7 @@ export const OfferSchema = z.object({
   locale: z.string().default('nl'),
   valid_until: z.string().nullable().optional(),
   notes: z.string().nullable().optional(),
+  payer_type: z.enum(['casco', 'wa', 'particulier', 'lease']).nullable().optional(),
 });
 
 export const OfferLineSchema = z.object({

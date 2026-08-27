@@ -88,14 +88,15 @@ export async function POST(req: NextRequest) {
     const { data, error } = await admin
       .from('leads')
       .insert({
-        name,
-        email: email ?? null,
-        phone: phone ?? null,
+        contact_name: name,
+        contact_email: email ?? null,
+        contact_phone: phone ?? null,
         kenteken: kenteken ?? null,
         damage_description: damage ?? null,
         locale,
-        source: 'website',
+        origin: 'website',
         channel: 'quote_form',
+        status: 'new',
       })
       .select('id')
       .single();

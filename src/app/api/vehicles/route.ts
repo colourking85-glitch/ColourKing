@@ -7,13 +7,18 @@ export async function GET(req: NextRequest) {
   const search = req.nextUrl.searchParams.get('search');
   const customerId = req.nextUrl.searchParams.get('customer_id');
 
+  const status = req.nextUrl.searchParams.get('status');
+  const sortBy = req.nextUrl.searchParams.get('sort') || 'created_at';
+  const sortDir = req.nextUrl.searchParams.get('dir') === 'asc';
+
   let query = supabase
     .from('vehicles')
-    .select('id, kenteken, make, model, colour, year, wok, customer_id, customers(id, name), created_at')
+    .select('id, kenteken, make, model, colour, year, wok, status, customer_id, customers(id, name), created_at')
     .is('deleted_at', null)
-    .order('created_at', { ascending: false });
+    .order(sortBy, { ascending: sortDir });
 
   if (customerId) query = query.eq('customer_id', customerId);
+  if (status) query = query.eq('status', status);
   if (search) {
     query = query.or(`kenteken.ilike.%${search}%,make.ilike.%${search}%,model.ilike.%${search}%`);
   }

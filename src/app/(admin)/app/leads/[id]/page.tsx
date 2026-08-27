@@ -3,9 +3,11 @@
 import { useState, useEffect } from 'react';
 import { useParams, useRouter } from 'next/navigation';
 import Link from 'next/link';
-import { ArrowLeft, Clock, MessageCircle, FileText, Trophy, XCircle } from 'lucide-react';
+import { ArrowLeft, Clock, MessageCircle, FileText, Trophy, XCircle, Image as ImageIcon, X } from 'lucide-react';
 import { useTranslations } from 'next-intl';
 import { ScreenBadge } from '@/components/ui/ScreenBadge';
+
+type LeadPhoto = { id: string; storage_path: string; url: string; created_at: string };
 
 type Lead = {
   id: string;
@@ -47,6 +49,8 @@ export default function LeadDetailPage() {
   const { id } = useParams<{ id: string }>();
   const router = useRouter();
   const [lead, setLead] = useState<Lead | null>(null);
+  const [photos, setPhotos] = useState<LeadPhoto[]>([]);
+  const [enlargedPhoto, setEnlargedPhoto] = useState<string | null>(null);
   const [loading, setLoading] = useState(true);
   const [updating, setUpdating] = useState(false);
 
@@ -55,6 +59,9 @@ export default function LeadDetailPage() {
       .then(r => r.ok ? r.json() : null)
       .then(setLead)
       .finally(() => setLoading(false));
+    fetch(`/api/leads/${id}/photos`)
+      .then(r => r.ok ? r.json() : [])
+      .then(setPhotos);
   }, [id]);
 
   async function changeStatus(newStatus: string) {
@@ -144,6 +151,26 @@ export default function LeadDetailPage() {
               <p className="text-sm text-ck-muted-light whitespace-pre-wrap">{lead.damage_description}</p>
             </div>
           )}
+
+          {photos.length > 0 && (
+            <div className="rounded-lg border border-ck-dark-border bg-ck-dark-card p-6">
+              <h2 className="mb-3 flex items-center gap-2 text-sm font-semibold uppercase text-ck-muted">
+                <ImageIcon size={14} />
+                {t('photos')} ({photos.length})
+              </h2>
+              <div className="grid grid-cols-3 gap-2">
+                {photos.map(p => (
+                  <button
+                    key={p.id}
+                    onClick={() => setEnlargedPhoto(p.url)}
+                    className="aspect-square overflow-hidden rounded-lg border border-ck-dark-border hover:border-ck-red transition-colors"
+                  >
+                    <img src={p.url} alt="" className="h-full w-full object-cover" />
+                  </button>
+                ))}
+              </div>
+            </div>
+          )}
         </div>
 
         <div className="space-y-6">
@@ -192,6 +219,18 @@ export default function LeadDetailPage() {
           </div>
         </div>
       </div>
+
+      {enlargedPhoto && (
+        <div
+          className="fixed inset-0 z-50 flex items-center justify-center bg-black/80 p-8"
+          onClick={() => setEnlargedPhoto(null)}
+        >
+          <button className="absolute right-4 top-4 text-white/70 hover:text-white">
+            <X size={24} />
+          </button>
+          <img src={enlargedPhoto} alt="" className="max-h-full max-w-full rounded-lg object-contain" />
+        </div>
+      )}
     </div>
   );
 }

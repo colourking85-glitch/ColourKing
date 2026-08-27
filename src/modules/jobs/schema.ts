@@ -23,6 +23,11 @@ export const JobSchema = z.object({
   intake_km: z.number().int().positive().nullable().optional(),
   outtake_km: z.number().int().positive().nullable().optional(),
   notes: z.string().nullable().optional(),
+  job_type: z.enum(['bodywork', 'mechanical', 'paint', 'electrical', 'diagnostics', 'apk', 'maintenance']).default('bodywork'),
+  priority: z.enum(['normal', 'urgent', 'rush']).default('normal'),
+  payer_type: z.enum(['casco', 'wa', 'particulier', 'lease']).nullable().optional(),
+  estimated_hours: z.number().positive().nullable().optional(),
+  target_date: z.string().nullable().optional(),
 });
 
 export type JobInput = z.infer<typeof JobSchema>;

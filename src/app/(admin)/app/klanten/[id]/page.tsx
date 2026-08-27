@@ -7,6 +7,14 @@ import { ArrowLeft, Car, Pencil, Trash2 } from 'lucide-react';
 import { useTranslations } from 'next-intl';
 import { ScreenBadge } from '@/components/ui/ScreenBadge';
 
+const STATUS_COLORS: Record<string, string> = {
+  active: 'bg-green-900/30 text-green-400 border-green-500/30',
+  inactive: 'bg-gray-700/30 text-gray-400 border-gray-500/30',
+  blocked: 'bg-red-900/30 text-red-400 border-red-500/30',
+};
+
+const CUSTOMER_STATUSES = ['active', 'inactive', 'blocked'] as const;
+
 type Customer = {
   id: string;
   type: string;
@@ -19,6 +27,7 @@ type Customer = {
   btw_number: string | null;
   locale: string;
   notes: string | null;
+  status: string;
   created_at: string;
   vehicles?: Array<{
     id: string;
@@ -51,6 +60,17 @@ export default function CustomerDetailPage() {
     if (res.ok) router.push('/app/klanten');
   }
 
+  async function handleStatusChange(newStatus: string) {
+    const res = await fetch(`/api/customers/${id}`, {
+      method: 'PATCH',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ status: newStatus }),
+    });
+    if (res.ok) {
+      setCustomer(prev => prev ? { ...prev, status: newStatus } : prev);
+    }
+  }
+
   if (loading) return <div className="p-8 text-center text-ck-muted">{tCommon('loading')}</div>;
   if (!customer) return <div className="p-8 text-center text-ck-muted">{tCommon('notFound')}</div>;
 
@@ -80,6 +100,25 @@ export default function CustomerDetailPage() {
           >
             <Trash2 size={14} /> {tCommon('delete')}
           </button>
+        </div>
+      </div>
+
+      <div className="rounded-lg border border-ck-dark-border bg-ck-dark-card p-4">
+        <h2 className="mb-3 text-sm font-semibold uppercase text-ck-muted">{t('status')}</h2>
+        <div className="flex gap-2">
+          {CUSTOMER_STATUSES.map(s => (
+            <button
+              key={s}
+              onClick={() => handleStatusChange(s)}
+              className={`rounded-lg border px-4 py-2 text-sm font-medium transition-colors ${
+                customer.status === s
+                  ? STATUS_COLORS[s]
+                  : 'border-ck-dark-border text-ck-muted hover:text-white hover:border-ck-muted/50'
+              }`}
+            >
+              {t(`status_${s}`)}
+            </button>
+          ))}
         </div>
       </div>
 

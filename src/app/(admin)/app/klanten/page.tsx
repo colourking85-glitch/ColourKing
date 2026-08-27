@@ -1,8 +1,8 @@
 'use client';
 
-import { useState, useEffect } from 'react';
+import { useState, useEffect, useMemo, useCallback } from 'react';
 import Link from 'next/link';
-import { Plus, Search, User, Building2, Truck, Store } from 'lucide-react';
+import { Plus, Search, User, Building2, Truck, Store, ChevronUp, ChevronDown, ChevronsUpDown } from 'lucide-react';
 import { useTranslations } from 'next-intl';
 import { ScreenBadge } from '@/components/ui/ScreenBadge';
 
@@ -13,7 +13,23 @@ type Customer = {
   email: string | null;
   phone: string | null;
   city: string | null;
+  status: string;
   created_at: string;
+};
+
+type SortKey = 'type' | 'name' | 'email' | 'phone' | 'city' | 'status';
+type SortDir = 'asc' | 'desc';
+
+const STATUS_COLORS: Record<string, string> = {
+  active: 'bg-green-900/30 text-green-400 hover:bg-green-900/50',
+  inactive: 'bg-gray-700/30 text-gray-400 hover:bg-gray-700/50',
+  blocked: 'bg-red-900/30 text-red-400 hover:bg-red-900/50',
+};
+
+const STATUS_ORDER: Record<string, number> = {
+  active: 0,
+  inactive: 1,
+  blocked: 2,
 };
 
 const TYPE_ICONS: Record<string, typeof User> = {
@@ -23,12 +39,22 @@ const TYPE_ICONS: Record<string, typeof User> = {
   dealer: Store,
 };
 
+const TYPE_ORDER: Record<string, number> = {
+  company: 0,
+  dealer: 1,
+  fleet: 2,
+  private: 3,
+};
+
 export default function CustomersPage() {
   const t = useTranslations('kl');
   const tCommon = useTranslations('common');
   const [customers, setCustomers] = useState<Customer[]>([]);
   const [search, setSearch] = useState('');
   const [loading, setLoading] = useState(true);
+  const [sortKey, setSortKey] = useState<SortKey>('status');
+  const [sortDir, setSortDir] = useState<SortDir>('asc');
+  const [togglingId, setTogglingId] = useState<string | null>(null);
 
   useEffect(() => {
     setLoading(true);
@@ -39,6 +65,65 @@ export default function CustomersPage() {
       .then(setCustomers)
       .finally(() => setLoading(false));
   }, [search]);
+
+  function handleSort(key: SortKey) {
+    if (sortKey === key) {
+      setSortDir(d => d === 'asc' ? 'desc' : 'asc');
+    } else {
+      setSortKey(key);
+      setSortDir('asc');
+    }
+  }
+
+  const sorted = useMemo(() => {
+    const list = [...customers];
+    list.sort((a, b) => {
+      let cmp = 0;
+      if (sortKey === 'status') {
+        cmp = (STATUS_ORDER[a.status] ?? 9) - (STATUS_ORDER[b.status] ?? 9);
+      } else if (sortKey === 'type') {
+        cmp = (TYPE_ORDER[a.type] ?? 9) - (TYPE_ORDER[b.type] ?? 9);
+      } else {
+        const va = (a[sortKey] ?? '').toString().toLowerCase();
+        const vb = (b[sortKey] ?? '').toString().toLowerCase();
+        cmp = va.localeCompare(vb);
+      }
+      return sortDir === 'asc' ? cmp : -cmp;
+    });
+    return list;
+  }, [customers, sortKey, sortDir]);
+
+  const toggleStatus = useCallback(async (customer: Customer) => {
+    const newStatus = customer.status === 'active' ? 'inactive' : 'active';
+    setTogglingId(customer.id);
+    const res = await fetch(`/api/customers/${customer.id}`, {
+      method: 'PATCH',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ status: newStatus }),
+    });
+    if (res.ok) {
+      setCustomers(prev => prev.map(c =>
+        c.id === customer.id ? { ...c, status: newStatus } : c
+      ));
+    }
+    setTogglingId(null);
+  }, []);
+
+  function SortIcon({ column }: { column: SortKey }) {
+    if (sortKey !== column) return <ChevronsUpDown size={12} className="text-ck-muted/50" />;
+    return sortDir === 'asc'
+      ? <ChevronUp size={12} className="text-ck-red" />
+      : <ChevronDown size={12} className="text-ck-red" />;
+  }
+
+  const columns: { key: SortKey; label: string }[] = [
+    { key: 'type', label: t('type') },
+    { key: 'name', label: t('name') },
+    { key: 'email', label: t('email') },
+    { key: 'phone', label: t('phone') },
+    { key: 'city', label: t('city') },
+    { key: 'status', label: t('status') },
+  ];
 
   return (
     <div className="space-y-6">
@@ -78,15 +163,22 @@ export default function CustomersPage() {
           <table className="w-full">
             <thead>
               <tr className="border-b border-ck-dark-border text-left text-xs uppercase text-ck-muted">
-                <th className="px-4 py-3">{t('type')}</th>
-                <th className="px-4 py-3">{t('name')}</th>
-                <th className="px-4 py-3">{t('email')}</th>
-                <th className="px-4 py-3">{t('phone')}</th>
-                <th className="px-4 py-3">{t('city')}</th>
+                {columns.map(col => (
+                  <th
+                    key={col.key}
+                    className="cursor-pointer select-none px-4 py-3 transition-colors hover:text-white"
+                    onClick={() => handleSort(col.key)}
+                  >
+                    <span className="flex items-center gap-1.5">
+                      {col.label}
+                      <SortIcon column={col.key} />
+                    </span>
+                  </th>
+                ))}
               </tr>
             </thead>
             <tbody>
-              {customers.map(c => {
+              {sorted.map(c => {
                 const Icon = TYPE_ICONS[c.type] ?? User;
                 return (
                   <tr key={c.id} className="border-b border-ck-dark-border/50 hover:bg-ck-dark-surface">
@@ -104,6 +196,17 @@ export default function CustomersPage() {
                     <td className="px-4 py-3 text-sm text-ck-muted-light">{c.email ?? '—'}</td>
                     <td className="px-4 py-3 text-sm text-ck-muted-light">{c.phone ?? '—'}</td>
                     <td className="px-4 py-3 text-sm text-ck-muted-light">{c.city ?? '—'}</td>
+                    <td className="px-4 py-3">
+                      <button
+                        type="button"
+                        onClick={() => toggleStatus(c)}
+                        disabled={togglingId === c.id}
+                        className={`cursor-pointer rounded-full px-2 py-0.5 text-xs transition-colors ${STATUS_COLORS[c.status] ?? ''} ${togglingId === c.id ? 'opacity-50' : ''}`}
+                        title={c.status === 'active' ? t('status_inactive') : t('status_active')}
+                      >
+                        {togglingId === c.id ? '...' : t(`status_${c.status}` as 'status_active' | 'status_inactive' | 'status_blocked')}
+                      </button>
+                    </td>
                   </tr>
                 );
               })}

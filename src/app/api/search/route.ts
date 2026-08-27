@@ -27,8 +27,9 @@ export async function GET(req: NextRequest) {
       .limit(5),
     supabase
       .from('vehicles')
-      .select('id, kenteken, merk, model, customer_id')
-      .or(`kenteken.ilike.${pattern},merk.ilike.${pattern},model.ilike.${pattern}`)
+      .select('id, kenteken, make, model, customer_id')
+      .is('deleted_at', null)
+      .or(`kenteken.ilike.${pattern},make.ilike.${pattern},model.ilike.${pattern}`)
       .limit(5),
     supabase
       .from('jobs')
@@ -65,7 +66,7 @@ export async function GET(req: NextRequest) {
         type: 'vehicle',
         id: v.id,
         title: v.kenteken || 'Unknown',
-        subtitle: [v.merk, v.model].filter(Boolean).join(' '),
+        subtitle: [v.make, v.model].filter(Boolean).join(' '),
         href: `/app/voertuigen/${v.id}`,
       });
     }

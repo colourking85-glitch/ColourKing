@@ -13,6 +13,8 @@ export const VehicleSchema = z.object({
   body_type: z.string().nullable().optional(),
   rdw_snapshot: z.record(z.unknown()).nullable().optional(),
   wok: z.boolean().default(false),
+  notes: z.string().nullable().optional(),
+  plate_origin: z.string().nullable().optional(),
 });
 
 export type VehicleInput = z.infer<typeof VehicleSchema>;

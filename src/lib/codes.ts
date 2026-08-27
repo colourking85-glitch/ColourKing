@@ -37,10 +37,12 @@ export const SCREEN_REGISTRY: Record<string, ScreenMeta> = {
   '/app/klanten': { id: 'KL05', title: 'Customer List', titleNl: 'Klantenlijst', module: 'KL', route: '/app/klanten' },
   '/app/klanten/nieuw': { id: 'KL01', title: 'Create Customer', titleNl: 'Klant Aanmaken', module: 'KL', route: '/app/klanten/nieuw' },
   '/app/klanten/[id]': { id: 'KL02', title: 'Customer Detail', titleNl: 'Klantgegevens', module: 'KL', route: '/app/klanten/[id]' },
+  '/app/klanten/[id]/bewerken': { id: 'KL03', title: 'Edit Customer', titleNl: 'Klant Bewerken', module: 'KL', route: '/app/klanten/[id]/bewerken' },
 
   // Vehicles
   '/app/voertuigen': { id: 'VH05', title: 'Vehicle List', titleNl: 'Voertuigenlijst', module: 'VH', route: '/app/voertuigen' },
   '/app/voertuigen/nieuw': { id: 'VH01', title: 'Create Vehicle', titleNl: 'Voertuig Aanmaken', module: 'VH', route: '/app/voertuigen/nieuw' },
+  '/app/voertuigen/[id]': { id: 'VH10', title: 'Vehicle Detail', titleNl: 'Voertuigdetail', module: 'VH', route: '/app/voertuigen/[id]' },
 
   // Offers
   '/app/offertes': { id: 'ES05', title: 'Offer List', titleNl: 'Offertelijst', module: 'ES', route: '/app/offertes' },
@@ -116,6 +118,11 @@ export const SCREEN_REGISTRY: Record<string, ScreenMeta> = {
 
   // Infrastructure
   '/app/instellingen/infrastructuur': { id: 'SY35', title: 'Infrastructure', titleNl: 'Infrastructuur', module: 'SY', route: '/app/instellingen/infrastructuur' },
+
+  // Brand/Model Management
+  '/app/instellingen/merken': { id: 'SY40', title: 'Brand Management', titleNl: 'Merk/Model Beheer', module: 'SY', route: '/app/instellingen/merken' },
+
+  '/app/instellingen/tarieven': { id: 'SY45', title: 'Labour Rates', titleNl: 'Tarieven', module: 'SY', route: '/app/instellingen/tarieven' },
 };
 
 export function getScreen(pathname: string): ScreenMeta | undefined {
@@ -130,8 +137,9 @@ export function searchScreens(query: string): ScreenMeta[] {
   const q = query.toLowerCase();
   return Object.values(SCREEN_REGISTRY).filter(
     (s) =>
-      s.id.toLowerCase().includes(q) ||
-      s.title.toLowerCase().includes(q) ||
-      s.titleNl.toLowerCase().includes(q)
+      !s.route.includes('[') &&
+      (s.id.toLowerCase().includes(q) ||
+       s.title.toLowerCase().includes(q) ||
+       s.titleNl.toLowerCase().includes(q))
   );
 }
