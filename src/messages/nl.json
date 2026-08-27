@@ -1149,7 +1149,8 @@
       "about": "Over ons",
       "contact": "Contact",
       "menu": "Menu",
-      "quote": "Offerte aanvragen"
+      "quote": "Offerte aanvragen",
+      "appointment": "Afspraak"
     },
     "seo": {
       "homeTitle": "Colour King — Autospuitbedrijf Rotterdam",
@@ -1169,6 +1170,7 @@
       "title": "Uw auto weer als nieuw",
       "subtitle": "Vakkundige lakschadeverstelling — van kleine chips tot diepe krassen. Precisiewerk met gegarandeerd resultaat.",
       "ctaQuote": "Gratis Offerte Aanvragen",
+      "ctaAppointment": "Afspraak Maken",
       "ctaGallery": "Bekijk Ons Werk",
       "ctaCall": "Bel direct"
     },
@@ -1378,6 +1380,43 @@
       "filesTooLarge": "Totale bestandsgrootte overschrijdt 20 MB. Verwijder enkele foto's.",
       "infoTitle": "Contactgegevens",
       "mapPlaceholder": "Kaart"
+    },
+    "booking": {
+      "title": "Afspraak maken",
+      "subtitle": "Kies een datum en tijdstip dat u uitkomt. We bevestigen uw afspraak zo spoedig mogelijk.",
+      "step1": "Type",
+      "step2": "Datum & Tijd",
+      "step3": "Gegevens",
+      "chooseType": "Doel van uw bezoek",
+      "type": "Type",
+      "types": {
+        "inspection": "Inspectie",
+        "drop_off": "Auto inleveren",
+        "collection": "Auto ophalen"
+      },
+      "typeDesc": {
+        "inspection": "Wij beoordelen de schade en maken ter plaatse een offerte",
+        "drop_off": "Breng uw auto voor de geplande reparatie",
+        "collection": "Haal uw auto op na reparatie"
+      },
+      "chooseDateTime": "Kies datum & tijd",
+      "time": "Tijd",
+      "noSlots": "Geen beschikbare tijden op deze dag. Kies een andere datum.",
+      "yourDetails": "Uw gegevens",
+      "name": "Naam",
+      "namePlaceholder": "Uw volledige naam",
+      "phone": "Telefoon",
+      "email": "E-mail",
+      "kenteken": "Kenteken",
+      "notes": "Opmerkingen",
+      "notesPlaceholder": "Eventuele aanvullende informatie over uw bezoek...",
+      "continue": "Doorgaan",
+      "submit": "Afspraak boeken",
+      "submitError": "Er ging iets mis. Probeer het opnieuw.",
+      "successTitle": "Afspraak ingepland!",
+      "successMessage": "We hebben uw afspraakverzoek ontvangen. U ontvangt een bevestiging per e-mail of telefoon.",
+      "backToHome": "Terug naar Home",
+      "openingHours": "Ma – Vr · 08:00 – 17:00 · Rotterdam, Nederland"
     }
   },
   "em": {

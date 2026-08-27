@@ -1149,7 +1149,8 @@
       "about": "Hakkımızda",
       "contact": "İletişim",
       "menu": "Menü",
-      "quote": "Teklif al"
+      "quote": "Teklif al",
+      "appointment": "Randevu"
     },
     "seo": {
       "homeTitle": "Colour King — Rotterdam Oto Boya ve Kaporta",
@@ -1169,6 +1170,7 @@
       "title": "Aracınız yeniden ilk günkü gibi",
       "subtitle": "Profesyonel oto boya onarımı — küçük çiziklerden derin hasarlara. Garantili hassas işçilik.",
       "ctaQuote": "Ücretsiz Teklif Alın",
+      "ctaAppointment": "Randevu Al",
       "ctaGallery": "Çalışmalarımızı Görün",
       "ctaCall": "Hemen arayın"
     },
@@ -1378,6 +1380,43 @@
       "filesTooLarge": "Toplam dosya boyutu 20 MB'ı aşıyor. Lütfen bazı fotoğrafları kaldırın.",
       "infoTitle": "İletişim bilgileri",
       "mapPlaceholder": "Harita"
+    },
+    "booking": {
+      "title": "Randevu Al",
+      "subtitle": "Size uygun bir tarih ve saat seçin. Randevunuzu en kısa sürede onaylayacağız.",
+      "step1": "Tür",
+      "step2": "Tarih & Saat",
+      "step3": "Bilgiler",
+      "chooseType": "Ziyaret amacınız",
+      "type": "Tür",
+      "types": {
+        "inspection": "Muayene",
+        "drop_off": "Araç teslim",
+        "collection": "Araç teslim alma"
+      },
+      "typeDesc": {
+        "inspection": "Hasarı yerinde değerlendirip teklif sunuyoruz",
+        "drop_off": "Planlanan onarım için aracınızı getirin",
+        "collection": "Onarım sonrası aracınızı teslim alın"
+      },
+      "chooseDateTime": "Tarih & saat seçin",
+      "time": "Saat",
+      "noSlots": "Bu gün için uygun zaman yok. Lütfen başka bir tarih seçin.",
+      "yourDetails": "Bilgileriniz",
+      "name": "Ad",
+      "namePlaceholder": "Adınız ve soyadınız",
+      "phone": "Telefon",
+      "email": "E-posta",
+      "kenteken": "Plaka",
+      "notes": "Notlar",
+      "notesPlaceholder": "Ziyaretiniz hakkında ek bilgi...",
+      "continue": "Devam et",
+      "submit": "Randevu al",
+      "submitError": "Bir hata oluştu. Lütfen tekrar deneyin.",
+      "successTitle": "Randevu alındı!",
+      "successMessage": "Randevu talebinizi aldık. E-posta veya telefon ile onay alacaksınız.",
+      "backToHome": "Ana sayfaya dön",
+      "openingHours": "Pzt – Cum · 08:00 – 17:00 · Rotterdam, Hollanda"
     }
   },
   "em": {

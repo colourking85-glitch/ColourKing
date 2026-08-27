@@ -1200,7 +1200,8 @@
       "about": "About us",
       "contact": "Contact",
       "menu": "Menu",
-      "quote": "Get a quote"
+      "quote": "Get a quote",
+      "appointment": "Appointment"
     },
     "seo": {
       "homeTitle": "Colour King — Auto Body Shop Rotterdam",
@@ -1220,6 +1221,7 @@
       "title": "Your car looking like new again",
       "subtitle": "Expert paint damage repair — from small chips to deep scratches. Precision work with guaranteed results.",
       "ctaQuote": "Free Quote",
+      "ctaAppointment": "Book Appointment",
       "ctaGallery": "View Our Work",
       "ctaCall": "Call now"
     },
@@ -1429,6 +1431,43 @@
       "filesTooLarge": "Total file size exceeds 20 MB. Please remove some photos.",
       "infoTitle": "Contact details",
       "mapPlaceholder": "Map"
+    },
+    "booking": {
+      "title": "Book an Appointment",
+      "subtitle": "Choose a date and time that suits you. We will confirm your appointment as soon as possible.",
+      "step1": "Type",
+      "step2": "Date & Time",
+      "step3": "Details",
+      "chooseType": "Purpose of your visit",
+      "type": "Type",
+      "types": {
+        "inspection": "Inspection",
+        "drop_off": "Drop off vehicle",
+        "collection": "Pick up vehicle"
+      },
+      "typeDesc": {
+        "inspection": "We assess the damage and provide a quote on site",
+        "drop_off": "Bring your car in for the scheduled repair",
+        "collection": "Pick up your car after repair"
+      },
+      "chooseDateTime": "Choose date & time",
+      "time": "Time",
+      "noSlots": "No available slots on this day. Please choose another date.",
+      "yourDetails": "Your details",
+      "name": "Name",
+      "namePlaceholder": "Your full name",
+      "phone": "Phone",
+      "email": "Email",
+      "kenteken": "License plate",
+      "notes": "Notes",
+      "notesPlaceholder": "Any additional information about your visit...",
+      "continue": "Continue",
+      "submit": "Book Appointment",
+      "submitError": "Something went wrong. Please try again.",
+      "successTitle": "Appointment Booked!",
+      "successMessage": "We have received your appointment request. You will receive a confirmation by email or phone.",
+      "backToHome": "Back to Home",
+      "openingHours": "Mon – Fri · 08:00 – 17:00 · Rotterdam, Netherlands"
     }
   },
   "bc": {

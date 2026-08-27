@@ -60,12 +60,12 @@ export default async function HomePage({
               </svg>
             </Link>
             <Link
-              href="/gallerij"
-              className="inline-flex items-center gap-2 border border-white/30 px-7 py-4 text-sm font-semibold uppercase tracking-wider text-white transition-all duration-200 hover:border-white/70 hover:bg-white/5"
+              href="/afspraak"
+              className="group inline-flex items-center gap-2 border border-white/30 px-7 py-4 text-sm font-semibold uppercase tracking-wider text-white transition-all duration-200 hover:border-white/70 hover:bg-white/5 hover:-translate-y-0.5"
             >
-              <span>{t('hero.ctaGallery')}</span>
+              <span>{t('hero.ctaAppointment')}</span>
               <svg className="h-4 w-4" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth="2">
-                <path strokeLinecap="round" strokeLinejoin="round" d="m9 18 6-6-6-6" />
+                <path strokeLinecap="round" strokeLinejoin="round" d="M8 7V3m8 4V3m-9 8h10M5 21h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v12a2 2 0 002 2z" />
               </svg>
             </Link>
           </div>

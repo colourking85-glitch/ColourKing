@@ -84,10 +84,16 @@ export function Navbar({ locale }: { locale: string }) {
             ))}
           </div>
 
-          {/* CTA */}
+          {/* CTAs */}
+          <Link
+            href="/afspraak"
+            className="ml-4 border border-white/30 px-5 py-2.5 text-sm font-semibold uppercase tracking-wider text-white transition-colors duration-200 hover:border-white/70 hover:bg-white/5"
+          >
+            {t('nav.appointment')}
+          </Link>
           <Link
             href="/contact"
-            className="ml-4 bg-[#E8364E] px-5 py-2.5 text-sm font-semibold uppercase tracking-wider text-white transition-colors duration-200 hover:bg-[#d02e44]"
+            className="bg-[#E8364E] px-5 py-2.5 text-sm font-semibold uppercase tracking-wider text-white transition-colors duration-200 hover:bg-[#d02e44]"
           >
             {t('nav.quote')}
           </Link>
@@ -144,13 +150,22 @@ export function Navbar({ locale }: { locale: string }) {
                 </Link>
               ))}
             </div>
-            <Link
-              href="/contact"
-              onClick={() => setMenuOpen(false)}
-              className="bg-[#E8364E] px-5 py-2.5 text-sm font-semibold uppercase tracking-wider text-white"
-            >
-              {t('nav.quote')}
-            </Link>
+            <div className="flex gap-2">
+              <Link
+                href="/afspraak"
+                onClick={() => setMenuOpen(false)}
+                className="border border-white/30 px-4 py-2.5 text-xs font-semibold uppercase tracking-wider text-white"
+              >
+                {t('nav.appointment')}
+              </Link>
+              <Link
+                href="/contact"
+                onClick={() => setMenuOpen(false)}
+                className="bg-[#E8364E] px-4 py-2.5 text-xs font-semibold uppercase tracking-wider text-white"
+              >
+                {t('nav.quote')}
+              </Link>
+            </div>
           </div>
         </div>
       )}
