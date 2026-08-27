@@ -225,15 +225,15 @@ export function InvoiceTemplate({ invoice }: { invoice: InvoiceData }) {
             Colourking
           </div>
           <div style={{ marginTop: '8px', fontSize: '12px', lineHeight: '1.7', color: '#555' }}>
-            <div>Industrieweg 12</div>
-            <div>1234 AB Amsterdam</div>
-            <div>{t.tel}: +31 20 123 4567</div>
+            <div>Satijnbloem 6</div>
+            <div>3068 JP Rotterdam</div>
+            <div>{t.tel}: 06 81 63 10 20</div>
             <div>info@colourking.nl</div>
           </div>
           <div style={{ marginTop: '8px', fontSize: '11px', color: '#888' }}>
-            <span>{t.kvk}: 12345678</span>
+            <span>{t.kvk}: 62022043</span>
             <span style={{ margin: '0 8px' }}>|</span>
-            <span>{t.btw}: NL123456789B01</span>
+            <span>{t.btw}: NL620220430B03</span>
           </div>
         </div>
 
@@ -534,8 +534,8 @@ export function InvoiceTemplate({ invoice }: { invoice: InvoiceData }) {
         textAlign: 'center',
         lineHeight: '1.6',
       }}>
-        <div>Colourking B.V. | Industrieweg 12, 1234 AB Amsterdam | {t.kvk}: 12345678 | {t.btw}: NL123456789B01</div>
-        <div>IBAN: NL00 INGB 0000 0000 00 | BIC: INGBNL2A | info@colourking.nl | +31 20 123 4567</div>
+        <div>Colourking B.V. | Satijnbloem 6, 3068 JP Rotterdam | {t.kvk}: 62022043 | {t.btw}: NL620220430B03</div>
+        <div>IBAN: NL00 INGB 0000 0000 00 | BIC: INGBNL2A | info@colourking.nl | 06 81 63 10 20</div>
       </div>
     </div>
   );

@@ -39,7 +39,7 @@ const STRINGS: Record<string, EmailStrings> = {
     team: 'Het Colourking team',
     viewOnline: 'Online bekijken',
     unsubscribe: 'Afmelden',
-    companyFooter: 'Colourking B.V. | Industrieweg 12, 1234 AB Amsterdam | KvK: 12345678 | BTW: NL123456789B01',
+    companyFooter: 'Colourking B.V. | Satijnbloem 6, 3068 JP Rotterdam | KvK: 62022043 | BTW: NL620220430B03',
 
     // Offer
     offerSubject: 'Uw offerte {offerNumber} van Colourking',
@@ -110,7 +110,7 @@ const STRINGS: Record<string, EmailStrings> = {
     team: 'The Colourking team',
     viewOnline: 'View online',
     unsubscribe: 'Unsubscribe',
-    companyFooter: 'Colourking B.V. | Industrieweg 12, 1234 AB Amsterdam | CoC: 12345678 | VAT: NL123456789B01',
+    companyFooter: 'Colourking B.V. | Satijnbloem 6, 3068 JP Rotterdam | CoC: 62022043 | VAT: NL620220430B03',
 
     offerSubject: 'Your quote {offerNumber} from Colourking',
     offerIntro: 'Please find below our quote for the work on your vehicle.',
@@ -174,7 +174,7 @@ const STRINGS: Record<string, EmailStrings> = {
     team: 'Colourking ekibi',
     viewOnline: 'Online goruntuле',
     unsubscribe: 'Abonelikten cik',
-    companyFooter: 'Colourking B.V. | Industrieweg 12, 1234 AB Amsterdam | Ticaret Sicil: 12345678 | KDV: NL123456789B01',
+    companyFooter: 'Colourking B.V. | Satijnbloem 6, 3068 JP Rotterdam | Ticaret Sicil: 62022043 | KDV: NL620220430B03',
 
     offerSubject: 'Colourking teklif {offerNumber}',
     offerIntro: 'Araciniz icin hazirlanan teklifimizi asagida bulabilirsiniz.',
@@ -303,7 +303,7 @@ function wrapLayout(locale: string, body: string): string {
                 <tr>
                   <td style="padding-top:16px;font-size:10px;color:#d1d5db;line-height:1.6;font-family:Arial,Helvetica,sans-serif;">
                     ${s.companyFooter}<br>
-                    IBAN: NL00 INGB 0000 0000 00 | info@colourking.nl | +31 20 123 4567
+                    IBAN: NL00 INGB 0000 0000 00 | info@colourking.nl | 06 81 63 10 20
                   </td>
                 </tr>
               </table>
@@ -593,7 +593,7 @@ export function getSampleData(template: string): Record<string, unknown> {
       scheduledDate: '2026-09-01',
       scheduledTime: '09:30',
       durationMinutes: 30,
-      address: 'Industrieweg 12, 1234 AB Amsterdam',
+      address: 'Satijnbloem 6, 3068 JP Rotterdam',
       vehicleInfo: 'AB-123-CD (BMW 3 Serie)',
       cancelUrl: 'https://colourking.nl/afspraak/cancel/sample',
     },
@@ -602,7 +602,7 @@ export function getSampleData(template: string): Record<string, unknown> {
       appointmentType: 'Inname',
       scheduledDate: '2026-09-01',
       scheduledTime: '09:30',
-      address: 'Industrieweg 12, 1234 AB Amsterdam',
+      address: 'Satijnbloem 6, 3068 JP Rotterdam',
       vehicleInfo: 'AB-123-CD (BMW 3 Serie)',
       cancelUrl: 'https://colourking.nl/afspraak/cancel/sample',
     },
@@ -628,7 +628,7 @@ export function getSampleData(template: string): Record<string, unknown> {
       jobNumber: 'JOB-2026-0015',
       collectionDate: '2026-09-05',
       collectionTime: '14:00',
-      address: 'Industrieweg 12, 1234 AB Amsterdam',
+      address: 'Satijnbloem 6, 3068 JP Rotterdam',
     },
   };
 

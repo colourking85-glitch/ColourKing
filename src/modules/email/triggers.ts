@@ -181,7 +181,7 @@ export async function onAppointmentConfirmed(appointmentId: string): Promise<voi
     scheduledDate: apt.scheduled_date,
     scheduledTime: apt.scheduled_time,
     durationMinutes: apt.duration_minutes,
-    address: 'Industrieweg 12, 1234 AB Amsterdam',
+    address: 'Satijnbloem 6, 3068 JP Rotterdam',
     vehicleInfo,
     cancelUrl: `${APP_URL}/afspraak/${appointmentId}/cancel`,
   };
@@ -369,7 +369,7 @@ export async function onRepairComplete(jobId: string): Promise<void> {
     jobNumber: jobId.slice(0, 8),
     collectionDate: null,
     collectionTime: null,
-    address: 'Industrieweg 12, 1234 AB Amsterdam',
+    address: 'Satijnbloem 6, 3068 JP Rotterdam',
   };
 
   const html = renderTemplate('repairOrderReady', data, locale);
