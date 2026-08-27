@@ -15,10 +15,6 @@ const mono = JetBrains_Mono({
 export const metadata: Metadata = {
   title: 'Colourking',
   description: 'Autospuitbedrijf Colour King — Rotterdam',
-  icons: {
-    icon: [{ url: '/favicon.svg', type: 'image/svg+xml' }],
-    apple: '/favicon.svg',
-  },
 };
 
 export default function RootLayout({
@@ -28,6 +24,10 @@ export default function RootLayout({
 }) {
   return (
     <html lang="nl" className="dark">
+      <head>
+        <link rel="icon" href="/favicon.svg" type="image/svg+xml" />
+        <link rel="apple-touch-icon" href="/favicon.svg" />
+      </head>
       <body className={`${inter.variable} ${mono.variable}`}>{children}</body>
     </html>
   );
