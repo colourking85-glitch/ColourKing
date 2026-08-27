@@ -3,7 +3,7 @@
 import { useState, useEffect } from 'react';
 import { useTranslations } from 'next-intl';
 import { Link } from '@/i18n/routing';
-import { Car, ClipboardCheck, PackageCheck, ChevronLeft, ChevronRight, Check, Clock, Calendar, User, Phone, Mail, FileText, Loader2 } from 'lucide-react';
+import { Car, ClipboardCheck, PackageCheck, ChevronLeft, ChevronRight, Check, Clock, Calendar, User, Phone, Mail, FileText, Loader2, MapPin, Navigation } from 'lucide-react';
 
 type Slot = { time: string; available: boolean };
 
@@ -21,6 +21,7 @@ export default function BookingPage() {
 
   const [step, setStep] = useState(1);
   const [type, setType] = useState<AppointmentType | ''>('');
+  const [location, setLocation] = useState<'shop' | 'other'>('shop');
   const [date, setDate] = useState('');
   const [time, setTime] = useState('');
   const [slots, setSlots] = useState<Slot[]>([]);
@@ -31,6 +32,9 @@ export default function BookingPage() {
   const [phone, setPhone] = useState('');
   const [kenteken, setKenteken] = useState('');
   const [notes, setNotes] = useState('');
+  const [street, setStreet] = useState('');
+  const [postcode, setPostcode] = useState('');
+  const [city, setCity] = useState('');
 
   const [submitting, setSubmitting] = useState(false);
   const [success, setSuccess] = useState(false);
@@ -67,7 +71,10 @@ export default function BookingPage() {
           kenteken: kenteken || undefined,
           scheduled_date: date,
           scheduled_time: time,
-          notes: notes || undefined,
+          notes: [
+            location === 'other' ? `Locatie: ${[street, [postcode, city].filter(Boolean).join(' ')].filter(Boolean).join(', ') || t('locationOther')}` : '',
+            notes,
+          ].filter(Boolean).join('\n') || undefined,
         }),
       });
       if (res.ok) {
@@ -197,7 +204,93 @@ export default function BookingPage() {
                 </button>
               ))}
             </div>
-            <div className="flex justify-end pt-4">
+
+            {/* Location */}
+            <h2 className="mt-8 text-lg font-semibold text-white">{t('location')}</h2>
+            <div className="grid gap-3 sm:grid-cols-2">
+              <button
+                onClick={() => setLocation('shop')}
+                className={`flex items-start gap-4 rounded-lg border p-5 text-left transition-all ${
+                  location === 'shop'
+                    ? 'border-[#E8364E]/50 bg-[#E8364E]/10 shadow-lg shadow-[#E8364E]/5'
+                    : 'border-white/10 bg-white/[0.03] hover:border-white/20 hover:bg-white/[0.06]'
+                }`}
+              >
+                <div className={`mt-0.5 flex h-10 w-10 shrink-0 items-center justify-center rounded-lg ${
+                  location === 'shop' ? 'bg-[#E8364E]/20 text-[#E8364E]' : 'bg-white/5 text-white/40'
+                }`}>
+                  <MapPin size={20} />
+                </div>
+                <div>
+                  <span className={`text-sm font-semibold uppercase tracking-wide ${location === 'shop' ? 'text-[#E8364E]' : 'text-white/60'}`}>
+                    {t('locationShop')}
+                  </span>
+                  <p className="mt-1 text-sm font-medium text-white">Satijnbloem 6, 3068 JP</p>
+                  <p className="text-xs text-white/40">Rotterdam · {t('freeParking')}</p>
+                </div>
+              </button>
+              <button
+                onClick={() => setLocation('other')}
+                className={`flex items-start gap-4 rounded-lg border p-5 text-left transition-all ${
+                  location === 'other'
+                    ? 'border-[#E8364E]/50 bg-[#E8364E]/10 shadow-lg shadow-[#E8364E]/5'
+                    : 'border-white/10 bg-white/[0.03] hover:border-white/20 hover:bg-white/[0.06]'
+                }`}
+              >
+                <div className={`mt-0.5 flex h-10 w-10 shrink-0 items-center justify-center rounded-lg ${
+                  location === 'other' ? 'bg-[#E8364E]/20 text-[#E8364E]' : 'bg-white/5 text-white/40'
+                }`}>
+                  <Navigation size={20} />
+                </div>
+                <div>
+                  <span className={`text-sm font-semibold uppercase tracking-wide ${location === 'other' ? 'text-[#E8364E]' : 'text-white/60'}`}>
+                    {t('locationOther')}
+                  </span>
+                  <p className="mt-1 text-sm font-medium text-white">{t('locationOtherDesc')}</p>
+                  <p className="text-xs text-white/40">{t('locationOtherHint')}</p>
+                </div>
+              </button>
+            </div>
+
+            {location === 'other' && (
+              <div className="grid gap-3">
+                <div>
+                  <label className="mb-1.5 block text-xs font-semibold uppercase tracking-wide text-white/50">{t('street')}</label>
+                  <input
+                    type="text"
+                    value={street}
+                    onChange={e => setStreet(e.target.value)}
+                    placeholder={t('streetPlaceholder')}
+                    className="w-full rounded-lg border border-white/10 bg-white/[0.03] px-4 py-3 text-white placeholder:text-white/20 focus:border-[#E8364E] focus:outline-none"
+                  />
+                </div>
+                <div className="grid grid-cols-2 gap-3">
+                  <div>
+                    <label className="mb-1.5 block text-xs font-semibold uppercase tracking-wide text-white/50">{t('postcode')}</label>
+                    <input
+                      type="text"
+                      value={postcode}
+                      onChange={e => setPostcode(e.target.value.toUpperCase())}
+                      placeholder={t('postcodePlaceholder')}
+                      className="w-full rounded-lg border border-white/10 bg-white/[0.03] px-4 py-3 text-white placeholder:text-white/20 focus:border-[#E8364E] focus:outline-none"
+                    />
+                  </div>
+                  <div>
+                    <label className="mb-1.5 block text-xs font-semibold uppercase tracking-wide text-white/50">{t('city')}</label>
+                    <input
+                      type="text"
+                      value={city}
+                      onChange={e => setCity(e.target.value)}
+                      placeholder={t('cityPlaceholder')}
+                      className="w-full rounded-lg border border-white/10 bg-white/[0.03] px-4 py-3 text-white placeholder:text-white/20 focus:border-[#E8364E] focus:outline-none"
+                    />
+                  </div>
+                </div>
+              </div>
+            )}
+
+            <div className="flex items-center justify-between pt-4">
+              <span className="text-xs text-white/30">{t('stepOf', { step: 1, total: 3 })}</span>
               <button
                 onClick={() => setStep(2)}
                 disabled={!canGoStep2}
@@ -306,6 +399,10 @@ export default function BookingPage() {
                 <div className="flex items-center gap-2">
                   <Clock size={14} className="text-[#E8364E]" />
                   <span className="text-white/50">{time}</span>
+                </div>
+                <div className="flex items-center gap-2">
+                  <MapPin size={14} className="text-[#E8364E]" />
+                  <span className="text-white/50">{location === 'shop' ? t('locationShop') : t('locationOther')}</span>
                 </div>
               </div>
             </div>

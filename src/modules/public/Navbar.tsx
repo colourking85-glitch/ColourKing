@@ -1,8 +1,9 @@
 'use client';
 
-import { useState, useEffect } from 'react';
+import { useState, useEffect, useRef } from 'react';
 import { useTranslations } from 'next-intl';
-import { Link, usePathname } from '@/i18n/routing';
+import { Link, usePathname, useRouter } from '@/i18n/routing';
+import { ChevronDown, Globe } from 'lucide-react';
 
 const navLinks = [
   { href: '/diensten', label: 'nav.services' },
@@ -11,17 +12,41 @@ const navLinks = [
   { href: '/contact', label: 'nav.contact' },
 ] as const;
 
-const localeLabels: Record<string, string> = {
-  nl: 'NL',
-  en: 'EN',
-  tr: 'TR',
+const LOCALES = [
+  { code: 'nl', label: 'Nederlands', flag: '🇳🇱' },
+  { code: 'en', label: 'English', flag: '🇬🇧' },
+  { code: 'tr', label: 'Türkçe', flag: '🇹🇷' },
+] as const;
+
+const BROWSER_LANG_MAP: Record<string, string> = {
+  nl: 'nl', 'nl-nl': 'nl', 'nl-be': 'nl',
+  en: 'en', 'en-us': 'en', 'en-gb': 'en', 'en-au': 'en',
+  tr: 'tr', 'tr-tr': 'tr',
 };
+
+function detectBrowserLocale(): string | null {
+  if (typeof navigator === 'undefined') return null;
+  const langs = navigator.languages ?? [navigator.language];
+  for (const lang of langs) {
+    const match = BROWSER_LANG_MAP[lang.toLowerCase()];
+    if (match) return match;
+    const base = lang.split('-')[0].toLowerCase();
+    const baseMatch = BROWSER_LANG_MAP[base];
+    if (baseMatch) return baseMatch;
+  }
+  return null;
+}
 
 export function Navbar({ locale }: { locale: string }) {
   const t = useTranslations('pub');
   const pathname = usePathname();
+  const router = useRouter();
   const [menuOpen, setMenuOpen] = useState(false);
   const [scrolled, setScrolled] = useState(false);
+  const [langOpen, setLangOpen] = useState(false);
+  const langRef = useRef<HTMLDivElement>(null);
+
+  const currentLocale = LOCALES.find(l => l.code === locale) ?? LOCALES[0];
 
   useEffect(() => {
     function onScroll() {
@@ -30,6 +55,31 @@ export function Navbar({ locale }: { locale: string }) {
     window.addEventListener('scroll', onScroll, { passive: true });
     return () => window.removeEventListener('scroll', onScroll);
   }, []);
+
+  useEffect(() => {
+    function onClick(e: MouseEvent) {
+      if (langRef.current && !langRef.current.contains(e.target as Node)) {
+        setLangOpen(false);
+      }
+    }
+    document.addEventListener('click', onClick);
+    return () => document.removeEventListener('click', onClick);
+  }, []);
+
+  function handleAutoDetect() {
+    const detected = detectBrowserLocale();
+    if (detected && detected !== locale) {
+      router.replace(pathname || '/', { locale: detected as 'nl' | 'en' | 'tr' });
+    }
+    setLangOpen(false);
+  }
+
+  function switchLocale(loc: string) {
+    setLangOpen(false);
+    if (loc !== locale) {
+      router.replace(pathname || '/', { locale: loc as 'nl' | 'en' | 'tr' });
+    }
+  }
 
   return (
     <header
@@ -66,28 +116,51 @@ export function Navbar({ locale }: { locale: string }) {
             );
           })}
 
-          {/* Language switcher */}
-          <div className="flex items-center gap-1 border-l border-white/20 pl-6">
-            {(['nl', 'en', 'tr'] as const).map((loc) => (
-              <Link
-                key={loc}
-                href={pathname || '/'}
-                locale={loc}
-                className={`px-2 py-0.5 text-xs font-medium uppercase tracking-wider transition-colors ${
-                  locale === loc
-                    ? 'text-white'
-                    : 'text-white/40 hover:text-white/70'
-                }`}
-              >
-                {localeLabels[loc]}
-              </Link>
-            ))}
+          {/* Language dropdown */}
+          <div className="relative border-l border-white/20 pl-6" ref={langRef}>
+            <button
+              type="button"
+              onClick={() => setLangOpen(!langOpen)}
+              className="flex items-center gap-2 rounded-lg px-3 py-1.5 text-sm font-medium text-white/80 transition-colors hover:text-white hover:bg-white/5"
+            >
+              <span className="text-base">{currentLocale.flag}</span>
+              <ChevronDown size={14} className={`transition-transform ${langOpen ? 'rotate-180' : ''}`} />
+            </button>
+            {langOpen && (
+              <div className="absolute right-0 top-full mt-2 w-52 overflow-hidden rounded-xl border border-white/10 bg-[#1a1a1a] shadow-2xl shadow-black/50">
+                <div className="grid grid-cols-1 p-2">
+                  {LOCALES.map(loc => (
+                    <button
+                      key={loc.code}
+                      onClick={() => switchLocale(loc.code)}
+                      className={`flex items-center gap-3 rounded-lg px-3 py-2.5 text-left text-sm transition-colors ${
+                        locale === loc.code
+                          ? 'bg-[#E8364E]/10 text-[#E8364E] font-semibold'
+                          : 'text-white/70 hover:bg-white/5 hover:text-white'
+                      }`}
+                    >
+                      <span className="text-lg">{loc.flag}</span>
+                      <span>{loc.label}</span>
+                    </button>
+                  ))}
+                </div>
+                <div className="border-t border-white/10 p-2">
+                  <button
+                    onClick={handleAutoDetect}
+                    className="flex w-full items-center gap-3 rounded-lg px-3 py-2.5 text-left text-sm text-white/40 transition-colors hover:bg-white/5 hover:text-white/70"
+                  >
+                    <Globe size={18} className="shrink-0" />
+                    <span>{t('nav.autoDetect')}</span>
+                  </button>
+                </div>
+              </div>
+            )}
           </div>
 
           {/* CTAs */}
           <Link
             href="/afspraak"
-            className="ml-4 border border-white/30 px-5 py-2.5 text-sm font-semibold uppercase tracking-wider text-white transition-colors duration-200 hover:border-white/70 hover:bg-white/5"
+            className="border border-white/30 px-5 py-2.5 text-sm font-semibold uppercase tracking-wider text-white transition-colors duration-200 hover:border-white/70 hover:bg-white/5"
           >
             {t('nav.appointment')}
           </Link>
@@ -134,21 +207,31 @@ export function Navbar({ locale }: { locale: string }) {
               </Link>
             ))}
           </div>
-          <div className="flex items-center justify-between border-t border-ck-border pt-4">
-            <div className="flex items-center gap-2">
-              {(['nl', 'en', 'tr'] as const).map((loc) => (
-                <Link
-                  key={loc}
-                  href={pathname || '/'}
-                  locale={loc}
-                  onClick={() => setMenuOpen(false)}
-                  className={`px-2.5 py-1 text-xs font-medium uppercase tracking-wider transition-colors ${
-                    locale === loc ? 'text-white' : 'text-white/40 hover:text-white'
+
+          {/* Mobile language + CTAs */}
+          <div className="border-t border-ck-border pt-4">
+            <div className="flex flex-wrap gap-2 mb-4">
+              {LOCALES.map(loc => (
+                <button
+                  key={loc.code}
+                  onClick={() => { switchLocale(loc.code); setMenuOpen(false); }}
+                  className={`flex items-center gap-2 rounded-lg px-3 py-2 text-sm transition-colors ${
+                    locale === loc.code
+                      ? 'bg-[#E8364E]/10 text-[#E8364E] font-semibold'
+                      : 'text-white/50 hover:text-white'
                   }`}
                 >
-                  {localeLabels[loc]}
-                </Link>
+                  <span>{loc.flag}</span>
+                  <span>{loc.label}</span>
+                </button>
               ))}
+              <button
+                onClick={() => { handleAutoDetect(); setMenuOpen(false); }}
+                className="flex items-center gap-2 rounded-lg px-3 py-2 text-sm text-white/30 hover:text-white/60"
+              >
+                <Globe size={14} />
+                <span>{t('nav.autoDetect')}</span>
+              </button>
             </div>
             <div className="flex gap-2">
               <Link
