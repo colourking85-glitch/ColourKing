@@ -7,6 +7,7 @@ const HERO_IMAGES = [
   '/images/Hero/PHero1.png',
   '/images/Hero/PHero2.png',
   '/images/Hero/PHero3.jfif',
+  '/images/Hero/hero.webp',
 ];
 
 const INTERVAL = 6000;
