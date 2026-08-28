@@ -3,7 +3,7 @@
 import { useState, useEffect, useRef, useCallback } from 'react';
 import { useParams, useRouter } from 'next/navigation';
 import Link from 'next/link';
-import { ArrowLeft, Clock, MessageCircle, FileText, Trophy, XCircle, Image as ImageIcon, X, Car, Send, Plus, Minus, RotateCcw, Calendar, MapPin, CheckCircle2 } from 'lucide-react';
+import { ArrowLeft, Clock, MessageCircle, FileText, Trophy, XCircle, Image as ImageIcon, X, Car, Send, Plus, Minus, RotateCcw, Calendar, MapPin, CheckCircle2, Wrench, Globe } from 'lucide-react';
 import { useTranslations } from 'next-intl';
 import { ScreenBadge } from '@/components/ui/ScreenBadge';
 
@@ -29,6 +29,16 @@ type Lead = {
   scheduled_time: string | null;
   location: string | null;
   location_address: string | null;
+  vehicle_make: string | null;
+  vehicle_model: string | null;
+  vehicle_year: number | null;
+  vehicle_colour: string | null;
+  vehicle_vin: string | null;
+  paint_code: string | null;
+  is_foreign_plate: boolean;
+  service_types: string[];
+  repair_locations: string[];
+  rdw_snapshot: Record<string, unknown> | null;
   customers: { id: string; name: string; email: string | null; phone: string | null } | null;
   vehicles: { id: string; kenteken: string | null; make: string | null; model: string | null; colour: string | null } | null;
 };
@@ -229,7 +239,13 @@ export default function LeadDetailPage() {
               <Row label={t('kenteken')} value={lead.kenteken} mono />
               <Row label={t('preferredDate')} value={lead.preferred_date ? new Date(lead.preferred_date).toLocaleDateString('nl-NL') : null} />
               <Row label={t('source')} value={lead.origin} />
-              <Row label={t('status')} value={lead.locale?.toUpperCase()} />
+              <Row label={t('language')} value={lead.locale ? t(`language_${lead.locale}` as Parameters<typeof t>[0]) : null} />
+              {lead.is_foreign_plate && (
+                <div className="flex items-center gap-1.5 text-xs text-amber-400">
+                  <Globe size={12} />
+                  {t('foreignPlate')}
+                </div>
+              )}
               <Row label={tCommon('create')} value={new Date(lead.created_at).toLocaleDateString('nl-NL', { day: 'numeric', month: 'long', year: 'numeric', hour: '2-digit', minute: '2-digit' })} />
             </dl>
             {lead.lost_reason && (
@@ -243,6 +259,56 @@ export default function LeadDetailPage() {
             <div className="rounded-lg border border-ck-dark-border bg-ck-dark-card p-6">
               <h2 className="mb-3 text-sm font-semibold uppercase text-ck-muted">{t('damage')}</h2>
               <p className="text-sm text-ck-muted-light whitespace-pre-wrap">{lead.damage_description}</p>
+            </div>
+          )}
+
+          {(lead.vehicle_make || lead.vehicle_vin || lead.paint_code) && (
+            <div className="rounded-lg border border-ck-dark-border bg-ck-dark-card p-6">
+              <h2 className="mb-4 flex items-center gap-2 text-sm font-semibold uppercase text-ck-muted">
+                <Car size={14} />
+                {t('vehicleDetails')}
+              </h2>
+              <dl className="space-y-3">
+                <Row label={t('make')} value={lead.vehicle_make} />
+                <Row label={t('model')} value={lead.vehicle_model} />
+                <Row label={t('year')} value={lead.vehicle_year?.toString()} />
+                <Row label={t('colour')} value={lead.vehicle_colour} />
+                <Row label={t('vin')} value={lead.vehicle_vin} mono />
+                <Row label={t('paintCode')} value={lead.paint_code} mono />
+              </dl>
+            </div>
+          )}
+
+          {(lead.service_types?.length > 0 || lead.repair_locations?.length > 0) && (
+            <div className="rounded-lg border border-ck-dark-border bg-ck-dark-card p-6">
+              <h2 className="mb-4 flex items-center gap-2 text-sm font-semibold uppercase text-ck-muted">
+                <Wrench size={14} />
+                {t('serviceDetails')}
+              </h2>
+              {lead.service_types?.length > 0 && (
+                <div className="mb-3">
+                  <p className="mb-2 text-xs text-ck-muted">{t('serviceTypes')}</p>
+                  <div className="flex flex-wrap gap-1.5">
+                    {lead.service_types.map(s => (
+                      <span key={s} className="rounded-full border border-ck-dark-border bg-ck-dark-surface px-2.5 py-1 text-xs text-ck-muted-light">
+                        {t(`service_${s}` as Parameters<typeof t>[0])}
+                      </span>
+                    ))}
+                  </div>
+                </div>
+              )}
+              {lead.repair_locations?.length > 0 && (
+                <div>
+                  <p className="mb-2 text-xs text-ck-muted">{t('repairLocations')}</p>
+                  <div className="flex flex-wrap gap-1.5">
+                    {lead.repair_locations.map(l => (
+                      <span key={l} className="rounded-full border border-ck-dark-border bg-ck-dark-surface px-2.5 py-1 text-xs text-ck-muted-light">
+                        {t(`location_${l}` as Parameters<typeof t>[0])}
+                      </span>
+                    ))}
+                  </div>
+                </div>
+              )}
             </div>
           )}
 
