@@ -9,7 +9,7 @@ import {
   Package, Receipt, FolderOpen, CalendarDays, ClipboardList,
   BarChart3, Calculator, ShoppingCart, BookOpen, Settings, Bell,
   ChevronLeft, ChevronRight, ChevronDown, BookOpenCheck, Clock, Bot, Mail, HardDrive, Server,
-  Plug, Zap, CarFront, Coins,
+  Plug, Zap, CarFront, Coins, Shield,
 } from 'lucide-react';
 import { ScreenBadge } from '@/components/ui/ScreenBadge';
 import { SCREEN_REGISTRY } from '@/lib/codes';
@@ -114,6 +114,7 @@ const NAV: NavSection[] = [
           { label: 'emailMonitor', href: '/app/instellingen/email-monitor', icon: Mail, code: 'SY25' },
           { label: 'googleDrive', href: '/app/drive', icon: HardDrive, code: 'SY30' },
           { label: 'infrastructure', href: '/app/instellingen/infrastructuur', icon: Server, code: 'SY35' },
+          { label: 'envSecrets', href: '/app/instellingen/integraties', icon: Shield, code: 'SY50' },
         ],
       },
       {

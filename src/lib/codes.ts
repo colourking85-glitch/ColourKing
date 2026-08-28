@@ -125,6 +125,9 @@ export const SCREEN_REGISTRY: Record<string, ScreenMeta> = {
   '/app/instellingen/merken': { id: 'SY40', title: 'Brand Management', titleNl: 'Merk/Model Beheer', module: 'SY', route: '/app/instellingen/merken' },
 
   '/app/instellingen/tarieven': { id: 'SY45', title: 'Labour Rates', titleNl: 'Tarieven', module: 'SY', route: '/app/instellingen/tarieven' },
+
+  // Environment Secrets
+  '/app/instellingen/integraties': { id: 'SY50', title: 'Environment Secrets', titleNl: 'Omgevingsgeheimen', module: 'SY', route: '/app/instellingen/integraties' },
 };
 
 export function getScreen(pathname: string): ScreenMeta | undefined {

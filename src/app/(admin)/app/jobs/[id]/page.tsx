@@ -4,7 +4,7 @@ import { useState, useEffect, useCallback, useRef } from 'react';
 import { useParams, useRouter } from 'next/navigation';
 import Link from 'next/link';
 import { useTranslations } from 'next-intl';
-import { ArrowLeft, ChevronRight, MessageSquare, Clock, Camera, Upload, Trash2, X } from 'lucide-react';
+import { ArrowLeft, ChevronRight, MessageSquare, Clock, Camera, Upload, Trash2, X, FileCheck } from 'lucide-react';
 import { ScreenBadge } from '@/components/ui/ScreenBadge';
 import {
   STAGE_LABELS,
@@ -240,6 +240,17 @@ export default function JobDetailPage() {
                 </button>
               ))}
             </div>
+          )}
+
+          {/* Handover shortcut — visible at ready/delivered/closed stages */}
+          {(['ready', 'delivered', 'closed'] as JobStage[]).includes(job.stage) && (
+            <Link
+              href={`/app/afleverbon?job=${id}`}
+              className="flex items-center gap-2 rounded-lg border border-green-500/30 bg-green-500/5 px-4 py-3 text-sm font-medium text-green-400 hover:border-green-500/50 hover:bg-green-500/10 transition-colors"
+            >
+              <FileCheck size={16} />
+              {t('createHandover')}
+            </Link>
           )}
 
           {/* Photos */}

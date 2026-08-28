@@ -82,7 +82,8 @@
     "integrations": "Entegrasyonlar",
     "automation": "Otomasyon",
     "brandModels": "Markalar & Modeller",
-    "labourRates": "Tarifeler"
+    "labourRates": "Tarifeler",
+    "envSecrets": "Ortam Sırları"
   },
   "header": {
     "quickCreate": "Hızlı oluştur",
@@ -454,7 +455,8 @@
     "process_mechanical": "Mekanik",
     "process_diagnostics": "Teşhis",
     "process_polish": "Polisaj & detay",
-    "process_prep": "Yüzey hazırlık"
+    "process_prep": "Yüzey hazırlık",
+    "createHandover": "Teslimat Belgesi Oluştur"
   },
   "es": {
     "title": "Teklifler",
@@ -1093,7 +1095,25 @@
     "rateUnit": "Birim",
     "ratePrice": "Fiyat",
     "rateDefault": "Varsayılan",
-    "rateActive": "Aktif"
+    "rateActive": "Aktif",
+    "envSecrets": "Ortam Sırları",
+    "envSecretsDesc": "API anahtarlarını, webhook sırlarını ve servis bağlantılarını yönetin",
+    "testAll": "Tümünü Test Et",
+    "totalSecrets": "Toplam Değişkenler",
+    "configured": "Yapılandırılmış",
+    "missingRequired": "Zorunlu Eksik",
+    "allSet": "Tümü ayarlı",
+    "missing": "eksik",
+    "optionalMissing": "İsteğe bağlı",
+    "test": "Test",
+    "envVar": "Değişken",
+    "label": "Etiket",
+    "scope": "Kapsam",
+    "status": "Durum",
+    "value": "Değer",
+    "set": "Ayarlı",
+    "notSet": "Ayarlanmamış",
+    "optional": "İsteğe bağlı"
   },
   "signature": {
     "signHere": "Buraya imza atın",

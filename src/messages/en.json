@@ -82,7 +82,8 @@
     "integrations": "Integrations",
     "automation": "Automation",
     "brandModels": "Brands & Models",
-    "labourRates": "Labour Rates"
+    "labourRates": "Labour Rates",
+    "envSecrets": "Environment Secrets"
   },
   "header": {
     "quickCreate": "Quick create",
@@ -454,7 +455,8 @@
     "process_mechanical": "Mechanical",
     "process_diagnostics": "Diagnostics",
     "process_polish": "Polish & detail",
-    "process_prep": "Surface prep"
+    "process_prep": "Surface prep",
+    "createHandover": "Create Handover Note"
   },
   "es": {
     "title": "Quotes",
@@ -1093,7 +1095,25 @@
     "rateUnit": "Unit",
     "ratePrice": "Price",
     "rateDefault": "Default",
-    "rateActive": "Active"
+    "rateActive": "Active",
+    "envSecrets": "Environment Secrets",
+    "envSecretsDesc": "Manage API keys, webhook secrets, and service connections",
+    "testAll": "Test All",
+    "totalSecrets": "Total Variables",
+    "configured": "Configured",
+    "missingRequired": "Required Missing",
+    "allSet": "All set",
+    "missing": "missing",
+    "optionalMissing": "Optional",
+    "test": "Test",
+    "envVar": "Variable",
+    "label": "Label",
+    "scope": "Scope",
+    "status": "Status",
+    "value": "Value",
+    "set": "Set",
+    "notSet": "Not set",
+    "optional": "Optional"
   },
   "signature": {
     "signHere": "Sign here",

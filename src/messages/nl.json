@@ -82,7 +82,8 @@
     "integrations": "Koppelingen",
     "automation": "Automatisering",
     "brandModels": "Merken & Modellen",
-    "labourRates": "Tarieven"
+    "labourRates": "Tarieven",
+    "envSecrets": "Omgevingsgeheimen"
   },
   "header": {
     "quickCreate": "Snel aanmaken",
@@ -454,7 +455,8 @@
     "process_mechanical": "Mechanisch",
     "process_diagnostics": "Diagnose",
     "process_polish": "Polijsten & detail",
-    "process_prep": "Voorbewerking"
+    "process_prep": "Voorbewerking",
+    "createHandover": "Afleverbon aanmaken"
   },
   "es": {
     "title": "Offertes",
@@ -1093,7 +1095,25 @@
     "rateUnit": "Eenheid",
     "ratePrice": "Prijs",
     "rateDefault": "Standaard",
-    "rateActive": "Actief"
+    "rateActive": "Actief",
+    "envSecrets": "Omgevingsgeheimen",
+    "envSecretsDesc": "Beheer API-sleutels, webhookgeheimen en serviceverbindingen",
+    "testAll": "Alles testen",
+    "totalSecrets": "Totaal variabelen",
+    "configured": "Geconfigureerd",
+    "missingRequired": "Verplicht ontbrekend",
+    "allSet": "Alles ingesteld",
+    "missing": "ontbrekend",
+    "optionalMissing": "Optioneel",
+    "test": "Test",
+    "envVar": "Variabele",
+    "label": "Label",
+    "scope": "Scope",
+    "status": "Status",
+    "value": "Waarde",
+    "set": "Ingesteld",
+    "notSet": "Niet ingesteld",
+    "optional": "Optioneel"
   },
   "signature": {
     "signHere": "Hier tekenen",
