@@ -2,11 +2,12 @@
 
 import { useState } from 'react';
 import { useTranslations } from 'next-intl';
-import { BookOpenCheck, Bot, ChevronRight, ChevronDown } from 'lucide-react';
+import { BookOpenCheck, Bot, ChevronRight, ChevronDown, GitBranch } from 'lucide-react';
 import { ScreenBadge } from '@/components/ui/ScreenBadge';
+import { BusinessFlowChart } from '@/components/ui/BusinessFlowChart';
 import { SCREEN_REGISTRY } from '@/lib/codes';
 
-type Tab = 'agent' | 'user';
+type Tab = 'agent' | 'user' | 'flow';
 
 const MODULES = [
   {
@@ -567,6 +568,7 @@ export default function ManualPage() {
   const tabs: { key: Tab; label: string; icon: React.ReactNode }[] = [
     { key: 'user', label: 'End User Manual', icon: <BookOpenCheck className="h-4 w-4" /> },
     { key: 'agent', label: 'AI Agent Guide', icon: <Bot className="h-4 w-4" /> },
+    { key: 'flow', label: 'Business Flow', icon: <GitBranch className="h-4 w-4" /> },
   ];
 
   return (
@@ -576,14 +578,16 @@ export default function ManualPage() {
         <div>
           <div className="flex items-center gap-3">
             <h1 className="text-xl font-medium text-white">
-              {tab === 'user' ? 'End User Manual' : 'AI Agent Quick Reference'}
+              {tab === 'user' ? 'End User Manual' : tab === 'agent' ? 'AI Agent Quick Reference' : 'Business Flow Chart'}
             </h1>
             <ScreenBadge code="SY10" />
           </div>
           <p className="mt-1 text-sm text-[#6b6b80]">
             {tab === 'user'
               ? 'Complete guide to every screen: what it does, how to use it, and how it connects to other parts of the system.'
-              : 'Machine-readable reference for AI agents to understand, navigate, and test the Colourking system.'}
+              : tab === 'agent'
+              ? 'Machine-readable reference for AI agents to understand, navigate, and test the Colourking system.'
+              : 'Visual end-to-end overview of all modules, screens, state machines, and how data flows through the system.'}
           </p>
         </div>
       </div>
@@ -763,6 +767,9 @@ export default function ManualPage() {
           ))}
         </div>
       )}
+
+      {/* Business Flow Tab */}
+      {tab === 'flow' && <BusinessFlowChart />}
     </div>
   );
 }

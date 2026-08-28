@@ -10,6 +10,7 @@ import {
 } from 'lucide-react';
 import { getScreen, searchScreens, type ScreenMeta } from '@/lib/codes';
 import { ScreenBadge } from '@/components/ui/ScreenBadge';
+import { ScreenHelpPanel } from '@/components/ui/ScreenHelpPanel';
 import { signOut } from '@/lib/auth';
 import { getFavorites, getRecentItems, addRecentItem, type FavoriteItem } from '@/lib/favorites';
 import { supabase } from '@/lib/supabase/client';
@@ -54,6 +55,7 @@ export function Header() {
   const [sysOpen, setSysOpen] = useState(false);
   const [userMenuOpen, setUserMenuOpen] = useState(false);
   const [bellOpen, setBellOpen] = useState(false);
+  const [helpOpen, setHelpOpen] = useState(false);
   const inputRef = useRef<HTMLInputElement>(null);
   const qcRef = useRef<HTMLDivElement>(null);
   const bellRef = useRef<HTMLDivElement>(null);
@@ -137,6 +139,7 @@ export function Header() {
         setBellOpen(false);
         setSysOpen(false);
         setUserMenuOpen(false);
+        setHelpOpen(false);
       }
     }
     window.addEventListener('keydown', onKeyDown);
@@ -181,6 +184,7 @@ export function Header() {
     setBellOpen(false);
     setSysOpen(false);
     setUserMenuOpen(false);
+    setHelpOpen(false);
   }
 
   return (
@@ -189,7 +193,7 @@ export function Header() {
         {/* ── Left: Logo + Screen context ──────────────────────────────── */}
         <div className="flex items-center gap-3 pl-4 pr-3">
           <div className="flex items-center gap-2">
-            {screen && <ScreenBadge id={screen.id} />}
+            {screen && <ScreenBadge id={screen.id} onClick={() => setHelpOpen(prev => !prev)} />}
             <span className="hidden text-[13px] font-medium text-white/80 sm:inline">
               {screen?.titleNl ?? tCommon('appName')}
             </span>
@@ -407,6 +411,11 @@ export function Header() {
           </div>
         </div>
       </header>
+
+      {/* ── Screen Help Panel ────────────────────────────────────────── */}
+      {helpOpen && screen && (
+        <ScreenHelpPanel screenCode={screen.id} onClose={() => setHelpOpen(false)} />
+      )}
 
       {/* ── Cmd-K palette ─────────────────────────────────────────────── */}
       {cmdkOpen && (

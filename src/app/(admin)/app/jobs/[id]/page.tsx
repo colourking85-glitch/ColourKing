@@ -42,6 +42,7 @@ type JobDetail = {
   created_at: string;
   updated_at: string;
   closed_at: string | null;
+  estimated_delivery_at: string | null;
   customers: { id: string; name: string; email: string | null; phone: string | null } | null;
   vehicles: { id: string; kenteken: string; make: string; model: string; colour: string; year: number | null } | null;
   job_events: JobEvent[];
@@ -216,6 +217,12 @@ export default function JobDetailPage() {
                 <span className="text-ck-muted">{t('createdDate')}</span>{' '}
                 <span className="text-white">{new Date(job.created_at).toLocaleDateString('nl-NL')}</span>
               </div>
+              {job.estimated_delivery_at && (
+                <div>
+                  <span className="text-ck-muted">{t('estimatedDelivery')}</span>{' '}
+                  <span className="text-white">{new Date(job.estimated_delivery_at).toLocaleString('nl-NL', { dateStyle: 'medium', timeStyle: 'short' })}</span>
+                </div>
+              )}
             </div>
             {job.notes && (
               <div className="mt-3 border-t border-ck-dark-border pt-3 text-sm text-ck-muted-light">{job.notes}</div>

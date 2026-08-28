@@ -4,7 +4,7 @@ import { useState, useEffect } from 'react';
 import Link from 'next/link';
 import { useTranslations } from 'next-intl';
 import {
-  Search, FileText, CheckCircle, Clock, Ban, Send, Pen,
+  Search, FileText, CheckCircle, Clock, Ban, Send, Pen, Plus,
 } from 'lucide-react';
 import { ScreenBadge } from '@/components/ui/ScreenBadge';
 import type { DocStatus } from '@/types/database';
@@ -55,10 +55,17 @@ export default function HandoverListPage() {
         <div>
           <div className="flex items-center gap-2">
             <h1 className="text-base font-medium text-ck-text">{t('titlePlural')}</h1>
-            <ScreenBadge code="DO22" />
+            <ScreenBadge code="DO21" />
           </div>
           <p className="mt-0.5 text-[11px] text-ck-text-muted">{t('listSubtitle')}</p>
         </div>
+        <Link
+          href="/app/afleverbon/nieuw"
+          className="inline-flex items-center gap-1.5 rounded-lg bg-ck-red px-3 py-2 text-xs font-semibold text-white transition-colors hover:bg-ck-red-hover"
+        >
+          <Plus size={14} />
+          {t('create')}
+        </Link>
       </div>
 
       {/* Search */}

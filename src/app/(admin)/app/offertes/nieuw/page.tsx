@@ -209,7 +209,10 @@ export default function CreateOfferPage() {
         }),
       });
 
-      if (!offerRes.ok) throw new Error('Could not create offer');
+      if (!offerRes.ok) {
+        const err = await offerRes.json().catch(() => null);
+        throw new Error(err?.error || 'Could not create offer');
+      }
       const offer = await offerRes.json();
 
       const validLines = lines.filter(l => l.description.trim());

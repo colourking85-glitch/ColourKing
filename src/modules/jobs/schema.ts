@@ -28,6 +28,7 @@ export const JobSchema = z.object({
   payer_type: z.enum(['casco', 'wa', 'particulier', 'lease']).nullable().optional(),
   estimated_hours: z.number().positive().nullable().optional(),
   target_date: z.string().nullable().optional(),
+  estimated_delivery_at: z.string().nullable().optional(),
 });
 
 export type JobInput = z.infer<typeof JobSchema>;

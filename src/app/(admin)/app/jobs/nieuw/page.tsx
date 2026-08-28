@@ -73,6 +73,7 @@ export default function CreateJobPage() {
     assigned_to: '' as string,
     estimated_hours: '',
     target_date: '',
+    estimated_delivery_at: '',
     intake_km: '',
     notes: '',
   });
@@ -164,6 +165,7 @@ export default function CreateJobPage() {
     if (form.assigned_to) body.assigned_to = form.assigned_to;
     if (form.estimated_hours) body.estimated_hours = parseFloat(form.estimated_hours);
     if (form.target_date) body.target_date = form.target_date;
+    if (form.estimated_delivery_at) body.estimated_delivery_at = new Date(form.estimated_delivery_at).toISOString();
     if (form.intake_km) body.intake_km = parseInt(form.intake_km);
     if (form.notes) body.notes = form.notes;
 
@@ -312,8 +314,8 @@ export default function CreateJobPage() {
           </div>
         </div>
 
-        {/* Estimated hours, Target date, Intake KM */}
-        <div className="grid grid-cols-3 gap-4">
+        {/* Estimated hours, Target date, Estimated delivery, Intake KM */}
+        <div className="grid grid-cols-2 gap-4">
           <div>
             <label className="mb-1 block text-xs text-ck-muted">{t('estimatedHours')}</label>
             <input
@@ -327,6 +329,17 @@ export default function CreateJobPage() {
             />
           </div>
           <div>
+            <label className="mb-1 block text-xs text-ck-muted">{t('intakeKm')}</label>
+            <input
+              type="number"
+              value={form.intake_km}
+              onChange={set('intake_km')}
+              className={inputClass}
+            />
+          </div>
+        </div>
+        <div className="grid grid-cols-2 gap-4">
+          <div>
             <label className="mb-1 block text-xs text-ck-muted">{t('targetDate')}</label>
             <input
               type="date"
@@ -336,11 +349,11 @@ export default function CreateJobPage() {
             />
           </div>
           <div>
-            <label className="mb-1 block text-xs text-ck-muted">{t('intakeKm')}</label>
+            <label className="mb-1 block text-xs text-ck-muted">{t('estimatedDelivery')}</label>
             <input
-              type="number"
-              value={form.intake_km}
-              onChange={set('intake_km')}
+              type="datetime-local"
+              value={form.estimated_delivery_at}
+              onChange={set('estimated_delivery_at')}
               className={inputClass}
             />
           </div>

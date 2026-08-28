@@ -427,6 +427,7 @@
     "payerType": "Betaler",
     "estimatedHours": "Geschatte uren",
     "targetDate": "Streefdatum",
+    "estimatedDelivery": "Geschatte afleverdatum",
     "assignedTo": "Monteur",
     "type_bodywork": "Carrosserie",
     "type_mechanical": "Mechanisch",

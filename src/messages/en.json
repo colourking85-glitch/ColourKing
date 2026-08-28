@@ -427,6 +427,7 @@
     "payerType": "Payer",
     "estimatedHours": "Estimated hours",
     "targetDate": "Target date",
+    "estimatedDelivery": "Estimated delivery",
     "assignedTo": "Technician",
     "type_bodywork": "Bodywork",
     "type_mechanical": "Mechanical",

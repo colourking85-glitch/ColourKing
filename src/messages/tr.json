@@ -427,6 +427,7 @@
     "payerType": "Ödeyici",
     "estimatedHours": "Tahmini saat",
     "targetDate": "Hedef tarih",
+    "estimatedDelivery": "Tahmini teslimat",
     "assignedTo": "Teknisyen",
     "type_bodywork": "Kaporta",
     "type_mechanical": "Mekanik",

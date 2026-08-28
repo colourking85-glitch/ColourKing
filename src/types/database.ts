@@ -1,4 +1,4 @@
-// Auto-generated types — reflects migrations 0001-0031.
+// Auto-generated types — reflects migrations 0001-0036.
 // Regenerate after every migration: supabase gen types typescript --local > src/types/database.ts
 
 export type Json =
@@ -399,6 +399,49 @@ export interface VatReturn {
 
 export type PurchaseCategory = 'general' | 'parts' | 'paint' | 'materials' | 'tools' | 'rent' | 'utilities' | 'insurance' | 'other';
 
+export interface Job {
+  id: string;
+  number: number;
+  customer_id: string;
+  vehicle_id: string | null;
+  lead_id: string | null;
+  offer_id: string | null;
+  stage: JobStage;
+  job_type: JobType;
+  priority: JobPriority;
+  payer_type: PayerType | null;
+  assigned_to: string | null;
+  intake_km: number | null;
+  outtake_km: number | null;
+  estimated_hours: number | null;
+  target_date: string | null;
+  estimated_delivery_at: string | null;
+  notes: string | null;
+  created_at: string;
+  updated_at: string;
+  closed_at: string | null;
+}
+
+export interface JobEvent {
+  id: string;
+  job_id: string;
+  event_type: JobEventType;
+  description: string | null;
+  old_value: string | null;
+  new_value: string | null;
+  actor_id: string | null;
+  created_at: string;
+}
+
+export interface JobPhoto {
+  id: string;
+  job_id: string;
+  storage_path: string;
+  phase: PhotoPhase;
+  caption: string | null;
+  created_at: string;
+}
+
 export interface Purchase {
   id: string;
   purchase_number: string | null;
@@ -480,6 +523,21 @@ export interface Database {
         Row: OfferLine;
         Insert: Omit<OfferLine, 'id' | 'created_at'> & { id?: string };
         Update: Partial<Omit<OfferLine, 'id' | 'created_at'>>;
+      };
+      jobs: {
+        Row: Job;
+        Insert: Omit<Job, 'id' | 'number' | 'created_at' | 'updated_at' | 'closed_at'> & { id?: string; number?: number };
+        Update: Partial<Omit<Job, 'id' | 'number' | 'created_at' | 'updated_at'>>;
+      };
+      job_events: {
+        Row: JobEvent;
+        Insert: Omit<JobEvent, 'id' | 'created_at'> & { id?: string };
+        Update: Partial<Omit<JobEvent, 'id' | 'created_at'>>;
+      };
+      job_photos: {
+        Row: JobPhoto;
+        Insert: Omit<JobPhoto, 'id' | 'created_at'> & { id?: string };
+        Update: Partial<Omit<JobPhoto, 'id' | 'created_at'>>;
       };
       parts: {
         Row: Part;
