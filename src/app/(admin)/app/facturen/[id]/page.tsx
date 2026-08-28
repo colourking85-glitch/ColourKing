@@ -8,7 +8,7 @@ import {
   ArrowLeft, FileText, Send, CheckCircle, AlertCircle,
   File, Ban, CreditCard, Trash2, Hash, Calendar,
   User, Car, ExternalLink, Copy, Printer, Link2,
-  Clock, Banknote,
+  Clock, Banknote, Eye,
 } from 'lucide-react';
 import type { InvoiceStatus, OfferLineKind, TaxCode, PaymentMethod } from '@/types/database';
 import { InvoiceTemplate } from '@/modules/invoices/template';
@@ -293,6 +293,13 @@ export default function InvoiceDetailPage() {
         </div>
 
         <div className="flex gap-2">
+          <Link
+            href={`/app/facturen/${id}/preview`}
+            className="flex items-center gap-1.5 rounded-[10px] border-[0.5px] border-ck-border bg-ck-surface px-4 py-2 text-sm text-ck-text-3 hover:border-ck-red hover:text-ck-red transition-colors"
+          >
+            <Eye size={14} />
+            {t('preview')}
+          </Link>
           {isDraft && (
             <button
               onClick={handleIssue}

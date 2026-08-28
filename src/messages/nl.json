@@ -518,7 +518,11 @@
     "noOffersFound": "Geen offertes gevonden",
     "noOffersMessage": "Nog geen offertes. Maak de eerste aan.",
     "recentLeads": "Recente leads",
-    "fromLead": "Vanuit lead"
+    "fromLead": "Vanuit lead",
+    "preview": "Voorbeeld",
+    "print": "Afdrukken",
+    "backToDetail": "Terug naar detail",
+    "notFound": "Offerte niet gevonden"
   },
   "pt": {
     "title": "Onderdelen",
@@ -763,7 +767,11 @@
     "listSubtitle": "Alle afleverbonnen",
     "searchPlaceholder": "Zoek op nummer of klantnaam...",
     "noHandovers": "Nog geen afleverbonnen",
-    "vehicle": "Voertuig"
+    "vehicle": "Voertuig",
+    "share": "Delen",
+    "copied": "Gekopieerd",
+    "issued": "Uitgeven",
+    "draft": "Concept"
   },
   "tk": {
     "title": "Taken",
@@ -929,7 +937,10 @@
     "paymentTerms": "Betalingsvoorwaarden",
     "paymentTermsPlaceholder": "Betaling binnen 30 dagen na factuurdatum...",
     "copied": "Gekopieerd!",
-    "paymentLink": "Betaallink"
+    "paymentLink": "Betaallink",
+    "preview": "Voorbeeld",
+    "backToDetail": "Terug naar detail",
+    "notFound": "Factuur niet gevonden"
   },
   "sy": {
     "title": "Instellingen",

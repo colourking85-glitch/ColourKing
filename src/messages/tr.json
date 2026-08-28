@@ -518,7 +518,11 @@
     "noOffersFound": "Teklif bulunamadı",
     "noOffersMessage": "Henüz teklif yok. İlk teklifi oluşturun.",
     "recentLeads": "Son gelen başvurular",
-    "fromLead": "Başvurudan"
+    "fromLead": "Başvurudan",
+    "preview": "Önizleme",
+    "print": "Yazdır",
+    "backToDetail": "Detaya dön",
+    "notFound": "Teklif bulunamadı"
   },
   "pt": {
     "title": "Parçalar",
@@ -763,7 +767,11 @@
     "listSubtitle": "Tüm teslim belgeleri",
     "searchPlaceholder": "Numara veya müşteri adına göre ara...",
     "noHandovers": "Henüz teslim belgesi yok",
-    "vehicle": "Araç"
+    "vehicle": "Araç",
+    "share": "Paylaş",
+    "copied": "Kopyalandı",
+    "issued": "Düzenle",
+    "draft": "Taslak"
   },
   "tk": {
     "title": "Görevler",
@@ -929,7 +937,10 @@
     "paymentTerms": "Ödeme koşulları",
     "paymentTermsPlaceholder": "Fatura tarihinden itibaren 30 gün içinde ödeme...",
     "copied": "Kopyalandı!",
-    "paymentLink": "Ödeme linki"
+    "paymentLink": "Ödeme linki",
+    "preview": "Önizleme",
+    "backToDetail": "Detaya dön",
+    "notFound": "Fatura bulunamadı"
   },
   "sy": {
     "title": "Ayarlar",

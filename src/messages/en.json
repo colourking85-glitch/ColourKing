@@ -518,7 +518,11 @@
     "noOffersFound": "No quotes found",
     "noOffersMessage": "No quotes yet. Create the first one.",
     "recentLeads": "Recent leads",
-    "fromLead": "From lead"
+    "fromLead": "From lead",
+    "preview": "Preview",
+    "print": "Print",
+    "backToDetail": "Back to detail",
+    "notFound": "Quote not found"
   },
   "pt": {
     "title": "Parts",
@@ -763,7 +767,11 @@
     "listSubtitle": "All handover notes",
     "searchPlaceholder": "Search by number or customer...",
     "noHandovers": "No handover notes yet",
-    "vehicle": "Vehicle"
+    "vehicle": "Vehicle",
+    "share": "Share",
+    "copied": "Copied",
+    "issued": "Issue",
+    "draft": "Draft"
   },
   "tk": {
     "title": "Tasks",
@@ -929,7 +937,10 @@
     "paymentTerms": "Payment terms",
     "paymentTermsPlaceholder": "Payment within 30 days of invoice date...",
     "copied": "Copied!",
-    "paymentLink": "Payment link"
+    "paymentLink": "Payment link",
+    "preview": "Preview",
+    "backToDetail": "Back to detail",
+    "notFound": "Invoice not found"
   },
   "sy": {
     "title": "Settings",

@@ -200,6 +200,8 @@ export interface Document {
   cancelled_at: string | null;
   cancel_reason: string | null;
   gallery_consent: boolean | null;
+  share_token: string | null;
+  share_expires_at: string | null;
   created_at: string;
   updated_at: string;
 }

@@ -7,7 +7,7 @@ import { useTranslations } from 'next-intl';
 import {
   ArrowLeft, FileText, Send, CheckCircle, XCircle,
   File, GitBranch, Trash2, Plus, Hash, Calendar,
-  User, Car, ExternalLink, Copy,
+  User, Car, ExternalLink, Copy, Eye,
 } from 'lucide-react';
 import type { OfferType, OfferStatus, OfferLineKind, TaxCode } from '@/types/database';
 import { formatCurrency } from '@/lib/format';
@@ -267,6 +267,13 @@ export default function OfferDetailPage() {
         </div>
 
         <div className="flex gap-2">
+          <Link
+            href={`/app/offertes/${id}/preview`}
+            className="flex items-center gap-1.5 rounded-[10px] border-[0.5px] border-ck-border bg-ck-surface px-4 py-2 text-sm text-ck-text-3 hover:border-ck-red hover:text-ck-red transition-colors"
+          >
+            <Eye size={14} />
+            {t('preview')}
+          </Link>
           {isDraft && (
             <button
               onClick={handleSend}

@@ -1,4 +1,5 @@
 import { NextRequest, NextResponse } from 'next/server';
+import { createClient } from '@/lib/supabase/server';
 import { getHandoverNote, getSignatures } from '@/modules/repair-orders/queries';
 import { getDocumentChain } from '@/modules/documents/queries';
 import { issueDocument, updateDocumentPayload } from '@/modules/documents/actions';
@@ -32,6 +33,26 @@ export async function PATCH(
 
     if (body.action === 'gallery_consent') {
       const doc = await setGalleryConsent(params.id, body.consent);
+      return NextResponse.json(doc);
+    }
+
+    if (body.action === 'share') {
+      const supabase = createClient();
+      const token = crypto.randomUUID().replace(/-/g, '');
+      const expiresAt = new Date();
+      expiresAt.setDate(expiresAt.getDate() + 30);
+
+      const { data: doc, error } = await supabase
+        .from('documents')
+        .update({
+          share_token: token,
+          share_expires_at: expiresAt.toISOString(),
+        })
+        .eq('id', params.id)
+        .select('id, share_token, share_expires_at')
+        .single();
+
+      if (error) throw error;
       return NextResponse.json(doc);
     }
 

@@ -6,6 +6,7 @@ import Link from 'next/link';
 import {
   ArrowLeft, FileText, Send, Hash, Calendar,
   User, Pen, Printer, CheckSquare, Square,
+  Share2, Copy, Check,
 } from 'lucide-react';
 import { useTranslations } from 'next-intl';
 import SignatureCanvas from '@/components/SignatureCanvas';
@@ -78,6 +79,8 @@ export default function HandoverNotePage() {
   const [acting, setActing] = useState(false);
   const [signerName, setSignerName] = useState('');
   const [showSign, setShowSign] = useState(false);
+  const [shareLink, setShareLink] = useState('');
+  const [copied, setCopied] = useState(false);
 
   const load = () => {
     setLoading(true);
@@ -110,6 +113,28 @@ export default function HandoverNotePage() {
     });
     if (res.ok) load();
     setActing(false);
+  };
+
+  const handleShare = async () => {
+    setActing(true);
+    const res = await fetch(`/api/handover-notes/${id}`, {
+      method: 'PATCH',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ action: 'share' }),
+    });
+    if (res.ok) {
+      const data = await res.json();
+      const link = `${window.location.origin}/s/handover/${data.share_token}`;
+      setShareLink(link);
+      await navigator.clipboard.writeText(link);
+      setCopied(true);
+      setTimeout(() => setCopied(false), 2000);
+    }
+    setActing(false);
+  };
+
+  const handlePrint = () => {
+    window.open(`/app/afleverbon/${id}/print`, '_blank');
   };
 
   const handleSign = async (signatureData: string) => {
@@ -188,15 +213,45 @@ export default function HandoverNotePage() {
               {t('issued')}
             </button>
           )}
+          {!isDraft && (
+            <button
+              onClick={handleShare}
+              disabled={acting}
+              className="flex items-center gap-1.5 rounded-[10px] border-[0.5px] border-ck-border bg-ck-surface px-4 py-2 text-sm text-ck-text-3 hover:border-ck-red hover:text-ck-red transition-colors disabled:opacity-50"
+            >
+              {copied ? <Check size={14} /> : <Share2 size={14} />}
+              {copied ? t('copied') : t('share')}
+            </button>
+          )}
           <button
-            disabled
-            className="flex items-center gap-1.5 rounded-[10px] border-[0.5px] border-ck-border bg-ck-surface px-4 py-2 text-sm text-ck-text-3 opacity-50 cursor-not-allowed"
+            onClick={handlePrint}
+            disabled={!doc.payload}
+            className="flex items-center gap-1.5 rounded-[10px] border-[0.5px] border-ck-border bg-ck-surface px-4 py-2 text-sm text-ck-text-3 hover:border-ck-red hover:text-ck-red transition-colors disabled:opacity-50"
           >
             <Printer size={14} />
             {t('pdf')}
           </button>
         </div>
       </div>
+
+      {/* Share link display */}
+      {shareLink && (
+        <div className="flex items-center gap-2 rounded-[10px] border-[0.5px] border-emerald-500/30 bg-emerald-500/5 px-4 py-3">
+          <Share2 size={14} className="shrink-0 text-emerald-400" />
+          <input
+            type="text"
+            readOnly
+            value={shareLink}
+            className="flex-1 bg-transparent text-xs font-mono text-ck-text-2 outline-none"
+          />
+          <button
+            onClick={() => { navigator.clipboard.writeText(shareLink); setCopied(true); setTimeout(() => setCopied(false), 2000); }}
+            className="shrink-0 text-xs text-emerald-400 hover:text-emerald-300"
+          >
+            {copied ? <Check size={14} /> : <Copy size={14} />}
+          </button>
+        </div>
+      )}
 
       <div className="grid gap-6 lg:grid-cols-3">
         {/* Main content */}
