@@ -369,34 +369,63 @@ export default function OffertePage() {
 
                   {!isForeignPlate ? (
                     <>
-                      <div>
-                        <label htmlFor="kenteken" className="block text-xs font-semibold uppercase tracking-wider text-ck-text-muted">
-                          {t('offerte.kenteken')} *
-                        </label>
-                        <div className="mt-1 flex gap-2">
-                          <input
-                            id="kenteken"
-                            type="text"
-                            value={form.kenteken}
-                            onChange={e => {
-                              handleChange('kenteken', e.target.value.toUpperCase());
-                              if (vehicle) setVehicle(null);
-                            }}
-                            onKeyDown={e => { if (e.key === 'Enter') { e.preventDefault(); lookupPlate(); } }}
-                            placeholder="XX-XXX-X"
-                            className={`${inputClasses} mt-0 flex-1 font-mono tracking-widest`}
-                          />
-                          <button
-                            type="button"
-                            onClick={lookupPlate}
-                            disabled={rdwLoading}
-                            className="whitespace-nowrap border border-ck-red bg-ck-red/10 px-4 py-3 text-xs font-semibold uppercase tracking-wider text-ck-red transition-colors hover:bg-ck-red/20 disabled:opacity-50"
-                          >
-                            {rdwLoading ? '...' : t('offerte.lookupPlate')}
-                          </button>
+                      <div className="grid gap-4 sm:grid-cols-3">
+                        <div>
+                          <label htmlFor="kenteken" className="block text-xs font-semibold uppercase tracking-wider text-ck-text-muted">
+                            {t('offerte.kenteken')} *
+                          </label>
+                          <div className="mt-1 flex gap-2">
+                            <input
+                              id="kenteken"
+                              type="text"
+                              value={form.kenteken}
+                              onChange={e => {
+                                handleChange('kenteken', e.target.value.toUpperCase());
+                                if (vehicle) setVehicle(null);
+                              }}
+                              onKeyDown={e => { if (e.key === 'Enter') { e.preventDefault(); lookupPlate(); } }}
+                              placeholder="XX-XXX-X"
+                              className={`${inputClasses} mt-0 flex-1 font-mono tracking-widest`}
+                            />
+                            <button
+                              type="button"
+                              onClick={lookupPlate}
+                              disabled={rdwLoading}
+                              className="whitespace-nowrap border border-ck-red bg-ck-red/10 px-4 py-3 text-xs font-semibold uppercase tracking-wider text-ck-red transition-colors hover:bg-ck-red/20 disabled:opacity-50"
+                            >
+                              {rdwLoading ? '...' : t('offerte.lookupPlate')}
+                            </button>
+                          </div>
+                          {rdwError && <p className="mt-1 text-xs text-ck-red">{rdwError}</p>}
+                          {errors.kenteken && <p className="mt-1 text-xs text-ck-red">{errors.kenteken}</p>}
                         </div>
-                        {rdwError && <p className="mt-1 text-xs text-ck-red">{rdwError}</p>}
-                        {errors.kenteken && <p className="mt-1 text-xs text-ck-red">{errors.kenteken}</p>}
+                        <div>
+                          <label htmlFor="vin" className="block text-xs font-semibold uppercase tracking-wider text-ck-text-muted">
+                            {t('offerte.vin')}
+                          </label>
+                          <input
+                            id="vin"
+                            type="text"
+                            maxLength={17}
+                            value={form.vehicle_vin}
+                            onChange={e => handleChange('vehicle_vin', e.target.value.toUpperCase())}
+                            placeholder="WVWZZZ3CZWE123456"
+                            className={`${inputClasses} font-mono tracking-wider`}
+                          />
+                        </div>
+                        <div>
+                          <label htmlFor="paintCode" className="block text-xs font-semibold uppercase tracking-wider text-ck-text-muted">
+                            {t('offerte.paintCode')}
+                          </label>
+                          <input
+                            id="paintCode"
+                            type="text"
+                            value={form.paint_code}
+                            onChange={e => handleChange('paint_code', e.target.value)}
+                            className={inputClasses}
+                          />
+                          <p className="mt-1 text-[10px] text-ck-text-faint">{t('offerte.paintCodeHint')}</p>
+                        </div>
                       </div>
 
                       {vehicle && (
@@ -503,38 +532,38 @@ export default function OffertePage() {
                           className={inputClasses}
                         />
                       </div>
+
+                      <div className="grid gap-4 sm:grid-cols-2">
+                        <div>
+                          <label htmlFor="vin" className="block text-xs font-semibold uppercase tracking-wider text-ck-text-muted">
+                            {t('offerte.vin')}
+                          </label>
+                          <input
+                            id="vin"
+                            type="text"
+                            maxLength={17}
+                            value={form.vehicle_vin}
+                            onChange={e => handleChange('vehicle_vin', e.target.value.toUpperCase())}
+                            placeholder="WVWZZZ3CZWE123456"
+                            className={`${inputClasses} font-mono tracking-wider`}
+                          />
+                        </div>
+                        <div>
+                          <label htmlFor="paintCode" className="block text-xs font-semibold uppercase tracking-wider text-ck-text-muted">
+                            {t('offerte.paintCode')}
+                          </label>
+                          <input
+                            id="paintCode"
+                            type="text"
+                            value={form.paint_code}
+                            onChange={e => handleChange('paint_code', e.target.value)}
+                            className={inputClasses}
+                          />
+                          <p className="mt-1 text-[10px] text-ck-text-faint">{t('offerte.paintCodeHint')}</p>
+                        </div>
+                      </div>
                     </>
                   )}
-
-                  <div className="grid gap-4 sm:grid-cols-2">
-                    <div>
-                      <label htmlFor="vin" className="block text-xs font-semibold uppercase tracking-wider text-ck-text-muted">
-                        {t('offerte.vin')}
-                      </label>
-                      <input
-                        id="vin"
-                        type="text"
-                        maxLength={17}
-                        value={form.vehicle_vin}
-                        onChange={e => handleChange('vehicle_vin', e.target.value.toUpperCase())}
-                        placeholder="WVWZZZ3CZWE123456"
-                        className={`${inputClasses} font-mono tracking-wider`}
-                      />
-                    </div>
-                    <div>
-                      <label htmlFor="paintCode" className="block text-xs font-semibold uppercase tracking-wider text-ck-text-muted">
-                        {t('offerte.paintCode')}
-                      </label>
-                      <input
-                        id="paintCode"
-                        type="text"
-                        value={form.paint_code}
-                        onChange={e => handleChange('paint_code', e.target.value)}
-                        className={inputClasses}
-                      />
-                      <p className="mt-1 text-[10px] text-ck-text-faint">{t('offerte.paintCodeHint')}</p>
-                    </div>
-                  </div>
                 </div>
 
                 {/* --- Service type --- */}
