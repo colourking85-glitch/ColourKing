@@ -113,8 +113,9 @@ export function Navbar({ locale }: { locale: string }) {
       className={`fixed top-0 left-0 right-0 z-50 transition-all duration-300 ${
         scrolled
           ? 'bg-ck-bg/95 backdrop-blur-md border-b border-ck-border py-3'
-          : 'bg-transparent py-5'
+          : 'py-5'
       }`}
+      style={scrolled ? undefined : { background: 'linear-gradient(to bottom, rgba(0,0,0,0.55) 0%, rgba(0,0,0,0.25) 60%, transparent 100%)' }}
     >
       <nav className="mx-auto flex max-w-7xl items-center justify-between px-6">
         {/* Logo */}
@@ -136,8 +137,8 @@ export function Navbar({ locale }: { locale: string }) {
                 href={link.href}
                 className={`text-sm font-medium uppercase tracking-wide transition-colors duration-200 ${
                   isActive
-                    ? 'text-ck-text'
-                    : 'text-ck-text-3 hover:text-ck-text'
+                    ? scrolled ? 'text-ck-text' : 'text-white'
+                    : scrolled ? 'text-ck-text-3 hover:text-ck-text' : 'text-white/80 hover:text-white'
                 }`}
               >
                 {t(link.label)}
@@ -146,11 +147,13 @@ export function Navbar({ locale }: { locale: string }) {
           })}
 
           {/* Language dropdown */}
-          <div className="relative border-l border-ck-border pl-6" ref={langRef}>
+          <div className={`relative border-l pl-6 ${scrolled ? 'border-ck-border' : 'border-white/20'}`} ref={langRef}>
             <button
               type="button"
               onClick={() => setLangOpen(!langOpen)}
-              className="flex items-center gap-2 rounded-lg px-3 py-1.5 text-sm font-medium text-ck-text-3 transition-colors hover:text-ck-text hover:bg-ck-surface-2"
+              className={`flex items-center gap-2 rounded-lg px-3 py-1.5 text-sm font-medium transition-colors ${
+                scrolled ? 'text-ck-text-3 hover:text-ck-text hover:bg-ck-surface-2' : 'text-white/80 hover:text-white'
+              }`}
             >
               <FlagIcon code={currentLocale.code} />
               <ChevronDown size={14} className={`transition-transform ${langOpen ? 'rotate-180' : ''}`} />
@@ -191,10 +194,12 @@ export function Navbar({ locale }: { locale: string }) {
             href="https://www.instagram.com/autoschadeherstelcolourking/"
             target="_blank"
             rel="noopener noreferrer"
-            className="group flex h-8 w-8 items-center justify-center border border-ck-border transition-colors hover:border-ck-text-3 hover:bg-ck-surface-2"
+            className={`group flex h-8 w-8 items-center justify-center border transition-colors ${
+              scrolled ? 'border-ck-border hover:border-ck-text-3 hover:bg-ck-surface-2' : 'border-white/30 hover:border-white hover:bg-white/10'
+            }`}
             aria-label="Instagram"
           >
-            <svg className="h-4 w-4 text-ck-text-muted transition-colors group-hover:text-ck-text" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+            <svg className={`h-4 w-4 transition-colors ${scrolled ? 'text-ck-text-muted group-hover:text-ck-text' : 'text-white/70 group-hover:text-white'}`} viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
               <rect x="2" y="2" width="20" height="20" rx="5" />
               <circle cx="12" cy="12" r="5" />
               <circle cx="17.5" cy="6.5" r="1.5" fill="currentColor" stroke="none" />
@@ -204,7 +209,11 @@ export function Navbar({ locale }: { locale: string }) {
           {/* CTAs */}
           <Link
             href="/afspraak"
-            className="border border-ck-border px-5 py-2.5 text-sm font-semibold uppercase tracking-wider text-ck-text transition-colors duration-200 hover:border-ck-text-3 hover:bg-ck-surface-2"
+            className={`border px-5 py-2.5 text-sm font-semibold uppercase tracking-wider transition-colors duration-200 ${
+              scrolled
+                ? 'border-ck-border text-ck-text hover:border-ck-text-3 hover:bg-ck-surface-2'
+                : 'border-white/40 text-white hover:border-white hover:bg-white/10'
+            }`}
           >
             {t('nav.appointment')}
           </Link>
@@ -223,9 +232,9 @@ export function Navbar({ locale }: { locale: string }) {
           className="flex flex-col gap-1.5 p-2 md:hidden"
           aria-label={t('nav.menu')}
         >
-          <span className={`block h-0.5 w-6 bg-ck-text transition-all duration-200 ${menuOpen ? 'translate-y-2 rotate-45' : ''}`} />
-          <span className={`block h-0.5 w-6 bg-ck-text transition-all duration-200 ${menuOpen ? 'opacity-0' : ''}`} />
-          <span className={`block h-0.5 w-6 bg-ck-text transition-all duration-200 ${menuOpen ? '-translate-y-2 -rotate-45' : ''}`} />
+          <span className={`block h-0.5 w-6 transition-all ${scrolled ? 'bg-ck-text' : 'bg-white'} duration-200 ${menuOpen ? 'translate-y-2 rotate-45' : ''}`} />
+          <span className={`block h-0.5 w-6 transition-all ${scrolled ? 'bg-ck-text' : 'bg-white'} duration-200 ${menuOpen ? 'opacity-0' : ''}`} />
+          <span className={`block h-0.5 w-6 transition-all ${scrolled ? 'bg-ck-text' : 'bg-white'} duration-200 ${menuOpen ? '-translate-y-2 -rotate-45' : ''}`} />
         </button>
       </nav>
 
