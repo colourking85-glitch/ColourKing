@@ -4,8 +4,9 @@ import { useState, useEffect, useRef, useMemo } from 'react';
 import { useParams } from 'next/navigation';
 import Link from 'next/link';
 import { useTranslations } from 'next-intl';
-import { ArrowLeft, Printer, Link2, FileDown } from 'lucide-react';
+import { ArrowLeft, Printer, Link2, FileDown, Camera } from 'lucide-react';
 import { ScreenBadge } from '@/components/ui/ScreenBadge';
+import { PhotoCapture } from '@/components/ui/PhotoCapture';
 import {
   STATUS_LABELS, STATUS_COLORS, isTerminal,
   type InsStatus
@@ -165,6 +166,7 @@ export default function InspectieDetailPage() {
   const [view, setView] = useState<ViewTab>('rapport');
   const [selectedRef, setSelectedRef] = useState<string>('');
   const [filter, setFilter] = useState<FindingFilter>('alles');
+  const [showCamera, setShowCamera] = useState(false);
   const scrollRef = useRef<HTMLDivElement>(null);
 
   useEffect(() => {
@@ -278,6 +280,14 @@ export default function InspectieDetailPage() {
             <button className="flex items-center gap-1.5 rounded-lg border border-ck-dark-border px-3 py-1.5 text-xs font-medium text-ck-muted-light hover:bg-ck-dark-surface hover:text-white">
               <Link2 size={14} /> Deellink
             </button>
+            {!locked && (
+              <button
+                onClick={() => setShowCamera(true)}
+                className="flex items-center gap-1.5 rounded-lg border border-ck-dark-border px-3 py-1.5 text-xs font-medium text-ck-muted-light hover:bg-ck-dark-surface hover:text-white"
+              >
+                <Camera size={14} /> Foto
+              </button>
+            )}
             <Link
               href={`/app/inspecties/${id}/rapport`}
               className="flex items-center gap-1.5 rounded-lg bg-ck-red px-3 py-1.5 text-xs font-semibold text-white hover:bg-ck-red-hover"
@@ -923,6 +933,23 @@ export default function InspectieDetailPage() {
         {/* ─── Right sidebar: finding detail ─── */}
         {selectedFinding && (
           <aside className="flex w-[340px] flex-none flex-col border-l border-ck-dark-border bg-ck-dark-card min-h-0">
+            {/* Photo capture panel */}
+            {showCamera && !locked && (
+              <div className="border-b border-ck-dark-border p-3">
+                <PhotoCapture
+                  inspectionId={id}
+                  findingId={selectedFinding.id}
+                  kind={selectedFinding.origin === 'pre_existent' ? 'pre_existent' : 'schade'}
+                  onUploaded={() => {
+                    setShowCamera(false);
+                    fetch(`/api/inspections/${id}`)
+                      .then(r => r.ok ? r.json() : null)
+                      .then(data => { if (data) setIns(data); });
+                  }}
+                  onClose={() => setShowCamera(false)}
+                />
+              </div>
+            )}
             <div className="flex items-center justify-between border-b border-ck-dark-border px-4 py-3">
               <span className="text-[10px] font-semibold uppercase tracking-widest text-ck-muted">Bevinding in detail</span>
               <span className="font-mono text-[12px] font-medium text-white">{selectedFinding.reference}</span>
