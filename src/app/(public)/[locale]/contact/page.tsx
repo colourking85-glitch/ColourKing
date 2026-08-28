@@ -297,7 +297,7 @@ export default function ContactPage() {
                 <div className="mt-5 space-y-3 text-sm">
                   <div className="flex justify-between border-b border-ck-border pb-2">
                     <span className="text-ck-text-muted">{t('contact.verified.company')}</span>
-                    <span className="font-medium text-ck-text">Colourking</span>
+                    <span className="font-medium text-ck-text">Autospuitbedrijf Colour King</span>
                   </div>
                   <div className="flex justify-between border-b border-ck-border pb-2">
                     <span className="text-ck-text-muted">KvK</span>

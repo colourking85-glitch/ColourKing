@@ -38,6 +38,7 @@
     "vehicle": "Vehicle",
     "job": "Job",
     "draft": "Draft",
+    "total": "Total",
     "notLinked": "Not linked yet",
     "noRegistration": "No registration",
     "settings": "Settings"

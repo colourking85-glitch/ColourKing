@@ -120,7 +120,7 @@ export default function GalleryPage() {
                 </p>
               </div>
               <Link
-                href="/offerte"
+                href="/contact"
                 className="shrink-0 bg-ck-red px-8 py-4 text-sm font-semibold uppercase tracking-wider text-white transition-colors hover:bg-ck-red-hover"
               >
                 {t('cta.button')}

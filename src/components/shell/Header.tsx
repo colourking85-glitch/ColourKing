@@ -6,7 +6,7 @@ import { useTranslations } from 'next-intl';
 import {
   Search, User, LogOut, Plus, Settings, HelpCircle,
   Inbox, Users, Car, Wrench, Bell, Sparkles,
-  ClipboardList, ChevronDown, Receipt, Star, FileText,
+  ClipboardList, ClipboardCheck, ChevronDown, Receipt, Star, FileText,
 } from 'lucide-react';
 import { getScreen, searchScreens, type ScreenMeta } from '@/lib/codes';
 import { ScreenBadge } from '@/components/ui/ScreenBadge';
@@ -30,6 +30,7 @@ const QUICK_CREATE = [
   { labelKey: 'vehicles', href: '/app/voertuigen/nieuw', icon: Car, color: 'text-blue-400' },
   { labelKey: 'offers', href: '/app/offertes/nieuw', icon: FileText, color: 'text-green-400' },
   { labelKey: 'jobs', href: '/app/jobs/nieuw', icon: Wrench, color: 'text-cyan-400' },
+  { labelKey: 'inspections', href: '/app/inspecties/nieuw', icon: ClipboardCheck, color: 'text-rose-400' },
   { labelKey: 'tasks', href: '/app/taken/nieuw', icon: ClipboardList, color: 'text-orange-400' },
   { labelKey: 'invoices', href: '/app/facturen/nieuw', icon: Receipt, color: 'text-emerald-400' },
 ];

@@ -341,7 +341,7 @@ export default async function HomePage({
               </a>
               <div className="flex flex-wrap gap-4">
                 <Link
-                  href="/offerte"
+                  href="/contact"
                   className="inline-flex items-center gap-2 bg-ck-red px-7 py-4 text-sm font-semibold uppercase tracking-wider text-white transition-all duration-200 hover:bg-ck-red-hover hover:-translate-y-0.5 hover:shadow-lg hover:shadow-ck-red/30"
                 >
                   <span>{t('cta.button')}</span>
