@@ -57,7 +57,7 @@ export function SiteTracker({ locale }: { locale?: string }) {
 
     initialized.current = true;
 
-    fetch('/api/analytics/track', {
+    fetch('/api/pulse', {
       method: 'POST',
       headers: { 'Content-Type': 'application/json' },
       body: JSON.stringify(payload),
@@ -68,7 +68,7 @@ export function SiteTracker({ locale }: { locale?: string }) {
       const duration = Math.round((Date.now() - st) / 1000);
       if (navigator.sendBeacon) {
         navigator.sendBeacon(
-          '/api/analytics/track',
+          '/api/pulse',
           JSON.stringify({
             action: 'end',
             session_id: sid,
