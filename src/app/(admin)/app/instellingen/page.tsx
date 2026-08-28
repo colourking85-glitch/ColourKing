@@ -1,8 +1,8 @@
 'use client';
 
-import { useState } from 'react';
+import { useState, useEffect, useCallback } from 'react';
 import { useTranslations } from 'next-intl';
-import { Settings, Palette, Globe, Building2, Bell, Check, Type, Maximize2 } from 'lucide-react';
+import { Settings, Palette, Globe, Building2, Bell, Check, Type, Maximize2, Bot } from 'lucide-react';
 import { ScreenBadge } from '@/components/ui/ScreenBadge';
 import { useAppLocale } from '@/components/AdminIntlProvider';
 import { useSettings } from '@/components/SettingsProvider';
@@ -36,6 +36,22 @@ export default function SettingsPage() {
   const [notifEmail, setNotifEmail] = useState(true);
   const [notifAppointment, setNotifAppointment] = useState(false);
 
+  const [aiPhotoCheck, setAiPhotoCheck] = useState(false);
+  const [aiKeyConfigured, setAiKeyConfigured] = useState(false);
+
+  const fetchAiConfig = useCallback(async () => {
+    try {
+      const res = await fetch('/api/public/ai-config');
+      if (res.ok) {
+        const data = await res.json();
+        setAiPhotoCheck(data.photo_check_enabled === true);
+        setAiKeyConfigured(data.photo_check_enabled === true);
+      }
+    } catch { /* ignore */ }
+  }, []);
+
+  useEffect(() => { fetchAiConfig(); }, [fetchAiConfig]);
+
   function handleSave() {
     if (language !== locale) {
       setLocale(language as 'nl' | 'en' | 'tr');
@@ -55,6 +71,12 @@ export default function SettingsPage() {
       timezone,
       currency,
     });
+
+    fetch('/api/settings/ai', {
+      method: 'PUT',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ photo_check_enabled: aiPhotoCheck }),
+    }).catch(() => {});
 
     setSaved(true);
     setTimeout(() => setSaved(false), 2000);
@@ -387,41 +409,77 @@ export default function SettingsPage() {
 
           {/* Notifications tab */}
           {tab === 'notifications' && (
-            <section className="rounded-lg border border-ck-dark-border bg-ck-dark-card p-6">
-              <h2 className="mb-4 flex items-center gap-2 text-sm font-semibold text-white">
-                <Bell size={16} /> {tSy('notifPrefs')}
-              </h2>
-              <p className="mb-4 text-xs text-ck-muted">
-                {tSy('notifPrefsDesc')}
-              </p>
-              <div className="space-y-4">
-                {[
-                  { label: tSy('notifLeadLabel'), desc: tSy('notifLeadDesc'), state: notifLead, set: setNotifLead },
-                  { label: tSy('notifStageLabel'), desc: tSy('notifStageDesc'), state: notifStage, set: setNotifStage },
-                  { label: tSy('notifEmailLabel'), desc: tSy('notifEmailDesc'), state: notifEmail, set: setNotifEmail },
-                  { label: tSy('notifAppointLabel'), desc: tSy('notifAppointDesc'), state: notifAppointment, set: setNotifAppointment },
-                ].map(n => (
-                  <label key={n.label} className="flex items-center justify-between">
+            <>
+              <section className="rounded-lg border border-ck-dark-border bg-ck-dark-card p-6">
+                <h2 className="mb-4 flex items-center gap-2 text-sm font-semibold text-white">
+                  <Bell size={16} /> {tSy('notifPrefs')}
+                </h2>
+                <p className="mb-4 text-xs text-ck-muted">
+                  {tSy('notifPrefsDesc')}
+                </p>
+                <div className="space-y-4">
+                  {[
+                    { label: tSy('notifLeadLabel'), desc: tSy('notifLeadDesc'), state: notifLead, set: setNotifLead },
+                    { label: tSy('notifStageLabel'), desc: tSy('notifStageDesc'), state: notifStage, set: setNotifStage },
+                    { label: tSy('notifEmailLabel'), desc: tSy('notifEmailDesc'), state: notifEmail, set: setNotifEmail },
+                    { label: tSy('notifAppointLabel'), desc: tSy('notifAppointDesc'), state: notifAppointment, set: setNotifAppointment },
+                  ].map(n => (
+                    <label key={n.label} className="flex items-center justify-between">
+                      <div>
+                        <div className="text-sm text-white">{n.label}</div>
+                        <div className="text-xs text-ck-muted">{n.desc}</div>
+                      </div>
+                      <button
+                        onClick={() => n.set(!n.state)}
+                        className={`relative h-6 w-11 rounded-full transition-colors ${
+                          n.state ? 'bg-ck-red' : 'bg-ck-dark-border'
+                        }`}
+                      >
+                        <span
+                          className={`absolute top-0.5 h-5 w-5 rounded-full bg-white transition-transform ${
+                            n.state ? 'translate-x-[22px]' : 'translate-x-0.5'
+                          }`}
+                        />
+                      </button>
+                    </label>
+                  ))}
+                </div>
+              </section>
+
+              <section className="rounded-lg border border-ck-dark-border bg-ck-dark-card p-6">
+                <h2 className="mb-4 flex items-center gap-2 text-sm font-semibold text-white">
+                  <Bot size={16} /> {tSy('aiSettings')}
+                </h2>
+                <p className="mb-4 text-xs text-ck-muted">
+                  {tSy('aiSettingsDesc')}
+                </p>
+                <div className="space-y-4">
+                  <label className="flex items-center justify-between">
                     <div>
-                      <div className="text-sm text-white">{n.label}</div>
-                      <div className="text-xs text-ck-muted">{n.desc}</div>
+                      <div className="text-sm text-white">{tSy('aiPhotoCheckLabel')}</div>
+                      <div className="text-xs text-ck-muted">{tSy('aiPhotoCheckDesc')}</div>
                     </div>
                     <button
-                      onClick={() => n.set(!n.state)}
+                      onClick={() => setAiPhotoCheck(!aiPhotoCheck)}
                       className={`relative h-6 w-11 rounded-full transition-colors ${
-                        n.state ? 'bg-ck-red' : 'bg-ck-dark-border'
+                        aiPhotoCheck ? 'bg-ck-red' : 'bg-ck-dark-border'
                       }`}
                     >
                       <span
                         className={`absolute top-0.5 h-5 w-5 rounded-full bg-white transition-transform ${
-                          n.state ? 'translate-x-[22px]' : 'translate-x-0.5'
+                          aiPhotoCheck ? 'translate-x-[22px]' : 'translate-x-0.5'
                         }`}
                       />
                     </button>
                   </label>
-                ))}
-              </div>
-            </section>
+                  {!aiKeyConfigured && (
+                    <p className="text-xs text-yellow-400">
+                      {tSy('aiKeyMissing')}
+                    </p>
+                  )}
+                </div>
+              </section>
+            </>
           )}
 
           {/* Save button */}

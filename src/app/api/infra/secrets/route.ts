@@ -110,6 +110,16 @@ export async function GET() {
       ],
     },
     {
+      id: 'anthropic',
+      name: 'Anthropic (AI)',
+      icon: '🤖',
+      description: 'AI-powered photo quality evaluation for quote requests',
+      docsUrl: 'https://docs.anthropic.com',
+      secrets: [
+        entry('ANTHROPIC_API_KEY', 'API Key', true),
+      ],
+    },
+    {
       id: 'app',
       name: 'Application',
       icon: '🔧',
@@ -164,6 +174,20 @@ export async function POST(req: NextRequest) {
         results.mollie = { ok: res.ok, message: res.ok ? 'Connected' : `HTTP ${res.status}`, latencyMs: Date.now() - start };
       } catch (e) {
         results.mollie = { ok: false, message: (e as Error).message, latencyMs: Date.now() - start };
+      }
+    }
+
+    if (service === 'anthropic' || !service) {
+      const start = Date.now();
+      try {
+        const key = process.env.ANTHROPIC_API_KEY;
+        if (!key) throw new Error('API key not set');
+        const res = await fetch('https://api.anthropic.com/v1/models', {
+          headers: { 'x-api-key': key, 'anthropic-version': '2023-06-01' },
+        });
+        results.anthropic = { ok: res.ok, message: res.ok ? 'Connected' : `HTTP ${res.status}`, latencyMs: Date.now() - start };
+      } catch (e) {
+        results.anthropic = { ok: false, message: (e as Error).message, latencyMs: Date.now() - start };
       }
     }
 

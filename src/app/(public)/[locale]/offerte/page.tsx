@@ -7,6 +7,16 @@ import { useParams } from 'next/navigation';
 const MAX_FILES = 5;
 const MAX_TOTAL_BYTES = 20 * 1024 * 1024;
 
+interface PhotoScore {
+  lighting: 'good' | 'warning' | 'bad';
+  angle: 'good' | 'warning' | 'bad';
+  focus: 'good' | 'warning' | 'bad';
+  distance: 'good' | 'warning' | 'bad';
+  damageVisible: 'good' | 'warning' | 'bad';
+  overallScore: number;
+  tips: string[];
+}
+
 interface VehicleInfo {
   kenteken: string;
   make: string;
@@ -81,6 +91,21 @@ export default function OffertePage() {
   const fileRef = useRef<HTMLInputElement>(null);
   const [errors, setErrors] = useState<Record<string, string>>({});
   const [status, setStatus] = useState<'idle' | 'sending' | 'success' | 'error'>('idle');
+
+  const [aiEnabled, setAiEnabled] = useState(false);
+  const [aiChecked, setAiChecked] = useState(true);
+  const [photoScores, setPhotoScores] = useState<Record<number, PhotoScore>>({});
+  const [photoChecking, setPhotoChecking] = useState<Record<number, boolean>>({});
+
+  useEffect(() => {
+    fetch('/api/public/ai-config')
+      .then(r => r.json())
+      .then(data => {
+        setAiEnabled(data.photo_check_enabled === true);
+        setAiChecked(data.photo_check_enabled === true);
+      })
+      .catch(() => {});
+  }, []);
 
   useEffect(() => {
     if (isForeignPlate && brands.length === 0) {
@@ -205,9 +230,28 @@ export default function OffertePage() {
     }
   }
 
+  async function checkPhoto(file: File, index: number) {
+    setPhotoChecking(prev => ({ ...prev, [index]: true }));
+    try {
+      const fd = new FormData();
+      fd.append('file', file);
+      fd.append('locale', locale || 'nl');
+      const res = await fetch('/api/public/photo-check', { method: 'POST', body: fd });
+      if (res.ok) {
+        const score: PhotoScore = await res.json();
+        setPhotoScores(prev => ({ ...prev, [index]: score }));
+      }
+    } catch {
+      // silently fail — AI check is optional
+    } finally {
+      setPhotoChecking(prev => ({ ...prev, [index]: false }));
+    }
+  }
+
   function handleFiles(selected: FileList | null) {
     if (!selected) return;
     const next = [...files];
+    const startIdx = next.length;
     for (let i = 0; i < selected.length && next.length < MAX_FILES; i++) {
       const f = selected[i];
       if (f.type && !f.type.startsWith('image/')) continue;
@@ -219,10 +263,34 @@ export default function OffertePage() {
       return;
     }
     setFiles(next);
+
+    if (aiChecked) {
+      for (let i = startIdx; i < next.length; i++) {
+        checkPhoto(next[i], i);
+      }
+    }
   }
 
   function removeFile(idx: number) {
     setFiles(prev => prev.filter((_, i) => i !== idx));
+    setPhotoScores(prev => {
+      const next: Record<number, PhotoScore> = {};
+      for (const [k, v] of Object.entries(prev)) {
+        const ki = Number(k);
+        if (ki < idx) next[ki] = v;
+        else if (ki > idx) next[ki - 1] = v;
+      }
+      return next;
+    });
+    setPhotoChecking(prev => {
+      const next: Record<number, boolean> = {};
+      for (const [k, v] of Object.entries(prev)) {
+        const ki = Number(k);
+        if (ki < idx) next[ki] = v;
+        else if (ki > idx) next[ki - 1] = v;
+      }
+      return next;
+    });
   }
 
   function handleChange(field: string, value: string) {
@@ -233,27 +301,27 @@ export default function OffertePage() {
   }
 
   const inputClasses =
-    'mt-1 w-full border border-ck-border bg-ck-dark px-4 py-3 text-sm text-white placeholder-white/20 outline-none transition-colors focus:border-[#E8364E]/50';
+    'mt-1 w-full border border-ck-border bg-ck-bg px-4 py-3 text-sm text-ck-text placeholder-ck-text-faint outline-none transition-colors focus:border-ck-red/50';
 
   const checkboxClasses = (active: boolean) =>
     `cursor-pointer border px-3 py-2 text-xs font-medium transition-colors ${
       active
-        ? 'border-[#E8364E] bg-[#E8364E]/10 text-[#E8364E]'
-        : 'border-ck-border bg-ck-dark text-white/60 hover:border-white/30 hover:text-white/80'
+        ? 'border-ck-red bg-ck-red/10 text-ck-red'
+        : 'border-ck-border bg-ck-bg text-ck-text-muted hover:border-ck-border-2 hover:text-ck-text-2'
     }`;
 
   return (
     <>
       <section className="relative overflow-hidden px-6 pb-16 pt-32 sm:pt-40">
-        <div className="absolute inset-0 bg-gradient-to-b from-[#E8364E]/8 to-transparent" />
+        <div className="absolute inset-0 bg-gradient-to-b from-ck-red/8 to-transparent" />
         <div className="relative mx-auto max-w-7xl">
-          <p className="text-xs font-semibold uppercase tracking-[0.2em] text-[#E8364E]">
+          <p className="text-xs font-semibold uppercase tracking-[0.2em] text-ck-red">
             {t('cta.eyebrow')}
           </p>
-          <h1 className="mt-4 font-heading text-4xl font-bold uppercase tracking-tight text-white sm:text-5xl lg:text-6xl">
+          <h1 className="mt-4 font-heading text-4xl font-bold uppercase tracking-tight text-ck-text sm:text-5xl lg:text-6xl">
             {t('offerte.title')}
           </h1>
-          <p className="mt-5 max-w-2xl text-lg leading-relaxed text-white/60">
+          <p className="mt-5 max-w-2xl text-lg leading-relaxed text-ck-text-muted">
             {t('offerte.subtitle')}
           </p>
         </div>
@@ -261,8 +329,8 @@ export default function OffertePage() {
 
       <section className="px-6 pb-24">
         <div className="mx-auto grid max-w-7xl gap-px bg-ck-border lg:grid-cols-5">
-          <div className="bg-ck-dark p-8 sm:p-12 lg:col-span-3">
-            <h2 className="font-heading text-2xl font-bold uppercase tracking-tight text-white">
+          <div className="bg-ck-bg p-8 sm:p-12 lg:col-span-3">
+            <h2 className="font-heading text-2xl font-bold uppercase tracking-tight text-ck-text">
               {t('offerte.formTitle')}
             </h2>
 
@@ -274,11 +342,11 @@ export default function OffertePage() {
               <form onSubmit={handleSubmit} className="mt-8 space-y-6">
                 {/* --- Vehicle identification --- */}
                 <div className="space-y-4">
-                  <h3 className="text-xs font-semibold uppercase tracking-[0.15em] text-[#E8364E]">
+                  <h3 className="text-xs font-semibold uppercase tracking-[0.15em] text-ck-red">
                     {t('offerte.vehicleSection')}
                   </h3>
 
-                  <label className="flex items-center gap-2 text-xs text-white/60">
+                  <label className="flex items-center gap-2 text-xs text-ck-text-muted">
                     <input
                       type="checkbox"
                       checked={isForeignPlate}
@@ -287,7 +355,7 @@ export default function OffertePage() {
                         setVehicle(null);
                         setRdwError('');
                       }}
-                      className="accent-[#E8364E]"
+                      className="accent-ck-red"
                     />
                     {t('offerte.foreignPlate')}
                   </label>
@@ -295,7 +363,7 @@ export default function OffertePage() {
                   {!isForeignPlate ? (
                     <>
                       <div>
-                        <label htmlFor="kenteken" className="block text-xs font-semibold uppercase tracking-wider text-white/50">
+                        <label htmlFor="kenteken" className="block text-xs font-semibold uppercase tracking-wider text-ck-text-muted">
                           {t('offerte.kenteken')} *
                         </label>
                         <div className="mt-1 flex gap-2">
@@ -315,23 +383,23 @@ export default function OffertePage() {
                             type="button"
                             onClick={lookupPlate}
                             disabled={rdwLoading}
-                            className="whitespace-nowrap border border-[#E8364E] bg-[#E8364E]/10 px-4 py-3 text-xs font-semibold uppercase tracking-wider text-[#E8364E] transition-colors hover:bg-[#E8364E]/20 disabled:opacity-50"
+                            className="whitespace-nowrap border border-ck-red bg-ck-red/10 px-4 py-3 text-xs font-semibold uppercase tracking-wider text-ck-red transition-colors hover:bg-ck-red/20 disabled:opacity-50"
                           >
                             {rdwLoading ? '...' : t('offerte.lookupPlate')}
                           </button>
                         </div>
-                        {rdwError && <p className="mt-1 text-xs text-[#E8364E]">{rdwError}</p>}
-                        {errors.kenteken && <p className="mt-1 text-xs text-[#E8364E]">{errors.kenteken}</p>}
+                        {rdwError && <p className="mt-1 text-xs text-ck-red">{rdwError}</p>}
+                        {errors.kenteken && <p className="mt-1 text-xs text-ck-red">{errors.kenteken}</p>}
                       </div>
 
                       {vehicle && (
                         <div className="border border-green-900/30 bg-green-950/10 p-4">
                           <div className="flex items-start justify-between gap-4">
                             <div>
-                              <p className="text-sm font-semibold text-white">
+                              <p className="text-sm font-semibold text-ck-text">
                                 {vehicle.make} {vehicle.model}
                               </p>
-                              <div className="mt-1 flex flex-wrap gap-x-4 gap-y-1 text-xs text-white/50">
+                              <div className="mt-1 flex flex-wrap gap-x-4 gap-y-1 text-xs text-ck-text-muted">
                                 {vehicle.year && <span>{vehicle.year}</span>}
                                 {vehicle.colour && <span>{vehicle.colour}</span>}
                                 {vehicle.fuel && <span>{vehicle.fuel}</span>}
@@ -347,7 +415,7 @@ export default function OffertePage() {
                     <>
                       <div className="grid gap-4 sm:grid-cols-2">
                         <div>
-                          <label htmlFor="brand" className="block text-xs font-semibold uppercase tracking-wider text-white/50">
+                          <label htmlFor="brand" className="block text-xs font-semibold uppercase tracking-wider text-ck-text-muted">
                             {t('offerte.brand')} *
                           </label>
                           <select
@@ -365,10 +433,10 @@ export default function OffertePage() {
                               <option key={b.id} value={b.id}>{b.name}</option>
                             ))}
                           </select>
-                          {errors.brand && <p className="mt-1 text-xs text-[#E8364E]">{errors.brand}</p>}
+                          {errors.brand && <p className="mt-1 text-xs text-ck-red">{errors.brand}</p>}
                         </div>
                         <div>
-                          <label htmlFor="model" className="block text-xs font-semibold uppercase tracking-wider text-white/50">
+                          <label htmlFor="model" className="block text-xs font-semibold uppercase tracking-wider text-ck-text-muted">
                             {t('offerte.model')}
                           </label>
                           <select
@@ -388,7 +456,7 @@ export default function OffertePage() {
 
                       <div className="grid gap-4 sm:grid-cols-2">
                         <div>
-                          <label htmlFor="year" className="block text-xs font-semibold uppercase tracking-wider text-white/50">
+                          <label htmlFor="year" className="block text-xs font-semibold uppercase tracking-wider text-ck-text-muted">
                             {t('offerte.year')}
                           </label>
                           <input
@@ -403,7 +471,7 @@ export default function OffertePage() {
                           />
                         </div>
                         <div>
-                          <label htmlFor="colour" className="block text-xs font-semibold uppercase tracking-wider text-white/50">
+                          <label htmlFor="colour" className="block text-xs font-semibold uppercase tracking-wider text-ck-text-muted">
                             {t('offerte.colour')}
                           </label>
                           <input
@@ -417,7 +485,7 @@ export default function OffertePage() {
                       </div>
 
                       <div>
-                        <label htmlFor="foreignKenteken" className="block text-xs font-semibold uppercase tracking-wider text-white/50">
+                        <label htmlFor="foreignKenteken" className="block text-xs font-semibold uppercase tracking-wider text-ck-text-muted">
                           {t('offerte.kentekenOptional')}
                         </label>
                         <input
@@ -433,7 +501,7 @@ export default function OffertePage() {
 
                   <div className="grid gap-4 sm:grid-cols-2">
                     <div>
-                      <label htmlFor="vin" className="block text-xs font-semibold uppercase tracking-wider text-white/50">
+                      <label htmlFor="vin" className="block text-xs font-semibold uppercase tracking-wider text-ck-text-muted">
                         {t('offerte.vin')}
                       </label>
                       <input
@@ -447,7 +515,7 @@ export default function OffertePage() {
                       />
                     </div>
                     <div>
-                      <label htmlFor="paintCode" className="block text-xs font-semibold uppercase tracking-wider text-white/50">
+                      <label htmlFor="paintCode" className="block text-xs font-semibold uppercase tracking-wider text-ck-text-muted">
                         {t('offerte.paintCode')}
                       </label>
                       <input
@@ -457,14 +525,14 @@ export default function OffertePage() {
                         onChange={e => handleChange('paint_code', e.target.value)}
                         className={inputClasses}
                       />
-                      <p className="mt-1 text-[10px] text-white/30">{t('offerte.paintCodeHint')}</p>
+                      <p className="mt-1 text-[10px] text-ck-text-faint">{t('offerte.paintCodeHint')}</p>
                     </div>
                   </div>
                 </div>
 
                 {/* --- Service type --- */}
                 <div className="space-y-3">
-                  <h3 className="text-xs font-semibold uppercase tracking-[0.15em] text-[#E8364E]">
+                  <h3 className="text-xs font-semibold uppercase tracking-[0.15em] text-ck-red">
                     {t('offerte.serviceSection')} *
                   </h3>
                   <div className="flex flex-wrap gap-2">
@@ -479,12 +547,12 @@ export default function OffertePage() {
                       </button>
                     ))}
                   </div>
-                  {errors.service && <p className="text-xs text-[#E8364E]">{errors.service}</p>}
+                  {errors.service && <p className="text-xs text-ck-red">{errors.service}</p>}
                 </div>
 
                 {/* --- Repair location --- */}
                 <div className="space-y-3">
-                  <h3 className="text-xs font-semibold uppercase tracking-[0.15em] text-white/50">
+                  <h3 className="text-xs font-semibold uppercase tracking-[0.15em] text-ck-text-muted">
                     {t('offerte.locationSection')}
                   </h3>
                   <div className="flex flex-wrap gap-2">
@@ -503,11 +571,11 @@ export default function OffertePage() {
 
                 {/* --- Contact details --- */}
                 <div className="space-y-4">
-                  <h3 className="text-xs font-semibold uppercase tracking-[0.15em] text-[#E8364E]">
+                  <h3 className="text-xs font-semibold uppercase tracking-[0.15em] text-ck-red">
                     {t('offerte.contactSection')}
                   </h3>
                   <div>
-                    <label htmlFor="name" className="block text-xs font-semibold uppercase tracking-wider text-white/50">
+                    <label htmlFor="name" className="block text-xs font-semibold uppercase tracking-wider text-ck-text-muted">
                       {t('offerte.name')} *
                     </label>
                     <input
@@ -517,12 +585,12 @@ export default function OffertePage() {
                       onChange={e => handleChange('name', e.target.value)}
                       className={inputClasses}
                     />
-                    {errors.name && <p className="mt-1 text-xs text-[#E8364E]">{errors.name}</p>}
+                    {errors.name && <p className="mt-1 text-xs text-ck-red">{errors.name}</p>}
                   </div>
 
                   <div className="grid gap-4 sm:grid-cols-2">
                     <div>
-                      <label htmlFor="email" className="block text-xs font-semibold uppercase tracking-wider text-white/50">
+                      <label htmlFor="email" className="block text-xs font-semibold uppercase tracking-wider text-ck-text-muted">
                         {t('offerte.email')}
                       </label>
                       <input
@@ -532,10 +600,10 @@ export default function OffertePage() {
                         onChange={e => handleChange('email', e.target.value)}
                         className={inputClasses}
                       />
-                      {errors.email && <p className="mt-1 text-xs text-[#E8364E]">{errors.email}</p>}
+                      {errors.email && <p className="mt-1 text-xs text-ck-red">{errors.email}</p>}
                     </div>
                     <div>
-                      <label htmlFor="phone" className="block text-xs font-semibold uppercase tracking-wider text-white/50">
+                      <label htmlFor="phone" className="block text-xs font-semibold uppercase tracking-wider text-ck-text-muted">
                         {t('offerte.phone')}
                       </label>
                       <input
@@ -551,7 +619,7 @@ export default function OffertePage() {
 
                 {/* --- Damage description --- */}
                 <div>
-                  <label htmlFor="damage" className="block text-xs font-semibold uppercase tracking-wider text-white/50">
+                  <label htmlFor="damage" className="block text-xs font-semibold uppercase tracking-wider text-ck-text-muted">
                     {t('offerte.damageDescription')}
                   </label>
                   <textarea
@@ -565,31 +633,71 @@ export default function OffertePage() {
 
                 {/* --- Photos --- */}
                 <div>
-                  <label className="block text-xs font-semibold uppercase tracking-wider text-white/50">
-                    {t('offerte.photos')} ({files.length}/{MAX_FILES})
-                  </label>
+                  <div className="flex items-center justify-between">
+                    <label className="block text-xs font-semibold uppercase tracking-wider text-ck-text-muted">
+                      {t('offerte.photos')} ({files.length}/{MAX_FILES})
+                    </label>
+                    {aiEnabled && (
+                      <label className="flex items-center gap-2 text-xs text-ck-text-muted cursor-pointer">
+                        <input
+                          type="checkbox"
+                          checked={aiChecked}
+                          onChange={() => setAiChecked(!aiChecked)}
+                          className="accent-ck-red"
+                        />
+                        {t('offerte.aiPhotoCheck')}
+                      </label>
+                    )}
+                  </div>
                   <div className="mt-1 flex flex-wrap gap-2">
                     {files.map((f, i) => (
-                      <div key={i} className="group relative h-20 w-20 overflow-hidden border border-ck-border">
-                        <img
-                          src={URL.createObjectURL(f)}
-                          alt={f.name}
-                          className="h-full w-full object-cover"
-                        />
-                        <button
-                          type="button"
-                          onClick={() => removeFile(i)}
-                          className="absolute right-0 top-0 bg-black/70 px-1.5 py-0.5 text-xs text-white opacity-0 transition-opacity group-hover:opacity-100"
-                        >
-                          &times;
-                        </button>
+                      <div key={i} className="group relative">
+                        <div className="relative h-20 w-20 overflow-hidden border border-ck-border">
+                          <img
+                            src={URL.createObjectURL(f)}
+                            alt={f.name}
+                            className="h-full w-full object-cover"
+                          />
+                          <button
+                            type="button"
+                            onClick={() => removeFile(i)}
+                            className="absolute right-0 top-0 bg-black/70 px-1.5 py-0.5 text-xs text-white opacity-0 transition-opacity group-hover:opacity-100"
+                          >
+                            &times;
+                          </button>
+                          {photoChecking[i] && (
+                            <div className="absolute inset-0 flex items-center justify-center bg-black/50">
+                              <div className="h-5 w-5 animate-spin rounded-full border-2 border-white border-t-transparent" />
+                            </div>
+                          )}
+                          {photoScores[i] && !photoChecking[i] && (
+                            <div className={`absolute bottom-0 left-0 right-0 px-1 py-0.5 text-center text-[9px] font-bold ${
+                              photoScores[i].overallScore >= 70
+                                ? 'bg-green-600/90 text-white'
+                                : photoScores[i].overallScore >= 40
+                                  ? 'bg-yellow-600/90 text-white'
+                                  : 'bg-red-600/90 text-white'
+                            }`}>
+                              {photoScores[i].overallScore}/100
+                            </div>
+                          )}
+                        </div>
+                        {photoScores[i] && !photoChecking[i] && photoScores[i].tips.length > 0 && (
+                          <div className="mt-1 w-48 space-y-0.5">
+                            {photoScores[i].tips.map((tip, ti) => (
+                              <p key={ti} className="text-[10px] leading-tight text-yellow-400">
+                                ⚠ {tip}
+                              </p>
+                            ))}
+                          </div>
+                        )}
                       </div>
                     ))}
                     {files.length < MAX_FILES && (
                       <button
                         type="button"
                         onClick={() => fileRef.current?.click()}
-                        className="flex h-20 w-20 items-center justify-center border border-dashed border-white/20 text-white/30 transition-colors hover:border-[#E8364E]/50 hover:text-[#E8364E]"
+                        className="flex h-20 w-20 items-center justify-center border border-dashed border-ck-border text-ck-text-faint transition-colors hover:border-ck-red/50 hover:text-ck-red"
                       >
                         +
                       </button>
@@ -603,17 +711,17 @@ export default function OffertePage() {
                     className="hidden"
                     onChange={e => { handleFiles(e.target.files); e.target.value = ''; }}
                   />
-                  <p className="mt-1 text-[10px] text-white/30">{t('offerte.photosHint')}</p>
+                  <p className="mt-1 text-[10px] text-ck-text-faint">{t('offerte.photosHint')}</p>
                 </div>
 
                 {status === 'error' && (
-                  <p className="text-sm text-[#E8364E]">{t('offerte.error')}</p>
+                  <p className="text-sm text-ck-red">{t('offerte.error')}</p>
                 )}
 
                 <button
                   type="submit"
                   disabled={status === 'sending'}
-                  className="w-full bg-[#E8364E] px-6 py-4 text-sm font-semibold uppercase tracking-wider text-white transition-colors hover:bg-[#d02e44] disabled:opacity-50"
+                  className="w-full bg-ck-red px-6 py-4 text-sm font-semibold uppercase tracking-wider text-white transition-colors hover:bg-ck-red-hover disabled:opacity-50"
                 >
                   {status === 'sending' ? t('offerte.submitting') : t('offerte.submit')}
                 </button>
@@ -622,48 +730,48 @@ export default function OffertePage() {
           </div>
 
           <div className="flex flex-col gap-px bg-ck-border lg:col-span-2">
-            <div className="bg-ck-dark p-8 sm:p-12">
-              <h2 className="font-heading text-2xl font-bold uppercase tracking-tight text-white">
+            <div className="bg-ck-bg p-8 sm:p-12">
+              <h2 className="font-heading text-2xl font-bold uppercase tracking-tight text-ck-text">
                 {t('contact.infoTitle')}
               </h2>
 
               <div className="mt-8 space-y-6">
                 <div>
-                  <p className="text-[11px] font-semibold uppercase tracking-[0.2em] text-[#E8364E]">
+                  <p className="text-[11px] font-semibold uppercase tracking-[0.2em] text-ck-red">
                     {t('contact.address')}
                   </p>
-                  <p className="mt-2 text-sm text-white">{t('footer.address')}</p>
+                  <p className="mt-2 text-sm text-ck-text">{t('footer.address')}</p>
                 </div>
 
                 <div>
-                  <p className="text-[11px] font-semibold uppercase tracking-[0.2em] text-[#E8364E]">
+                  <p className="text-[11px] font-semibold uppercase tracking-[0.2em] text-ck-red">
                     {t('contact.phone')}
                   </p>
                   <a
                     href="tel:+31681631020"
-                    className="mt-2 block font-heading text-2xl font-bold text-white transition-colors hover:text-[#E8364E]"
+                    className="mt-2 block font-heading text-2xl font-bold text-ck-text transition-colors hover:text-ck-red"
                   >
                     {t('footer.phone')}
                   </a>
                 </div>
 
                 <div>
-                  <p className="text-[11px] font-semibold uppercase tracking-[0.2em] text-[#E8364E]">
+                  <p className="text-[11px] font-semibold uppercase tracking-[0.2em] text-ck-red">
                     {t('contact.email')}
                   </p>
                   <a
                     href="mailto:info@colourking.nl"
-                    className="mt-2 block text-sm text-white transition-colors hover:text-[#E8364E]"
+                    className="mt-2 block text-sm text-ck-text transition-colors hover:text-ck-red"
                   >
                     {t('footer.email')}
                   </a>
                 </div>
 
                 <div>
-                  <p className="text-[11px] font-semibold uppercase tracking-[0.2em] text-[#E8364E]">
+                  <p className="text-[11px] font-semibold uppercase tracking-[0.2em] text-ck-red">
                     {t('footer.hours')}
                   </p>
-                  <div className="mt-2 space-y-1 text-sm text-white/60">
+                  <div className="mt-2 space-y-1 text-sm text-ck-text-muted">
                     <p>{t('footer.hoursWeekdays')}</p>
                     <p>{t('footer.hoursSaturday')}</p>
                     <p>{t('footer.hoursSunday')}</p>
@@ -672,8 +780,8 @@ export default function OffertePage() {
               </div>
             </div>
 
-            <div className="flex h-48 items-center justify-center bg-ck-dark lg:flex-1">
-              <p className="text-xs text-white/30">{t('contact.mapPlaceholder')}</p>
+            <div className="flex h-48 items-center justify-center bg-ck-bg lg:flex-1">
+              <p className="text-xs text-ck-text-faint">{t('contact.mapPlaceholder')}</p>
             </div>
           </div>
         </div>
