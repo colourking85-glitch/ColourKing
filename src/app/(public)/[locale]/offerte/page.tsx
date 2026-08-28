@@ -316,7 +316,7 @@ export default function OffertePage() {
     'mt-1 w-full border border-ck-border bg-ck-bg px-4 py-3 text-sm text-ck-text placeholder-ck-text-faint outline-none transition-colors focus:border-ck-red/50';
 
   const checkboxClasses = (active: boolean) =>
-    `cursor-pointer border px-3 py-2 text-xs font-medium transition-colors ${
+    `cursor-pointer border px-4 py-3.5 text-xs font-medium transition-colors ${
       active
         ? 'border-ck-red bg-ck-red/10 text-ck-red'
         : 'border-ck-border bg-ck-bg text-ck-text-muted hover:border-ck-border-2 hover:text-ck-text-2'
@@ -358,7 +358,7 @@ export default function OffertePage() {
                     {t('offerte.vehicleSection')}
                   </h3>
 
-                  <label className="flex items-center gap-2 text-xs text-ck-text-muted">
+                  <label className="flex min-h-[44px] cursor-pointer items-center gap-3 text-xs text-ck-text-muted">
                     <input
                       type="checkbox"
                       checked={isForeignPlate}
@@ -367,7 +367,7 @@ export default function OffertePage() {
                         setVehicle(null);
                         setRdwError('');
                       }}
-                      className="accent-ck-red"
+                      className="h-4 w-4 accent-ck-red"
                     />
                     {t('offerte.foreignPlate')}
                   </label>
@@ -744,12 +744,12 @@ export default function OffertePage() {
                       {t('offerte.photos')} ({files.length}/{MAX_FILES})
                     </label>
                     {aiEnabled && (
-                      <label className="flex items-center gap-2 text-xs text-ck-text-muted cursor-pointer">
+                      <label className="flex min-h-[44px] cursor-pointer items-center gap-3 text-xs text-ck-text-muted">
                         <input
                           type="checkbox"
                           checked={aiChecked}
                           onChange={() => setAiChecked(!aiChecked)}
-                          className="accent-ck-red"
+                          className="h-4 w-4 accent-ck-red"
                         />
                         {t('offerte.aiPhotoCheck')}
                       </label>
