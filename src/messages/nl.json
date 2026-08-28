@@ -53,6 +53,7 @@
     "invoices": "Facturen",
     "documents": "Documenten",
     "handovers": "Afleverbonnen",
+    "createHandover": "Afleverbon Aanmaken",
     "appointments": "Afspraken",
     "tasks": "Taken",
     "planning": "Planning",
@@ -773,7 +774,9 @@
     "share": "Delen",
     "copied": "Gekopieerd",
     "issued": "Uitgeven",
-    "draft": "Concept"
+    "draft": "Concept",
+    "linkedJob": "Gekoppelde opdracht",
+    "selectJob": "Selecteer een opdracht..."
   },
   "tk": {
     "title": "Taken",

@@ -216,7 +216,7 @@ export async function getJobMetrics(
   // Completed jobs in range
   const { data: completed, error: compErr } = await supabase
     .from('jobs')
-    .select('id, created_at, closed_at, offer_id')
+    .select('id, created_at, closed_at')
     .in('stage', ['delivered', 'closed'])
     .gte('closed_at', startDate)
     .lte('closed_at', endDate);
@@ -251,24 +251,9 @@ export async function getJobMetrics(
     }
   }
 
-  // Average job value from linked offers
-  let totalValue = 0;
-  let valueCount = 0;
-  if (completedList.length > 0) {
-    const offerIds = completedList.map((j) => j.offer_id).filter(Boolean) as string[];
-    if (offerIds.length > 0) {
-      const { data: offers } = await supabase
-        .from('offers')
-        .select('total_cents')
-        .in('id', offerIds);
-      if (offers) {
-        for (const o of offers) {
-          totalValue += o.total_cents || 0;
-          valueCount += 1;
-        }
-      }
-    }
-  }
+  // Average job value — offer_id not yet populated in production
+  const totalValue = 0;
+  const valueCount = 0;
 
   // Completed by month
   const completed_by_month = groupRows(

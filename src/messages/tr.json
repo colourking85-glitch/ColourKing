@@ -53,6 +53,7 @@
     "invoices": "Faturalar",
     "documents": "Belgeler",
     "handovers": "Teslim Belgeleri",
+    "createHandover": "Teslimat Belgesi Oluştur",
     "appointments": "Randevular",
     "tasks": "Görevler",
     "planning": "Planlama",
@@ -773,7 +774,9 @@
     "share": "Paylaş",
     "copied": "Kopyalandı",
     "issued": "Düzenle",
-    "draft": "Taslak"
+    "draft": "Taslak",
+    "linkedJob": "Bağlı iş",
+    "selectJob": "Bir iş seçin..."
   },
   "tk": {
     "title": "Görevler",

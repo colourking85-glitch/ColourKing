@@ -1,11 +1,11 @@
 'use client';
 
-import { useState, useEffect } from 'react';
+import { useState, useEffect, useRef } from 'react';
 import { useRouter } from 'next/navigation';
 import { useTranslations } from 'next-intl';
 import { ScreenBadge } from '@/components/ui/ScreenBadge';
 import { SearchableSelect } from '@/components/ui/SearchableSelect';
-import { Plus, Trash2, ChevronDown, ChevronRight, Clock } from 'lucide-react';
+import { Plus, Trash2, ChevronDown, ChevronRight, Clock, Camera, Upload, X } from 'lucide-react';
 
 type SelectOption = { id: string; name: string; kenteken?: string; make?: string; model?: string; customer_id?: string };
 type Staff = { id: string; name: string };
@@ -79,6 +79,9 @@ export default function CreateJobPage() {
 
   const [processesOpen, setProcessesOpen] = useState(false);
   const [processes, setProcesses] = useState<ProcessItem[]>([]);
+  const [stagedPhotos, setStagedPhotos] = useState<{ file: File; preview: string; phase: string }[]>([]);
+  const [photoPhase, setPhotoPhase] = useState('before');
+  const photoInputRef = useRef<HTMLInputElement>(null);
 
   useEffect(() => {
     fetch('/api/customers').then(r => r.json()).then(d => { if (Array.isArray(d)) setCustomers(d); });
@@ -121,6 +124,25 @@ export default function CreateJobPage() {
     if (existing) return;
     setProcesses(prev => [...prev, { tempId: crypto.randomUUID(), title: t(presetKey), estimated_hours: '' }]);
     if (!processesOpen) setProcessesOpen(true);
+  }
+
+  function handlePhotoStage(e: React.ChangeEvent<HTMLInputElement>) {
+    const files = e.target.files;
+    if (!files) return;
+    const newPhotos = Array.from(files).map(file => ({
+      file,
+      preview: URL.createObjectURL(file),
+      phase: photoPhase,
+    }));
+    setStagedPhotos(prev => [...prev, ...newPhotos]);
+    if (photoInputRef.current) photoInputRef.current.value = '';
+  }
+
+  function removeStagedPhoto(idx: number) {
+    setStagedPhotos(prev => {
+      URL.revokeObjectURL(prev[idx].preview);
+      return prev.filter((_, i) => i !== idx);
+    });
   }
 
   const set = (field: string) => (e: React.ChangeEvent<HTMLInputElement | HTMLSelectElement | HTMLTextAreaElement>) =>
@@ -175,6 +197,15 @@ export default function CreateJobPage() {
             sort_order: i,
           }),
         });
+      }
+    }
+
+    if (stagedPhotos.length > 0) {
+      for (const photo of stagedPhotos) {
+        const fd = new FormData();
+        fd.append('file', photo.file);
+        fd.append('phase', photo.phase);
+        await fetch(`/api/jobs/${job.id}/photos`, { method: 'POST', body: fd });
       }
     }
 
@@ -324,6 +355,61 @@ export default function CreateJobPage() {
             rows={3}
             className={`${inputClass} resize-y`}
           />
+        </div>
+
+        {/* Photos (intake) */}
+        <div className="space-y-3">
+          <div className="flex items-center justify-between">
+            <label className="flex items-center gap-2 text-xs text-ck-muted">
+              <Camera size={14} /> {t('photos')}
+            </label>
+            <div className="flex items-center gap-2">
+              <select
+                value={photoPhase}
+                onChange={e => setPhotoPhase(e.target.value)}
+                className="rounded border border-ck-dark-border bg-ck-dark-surface px-2 py-1 text-xs text-white focus:border-ck-red focus:outline-none"
+              >
+                <option value="before">{t('before')}</option>
+                <option value="during">{t('during')}</option>
+                <option value="after">{t('after')}</option>
+              </select>
+              <label className="flex cursor-pointer items-center gap-1 rounded-lg bg-ck-red px-3 py-1.5 text-xs font-semibold text-white hover:bg-ck-red-hover">
+                <Upload size={12} />
+                {t('upload')}
+                <input
+                  ref={photoInputRef}
+                  type="file"
+                  accept="image/jpeg,image/png,image/webp,image/heic"
+                  multiple
+                  className="hidden"
+                  onChange={handlePhotoStage}
+                />
+              </label>
+            </div>
+          </div>
+          {stagedPhotos.length > 0 && (
+            <div className="grid grid-cols-4 gap-2">
+              {stagedPhotos.map((p, idx) => (
+                <div key={idx} className="group relative">
+                  <img
+                    src={p.preview}
+                    alt={`${p.phase} ${idx + 1}`}
+                    className="h-24 w-full rounded-lg border border-ck-dark-border object-cover"
+                  />
+                  <span className="absolute bottom-1 left-1 rounded bg-black/60 px-1.5 py-0.5 text-[9px] text-white">
+                    {t(p.phase)}
+                  </span>
+                  <button
+                    type="button"
+                    onClick={() => removeStagedPhoto(idx)}
+                    className="absolute right-1 top-1 hidden rounded bg-red-600 p-1 text-white group-hover:block"
+                  >
+                    <X size={10} />
+                  </button>
+                </div>
+              ))}
+            </div>
+          )}
         </div>
 
         {/* Processes (optional, collapsible) */}

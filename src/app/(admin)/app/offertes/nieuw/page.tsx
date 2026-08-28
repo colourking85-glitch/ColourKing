@@ -21,6 +21,7 @@ type LeadOption = {
   damage_description: string | null;
   status: string;
   origin: string | null;
+  locale: string | null;
   created_at: string;
   customers: { id: string; name: string } | null;
   vehicles: { id: string; kenteken: string | null; make: string | null; model: string | null } | null;
@@ -126,6 +127,7 @@ export default function CreateOfferPage() {
     }
     if (lead.damage_description) setNotes(lead.damage_description);
     if (lead.origin) setOrigin(lead.origin);
+    if (lead.locale) setLocale(lead.locale);
   }
 
   function clearLead() {

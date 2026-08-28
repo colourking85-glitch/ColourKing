@@ -53,6 +53,7 @@
     "invoices": "Invoices",
     "documents": "Documents",
     "handovers": "Handover Notes",
+    "createHandover": "Create Handover",
     "appointments": "Appointments",
     "tasks": "Tasks",
     "planning": "Planning",
@@ -773,7 +774,9 @@
     "share": "Share",
     "copied": "Copied",
     "issued": "Issue",
-    "draft": "Draft"
+    "draft": "Draft",
+    "linkedJob": "Linked job",
+    "selectJob": "Select a job..."
   },
   "tk": {
     "title": "Tasks",
