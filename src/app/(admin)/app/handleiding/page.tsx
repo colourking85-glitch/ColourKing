@@ -550,6 +550,14 @@ const MODULES = [
         outputs: 'Service connectivity status with latency. Masked secret values. Summary statistics.',
         crossScreen: 'Shows configuration status of all integrations used by other screens: Supabase (database), IMAP (SY25), Google Drive (SY30), Mollie (FA), Resend (email). Related to Infrastructure overview (SY35).',
       },
+      {
+        code: 'AN05',
+        agentNotes: 'GET /api/analytics?period=3d&channel=all — returns summary (totalSessions, bounceRate, avgPages, avgDuration), channels[], entryPages[], exitPages[], countries[], devices[], browsers[], daily[], sessions[]. POST /api/analytics/track — public endpoint, no auth. Actions: start (creates session + first pageview), pageview (adds pageview + updates session counts), end (updates duration/exit page). Session tracking uses sessionStorage with 30-min TTL, no cookies. Geo from Vercel headers (x-vercel-ip-country, x-vercel-ip-city). Bot detection via user-agent patterns.',
+        userFlow: 'Website analytics dashboard showing visitor sessions on colourking.nl. Summary cards at top: Total Sessions, Bounce Rate, Avg Pages/Session, Avg Duration. Use the period filter (24h, 3d, 7d, 30d, 90d) and channel dropdown (all, direct, referral, organic search, social, AI, email) to narrow data.\n\nSessions Over Time bar chart shows daily session counts for the selected period. Five breakdown panels show: Channels (traffic sources), Top Entry Pages (where visitors land), Top Exit Pages (where they leave), Top Countries (with flag emoji), Top Devices (desktop/mobile/tablet).\n\nThe sessions table lists individual visits with: start time, session ID (first 8 chars), duration, page count, entry page, exit page, location (country flag + name + city), device icon, and channel badge. Filter sessions by ID using the search field. Bot traffic is automatically excluded.',
+        inputs: 'Period selector (24h/3d/7d/30d/90d), channel dropdown, session ID filter, refresh button.',
+        outputs: 'Summary statistics, sessions over time chart, breakdown panels (channels, entry/exit pages, countries, devices), sessions table.',
+        crossScreen: 'Tracking is embedded in the public layout via SiteTracker component. Sessions are recorded passively as visitors browse. Data comes from site_sessions and site_pageviews tables. No relation to internal user actions.',
+      },
     ],
   },
 ];

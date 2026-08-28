@@ -9,7 +9,7 @@ import {
   Package, Receipt, FolderOpen, CalendarDays, ClipboardList,
   BarChart3, Calculator, ShoppingCart, BookOpen, Settings, Bell,
   ChevronLeft, ChevronRight, ChevronDown, BookOpenCheck, Clock, Bot, Mail, HardDrive, Server,
-  Plug, Zap, CarFront, Coins, Shield,
+  Plug, Zap, CarFront, Coins, Shield, Activity,
 } from 'lucide-react';
 import { ScreenBadge } from '@/components/ui/ScreenBadge';
 import { SCREEN_REGISTRY } from '@/lib/codes';
@@ -124,6 +124,7 @@ const NAV: NavSection[] = [
           { label: 'monitoring', href: '/app/monitoring', icon: Bell, code: 'SY05' },
           { label: 'cronJobs', href: '/app/cron-jobs', icon: Clock, code: 'SY15' },
           { label: 'aiAgents', href: '/app/ai-agents', icon: Bot, code: 'SY20' },
+          { label: 'siteAnalytics', href: '/app/analytics', icon: Activity, code: 'AN05' },
         ],
       },
       { label: 'manual', href: '/app/handleiding', icon: BookOpenCheck, code: 'SY10' },

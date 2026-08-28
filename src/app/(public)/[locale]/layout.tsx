@@ -5,6 +5,7 @@ import { locales } from '@/i18n/request';
 import { ThemeProvider } from '@/components/ThemeProvider';
 import { Navbar } from '@/modules/public/Navbar';
 import { Footer } from '@/modules/public/Footer';
+import { SiteTracker } from '@/components/public/SiteTracker';
 
 export default async function PublicLayout({
   children,
@@ -29,6 +30,7 @@ export default async function PublicLayout({
           <Navbar locale={locale} />
           <main className="flex-1">{children}</main>
           <Footer />
+          <SiteTracker locale={locale} />
         </div>
       </ThemeProvider>
     </NextIntlClientProvider>
