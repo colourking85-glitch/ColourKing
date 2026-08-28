@@ -463,6 +463,7 @@ export default function CreateOfferPage() {
               <option value="phone">{tLd('phone')}</option>
               <option value="email">{tLd('email')}</option>
               <option value="walk_in">{tLd('walk_in')}</option>
+              <option value="Offerte-Web">Offerte-Web</option>
             </select>
           </div>
           <div>

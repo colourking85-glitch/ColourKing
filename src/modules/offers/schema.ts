@@ -2,7 +2,7 @@ import { z } from 'zod';
 
 export const OfferSchema = z.object({
   type: z.enum(['offer', 'supplement']).default('offer'),
-  origin: z.enum(['website', 'manual', 'phone', 'email', 'walk_in']).default('manual'),
+  origin: z.enum(['website', 'manual', 'phone', 'email', 'walk_in', 'Offerte-Web']).default('manual'),
   customer_id: z.string().uuid(),
   vehicle_id: z.string().uuid().nullable().optional(),
   lead_id: z.string().uuid().nullable().optional(),
