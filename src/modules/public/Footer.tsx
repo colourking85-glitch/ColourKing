@@ -126,25 +126,20 @@ export function Footer() {
         {/* Bottom */}
         <div className="mt-12 flex flex-col items-center justify-between gap-4 border-t border-ck-border pt-8 md:flex-row">
           <p className="text-xs text-ck-text-muted">
-            {t('footer.copyright', { year })}
+            {t('footer.copyright', { year })}{' · '}
+            <a
+              href="https://dessystems.io"
+              target="_blank"
+              rel="noopener noreferrer"
+              className="text-ck-text-muted/60 transition-colors hover:text-ck-text"
+            >
+              Developed by <span className="font-semibold">dessystems.io</span>
+            </a>
           </p>
           <ThemeSwitcher />
           <p className="text-xs text-ck-text-muted">
             {t('footer.kvk')}&nbsp;&nbsp;{t('footer.btw')}
           </p>
-        </div>
-
-        {/* Developer credit */}
-        <div className="mt-6 flex items-center justify-center pb-2">
-          <a
-            href="https://dessystems.io"
-            target="_blank"
-            rel="noopener noreferrer"
-            className="group flex items-center gap-1.5 text-[11px] text-ck-text-muted/60 transition-colors hover:text-ck-text-muted"
-          >
-            <span>Developed by</span>
-            <span className="font-semibold tracking-wide group-hover:text-ck-text">dessystems.io</span>
-          </a>
         </div>
       </div>
     </footer>
