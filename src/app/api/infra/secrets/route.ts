@@ -111,12 +111,32 @@ export async function GET() {
     },
     {
       id: 'anthropic',
-      name: 'Anthropic (AI)',
+      name: 'Anthropic (Claude)',
       icon: '🤖',
-      description: 'AI-powered photo quality evaluation for quote requests',
+      description: 'Claude AI — vision and text analysis',
       docsUrl: 'https://docs.anthropic.com',
       secrets: [
         entry('ANTHROPIC_API_KEY', 'API Key', true),
+      ],
+    },
+    {
+      id: 'google_ai',
+      name: 'Google (Gemini)',
+      icon: '✨',
+      description: 'Gemini AI — vision and text analysis',
+      docsUrl: 'https://ai.google.dev/docs',
+      secrets: [
+        entry('GOOGLE_AI_API_KEY', 'API Key', true),
+      ],
+    },
+    {
+      id: 'openai',
+      name: 'OpenAI (GPT)',
+      icon: '💬',
+      description: 'GPT AI — vision and text analysis',
+      docsUrl: 'https://platform.openai.com/docs',
+      secrets: [
+        entry('OPENAI_API_KEY', 'API Key', true),
       ],
     },
     {
@@ -188,6 +208,32 @@ export async function POST(req: NextRequest) {
         results.anthropic = { ok: res.ok, message: res.ok ? 'Connected' : `HTTP ${res.status}`, latencyMs: Date.now() - start };
       } catch (e) {
         results.anthropic = { ok: false, message: (e as Error).message, latencyMs: Date.now() - start };
+      }
+    }
+
+    if (service === 'google_ai' || !service) {
+      const start = Date.now();
+      try {
+        const key = process.env.GOOGLE_AI_API_KEY;
+        if (!key) throw new Error('API key not set');
+        const res = await fetch(`https://generativelanguage.googleapis.com/v1beta/models?key=${key}`);
+        results.google_ai = { ok: res.ok, message: res.ok ? 'Connected' : `HTTP ${res.status}`, latencyMs: Date.now() - start };
+      } catch (e) {
+        results.google_ai = { ok: false, message: (e as Error).message, latencyMs: Date.now() - start };
+      }
+    }
+
+    if (service === 'openai' || !service) {
+      const start = Date.now();
+      try {
+        const key = process.env.OPENAI_API_KEY;
+        if (!key) throw new Error('API key not set');
+        const res = await fetch('https://api.openai.com/v1/models', {
+          headers: { Authorization: `Bearer ${key}` },
+        });
+        results.openai = { ok: res.ok, message: res.ok ? 'Connected' : `HTTP ${res.status}`, latencyMs: Date.now() - start };
+      } catch (e) {
+        results.openai = { ok: false, message: (e as Error).message, latencyMs: Date.now() - start };
       }
     }
 

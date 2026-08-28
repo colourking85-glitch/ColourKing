@@ -1,16 +1,8 @@
 import { NextRequest, NextResponse } from 'next/server';
+import { admin } from '@/lib/supabase/admin';
+import { getDefaultProvider, type AIProviderId } from '@/lib/ai/providers';
 
 export const dynamic = 'force-dynamic';
-
-interface PhotoScore {
-  lighting: 'good' | 'warning' | 'bad';
-  angle: 'good' | 'warning' | 'bad';
-  focus: 'good' | 'warning' | 'bad';
-  distance: 'good' | 'warning' | 'bad';
-  damageVisible: 'good' | 'warning' | 'bad';
-  overallScore: number;
-  tips: string[];
-}
 
 const RATE_LIMIT_MAX = 10;
 const RATE_LIMIT_WINDOW_MS = 60_000;
@@ -35,8 +27,17 @@ function getClientKey(req: NextRequest) {
 }
 
 export async function POST(req: NextRequest) {
-  const apiKey = process.env.ANTHROPIC_API_KEY;
-  if (!apiKey) {
+  const { data } = await admin
+    .from('settings')
+    .select('value')
+    .eq('key', 'ai')
+    .single();
+
+  const aiSettings = data?.value as Record<string, unknown> | null;
+  const preferredProvider = (aiSettings?.photo_check_provider ?? aiSettings?.default_provider) as AIProviderId | null;
+  const provider = getDefaultProvider(preferredProvider);
+
+  if (!provider) {
     return NextResponse.json({ error: 'AI service not configured' }, { status: 503 });
   }
 
@@ -59,75 +60,15 @@ export async function POST(req: NextRequest) {
 
     const buffer = await file.arrayBuffer();
     const base64 = Buffer.from(buffer).toString('base64');
-    const mediaType = file.type as 'image/jpeg' | 'image/png' | 'image/webp' | 'image/gif';
 
-    const langMap: Record<string, string> = {
-      nl: 'Dutch',
-      en: 'English',
-      tr: 'Turkish',
-    };
+    const langMap: Record<string, string> = { nl: 'Dutch', en: 'English', tr: 'Turkish' };
     const language = langMap[locale] || 'English';
 
-    const res = await fetch('https://api.anthropic.com/v1/messages', {
-      method: 'POST',
-      headers: {
-        'x-api-key': apiKey,
-        'anthropic-version': '2023-06-01',
-        'content-type': 'application/json',
-      },
-      body: JSON.stringify({
-        model: 'claude-haiku-4-5-20251001',
-        max_tokens: 512,
-        messages: [
-          {
-            role: 'user',
-            content: [
-              {
-                type: 'image',
-                source: { type: 'base64', media_type: mediaType, data: base64 },
-              },
-              {
-                type: 'text',
-                text: `You are a vehicle damage photo quality inspector for an auto body shop. Evaluate this photo for use in a damage repair quote request.
+    const score = await provider.evaluatePhoto(base64, file.type, language);
 
-Score each criterion as "good", "warning", or "bad":
-- lighting: Is the photo well-lit? Can details be seen clearly?
-- angle: Is the damaged area photographed from a useful angle?
-- focus: Is the image sharp and in focus?
-- distance: Is the zoom/distance appropriate to see the damage?
-- damageVisible: Can vehicle damage actually be seen in this photo?
-
-Give an overall score from 0-100.
-Provide 1-3 short actionable tips in ${language} if improvements are needed. If the photo is good, return an empty tips array.
-
-Respond ONLY with valid JSON in this exact format:
-{"lighting":"good","angle":"good","focus":"good","distance":"good","damageVisible":"good","overallScore":85,"tips":[]}`,
-              },
-            ],
-          },
-        ],
-      }),
-    });
-
-    if (!res.ok) {
-      const err = await res.text();
-      console.error('Anthropic API error:', res.status, err);
-      return NextResponse.json({ error: 'AI evaluation failed' }, { status: 502 });
-    }
-
-    const data = await res.json();
-    const text = data.content?.[0]?.text ?? '';
-
-    const jsonMatch = text.match(/\{[\s\S]*\}/);
-    if (!jsonMatch) {
-      return NextResponse.json({ error: 'Invalid AI response' }, { status: 502 });
-    }
-
-    const score: PhotoScore = JSON.parse(jsonMatch[0]);
-
-    return NextResponse.json(score);
+    return NextResponse.json({ ...score, provider: provider.id });
   } catch (e) {
     console.error('Photo check error:', e);
-    return NextResponse.json({ error: 'Unexpected error' }, { status: 500 });
+    return NextResponse.json({ error: 'AI evaluation failed' }, { status: 502 });
   }
 }
