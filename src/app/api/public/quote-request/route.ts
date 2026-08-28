@@ -94,7 +94,7 @@ export async function POST(req: NextRequest) {
         kenteken: kenteken ?? null,
         damage_description: damage ?? null,
         locale,
-        origin: 'website',
+        origin: 'Offerte-Web',
         channel: 'quote_form',
         status: 'new',
       })

@@ -21,7 +21,7 @@ type Lead = {
 };
 
 const STATUSES = ['new', 'contacted', 'quoted', 'won', 'lost'] as const;
-const ORIGINS = ['website', 'phone', 'email', 'walk_in', 'referral'] as const;
+const ORIGINS = ['website', 'Offerte-Web', 'phone', 'email', 'walk_in', 'referral'] as const;
 
 type SortField = 'created_at' | 'contact_name' | 'status' | 'origin';
 type SortDir = 'asc' | 'desc';
