@@ -1,7 +1,10 @@
 import { z } from 'zod';
 
 export const InspectionSchema = z.object({
-  vehicle_id: z.string().uuid(),
+  vehicle_id: z.string().uuid().nullable().optional(),
+  plate_country: z.string().length(2).default('NL'),
+  paint_code: z.string().nullable().optional(),
+  colour: z.string().nullable().optional(),
   customer_id: z.string().uuid().nullable().optional(),
   job_id: z.string().uuid().nullable().optional(),
   parent_inspection_id: z.string().uuid().nullable().optional(),
@@ -32,9 +35,9 @@ export const FindingSchema = z.object({
   origin: z.enum(['schade', 'pre_existent']).default('schade'),
   disposition: z.enum(['herstellen', 'vervangen', 'onderzoeken', 'geen_actie']).default('herstellen'),
   repair_hours: z.number().min(0).default(0),
-  repair_technique: z.enum(['uitdeuken', 'uitdeuken_plamuren', 'richten', 'vervangen']).nullable().optional(),
+  repair_technique: z.enum(['uitdeuken', 'uitdeuken_plamuren', 'richten', 'vervangen', 'demontage_montage', 'polijsten', 'nader_onderzoeken']).nullable().optional(),
   paint_required: z.boolean().default(false),
-  paint_operation: z.enum(['spot', 'paneel', 'inspuiten', 'polijsten']).nullable().optional(),
+  paint_operation: z.enum(['spot', 'paneel', 'inspuiten', 'polijsten', 'paneel_inspuiten', 'polijsten_lak']).nullable().optional(),
   paint_hours: z.number().min(0).default(0),
   blend_components: z.array(z.string()).default([]),
   hidden_damage_possible: z.boolean().default(false),

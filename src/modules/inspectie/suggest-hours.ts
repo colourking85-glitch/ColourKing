@@ -59,12 +59,14 @@ export function suggestHours(input: SuggestInput): SuggestOutput {
         paintHours = base * 0.5;
         break;
       case 'polijsten':
+      case 'polijsten_lak':
         paintHours = base * 0.3;
         break;
       case 'paneel':
         paintHours = base;
         break;
       case 'inspuiten':
+      case 'paneel_inspuiten':
         paintHours = base * 1.2;
         break;
       default:

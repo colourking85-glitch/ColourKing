@@ -2,7 +2,7 @@
 
 import { useState, useEffect } from 'react';
 import Link from 'next/link';
-import { Search, ClipboardCheck, Eye } from 'lucide-react';
+import { Search, ClipboardCheck, Eye, Plus } from 'lucide-react';
 import { useTranslations } from 'next-intl';
 import { ScreenBadge } from '@/components/ui/ScreenBadge';
 import { STATUS_LABELS, STATUS_COLORS, type InsStatus } from '@/modules/inspectie/machine';
@@ -69,6 +69,13 @@ export default function InspectiesPage() {
           <ScreenBadge code="IN05" />
           <h1 className="font-display text-2xl font-bold text-white">{t('title')}</h1>
         </div>
+        <Link
+          href="/app/inspecties/nieuw"
+          className="flex items-center gap-2 rounded-lg bg-ck-red px-4 py-2.5 text-sm font-semibold text-white hover:bg-red-600 transition-colors"
+        >
+          <Plus size={16} />
+          {t('new')}
+        </Link>
       </div>
 
       <div className="flex gap-3">

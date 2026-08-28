@@ -63,6 +63,24 @@ export async function middleware(req: NextRequest) {
     return res;
   }
 
+  // ins.colourking.nl -> rewrite to /ins (standalone inspection wizard)
+  if (host.startsWith('ins.')) {
+    if (pathname.startsWith('/api/') || pathname.startsWith('/_next/') || pathname === '/login' || pathname.startsWith('/reset-password')) {
+      return NextResponse.next();
+    }
+    const url = req.nextUrl.clone();
+    url.pathname = '/ins';
+    const res = NextResponse.rewrite(url);
+    res.headers.set('X-Robots-Tag', 'noindex, nofollow');
+
+    if (hasSupabaseConfig()) {
+      const supabase = createSupabaseMiddleware(req, res);
+      await supabase.auth.getUser();
+    }
+
+    return res;
+  }
+
   // admin.colourking.nl -> rewrite to /app routes
   if (host.startsWith('admin.')) {
     // Public routes and API routes pass through directly
