@@ -4,8 +4,9 @@ import { admin } from '@/lib/supabase/admin';
 
 const ContactSchema = z.object({
   name: z.string().min(1, 'Name is required'),
-  email: z.string().email('Invalid email').optional(),
+  email: z.string().email('Invalid email'),
   phone: z.string().optional(),
+  subject: z.string().min(1, 'Subject is required'),
   message: z.string().min(1, 'Message is required'),
   locale: z.enum(['nl', 'en', 'tr']).optional().default('nl'),
 });
@@ -56,15 +57,15 @@ export async function POST(req: NextRequest) {
       );
     }
 
-    const { name, email, phone, message, locale } = parsed.data;
+    const { name, email, phone, subject, message, locale } = parsed.data;
 
     const { data, error } = await admin
       .from('leads')
       .insert({
         contact_name: name,
-        contact_email: email ?? null,
+        contact_email: email,
         contact_phone: phone ?? null,
-        damage_description: message,
+        damage_description: `[${subject}] ${message}`,
         origin: 'website',
         channel: 'contact_form',
         status: 'new',
