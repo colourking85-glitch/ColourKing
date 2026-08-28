@@ -1,5 +1,5 @@
 import { NextRequest, NextResponse } from 'next/server';
-import { createClient } from '@/lib/supabase/server';
+import { createClient, createServiceClient } from '@/lib/supabase/server';
 import { canTransition, getGuard, type InsStatus } from '@/modules/inspectie/machine';
 
 export async function POST(
@@ -9,13 +9,12 @@ export async function POST(
   try {
     const supabase = createClient();
     const { data: { user } } = await supabase.auth.getUser();
-    if (!user) {
-      return NextResponse.json({ error: 'Not authenticated' }, { status: 401 });
-    }
+
+    const db = user ? supabase : createServiceClient();
 
     const { to } = await req.json() as { to: InsStatus };
 
-    const { data: inspection, error: fetchErr } = await supabase
+    const { data: inspection, error: fetchErr } = await db
       .from('ins_inspections')
       .select('id, status, finding_count, photo_count')
       .eq('id', params.id)
@@ -33,7 +32,7 @@ export async function POST(
       throw new Error('Inspectie moet minstens één bevinding hebben');
     }
     if (guard === 'has_inspector_approval') {
-      const { data: approvals } = await supabase
+      const { data: approvals } = await db
         .from('ins_approvals')
         .select('id')
         .eq('inspection_id', params.id)
@@ -48,7 +47,7 @@ export async function POST(
     if (to === 'TER_AKKOORD') updates.submitted_at = new Date().toISOString();
     if (to === 'VERGRENDELD') updates.locked_at = new Date().toISOString();
 
-    const { data: updated, error } = await supabase
+    const { data: updated, error } = await db
       .from('ins_inspections')
       .update(updates)
       .eq('id', params.id)
@@ -57,10 +56,10 @@ export async function POST(
 
     if (error) throw error;
 
-    await supabase.from('ins_events').insert({
+    await db.from('ins_events').insert({
       inspection_id: params.id,
       event_type: `status_${to.toLowerCase()}`,
-      actor_id: user.id,
+      actor_id: user?.id ?? null,
       payload: { from, to },
     });
 

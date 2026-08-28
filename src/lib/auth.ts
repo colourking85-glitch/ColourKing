@@ -60,10 +60,22 @@ export async function getSession(): Promise<Session> {
     return MOCK_SESSION;
   }
 
-  const { data } = await supabase.auth.getSession();
+  let data;
+  try {
+    const result = await supabase.auth.getSession();
+    data = result.data;
+  } catch {
+    if (process.env.NODE_ENV === 'development') {
+      return {
+        id: 'dev-admin',
+        email: MOCK_SESSION.email,
+        name: MOCK_SESSION.name,
+        role: MOCK_SESSION.role,
+      };
+    }
+    return null;
+  }
 
-  // Dev bypass: when Supabase is configured but no user is logged in,
-  // return a dev admin in development mode
   if (!data.session?.user) {
     if (process.env.NODE_ENV === 'development') {
       return {

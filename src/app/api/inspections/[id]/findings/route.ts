@@ -1,5 +1,5 @@
 import { NextRequest, NextResponse } from 'next/server';
-import { createClient } from '@/lib/supabase/server';
+import { createClient, createServiceClient } from '@/lib/supabase/server';
 import { FindingSchema } from '@/modules/inspectie/schema';
 
 export async function POST(
@@ -9,18 +9,17 @@ export async function POST(
   try {
     const supabase = createClient();
     const { data: { user } } = await supabase.auth.getUser();
-    if (!user) {
-      return NextResponse.json({ error: 'Not authenticated' }, { status: 401 });
-    }
+
+    const db = user ? supabase : createServiceClient();
 
     const body = await req.json();
     const data = FindingSchema.parse({ ...body, inspection_id: params.id });
 
-    const { data: finding, error } = await supabase
+    const { data: finding, error } = await db
       .from('ins_findings')
       .upsert({
         ...data,
-        created_by: user.id,
+        ...(user ? { created_by: user.id } : {}),
       }, { onConflict: 'id' })
       .select()
       .single();

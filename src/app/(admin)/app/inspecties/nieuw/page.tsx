@@ -9,7 +9,7 @@ import { STATUS_LABELS, type InsStatus } from '@/modules/inspectie/machine';
 import { GUIDED_SHOTS, getShotProgress, type ShotKey } from '@/modules/inspectie/checklist';
 import { suggestHours } from '@/modules/inspectie/suggest-hours';
 
-// ──────── types ────────
+// -------- types --------
 
 type Vehicle = {
   id: string;
@@ -119,7 +119,7 @@ type Inspection = {
   ins_photos: Photo[];
 };
 
-// ──────── constants ────────
+// -------- constants --------
 
 const STEP_TITLE_KEYS = ['wizard.stepVehicle', 'wizard.stepPhotos', 'wizard.stepDamage', 'wizard.stepPreExistent', 'wizard.stepRepairPlan', 'wizard.stepCheck', 'wizard.stepApproval'] as const;
 const STEP_KEYS = ['voertuig', 'fotos', 'schade', 'preexistent', 'herstelplan', 'controle', 'akkoord'] as const;
@@ -209,7 +209,7 @@ const CHECKLIST_KEYS = [
   { titleKey: 'wizard.checkPartsForReplace', check: 'parts' },
 ] as const;
 
-// ──────── chip style helper ────────
+// -------- chip style helper --------
 
 const chipStyle = (on: boolean, extra: React.CSSProperties = {}): React.CSSProperties => ({
   display: 'flex', alignItems: 'center', gap: 6, minHeight: 40,
@@ -220,7 +220,7 @@ const chipStyle = (on: boolean, extra: React.CSSProperties = {}): React.CSSPrope
   ...extra,
 });
 
-// ──────── main component ────────
+// -------- main component --------
 
 export default function InspectieNieuwPage() {
   const router = useRouter();
@@ -277,7 +277,7 @@ export default function InspectieNieuwPage() {
   const [signName, setSignName] = useState('');
   const [signRecipient, setSignRecipient] = useState('');
 
-  // ──── data loading ────
+  // ---- data loading ----
 
   useEffect(() => {
     fetch('/api/vehicles').then(r => r.json()).then(setVehicles).catch(() => {});
@@ -297,7 +297,7 @@ export default function InspectieNieuwPage() {
     fetch(`/api/vehicle-brands/${selectedBrandId}/models`).then(r => r.json()).then(setModels).catch(() => setModels([]));
   }, [selectedBrandId]);
 
-  // ──── derived ────
+  // ---- derived ----
 
   const findings = inspection?.ins_findings ?? [];
   const photos = inspection?.ins_photos ?? [];
@@ -318,7 +318,7 @@ export default function InspectieNieuwPage() {
 
   const selFinding = currentFindings.find(f => f.id === selectedFindingId) || currentFindings[0] || null;
 
-  // ──── issues for right sidebar ────
+  // ---- issues for right sidebar ----
 
   const issues = useMemo(() => {
     if (!inspection) return [];
@@ -338,7 +338,7 @@ export default function InspectieNieuwPage() {
 
   const blockingIssues = issues.filter(i => i.block).length;
 
-  // ──── checklist checks ────
+  // ---- checklist checks ----
 
   const checkResults = useMemo(() => {
     const noPhoto = schadeFindings.filter(f => !photos.some(p => p.finding_id === f.id));
@@ -360,7 +360,7 @@ export default function InspectieNieuwPage() {
     });
   }, [plate, odometer, inspection, capturedShotKeys, schadeFindings, photos, repairTotal, paintTotal, t]);
 
-  // ──── RDW lookup ────
+  // ---- RDW lookup ----
 
   const lookupRdw = useCallback(async () => {
     if (!plate.trim()) return;
@@ -381,14 +381,14 @@ export default function InspectieNieuwPage() {
     finally { setRdwLoading(false); }
   }, [plate, vehicles, t]);
 
-  // ──── reload ────
+  // ---- reload ----
 
   const reloadInspection = useCallback(async (id: string) => {
     const res = await fetch(`/api/inspections/${id}`);
     if (res.ok) setInspection(await res.json());
   }, []);
 
-  // ──── create inspection ────
+  // ---- create inspection ----
 
   const createInspection = useCallback(async () => {
     if (!isForeignPlate && !selectedVehicle && !rdwData) { setError(t('wizard.errorSelectVehicle')); return false; }
@@ -427,7 +427,7 @@ export default function InspectieNieuwPage() {
     finally { setSaving(false); }
   }, [selectedVehicle, selectedCustomer, purpose, plate, vin, rdwData, odometer, eventDate, eventDesc, insurerName, claimNumber, reloadInspection, isForeignPlate, manualMake, manualModel, manualYear, manualColour, manualPaintCode, plateCountry, brands, selectedBrandId, models, selectedModelId, t]);
 
-  // ──── finding CRUD ────
+  // ---- finding CRUD ----
 
   const saveFinding = useCallback(async (finding: Partial<Finding> & { component_key: string; origin: string }) => {
     if (!inspection) return;
@@ -455,7 +455,7 @@ export default function InspectieNieuwPage() {
     finally { setSaving(false); }
   }, [inspection, reloadInspection, t]);
 
-  // ──── submit ────
+  // ---- submit ----
 
   const submitForApproval = useCallback(async () => {
     if (!inspection) return;
@@ -468,7 +468,7 @@ export default function InspectieNieuwPage() {
     finally { setSaving(false); }
   }, [inspection, router, t]);
 
-  // ──── navigation ────
+  // ---- navigation ----
 
   const canGoNext = useCallback(() => {
     if (step === 0) {
@@ -490,7 +490,7 @@ export default function InspectieNieuwPage() {
 
   const goPrev = useCallback(() => { setStep(s => Math.max(s - 1, 0)); setError(''); }, []);
 
-  // ──── filtered vehicles ────
+  // ---- filtered vehicles ----
 
   const filteredVehicles = useMemo(() => {
     if (!vehicleSearch.trim()) return vehicles.slice(0, 10);
@@ -500,7 +500,7 @@ export default function InspectieNieuwPage() {
     ).slice(0, 10);
   }, [vehicles, vehicleSearch]);
 
-  // ──── grouped components for picker modal ────
+  // ---- grouped components for picker modal ----
 
   const componentGroups = useMemo(() => {
     const active = components.filter(c => c.active);
@@ -515,7 +515,7 @@ export default function InspectieNieuwPage() {
     }));
   }, [components, findings]);
 
-  // ──── start new finding from picker ────
+  // ---- start new finding from picker ----
 
   const startNewFinding = useCallback((comp: Component) => {
     const origin = isPreStep ? 'pre_existent' : 'schade';
@@ -548,7 +548,7 @@ export default function InspectieNieuwPage() {
     setShowPicker(false);
   }, [isPreStep]);
 
-  // ──── recalc hours helper ────
+  // ---- recalc hours helper ----
 
   const recalcHours = useCallback((finding: Partial<Finding>) => {
     const c = components.find(c => c.key === finding.component_key);
@@ -579,14 +579,12 @@ export default function InspectieNieuwPage() {
 
   const dispLabel = (val: string) => t(DISP_LABEL_KEYS[val] || 'wizard.dispRepair');
 
-  // ════════════════════════════════
-  //           R E N D E R
-  // ════════════════════════════════
+  // --- RENDER ---
 
   return (
     <div className="-m-6 flex h-screen lg:h-[calc(100vh-48px)] flex-col overflow-hidden bg-ck-dark">
 
-      {/* ═══ HEADER ═══ */}
+      {/* --- HEADER --- */}
       <header className="flex-none flex items-center gap-2 sm:gap-4 px-3 sm:px-5 h-[56px] sm:h-[60px] bg-ck-dark-card border-b border-ck-dark-border whitespace-nowrap overflow-x-auto">
         <div className="flex h-[30px] w-[30px] flex-none items-center justify-center rounded-md bg-ck-red text-white font-mono text-xs font-semibold">
           CK
@@ -633,7 +631,7 @@ export default function InspectieNieuwPage() {
         </button>
       </header>
 
-      {/* ═══ MOBILE STEP BAR ═══ */}
+      {/* --- MOBILE STEP BAR --- */}
       <div className="flex lg:hidden flex-none items-center gap-1 px-3 h-[44px] bg-ck-dark-card border-b border-ck-dark-border overflow-x-auto">
         {STEP_TITLE_KEYS.map((titleKey, i) => {
           const active = i === step;
@@ -659,10 +657,10 @@ export default function InspectieNieuwPage() {
         })}
       </div>
 
-      {/* ═══ BODY: 3-PANEL ═══ */}
+      {/* --- BODY: 3-PANEL --- */}
       <div className="flex flex-1 min-h-0">
 
-        {/* ─── LEFT SIDEBAR: STEPS ─── */}
+        {/* --- LEFT SIDEBAR: STEPS --- */}
         <nav className="hidden lg:flex w-[232px] flex-none flex-col bg-ck-dark-card border-r border-ck-dark-border">
           <div className="flex flex-col gap-0.5 p-3">
             {STEP_TITLE_KEYS.map((titleKey, i) => {
@@ -715,7 +713,7 @@ export default function InspectieNieuwPage() {
           </div>
         </nav>
 
-        {/* ─── MAIN CONTENT ─── */}
+        {/* --- MAIN CONTENT --- */}
         <main className="flex flex-1 flex-col min-w-0 min-h-0">
           <div className="flex-1 overflow-auto p-3 sm:p-6 pb-10">
 
@@ -725,7 +723,7 @@ export default function InspectieNieuwPage() {
               </div>
             )}
 
-            {/* ═══ STEP 1: VOERTUIG ═══ */}
+            {/* --- STEP 1: VOERTUIG --- */}
             {stepKey === 'voertuig' && (
               <div style={{ maxWidth: 820 }}>
                 <h2 className="text-[24px] font-semibold text-white mb-1">{t('wizard.vehicleTitle')}</h2>
@@ -1014,7 +1012,7 @@ export default function InspectieNieuwPage() {
               </div>
             )}
 
-            {/* ═══ STEP 2: FOTO'S ═══ */}
+            {/* --- STEP 2: FOTOS --- */}
             {stepKey === 'fotos' && inspection && (
               <div>
                 <div className="flex items-end justify-between gap-4">
@@ -1106,7 +1104,7 @@ export default function InspectieNieuwPage() {
               </div>
             )}
 
-            {/* ═══ STEP 3 & 4: SCHADE / PRE-EXISTENT ═══ */}
+            {/* --- STEP 3 & 4: SCHADE / PRE-EXISTENT --- */}
             {(stepKey === 'schade' || stepKey === 'preexistent') && inspection && (
               <div>
                 <div className="flex items-end justify-between gap-4">
@@ -1358,7 +1356,7 @@ export default function InspectieNieuwPage() {
               </div>
             )}
 
-            {/* ═══ STEP 5: HERSTELPLAN ═══ */}
+            {/* --- STEP 5: HERSTELPLAN --- */}
             {stepKey === 'herstelplan' && inspection && (
               <div>
                 <h2 className="text-[24px] font-semibold text-white mb-1">{t('wizard.repairPlanTitle')}</h2>
@@ -1433,7 +1431,7 @@ export default function InspectieNieuwPage() {
               </div>
             )}
 
-            {/* ═══ STEP 6: CONTROLE ═══ */}
+            {/* --- STEP 6: CONTROLE --- */}
             {stepKey === 'controle' && inspection && (
               <div style={{ maxWidth: 900 }}>
                 <h2 className="text-[24px] font-semibold text-white mb-1">{t('wizard.checkTitle')}</h2>
@@ -1486,7 +1484,7 @@ export default function InspectieNieuwPage() {
               </div>
             )}
 
-            {/* ═══ STEP 7: AKKOORD ═══ */}
+            {/* --- STEP 7: AKKOORD --- */}
             {stepKey === 'akkoord' && inspection && (
               <div style={{ maxWidth: 720 }}>
                 <h2 className="text-[24px] font-semibold text-white mb-1">{t('wizard.approvalTitle')}</h2>
@@ -1605,7 +1603,7 @@ export default function InspectieNieuwPage() {
 
           </div>
 
-          {/* ─── FOOTER BAR ─── */}
+          {/* --- FOOTER BAR --- */}
           <div className="flex-none flex items-center gap-2 sm:gap-4 px-3 sm:px-6 h-[64px] bg-ck-dark-card border-t border-ck-dark-border">
             <span className="hidden sm:inline text-[13px] font-medium text-white">{t('wizard.stepOf', { current: step + 1 })}</span>
             {inspection && (
@@ -1642,7 +1640,7 @@ export default function InspectieNieuwPage() {
           </div>
         </main>
 
-        {/* ─── RIGHT SIDEBAR ─── */}
+        {/* --- RIGHT SIDEBAR --- */}
         <aside className="hidden lg:flex w-[296px] flex-none flex-col bg-ck-dark-card border-l border-ck-dark-border min-h-0">
           {/* Progress pips + mini stats */}
           <div className="p-4 border-b border-ck-dark-border">
@@ -1712,7 +1710,7 @@ export default function InspectieNieuwPage() {
         </aside>
       </div>
 
-      {/* ═══ COMPONENT PICKER MODAL ═══ */}
+      {/* --- COMPONENT PICKER MODAL --- */}
       {showPicker && (
         <div className="fixed inset-0 z-50 grid place-items-center p-2 sm:p-6" style={{ background: 'rgba(0,0,0,0.45)' }}>
           <div className="flex flex-col bg-ck-dark-card rounded-2xl shadow-2xl overflow-hidden w-full sm:w-[760px] max-h-[90vh] sm:max-h-[80vh]">
@@ -1755,9 +1753,7 @@ export default function InspectieNieuwPage() {
   );
 }
 
-// ════════════════════════════════
-//   Finding Editor (inline card)
-// ════════════════════════════════
+// --- Finding Editor (inline card) ---
 
 function FindingEditorInline({
   finding, damageTypes, components, origin,
