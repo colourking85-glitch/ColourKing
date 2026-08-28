@@ -97,34 +97,34 @@ export default function BookingPage() {
 
   if (success) {
     return (
-      <div className="flex min-h-screen items-center justify-center bg-[#0a0a0a] px-6 pt-24 pb-16">
+      <div className="flex min-h-screen items-center justify-center bg-ck-bg px-6 pt-24 pb-16">
         <div className="w-full max-w-lg text-center">
           <div className="mx-auto mb-6 flex h-20 w-20 items-center justify-center rounded-full bg-green-500/10">
             <Check size={40} className="text-green-400" />
           </div>
           <h1 className="font-heading text-3xl font-bold text-white">{t('successTitle')}</h1>
-          <p className="mt-4 text-white/60 leading-relaxed">{t('successMessage')}</p>
-          <div className="mt-8 rounded-lg border border-white/10 bg-white/5 p-6 text-left">
+          <p className="mt-4 text-ck-text-muted leading-relaxed">{t('successMessage')}</p>
+          <div className="mt-8 rounded-lg border border-ck-border bg-ck-surface-2 p-6 text-left">
             <div className="grid gap-3 text-sm">
               <div className="flex justify-between">
-                <span className="text-white/50">{t('type')}</span>
+                <span className="text-ck-text-muted">{t('type')}</span>
                 <span className="font-medium text-white">{t(`types.${type}`)}</span>
               </div>
               <div className="flex justify-between">
-                <span className="text-white/50">{tCommon('date')}</span>
+                <span className="text-ck-text-muted">{tCommon('date')}</span>
                 <span className="font-medium text-white">
                   {new Date(date + 'T00:00:00').toLocaleDateString('nl-NL', { weekday: 'long', day: 'numeric', month: 'long', year: 'numeric' })}
                 </span>
               </div>
               <div className="flex justify-between">
-                <span className="text-white/50">{t('time')}</span>
+                <span className="text-ck-text-muted">{t('time')}</span>
                 <span className="font-medium text-white">{time}</span>
               </div>
             </div>
           </div>
           <Link
             href="/"
-            className="mt-8 inline-flex items-center gap-2 bg-[#E8364E] px-7 py-3.5 text-sm font-semibold uppercase tracking-wider text-white transition-colors hover:bg-[#d02e44]"
+            className="mt-8 inline-flex items-center gap-2 bg-ck-red px-7 py-3.5 text-sm font-semibold uppercase tracking-wider text-white transition-colors hover:bg-ck-red-hover"
           >
             {t('backToHome')}
           </Link>
@@ -134,12 +134,12 @@ export default function BookingPage() {
   }
 
   return (
-    <div className="min-h-screen bg-[#0a0a0a] px-6 pt-28 pb-16">
+    <div className="min-h-screen bg-ck-bg px-6 pt-28 pb-16">
       <div className="mx-auto max-w-2xl">
         {/* Header */}
         <div className="mb-10 text-center">
-          <h1 className="font-heading text-3xl font-bold text-white md:text-4xl">{t('title')}</h1>
-          <p className="mt-3 text-white/50">{t('subtitle')}</p>
+          <h1 className="font-heading text-3xl font-bold text-ck-text md:text-4xl">{t('title')}</h1>
+          <p className="mt-3 text-ck-text-muted">{t('subtitle')}</p>
         </div>
 
         {/* Step indicator */}
@@ -154,20 +154,20 @@ export default function BookingPage() {
                 }}
                 className={`flex h-9 w-9 items-center justify-center rounded-full text-sm font-semibold transition-all ${
                   step === s
-                    ? 'bg-[#E8364E] text-white shadow-lg shadow-[#E8364E]/30'
+                    ? 'bg-ck-red text-white shadow-lg shadow-ck-red/30'
                     : step > s
                       ? 'bg-green-500/20 text-green-400'
-                      : 'bg-white/5 text-white/30'
+                      : 'bg-ck-surface-2 text-ck-text-faint'
                 }`}
               >
                 {step > s ? <Check size={16} /> : s}
               </button>
               <span className={`hidden text-xs font-medium uppercase tracking-wide sm:block ${
-                step === s ? 'text-white' : 'text-white/30'
+                step === s ? 'text-ck-text' : 'text-ck-text-faint'
               }`}>
                 {s === 1 ? t('step1') : s === 2 ? t('step2') : t('step3')}
               </span>
-              {s < 3 && <div className={`mx-2 h-px w-8 ${step > s ? 'bg-green-500/40' : 'bg-white/10'}`} />}
+              {s < 3 && <div className={`mx-2 h-px w-8 ${step > s ? 'bg-green-500/40' : 'bg-ck-border'}`} />}
             </div>
           ))}
         </div>
@@ -175,7 +175,7 @@ export default function BookingPage() {
         {/* Step 1: Type */}
         {step === 1 && (
           <div className="space-y-4">
-            <h2 className="text-lg font-semibold text-white">{t('chooseType')}</h2>
+            <h2 className="text-lg font-semibold text-ck-text">{t('chooseType')}</h2>
             <div className="grid gap-3">
               {TYPES.map(({ value, icon: Icon, duration }) => (
                 <button
@@ -183,22 +183,22 @@ export default function BookingPage() {
                   onClick={() => setType(value)}
                   className={`flex items-center gap-4 rounded-lg border p-5 text-left transition-all ${
                     type === value
-                      ? 'border-[#E8364E]/50 bg-[#E8364E]/10 shadow-lg shadow-[#E8364E]/5'
-                      : 'border-white/10 bg-white/[0.03] hover:border-white/20 hover:bg-white/[0.06]'
+                      ? 'border-ck-red/50 bg-ck-red/10 shadow-lg shadow-ck-red/5'
+                      : 'border-ck-border bg-ck-surface-2 hover:border-ck-border-2 hover:bg-ck-surface-3'
                   }`}
                 >
                   <div className={`flex h-12 w-12 items-center justify-center rounded-lg ${
-                    type === value ? 'bg-[#E8364E]/20 text-[#E8364E]' : 'bg-white/5 text-white/40'
+                    type === value ? 'bg-ck-red/20 text-ck-red' : 'bg-ck-surface-2 text-ck-text-faint'
                   }`}>
                     <Icon size={24} />
                   </div>
                   <div className="flex-1">
-                    <span className={`text-base font-semibold ${type === value ? 'text-white' : 'text-white/80'}`}>
+                    <span className={`text-base font-semibold ${type === value ? 'text-ck-text' : 'text-ck-text-2'}`}>
                       {t(`types.${value}`)}
                     </span>
-                    <p className="mt-0.5 text-sm text-white/40">{t(`typeDesc.${value}`)}</p>
+                    <p className="mt-0.5 text-sm text-ck-text-faint">{t(`typeDesc.${value}`)}</p>
                   </div>
-                  <div className="flex items-center gap-1 text-xs text-white/30">
+                  <div className="flex items-center gap-1 text-xs text-ck-text-faint">
                     <Clock size={12} />
                     <span>±{duration} min</span>
                   </div>
@@ -207,48 +207,48 @@ export default function BookingPage() {
             </div>
 
             {/* Location */}
-            <h2 className="mt-8 text-lg font-semibold text-white">{t('location')}</h2>
+            <h2 className="mt-8 text-lg font-semibold text-ck-text">{t('location')}</h2>
             <div className="grid gap-3 sm:grid-cols-2">
               <button
                 onClick={() => setLocation('shop')}
                 className={`flex items-start gap-4 rounded-lg border p-5 text-left transition-all ${
                   location === 'shop'
-                    ? 'border-[#E8364E]/50 bg-[#E8364E]/10 shadow-lg shadow-[#E8364E]/5'
-                    : 'border-white/10 bg-white/[0.03] hover:border-white/20 hover:bg-white/[0.06]'
+                    ? 'border-ck-red/50 bg-ck-red/10 shadow-lg shadow-ck-red/5'
+                    : 'border-ck-border bg-ck-surface-2 hover:border-ck-border-2 hover:bg-ck-surface-3'
                 }`}
               >
                 <div className={`mt-0.5 flex h-10 w-10 shrink-0 items-center justify-center rounded-lg ${
-                  location === 'shop' ? 'bg-[#E8364E]/20 text-[#E8364E]' : 'bg-white/5 text-white/40'
+                  location === 'shop' ? 'bg-ck-red/20 text-ck-red' : 'bg-ck-surface-2 text-ck-text-faint'
                 }`}>
                   <MapPin size={20} />
                 </div>
                 <div>
-                  <span className={`text-sm font-semibold uppercase tracking-wide ${location === 'shop' ? 'text-[#E8364E]' : 'text-white/60'}`}>
+                  <span className={`text-sm font-semibold uppercase tracking-wide ${location === 'shop' ? 'text-ck-red' : 'text-ck-text-muted'}`}>
                     {t('locationShop')}
                   </span>
-                  <p className="mt-1 text-sm font-medium text-white">Satijnbloem 6, 3068 JP</p>
-                  <p className="text-xs text-white/40">Rotterdam · {t('freeParking')}</p>
+                  <p className="mt-1 text-sm font-medium text-ck-text">Satijnbloem 6, 3068 JP</p>
+                  <p className="text-xs text-ck-text-faint">Rotterdam · {t('freeParking')}</p>
                 </div>
               </button>
               <button
                 onClick={() => setLocation('other')}
                 className={`flex items-start gap-4 rounded-lg border p-5 text-left transition-all ${
                   location === 'other'
-                    ? 'border-[#E8364E]/50 bg-[#E8364E]/10 shadow-lg shadow-[#E8364E]/5'
-                    : 'border-white/10 bg-white/[0.03] hover:border-white/20 hover:bg-white/[0.06]'
+                    ? 'border-ck-red/50 bg-ck-red/10 shadow-lg shadow-ck-red/5'
+                    : 'border-ck-border bg-ck-surface-2 hover:border-ck-border-2 hover:bg-ck-surface-3'
                 }`}
               >
                 <div className={`mt-0.5 flex h-10 w-10 shrink-0 items-center justify-center rounded-lg ${
-                  location === 'other' ? 'bg-[#E8364E]/20 text-[#E8364E]' : 'bg-white/5 text-white/40'
+                  location === 'other' ? 'bg-ck-red/20 text-ck-red' : 'bg-ck-surface-2 text-ck-text-faint'
                 }`}>
                   <Navigation size={20} />
                 </div>
                 <div>
-                  <span className={`text-sm font-semibold uppercase tracking-wide ${location === 'other' ? 'text-[#E8364E]' : 'text-white/60'}`}>
+                  <span className={`text-sm font-semibold uppercase tracking-wide ${location === 'other' ? 'text-ck-red' : 'text-ck-text-muted'}`}>
                     {t('locationOther')}
                   </span>
-                  <p className="mt-1 text-sm font-medium text-white">{t('locationOtherDesc')}</p>
-                  <p className="text-xs text-white/40">{t('locationOtherHint')}</p>
+                  <p className="mt-1 text-sm font-medium text-ck-text">{t('locationOtherDesc')}</p>
+                  <p className="text-xs text-ck-text-faint">{t('locationOtherHint')}</p>
                 </div>
               </button>
             </div>
@@ -256,34 +256,34 @@ export default function BookingPage() {
             {location === 'other' && (
               <div className="grid gap-3">
                 <div>
-                  <label className="mb-1.5 block text-xs font-semibold uppercase tracking-wide text-white/50">{t('street')}</label>
+                  <label className="mb-1.5 block text-xs font-semibold uppercase tracking-wide text-ck-text-muted">{t('street')}</label>
                   <input
                     type="text"
                     value={street}
                     onChange={e => setStreet(e.target.value)}
                     placeholder={t('streetPlaceholder')}
-                    className="w-full rounded-lg border border-white/10 bg-white/[0.03] px-4 py-3 text-white placeholder:text-white/20 focus:border-[#E8364E] focus:outline-none"
+                    className="w-full rounded-lg border border-ck-border bg-ck-surface-2 px-4 py-3 text-ck-text placeholder:text-ck-text-faint focus:border-ck-red focus:outline-none"
                   />
                 </div>
                 <div className="grid grid-cols-2 gap-3">
                   <div>
-                    <label className="mb-1.5 block text-xs font-semibold uppercase tracking-wide text-white/50">{t('postcode')}</label>
+                    <label className="mb-1.5 block text-xs font-semibold uppercase tracking-wide text-ck-text-muted">{t('postcode')}</label>
                     <input
                       type="text"
                       value={postcode}
                       onChange={e => setPostcode(e.target.value.toUpperCase())}
                       placeholder={t('postcodePlaceholder')}
-                      className="w-full rounded-lg border border-white/10 bg-white/[0.03] px-4 py-3 text-white placeholder:text-white/20 focus:border-[#E8364E] focus:outline-none"
+                      className="w-full rounded-lg border border-ck-border bg-ck-surface-2 px-4 py-3 text-ck-text placeholder:text-ck-text-faint focus:border-ck-red focus:outline-none"
                     />
                   </div>
                   <div>
-                    <label className="mb-1.5 block text-xs font-semibold uppercase tracking-wide text-white/50">{t('city')}</label>
+                    <label className="mb-1.5 block text-xs font-semibold uppercase tracking-wide text-ck-text-muted">{t('city')}</label>
                     <input
                       type="text"
                       value={city}
                       onChange={e => setCity(e.target.value)}
                       placeholder={t('cityPlaceholder')}
-                      className="w-full rounded-lg border border-white/10 bg-white/[0.03] px-4 py-3 text-white placeholder:text-white/20 focus:border-[#E8364E] focus:outline-none"
+                      className="w-full rounded-lg border border-ck-border bg-ck-surface-2 px-4 py-3 text-ck-text placeholder:text-ck-text-faint focus:border-ck-red focus:outline-none"
                     />
                   </div>
                 </div>
@@ -291,11 +291,11 @@ export default function BookingPage() {
             )}
 
             <div className="flex items-center justify-between pt-4">
-              <span className="text-xs text-white/30">{t('stepOf', { step: 1, total: 3 })}</span>
+              <span className="text-xs text-ck-text-faint">{t('stepOf', { step: 1, total: 3 })}</span>
               <button
                 onClick={() => setStep(2)}
                 disabled={!canGoStep2}
-                className="flex items-center gap-2 bg-[#E8364E] px-6 py-3 text-sm font-semibold uppercase tracking-wider text-white transition-colors hover:bg-[#d02e44] disabled:opacity-30 disabled:cursor-not-allowed"
+                className="flex items-center gap-2 bg-ck-red px-6 py-3 text-sm font-semibold uppercase tracking-wider text-white transition-colors hover:bg-ck-red-hover disabled:opacity-30 disabled:cursor-not-allowed"
               >
                 {t('continue')}
                 <ChevronRight size={16} />
@@ -307,10 +307,10 @@ export default function BookingPage() {
         {/* Step 2: Date & Time */}
         {step === 2 && (
           <div className="space-y-6">
-            <h2 className="text-lg font-semibold text-white">{t('chooseDateTime')}</h2>
+            <h2 className="text-lg font-semibold text-ck-text">{t('chooseDateTime')}</h2>
 
             <div>
-              <label className="mb-2 block text-sm font-medium text-white/60">
+              <label className="mb-2 block text-sm font-medium text-ck-text-muted">
                 <Calendar size={14} className="mr-1.5 inline" />
                 {tCommon('date')}
               </label>
@@ -319,23 +319,23 @@ export default function BookingPage() {
                 value={date}
                 min={minDateStr}
                 onChange={e => setDate(e.target.value)}
-                className="w-full rounded-lg border border-white/10 bg-white/[0.03] px-4 py-3 text-white [color-scheme:dark] focus:border-[#E8364E] focus:outline-none"
+                className="w-full rounded-lg border border-ck-border bg-ck-surface-2 px-4 py-3 text-ck-text focus:border-ck-red focus:outline-none"
               />
             </div>
 
             {date && (
               <div>
-                <label className="mb-2 block text-sm font-medium text-white/60">
+                <label className="mb-2 block text-sm font-medium text-ck-text-muted">
                   <Clock size={14} className="mr-1.5 inline" />
                   {t('time')}
                 </label>
                 {loadingSlots ? (
-                  <div className="flex items-center gap-2 py-4 text-white/40">
+                  <div className="flex items-center gap-2 py-4 text-ck-text-faint">
                     <Loader2 size={16} className="animate-spin" />
                     {tCommon('loading')}
                   </div>
                 ) : slots.length === 0 ? (
-                  <p className="py-4 text-sm text-white/40">{t('noSlots')}</p>
+                  <p className="py-4 text-sm text-ck-text-faint">{t('noSlots')}</p>
                 ) : (
                   <div className="grid grid-cols-4 gap-2 sm:grid-cols-6">
                     {slots.map(slot => (
@@ -345,10 +345,10 @@ export default function BookingPage() {
                         onClick={() => setTime(slot.time)}
                         className={`rounded-lg border px-3 py-2.5 text-sm font-medium transition-all ${
                           time === slot.time
-                            ? 'border-[#E8364E]/50 bg-[#E8364E]/20 text-[#E8364E]'
+                            ? 'border-ck-red/50 bg-ck-red/20 text-ck-red'
                             : slot.available
-                              ? 'border-white/10 bg-white/[0.03] text-white/70 hover:border-white/20 hover:text-white'
-                              : 'border-white/5 bg-white/[0.01] text-white/15 cursor-not-allowed line-through'
+                              ? 'border-ck-border bg-ck-surface-2 text-ck-text-3 hover:border-ck-border-2 hover:text-ck-text'
+                              : 'border-ck-border bg-ck-surface text-ck-text-faint cursor-not-allowed line-through'
                         }`}
                       >
                         {slot.time}
@@ -362,7 +362,7 @@ export default function BookingPage() {
             <div className="flex justify-between pt-4">
               <button
                 onClick={() => setStep(1)}
-                className="flex items-center gap-2 border border-white/10 px-5 py-3 text-sm font-medium text-white/60 transition-colors hover:text-white hover:border-white/30"
+                className="flex items-center gap-2 border border-ck-border px-5 py-3 text-sm font-medium text-ck-text-muted transition-colors hover:text-ck-text hover:border-ck-border-2"
               >
                 <ChevronLeft size={16} />
                 {tCommon('back')}
@@ -370,7 +370,7 @@ export default function BookingPage() {
               <button
                 onClick={() => setStep(3)}
                 disabled={!canGoStep3}
-                className="flex items-center gap-2 bg-[#E8364E] px-6 py-3 text-sm font-semibold uppercase tracking-wider text-white transition-colors hover:bg-[#d02e44] disabled:opacity-30 disabled:cursor-not-allowed"
+                className="flex items-center gap-2 bg-ck-red px-6 py-3 text-sm font-semibold uppercase tracking-wider text-white transition-colors hover:bg-ck-red-hover disabled:opacity-30 disabled:cursor-not-allowed"
               >
                 {t('continue')}
                 <ChevronRight size={16} />
@@ -382,35 +382,35 @@ export default function BookingPage() {
         {/* Step 3: Contact Details */}
         {step === 3 && (
           <div className="space-y-6">
-            <h2 className="text-lg font-semibold text-white">{t('yourDetails')}</h2>
+            <h2 className="text-lg font-semibold text-ck-text">{t('yourDetails')}</h2>
 
             {/* Summary */}
-            <div className="rounded-lg border border-white/10 bg-white/[0.03] p-4">
+            <div className="rounded-lg border border-ck-border bg-ck-surface-2 p-4">
               <div className="flex flex-wrap gap-4 text-sm">
                 <div className="flex items-center gap-2">
-                  <ClipboardCheck size={14} className="text-[#E8364E]" />
-                  <span className="text-white/50">{t(`types.${type}`)}</span>
+                  <ClipboardCheck size={14} className="text-ck-red" />
+                  <span className="text-ck-text-muted">{t(`types.${type}`)}</span>
                 </div>
                 <div className="flex items-center gap-2">
-                  <Calendar size={14} className="text-[#E8364E]" />
-                  <span className="text-white/50">
+                  <Calendar size={14} className="text-ck-red" />
+                  <span className="text-ck-text-muted">
                     {new Date(date + 'T00:00:00').toLocaleDateString('nl-NL', { weekday: 'short', day: 'numeric', month: 'short' })}
                   </span>
                 </div>
                 <div className="flex items-center gap-2">
-                  <Clock size={14} className="text-[#E8364E]" />
-                  <span className="text-white/50">{time}</span>
+                  <Clock size={14} className="text-ck-red" />
+                  <span className="text-ck-text-muted">{time}</span>
                 </div>
                 <div className="flex items-center gap-2">
-                  <MapPin size={14} className="text-[#E8364E]" />
-                  <span className="text-white/50">{location === 'shop' ? t('locationShop') : t('locationOther')}</span>
+                  <MapPin size={14} className="text-ck-red" />
+                  <span className="text-ck-text-muted">{location === 'shop' ? t('locationShop') : t('locationOther')}</span>
                 </div>
               </div>
             </div>
 
             <div className="grid gap-4">
               <div>
-                <label className="mb-1.5 block text-sm font-medium text-white/60">
+                <label className="mb-1.5 block text-sm font-medium text-ck-text-muted">
                   <User size={14} className="mr-1.5 inline" />
                   {t('name')} *
                 </label>
@@ -419,12 +419,12 @@ export default function BookingPage() {
                   value={name}
                   onChange={e => setName(e.target.value)}
                   placeholder={t('namePlaceholder')}
-                  className="w-full rounded-lg border border-white/10 bg-white/[0.03] px-4 py-3 text-white placeholder:text-white/20 focus:border-[#E8364E] focus:outline-none"
+                  className="w-full rounded-lg border border-ck-border bg-ck-surface-2 px-4 py-3 text-ck-text placeholder:text-ck-text-faint focus:border-ck-red focus:outline-none"
                 />
               </div>
               <div className="grid gap-4 sm:grid-cols-2">
                 <div>
-                  <label className="mb-1.5 block text-sm font-medium text-white/60">
+                  <label className="mb-1.5 block text-sm font-medium text-ck-text-muted">
                     <Phone size={14} className="mr-1.5 inline" />
                     {t('phone')}
                   </label>
@@ -433,11 +433,11 @@ export default function BookingPage() {
                     value={phone}
                     onChange={e => setPhone(e.target.value)}
                     placeholder="06-12345678"
-                    className="w-full rounded-lg border border-white/10 bg-white/[0.03] px-4 py-3 text-white placeholder:text-white/20 focus:border-[#E8364E] focus:outline-none"
+                    className="w-full rounded-lg border border-ck-border bg-ck-surface-2 px-4 py-3 text-ck-text placeholder:text-ck-text-faint focus:border-ck-red focus:outline-none"
                   />
                 </div>
                 <div>
-                  <label className="mb-1.5 block text-sm font-medium text-white/60">
+                  <label className="mb-1.5 block text-sm font-medium text-ck-text-muted">
                     <Mail size={14} className="mr-1.5 inline" />
                     {t('email')}
                   </label>
@@ -446,12 +446,12 @@ export default function BookingPage() {
                     value={email}
                     onChange={e => setEmail(e.target.value)}
                     placeholder="naam@voorbeeld.nl"
-                    className="w-full rounded-lg border border-white/10 bg-white/[0.03] px-4 py-3 text-white placeholder:text-white/20 focus:border-[#E8364E] focus:outline-none"
+                    className="w-full rounded-lg border border-ck-border bg-ck-surface-2 px-4 py-3 text-ck-text placeholder:text-ck-text-faint focus:border-ck-red focus:outline-none"
                   />
                 </div>
               </div>
               <div>
-                <label className="mb-1.5 block text-sm font-medium text-white/60">
+                <label className="mb-1.5 block text-sm font-medium text-ck-text-muted">
                   <Car size={14} className="mr-1.5 inline" />
                   {t('kenteken')}
                 </label>
@@ -460,11 +460,11 @@ export default function BookingPage() {
                   value={kenteken}
                   onChange={e => setKenteken(e.target.value.toUpperCase())}
                   placeholder="AB-123-CD"
-                  className="w-full rounded-lg border border-white/10 bg-white/[0.03] px-4 py-3 font-mono uppercase text-white placeholder:text-white/20 focus:border-[#E8364E] focus:outline-none"
+                  className="w-full rounded-lg border border-ck-border bg-ck-surface-2 px-4 py-3 font-mono uppercase text-ck-text placeholder:text-ck-text-faint focus:border-ck-red focus:outline-none"
                 />
               </div>
               <div>
-                <label className="mb-1.5 block text-sm font-medium text-white/60">
+                <label className="mb-1.5 block text-sm font-medium text-ck-text-muted">
                   <FileText size={14} className="mr-1.5 inline" />
                   {t('notes')}
                 </label>
@@ -473,7 +473,7 @@ export default function BookingPage() {
                   onChange={e => setNotes(e.target.value)}
                   rows={3}
                   placeholder={t('notesPlaceholder')}
-                  className="w-full rounded-lg border border-white/10 bg-white/[0.03] px-4 py-3 text-white placeholder:text-white/20 focus:border-[#E8364E] focus:outline-none resize-none"
+                  className="w-full rounded-lg border border-ck-border bg-ck-surface-2 px-4 py-3 text-ck-text placeholder:text-ck-text-faint focus:border-ck-red focus:outline-none resize-none"
                 />
               </div>
             </div>
@@ -485,7 +485,7 @@ export default function BookingPage() {
             <div className="flex justify-between pt-2">
               <button
                 onClick={() => setStep(2)}
-                className="flex items-center gap-2 border border-white/10 px-5 py-3 text-sm font-medium text-white/60 transition-colors hover:text-white hover:border-white/30"
+                className="flex items-center gap-2 border border-ck-border px-5 py-3 text-sm font-medium text-ck-text-muted transition-colors hover:text-ck-text hover:border-ck-border-2"
               >
                 <ChevronLeft size={16} />
                 {tCommon('back')}
@@ -493,7 +493,7 @@ export default function BookingPage() {
               <button
                 onClick={handleSubmit}
                 disabled={!canSubmit || submitting}
-                className="flex items-center gap-2 bg-[#E8364E] px-7 py-3.5 text-sm font-semibold uppercase tracking-wider text-white transition-colors hover:bg-[#d02e44] disabled:opacity-30 disabled:cursor-not-allowed"
+                className="flex items-center gap-2 bg-ck-red px-7 py-3.5 text-sm font-semibold uppercase tracking-wider text-white transition-colors hover:bg-ck-red-hover disabled:opacity-30 disabled:cursor-not-allowed"
               >
                 {submitting ? (
                   <>
@@ -512,7 +512,7 @@ export default function BookingPage() {
         )}
 
         {/* Footer info */}
-        <div className="mt-12 text-center text-xs text-white/30">
+        <div className="mt-12 text-center text-xs text-ck-text-faint">
           <p>{t('openingHours')}</p>
         </div>
       </div>

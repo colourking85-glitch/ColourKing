@@ -53,10 +53,12 @@ export default function AdminLayout({
   children: React.ReactNode;
 }) {
   return (
-    <AdminIntlProvider>
-      <SettingsProvider>
-        <AuthGate>{children}</AuthGate>
-      </SettingsProvider>
-    </AdminIntlProvider>
+    <div className="dark">
+      <AdminIntlProvider>
+        <SettingsProvider>
+          <AuthGate>{children}</AuthGate>
+        </SettingsProvider>
+      </AdminIntlProvider>
+    </div>
   );
 }

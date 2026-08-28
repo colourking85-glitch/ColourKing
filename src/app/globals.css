@@ -5,18 +5,87 @@
 @tailwind utilities;
 
 @layer base {
+  /* Dark theme (default) */
   :root {
     --ck-bg: #101114;
     --ck-surface: #16171b;
     --ck-surface-2: #1c1e23;
+    --ck-surface-3: #232830;
     --ck-border: #26272c;
+    --ck-border-2: #2b2d33;
     --ck-accent: #e11d48;
     --ck-accent-hover: #be123c;
+    --ck-text: #f4f4f5;
+    --ck-text-2: #e4e4e7;
+    --ck-text-3: #a1a1aa;
+    --ck-text-muted: #71717a;
+    --ck-text-faint: #52525b;
     --ck-density: 1;
+    --ck-icon-bg: #ffffff;
+    --ck-icon-fg: #101114;
+  }
+
+  /* Light theme — explicit toggle */
+  .light {
+    --ck-bg: #f5f6f8;
+    --ck-surface: #ffffff;
+    --ck-surface-2: #eef1f4;
+    --ck-surface-3: #e4e7eb;
+    --ck-border: #d4d6db;
+    --ck-border-2: #c8cacf;
+    --ck-accent: #e11d48;
+    --ck-accent-hover: #be123c;
+    --ck-text: #0f1115;
+    --ck-text-2: #1c1e23;
+    --ck-text-3: #52525b;
+    --ck-text-muted: #71717a;
+    --ck-text-faint: #a1a1aa;
+    --ck-icon-bg: #0f1115;
+    --ck-icon-fg: #ffffff;
+  }
+
+  /* Light theme — system preference (no class stamped) */
+  @media (prefers-color-scheme: light) {
+    :root:not(.dark) {
+      --ck-bg: #f5f6f8;
+      --ck-surface: #ffffff;
+      --ck-surface-2: #eef1f4;
+      --ck-surface-3: #e4e7eb;
+      --ck-border: #d4d6db;
+      --ck-border-2: #c8cacf;
+      --ck-accent: #e11d48;
+      --ck-accent-hover: #be123c;
+      --ck-text: #0f1115;
+      --ck-text-2: #1c1e23;
+      --ck-text-3: #52525b;
+      --ck-text-muted: #71717a;
+      --ck-text-faint: #a1a1aa;
+      --ck-icon-bg: #0f1115;
+      --ck-icon-fg: #ffffff;
+    }
+  }
+
+  /* Force dark theme when .dark class is set (admin panel) */
+  .dark {
+    --ck-bg: #101114;
+    --ck-surface: #16171b;
+    --ck-surface-2: #1c1e23;
+    --ck-surface-3: #232830;
+    --ck-border: #26272c;
+    --ck-border-2: #2b2d33;
+    --ck-accent: #e11d48;
+    --ck-accent-hover: #be123c;
+    --ck-text: #f4f4f5;
+    --ck-text-2: #e4e4e7;
+    --ck-text-3: #a1a1aa;
+    --ck-text-muted: #71717a;
+    --ck-text-faint: #52525b;
+    --ck-icon-bg: #ffffff;
+    --ck-icon-fg: #101114;
   }
 
   body {
-    @apply bg-ck-dark text-white antialiased;
+    @apply bg-ck-bg text-ck-text antialiased;
     font-family: 'Barlow', system-ui, sans-serif;
   }
 }
@@ -36,3 +105,16 @@
 }
 .ck-high-contrast .text-ck-text-muted { color: #a1a1aa; }
 .ck-high-contrast .text-ck-text-3 { color: #d4d4d8; }
+
+/* Logo: dark SVG needs inversion in dark mode */
+:root:not(.light) .ck-logo {
+  filter: invert(1) brightness(2);
+}
+.dark .ck-logo {
+  filter: invert(1) brightness(2);
+}
+@media (prefers-color-scheme: light) {
+  :root:not(.dark) .ck-logo {
+    filter: none;
+  }
+}

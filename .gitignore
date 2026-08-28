@@ -47,3 +47,4 @@ drive-download-*/
 /plan.md
 pnpm-workspace.yaml
 *.zip
+*.7z

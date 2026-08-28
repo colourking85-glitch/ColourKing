@@ -112,7 +112,7 @@ export function Navbar({ locale }: { locale: string }) {
     <header
       className={`fixed top-0 left-0 right-0 z-50 transition-all duration-300 ${
         scrolled
-          ? 'bg-ck-dark/95 backdrop-blur-md border-b border-ck-border py-3'
+          ? 'bg-ck-bg/95 backdrop-blur-md border-b border-ck-border py-3'
           : 'bg-transparent py-5'
       }`}
     >
@@ -122,7 +122,7 @@ export function Navbar({ locale }: { locale: string }) {
           <img
             src="/images/logo-colourking.svg"
             alt="Colourking"
-            className="h-12 w-auto"
+            className="h-12 w-auto ck-logo"
           />
         </Link>
 
@@ -136,8 +136,8 @@ export function Navbar({ locale }: { locale: string }) {
                 href={link.href}
                 className={`text-sm font-medium uppercase tracking-wide transition-colors duration-200 ${
                   isActive
-                    ? 'text-white'
-                    : 'text-white/70 hover:text-white'
+                    ? 'text-ck-text'
+                    : 'text-ck-text-3 hover:text-ck-text'
                 }`}
               >
                 {t(link.label)}
@@ -146,17 +146,17 @@ export function Navbar({ locale }: { locale: string }) {
           })}
 
           {/* Language dropdown */}
-          <div className="relative border-l border-white/20 pl-6" ref={langRef}>
+          <div className="relative border-l border-ck-border pl-6" ref={langRef}>
             <button
               type="button"
               onClick={() => setLangOpen(!langOpen)}
-              className="flex items-center gap-2 rounded-lg px-3 py-1.5 text-sm font-medium text-white/80 transition-colors hover:text-white hover:bg-white/5"
+              className="flex items-center gap-2 rounded-lg px-3 py-1.5 text-sm font-medium text-ck-text-3 transition-colors hover:text-ck-text hover:bg-ck-surface-2"
             >
               <FlagIcon code={currentLocale.code} />
               <ChevronDown size={14} className={`transition-transform ${langOpen ? 'rotate-180' : ''}`} />
             </button>
             {langOpen && (
-              <div className="absolute right-0 top-full mt-2 w-52 overflow-hidden rounded-xl border border-white/10 bg-[#1a1a1a] shadow-2xl shadow-black/50">
+              <div className="absolute right-0 top-full mt-2 w-52 overflow-hidden rounded-xl border border-ck-border bg-ck-surface shadow-2xl shadow-black/20">
                 <div className="grid grid-cols-1 p-2">
                   {LOCALES.map(loc => (
                     <button
@@ -164,8 +164,8 @@ export function Navbar({ locale }: { locale: string }) {
                       onClick={() => switchLocale(loc.code)}
                       className={`flex items-center gap-3 rounded-lg px-3 py-2.5 text-left text-sm transition-colors ${
                         locale === loc.code
-                          ? 'bg-[#E8364E]/10 text-[#E8364E] font-semibold'
-                          : 'text-white/70 hover:bg-white/5 hover:text-white'
+                          ? 'bg-ck-red/10 text-ck-red font-semibold'
+                          : 'text-ck-text-3 hover:bg-ck-surface-2 hover:text-ck-text'
                       }`}
                     >
                       <FlagIcon code={loc.code} />
@@ -173,10 +173,10 @@ export function Navbar({ locale }: { locale: string }) {
                     </button>
                   ))}
                 </div>
-                <div className="border-t border-white/10 p-2">
+                <div className="border-t border-ck-border p-2">
                   <button
                     onClick={handleAutoDetect}
-                    className="flex w-full items-center gap-3 rounded-lg px-3 py-2.5 text-left text-sm text-white/40 transition-colors hover:bg-white/5 hover:text-white/70"
+                    className="flex w-full items-center gap-3 rounded-lg px-3 py-2.5 text-left text-sm text-ck-text-faint transition-colors hover:bg-ck-surface-2 hover:text-ck-text-3"
                   >
                     <Globe size={18} className="shrink-0" />
                     <span>{t('nav.autoDetect')}</span>
@@ -191,10 +191,10 @@ export function Navbar({ locale }: { locale: string }) {
             href="https://www.instagram.com/autoschadeherstelcolourking/"
             target="_blank"
             rel="noopener noreferrer"
-            className="group flex h-8 w-8 items-center justify-center border border-white/20 transition-colors hover:border-white/50 hover:bg-white/10"
+            className="group flex h-8 w-8 items-center justify-center border border-ck-border transition-colors hover:border-ck-text-3 hover:bg-ck-surface-2"
             aria-label="Instagram"
           >
-            <svg className="h-4 w-4 text-white/60 transition-colors group-hover:text-white" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+            <svg className="h-4 w-4 text-ck-text-muted transition-colors group-hover:text-ck-text" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
               <rect x="2" y="2" width="20" height="20" rx="5" />
               <circle cx="12" cy="12" r="5" />
               <circle cx="17.5" cy="6.5" r="1.5" fill="currentColor" stroke="none" />
@@ -204,13 +204,13 @@ export function Navbar({ locale }: { locale: string }) {
           {/* CTAs */}
           <Link
             href="/afspraak"
-            className="border border-white/30 px-5 py-2.5 text-sm font-semibold uppercase tracking-wider text-white transition-colors duration-200 hover:border-white/70 hover:bg-white/5"
+            className="border border-ck-border px-5 py-2.5 text-sm font-semibold uppercase tracking-wider text-ck-text transition-colors duration-200 hover:border-ck-text-3 hover:bg-ck-surface-2"
           >
             {t('nav.appointment')}
           </Link>
           <Link
             href="/offerte"
-            className="bg-[#E8364E] px-5 py-2.5 text-sm font-semibold uppercase tracking-wider text-white transition-colors duration-200 hover:bg-[#d02e44]"
+            className="bg-ck-red px-5 py-2.5 text-sm font-semibold uppercase tracking-wider text-white transition-colors duration-200 hover:bg-ck-red-hover"
           >
             {t('nav.quote')}
           </Link>
@@ -223,20 +223,20 @@ export function Navbar({ locale }: { locale: string }) {
           className="flex flex-col gap-1.5 p-2 md:hidden"
           aria-label={t('nav.menu')}
         >
-          <span className={`block h-0.5 w-6 bg-white transition-all duration-200 ${menuOpen ? 'translate-y-2 rotate-45' : ''}`} />
-          <span className={`block h-0.5 w-6 bg-white transition-all duration-200 ${menuOpen ? 'opacity-0' : ''}`} />
-          <span className={`block h-0.5 w-6 bg-white transition-all duration-200 ${menuOpen ? '-translate-y-2 -rotate-45' : ''}`} />
+          <span className={`block h-0.5 w-6 bg-ck-text transition-all duration-200 ${menuOpen ? 'translate-y-2 rotate-45' : ''}`} />
+          <span className={`block h-0.5 w-6 bg-ck-text transition-all duration-200 ${menuOpen ? 'opacity-0' : ''}`} />
+          <span className={`block h-0.5 w-6 bg-ck-text transition-all duration-200 ${menuOpen ? '-translate-y-2 -rotate-45' : ''}`} />
         </button>
       </nav>
 
       {/* Mobile menu */}
       {menuOpen && (
-        <div className="border-t border-ck-border bg-ck-dark/98 px-6 pb-6 md:hidden">
+        <div className="border-t border-ck-border bg-ck-bg/98 px-6 pb-6 md:hidden">
           <div className="flex flex-col gap-1 py-4">
             <Link
               href="/"
               onClick={() => setMenuOpen(false)}
-              className="py-3 text-sm font-medium uppercase tracking-wide text-white/70 transition-colors hover:text-white"
+              className="py-3 text-sm font-medium uppercase tracking-wide text-ck-text-3 transition-colors hover:text-ck-text"
             >
               {t('nav.home')}
             </Link>
@@ -245,7 +245,7 @@ export function Navbar({ locale }: { locale: string }) {
                 key={link.href}
                 href={link.href}
                 onClick={() => setMenuOpen(false)}
-                className="py-3 text-sm font-medium uppercase tracking-wide text-white/70 transition-colors hover:text-white"
+                className="py-3 text-sm font-medium uppercase tracking-wide text-ck-text-3 transition-colors hover:text-ck-text"
               >
                 {t(link.label)}
               </Link>
@@ -261,8 +261,8 @@ export function Navbar({ locale }: { locale: string }) {
                   onClick={() => { switchLocale(loc.code); setMenuOpen(false); }}
                   className={`flex items-center gap-2 rounded-lg px-3 py-2 text-sm transition-colors ${
                     locale === loc.code
-                      ? 'bg-[#E8364E]/10 text-[#E8364E] font-semibold'
-                      : 'text-white/50 hover:text-white'
+                      ? 'bg-ck-red/10 text-ck-red font-semibold'
+                      : 'text-ck-text-muted hover:text-ck-text'
                   }`}
                 >
                   <FlagIcon code={loc.code} size={16} />
@@ -271,7 +271,7 @@ export function Navbar({ locale }: { locale: string }) {
               ))}
               <button
                 onClick={() => { handleAutoDetect(); setMenuOpen(false); }}
-                className="flex items-center gap-2 rounded-lg px-3 py-2 text-sm text-white/30 hover:text-white/60"
+                className="flex items-center gap-2 rounded-lg px-3 py-2 text-sm text-ck-text-faint hover:text-ck-text-muted"
               >
                 <Globe size={14} />
                 <span>{t('nav.autoDetect')}</span>
@@ -281,14 +281,14 @@ export function Navbar({ locale }: { locale: string }) {
               <Link
                 href="/afspraak"
                 onClick={() => setMenuOpen(false)}
-                className="border border-white/30 px-4 py-2.5 text-xs font-semibold uppercase tracking-wider text-white"
+                className="border border-ck-border px-4 py-2.5 text-xs font-semibold uppercase tracking-wider text-ck-text"
               >
                 {t('nav.appointment')}
               </Link>
               <Link
                 href="/offerte"
                 onClick={() => setMenuOpen(false)}
-                className="bg-[#E8364E] px-4 py-2.5 text-xs font-semibold uppercase tracking-wider text-white"
+                className="bg-ck-red px-4 py-2.5 text-xs font-semibold uppercase tracking-wider text-white"
               >
                 {t('nav.quote')}
               </Link>

@@ -30,15 +30,15 @@ export default function GalleryPage() {
     <>
       {/* Hero */}
       <section className="relative overflow-hidden px-6 pb-16 pt-32 sm:pt-40">
-        <div className="absolute inset-0 bg-gradient-to-b from-[#E8364E]/8 to-transparent" />
+        <div className="absolute inset-0 bg-gradient-to-b from-ck-red/8 to-transparent" />
         <div className="relative mx-auto max-w-7xl">
-          <p className="text-xs font-semibold uppercase tracking-[0.2em] text-[#E8364E]">
+          <p className="text-xs font-semibold uppercase tracking-[0.2em] text-ck-red">
             {t('beforeAfter.eyebrow')}
           </p>
-          <h1 className="mt-4 font-heading text-4xl font-bold uppercase tracking-tight text-white sm:text-5xl lg:text-6xl">
+          <h1 className="mt-4 font-heading text-4xl font-bold uppercase tracking-tight text-ck-text sm:text-5xl lg:text-6xl">
             {t('gallery.title')}
           </h1>
-          <p className="mt-5 max-w-2xl text-lg leading-relaxed text-white/60">
+          <p className="mt-5 max-w-2xl text-lg leading-relaxed text-ck-text-muted">
             {t('gallery.subtitle')}
           </p>
         </div>
@@ -54,8 +54,8 @@ export default function GalleryPage() {
               onClick={() => setActiveFilter(key)}
               className={`whitespace-nowrap px-6 py-3 text-sm font-semibold uppercase tracking-wider transition-colors ${
                 activeFilter === key
-                  ? 'bg-[#E8364E] text-white'
-                  : 'bg-ck-dark text-white/50 hover:text-white'
+                  ? 'bg-ck-red text-white'
+                  : 'bg-ck-bg text-ck-text-muted hover:text-ck-text'
               }`}
             >
               {t(`gallery.filters.${key}`)}
@@ -68,7 +68,7 @@ export default function GalleryPage() {
       <section className="px-6 py-16 sm:py-24">
         <div className="mx-auto max-w-7xl">
           {filtered.length === 0 ? (
-            <p className="py-20 text-center text-sm text-white/40">
+            <p className="py-20 text-center text-sm text-ck-text-faint">
               {t('gallery.empty')}
             </p>
           ) : (
@@ -76,25 +76,25 @@ export default function GalleryPage() {
               {filtered.map((project) => (
                 <div
                   key={project.id}
-                  className="group bg-ck-dark overflow-hidden"
+                  className="group bg-ck-bg overflow-hidden"
                 >
                   <div className="grid grid-cols-2">
                     <div className="flex aspect-[4/3] items-center justify-center bg-ck-surface">
-                      <span className="text-xs text-white/30">
+                      <span className="text-xs text-ck-text-faint">
                         {t('gallery.before')}
                       </span>
                     </div>
-                    <div className="flex aspect-[4/3] items-center justify-center border-l border-ck-border bg-ck-dark">
-                      <span className="text-xs text-white/30">
+                    <div className="flex aspect-[4/3] items-center justify-center border-l border-ck-border bg-ck-bg">
+                      <span className="text-xs text-ck-text-faint">
                         {t('gallery.after')}
                       </span>
                     </div>
                   </div>
                   <div className="px-6 py-4">
-                    <p className="font-heading text-sm font-bold uppercase tracking-tight text-white">
+                    <p className="font-heading text-sm font-bold uppercase tracking-tight text-ck-text">
                       {t('gallery.project', { n: project.id })}
                     </p>
-                    <p className="mt-1 text-xs text-white/50">
+                    <p className="mt-1 text-xs text-ck-text-muted">
                       {t(`gallery.filters.${project.category}`)}
                     </p>
                   </div>
@@ -109,19 +109,19 @@ export default function GalleryPage() {
       <section className="px-6 pb-24">
         <div className="mx-auto max-w-7xl">
           <div className="relative overflow-hidden border border-ck-border bg-ck-surface px-8 py-16 sm:px-16">
-            <div className="absolute right-0 top-0 h-40 w-40 bg-[#E8364E]/10 blur-[80px]" />
+            <div className="absolute right-0 top-0 h-40 w-40 bg-ck-red/10 blur-[80px]" />
             <div className="relative flex flex-col items-start gap-8 sm:flex-row sm:items-center sm:justify-between">
               <div>
-                <h2 className="font-heading text-3xl font-bold uppercase tracking-tight text-white">
+                <h2 className="font-heading text-3xl font-bold uppercase tracking-tight text-ck-text">
                   {t('cta.title')}
                 </h2>
-                <p className="mt-3 text-sm text-white/60">
+                <p className="mt-3 text-sm text-ck-text-muted">
                   {t('cta.subtitle')}
                 </p>
               </div>
               <Link
                 href="/offerte"
-                className="shrink-0 bg-[#E8364E] px-8 py-4 text-sm font-semibold uppercase tracking-wider text-white transition-colors hover:bg-[#d02e44]"
+                className="shrink-0 bg-ck-red px-8 py-4 text-sm font-semibold uppercase tracking-wider text-white transition-colors hover:bg-ck-red-hover"
               >
                 {t('cta.button')}
               </Link>
