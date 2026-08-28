@@ -1,12 +1,24 @@
 import { NextRequest, NextResponse } from 'next/server';
-import { deleteFinding } from '@/modules/inspectie/actions';
+import { createClient } from '@/lib/supabase/server';
 
 export async function DELETE(
   _req: NextRequest,
   { params }: { params: { id: string; findingId: string } }
 ) {
   try {
-    await deleteFinding(params.findingId, params.id);
+    const supabase = createClient();
+    const { data: { user } } = await supabase.auth.getUser();
+    if (!user) {
+      return NextResponse.json({ error: 'Not authenticated' }, { status: 401 });
+    }
+
+    const { error } = await supabase
+      .from('ins_findings')
+      .delete()
+      .eq('id', params.findingId);
+
+    if (error) throw error;
+
     return NextResponse.json({ ok: true });
   } catch (err: unknown) {
     const message = err instanceof Error ? err.message : 'Unknown error';
