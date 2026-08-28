@@ -52,6 +52,7 @@
     "parts": "Parçalar",
     "invoices": "Faturalar",
     "documents": "Belgeler",
+    "handovers": "Teslim Belgeleri",
     "appointments": "Randevular",
     "tasks": "Görevler",
     "planning": "Planlama",
@@ -653,6 +654,7 @@
     "credit_note": "Alacak dekontu",
     "draft": "Taslak",
     "issued": "Düzenlendi",
+    "signed": "İmzalandı",
     "cancelled": "İptal edildi",
     "issue": "Düzenle",
     "cancel": "İptal et",
@@ -757,7 +759,11 @@
     "goToJob": "İşe git",
     "cancelled": "İptal edildi",
     "details": "Detaylar",
-    "signature": "İmza"
+    "signature": "İmza",
+    "listSubtitle": "Tüm teslim belgeleri",
+    "searchPlaceholder": "Numara veya müşteri adına göre ara...",
+    "noHandovers": "Henüz teslim belgesi yok",
+    "vehicle": "Araç"
   },
   "tk": {
     "title": "Görevler",

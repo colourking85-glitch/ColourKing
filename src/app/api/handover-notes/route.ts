@@ -1,15 +1,18 @@
 import { NextRequest, NextResponse } from 'next/server';
-import { getHandoverNotesForJob } from '@/modules/repair-orders/queries';
+import { getHandoverNotesForJob, listHandoverNotes } from '@/modules/repair-orders/queries';
 import { createHandoverNote } from '@/modules/repair-orders/actions';
 
 export async function GET(req: NextRequest) {
   const sp = req.nextUrl.searchParams;
   const jobId = sp.get('job_id');
-  if (!jobId) {
-    return NextResponse.json({ error: 'job_id is required' }, { status: 400 });
-  }
+
   try {
-    const data = await getHandoverNotesForJob(jobId);
+    if (jobId) {
+      const data = await getHandoverNotesForJob(jobId);
+      return NextResponse.json(data);
+    }
+    const search = sp.get('search') || undefined;
+    const data = await listHandoverNotes(search);
     return NextResponse.json(data);
   } catch (e) {
     return NextResponse.json({ error: (e as Error).message }, { status: 500 });

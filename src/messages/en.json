@@ -52,6 +52,7 @@
     "parts": "Parts",
     "invoices": "Invoices",
     "documents": "Documents",
+    "handovers": "Handover Notes",
     "appointments": "Appointments",
     "tasks": "Tasks",
     "planning": "Planning",
@@ -653,6 +654,7 @@
     "credit_note": "Credit note",
     "draft": "Draft",
     "issued": "Issued",
+    "signed": "Signed",
     "cancelled": "Cancelled",
     "issue": "Issue",
     "cancel": "Cancel",
@@ -757,7 +759,11 @@
     "goToJob": "Go to job",
     "cancelled": "Cancelled",
     "details": "Details",
-    "signature": "Signature"
+    "signature": "Signature",
+    "listSubtitle": "All handover notes",
+    "searchPlaceholder": "Search by number or customer...",
+    "noHandovers": "No handover notes yet",
+    "vehicle": "Vehicle"
   },
   "tk": {
     "title": "Tasks",

@@ -52,6 +52,7 @@
     "parts": "Onderdelen",
     "invoices": "Facturen",
     "documents": "Documenten",
+    "handovers": "Afleverbonnen",
     "appointments": "Afspraken",
     "tasks": "Taken",
     "planning": "Planning",
@@ -653,6 +654,7 @@
     "credit_note": "Creditnota",
     "draft": "Concept",
     "issued": "Uitgegeven",
+    "signed": "Getekend",
     "cancelled": "Geannuleerd",
     "issue": "Uitgeven",
     "cancel": "Annuleren",
@@ -757,7 +759,11 @@
     "goToJob": "Ga naar opdracht",
     "cancelled": "Geannuleerd",
     "details": "Details",
-    "signature": "Handtekening"
+    "signature": "Handtekening",
+    "listSubtitle": "Alle afleverbonnen",
+    "searchPlaceholder": "Zoek op nummer of klantnaam...",
+    "noHandovers": "Nog geen afleverbonnen",
+    "vehicle": "Voertuig"
   },
   "tk": {
     "title": "Taken",

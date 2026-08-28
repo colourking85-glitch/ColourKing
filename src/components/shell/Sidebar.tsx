@@ -79,6 +79,7 @@ const NAV: NavSection[] = [
     items: [
       { label: 'invoices', href: '/app/facturen', icon: Receipt, code: 'FA05', permission: 'invoices.read' },
       { label: 'documents', href: '/app/documenten', icon: FolderOpen, code: 'DO05', permission: 'documents.read' },
+      { label: 'handovers', href: '/app/afleverbon', icon: ClipboardList, code: 'DO22', permission: 'documents.read' },
       { label: 'appointments', href: '/app/afspraken', icon: CalendarDays, code: 'AP05', permission: 'appointments.read' },
     ],
   },

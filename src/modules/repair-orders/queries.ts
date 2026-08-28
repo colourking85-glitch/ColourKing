@@ -38,6 +38,24 @@ export async function getHandoverNotesForJob(jobId: string) {
   return data;
 }
 
+export async function listHandoverNotes(search?: string) {
+  const supabase = createClient();
+  let query = supabase
+    .from('documents')
+    .select(DOC_SELECT)
+    .eq('doc_type', 'handover_note')
+    .order('created_at', { ascending: false })
+    .limit(100);
+
+  if (search) {
+    query = query.or(`doc_number.ilike.%${search}%,customers.name.ilike.%${search}%`);
+  }
+
+  const { data, error } = await query;
+  if (error) throw error;
+  return data;
+}
+
 export async function getRepairOrder(id: string) {
   const supabase = createClient();
   const { data, error } = await supabase
