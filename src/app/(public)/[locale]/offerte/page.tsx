@@ -96,6 +96,7 @@ export default function OffertePage() {
   const [aiChecked, setAiChecked] = useState(true);
   const [photoScores, setPhotoScores] = useState<Record<number, PhotoScore>>({});
   const [photoChecking, setPhotoChecking] = useState<Record<number, boolean>>({});
+  const [photoGuideOpen, setPhotoGuideOpen] = useState(false);
 
   useEffect(() => {
     fetch('/api/public/ai-config')
@@ -665,6 +666,229 @@ export default function OffertePage() {
                     className={`${inputClasses} resize-none`}
                   />
                   {errors.damage && <p className="mt-1 text-xs text-ck-red">{errors.damage}</p>}
+                </div>
+
+                {/* --- Photo guide --- */}
+                <div className="border border-ck-border/50 overflow-hidden">
+                  <button
+                    type="button"
+                    onClick={() => setPhotoGuideOpen(!photoGuideOpen)}
+                    className="flex w-full items-center justify-between gap-2 bg-ck-surface/50 px-4 py-3 text-left transition-colors hover:bg-ck-surface"
+                  >
+                    <span className="flex items-center gap-2 text-xs font-semibold uppercase tracking-wider text-ck-text-muted">
+                      <svg width="16" height="16" viewBox="0 0 16 16" fill="none" className="text-ck-red">
+                        <circle cx="8" cy="8" r="7" stroke="currentColor" strokeWidth="1.5"/>
+                        <path d="M8 4.5v4M8 10.5v1" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round"/>
+                      </svg>
+                      {t('offerte.photoGuideTitle')}
+                    </span>
+                    <svg width="12" height="12" viewBox="0 0 12 12" className={`text-ck-text-muted transition-transform ${photoGuideOpen ? 'rotate-180' : ''}`}>
+                      <path d="M2 4.5l4 4 4-4" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round" fill="none"/>
+                    </svg>
+                  </button>
+
+                  {photoGuideOpen && (
+                    <div className="border-t border-ck-border/50 bg-ck-surface/30 px-4 py-5 space-y-5">
+                      <p className="text-xs text-ck-text-muted leading-relaxed">
+                        {t('offerte.photoGuideIntro')}
+                      </p>
+
+                      <div className="grid gap-4 sm:grid-cols-2 lg:grid-cols-3">
+                        {/* Good: well-lit close-up */}
+                        <div className="space-y-2">
+                          <div className="relative aspect-[4/3] bg-gradient-to-br from-slate-700 to-slate-800 border border-ck-border/30 overflow-hidden">
+                            <svg viewBox="0 0 200 150" className="w-full h-full" xmlns="http://www.w3.org/2000/svg">
+                              <defs>
+                                <linearGradient id="carBody" x1="0" y1="0" x2="1" y2="1">
+                                  <stop offset="0%" stopColor="#4a6fa5"/>
+                                  <stop offset="100%" stopColor="#2d4a7a"/>
+                                </linearGradient>
+                                <radialGradient id="sunGood" cx="0.8" cy="0.15">
+                                  <stop offset="0%" stopColor="#fbbf24" stopOpacity="0.6"/>
+                                  <stop offset="100%" stopColor="#fbbf24" stopOpacity="0"/>
+                                </radialGradient>
+                              </defs>
+                              <rect width="200" height="150" fill="#1e293b"/>
+                              <circle cx="160" cy="22" r="30" fill="url(#sunGood)"/>
+                              <circle cx="160" cy="22" r="8" fill="#fbbf24" opacity="0.8"/>
+                              <rect x="20" y="50" width="160" height="70" rx="8" fill="url(#carBody)"/>
+                              <rect x="35" y="60" width="50" height="30" rx="3" fill="#1e3a5f" opacity="0.7"/>
+                              <rect x="95" y="60" width="50" height="30" rx="3" fill="#1e3a5f" opacity="0.7"/>
+                              <ellipse cx="55" cy="125" rx="18" ry="18" fill="#1e293b" stroke="#374151" strokeWidth="3"/>
+                              <ellipse cx="145" cy="125" rx="18" ry="18" fill="#1e293b" stroke="#374151" strokeWidth="3"/>
+                              <ellipse cx="55" cy="125" rx="8" ry="8" fill="#374151"/>
+                              <ellipse cx="145" cy="125" rx="8" ry="8" fill="#374151"/>
+                              <path d="M145 75 Q165 80 170 95 L180 93 Q172 75 150 70Z" fill="#dc2626" opacity="0.7"/>
+                              <line x1="150" y1="78" x2="165" y2="88" stroke="#fca5a5" strokeWidth="1" opacity="0.6"/>
+                              <line x1="155" y1="82" x2="172" y2="90" stroke="#fca5a5" strokeWidth="0.8" opacity="0.5"/>
+                            </svg>
+                            <div className="absolute top-2 right-2 rounded-full bg-green-500/90 p-1">
+                              <svg width="12" height="12" viewBox="0 0 12 12" fill="none">
+                                <path d="M2.5 6l2.5 2.5 4.5-5" stroke="white" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round"/>
+                              </svg>
+                            </div>
+                          </div>
+                          <div>
+                            <p className="text-[11px] font-semibold text-green-400">{t('offerte.photoGuideGood')}</p>
+                            <p className="text-[10px] text-ck-text-faint leading-relaxed">{t('offerte.photoGuideTip1')}</p>
+                          </div>
+                        </div>
+
+                        {/* Good: multiple angles */}
+                        <div className="space-y-2">
+                          <div className="relative aspect-[4/3] bg-gradient-to-br from-slate-700 to-slate-800 border border-ck-border/30 overflow-hidden">
+                            <svg viewBox="0 0 200 150" className="w-full h-full" xmlns="http://www.w3.org/2000/svg">
+                              <rect width="200" height="150" fill="#1e293b"/>
+                              <rect x="10" y="10" width="85" height="60" rx="3" fill="#374151" stroke="#4b5563" strokeWidth="1"/>
+                              <rect x="15" y="15" width="75" height="50" rx="2" fill="#2d4a7a"/>
+                              <path d="M60 30 Q75 35 78 45 L88 43 Q80 30 62 27Z" fill="#dc2626" opacity="0.6"/>
+                              <rect x="105" y="10" width="85" height="60" rx="3" fill="#374151" stroke="#4b5563" strokeWidth="1"/>
+                              <rect x="110" y="15" width="75" height="50" rx="2" fill="#2d4a7a"/>
+                              <path d="M140 25 Q160 28 165 42 L175 40 Q168 24 142 22Z" fill="#dc2626" opacity="0.6"/>
+                              <rect x="10" y="80" width="85" height="60" rx="3" fill="#374151" stroke="#4b5563" strokeWidth="1"/>
+                              <rect x="15" y="85" width="75" height="50" rx="2" fill="#2d4a7a"/>
+                              <path d="M35 100 Q50 95 65 100 L62 115 Q48 108 38 112Z" fill="#dc2626" opacity="0.6"/>
+                              <rect x="105" y="80" width="85" height="60" rx="3" fill="#374151" stroke="#6b7280" strokeWidth="1" strokeDasharray="4 2"/>
+                              <text x="147" y="115" textAnchor="middle" fill="#6b7280" fontSize="24">+</text>
+                              <circle cx="22" cy="22" r="8" fill="none" stroke="#fbbf24" strokeWidth="1.5" opacity="0.6"/>
+                              <text x="22" y="25" textAnchor="middle" fill="#fbbf24" fontSize="8" opacity="0.8">1</text>
+                              <circle cx="117" cy="22" r="8" fill="none" stroke="#fbbf24" strokeWidth="1.5" opacity="0.6"/>
+                              <text x="117" y="25" textAnchor="middle" fill="#fbbf24" fontSize="8" opacity="0.8">2</text>
+                              <circle cx="22" cy="92" r="8" fill="none" stroke="#fbbf24" strokeWidth="1.5" opacity="0.6"/>
+                              <text x="22" y="95" textAnchor="middle" fill="#fbbf24" fontSize="8" opacity="0.8">3</text>
+                            </svg>
+                            <div className="absolute top-2 right-2 rounded-full bg-green-500/90 p-1">
+                              <svg width="12" height="12" viewBox="0 0 12 12" fill="none">
+                                <path d="M2.5 6l2.5 2.5 4.5-5" stroke="white" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round"/>
+                              </svg>
+                            </div>
+                          </div>
+                          <div>
+                            <p className="text-[11px] font-semibold text-green-400">{t('offerte.photoGuideGood')}</p>
+                            <p className="text-[10px] text-ck-text-faint leading-relaxed">{t('offerte.photoGuideTip2')}</p>
+                          </div>
+                        </div>
+
+                        {/* Good: close-up detail */}
+                        <div className="space-y-2">
+                          <div className="relative aspect-[4/3] bg-gradient-to-br from-slate-700 to-slate-800 border border-ck-border/30 overflow-hidden">
+                            <svg viewBox="0 0 200 150" className="w-full h-full" xmlns="http://www.w3.org/2000/svg">
+                              <rect width="200" height="150" fill="#1e293b"/>
+                              <rect x="0" y="0" width="200" height="150" fill="#2d4a7a"/>
+                              <path d="M0 40 Q40 30 80 45 Q120 55 160 40 Q180 35 200 42 L200 110 Q160 100 120 108 Q80 115 40 105 Q20 100 0 108Z" fill="#3b6fb5" opacity="0.3"/>
+                              <path d="M60 50 Q100 35 140 55 Q155 62 160 80 L155 95 Q130 85 100 90 Q70 95 55 85 L50 70 Q52 58 60 50Z" fill="#dc2626" opacity="0.5"/>
+                              <line x1="70" y1="58" x2="130" y2="60" stroke="#fca5a5" strokeWidth="1.5" opacity="0.6"/>
+                              <line x1="75" y1="65" x2="145" y2="68" stroke="#fca5a5" strokeWidth="1" opacity="0.5"/>
+                              <line x1="65" y1="72" x2="120" y2="78" stroke="#fca5a5" strokeWidth="0.8" opacity="0.4"/>
+                              <path d="M90 55 Q95 48 105 50 Q108 45 115 48" fill="none" stroke="#fca5a5" strokeWidth="1.5" opacity="0.5"/>
+                              <circle cx="100" cy="75" r="35" fill="none" stroke="#fbbf24" strokeWidth="1.5" strokeDasharray="4 3" opacity="0.5"/>
+                              <line x1="125" y1="55" x2="145" y2="40" stroke="#fbbf24" strokeWidth="1" opacity="0.4"/>
+                              <circle cx="145" cy="40" r="12" fill="none" stroke="#fbbf24" strokeWidth="1" opacity="0.4"/>
+                              <path d="M139 37 Q145 33 151 37 Q148 30 155 33" fill="none" stroke="#fca5a5" strokeWidth="1.5" opacity="0.6"/>
+                            </svg>
+                            <div className="absolute top-2 right-2 rounded-full bg-green-500/90 p-1">
+                              <svg width="12" height="12" viewBox="0 0 12 12" fill="none">
+                                <path d="M2.5 6l2.5 2.5 4.5-5" stroke="white" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round"/>
+                              </svg>
+                            </div>
+                          </div>
+                          <div>
+                            <p className="text-[11px] font-semibold text-green-400">{t('offerte.photoGuideGood')}</p>
+                            <p className="text-[10px] text-ck-text-faint leading-relaxed">{t('offerte.photoGuideTip3')}</p>
+                          </div>
+                        </div>
+
+                        {/* Bad: too dark */}
+                        <div className="space-y-2">
+                          <div className="relative aspect-[4/3] bg-gradient-to-br from-slate-700 to-slate-800 border border-ck-border/30 overflow-hidden">
+                            <svg viewBox="0 0 200 150" className="w-full h-full" xmlns="http://www.w3.org/2000/svg">
+                              <rect width="200" height="150" fill="#0a0e17"/>
+                              <rect x="20" y="50" width="160" height="70" rx="8" fill="#111827" opacity="0.8"/>
+                              <rect x="35" y="60" width="50" height="30" rx="3" fill="#0f172a" opacity="0.5"/>
+                              <rect x="95" y="60" width="50" height="30" rx="3" fill="#0f172a" opacity="0.5"/>
+                              <ellipse cx="55" cy="125" rx="18" ry="18" fill="#0a0e17" stroke="#1e293b" strokeWidth="2"/>
+                              <ellipse cx="145" cy="125" rx="18" ry="18" fill="#0a0e17" stroke="#1e293b" strokeWidth="2"/>
+                              <path d="M145 75 Q165 80 170 95 L180 93 Q172 75 150 70Z" fill="#4a0000" opacity="0.3"/>
+                            </svg>
+                            <div className="absolute top-2 right-2 rounded-full bg-red-500/90 p-1">
+                              <svg width="12" height="12" viewBox="0 0 12 12" fill="none">
+                                <path d="M3 3l6 6M9 3l-6 6" stroke="white" strokeWidth="1.5" strokeLinecap="round"/>
+                              </svg>
+                            </div>
+                          </div>
+                          <div>
+                            <p className="text-[11px] font-semibold text-red-400">{t('offerte.photoGuideBad')}</p>
+                            <p className="text-[10px] text-ck-text-faint leading-relaxed">{t('offerte.photoGuideTip4')}</p>
+                          </div>
+                        </div>
+
+                        {/* Bad: too far away */}
+                        <div className="space-y-2">
+                          <div className="relative aspect-[4/3] bg-gradient-to-br from-slate-700 to-slate-800 border border-ck-border/30 overflow-hidden">
+                            <svg viewBox="0 0 200 150" className="w-full h-full" xmlns="http://www.w3.org/2000/svg">
+                              <rect width="200" height="150" fill="#1e293b"/>
+                              <rect x="0" y="120" width="200" height="30" fill="#374151" opacity="0.5"/>
+                              <rect x="65" y="85" width="70" height="30" rx="4" fill="#2d4a7a"/>
+                              <rect x="72" y="90" width="20" height="12" rx="1" fill="#1e3a5f" opacity="0.6"/>
+                              <rect x="97" y="90" width="20" height="12" rx="1" fill="#1e3a5f" opacity="0.6"/>
+                              <ellipse cx="80" cy="118" rx="8" ry="8" fill="#1e293b" stroke="#374151" strokeWidth="1.5"/>
+                              <ellipse cx="120" cy="118" rx="8" ry="8" fill="#1e293b" stroke="#374151" strokeWidth="1.5"/>
+                              <circle cx="110" cy="95" r="2" fill="#dc2626" opacity="0.5"/>
+                              <text x="100" y="145" textAnchor="middle" fill="#6b7280" fontSize="8" fontStyle="italic">?</text>
+                              <line x1="30" y1="20" x2="30" y2="130" stroke="#6b7280" strokeWidth="0.5" strokeDasharray="3 3" opacity="0.4"/>
+                              <line x1="170" y1="20" x2="170" y2="130" stroke="#6b7280" strokeWidth="0.5" strokeDasharray="3 3" opacity="0.4"/>
+                            </svg>
+                            <div className="absolute top-2 right-2 rounded-full bg-red-500/90 p-1">
+                              <svg width="12" height="12" viewBox="0 0 12 12" fill="none">
+                                <path d="M3 3l6 6M9 3l-6 6" stroke="white" strokeWidth="1.5" strokeLinecap="round"/>
+                              </svg>
+                            </div>
+                          </div>
+                          <div>
+                            <p className="text-[11px] font-semibold text-red-400">{t('offerte.photoGuideBad')}</p>
+                            <p className="text-[10px] text-ck-text-faint leading-relaxed">{t('offerte.photoGuideTip5')}</p>
+                          </div>
+                        </div>
+
+                        {/* Bad: blurry */}
+                        <div className="space-y-2">
+                          <div className="relative aspect-[4/3] bg-gradient-to-br from-slate-700 to-slate-800 border border-ck-border/30 overflow-hidden">
+                            <svg viewBox="0 0 200 150" className="w-full h-full" xmlns="http://www.w3.org/2000/svg">
+                              <defs>
+                                <filter id="blurFilter">
+                                  <feGaussianBlur stdDeviation="3"/>
+                                </filter>
+                              </defs>
+                              <rect width="200" height="150" fill="#1e293b"/>
+                              <g filter="url(#blurFilter)">
+                                <rect x="20" y="50" width="160" height="70" rx="8" fill="#2d4a7a"/>
+                                <rect x="35" y="60" width="50" height="30" rx="3" fill="#1e3a5f" opacity="0.7"/>
+                                <rect x="95" y="60" width="50" height="30" rx="3" fill="#1e3a5f" opacity="0.7"/>
+                                <ellipse cx="55" cy="125" rx="18" ry="18" fill="#1e293b" stroke="#374151" strokeWidth="3"/>
+                                <ellipse cx="145" cy="125" rx="18" ry="18" fill="#1e293b" stroke="#374151" strokeWidth="3"/>
+                                <path d="M145 75 Q165 80 170 95 L180 93 Q172 75 150 70Z" fill="#dc2626" opacity="0.6"/>
+                              </g>
+                            </svg>
+                            <div className="absolute top-2 right-2 rounded-full bg-red-500/90 p-1">
+                              <svg width="12" height="12" viewBox="0 0 12 12" fill="none">
+                                <path d="M3 3l6 6M9 3l-6 6" stroke="white" strokeWidth="1.5" strokeLinecap="round"/>
+                              </svg>
+                            </div>
+                          </div>
+                          <div>
+                            <p className="text-[11px] font-semibold text-red-400">{t('offerte.photoGuideBad')}</p>
+                            <p className="text-[10px] text-ck-text-faint leading-relaxed">{t('offerte.photoGuideTip6')}</p>
+                          </div>
+                        </div>
+                      </div>
+
+                      <div className="border-t border-ck-border/30 pt-4">
+                        <p className="text-[10px] text-ck-text-faint leading-relaxed">
+                          {t('offerte.photoGuideNote')}
+                        </p>
+                      </div>
+                    </div>
+                  )}
                 </div>
 
                 {/* --- Photos --- */}
