@@ -1,5 +1,11 @@
-import { createClient } from '@/lib/supabase/server';
+import { createClient, createServiceClient } from '@/lib/supabase/server';
 import type { OfferType, OfferStatus } from '@/types/database';
+
+async function getDb() {
+  const supabase = createClient();
+  const { data: { user } } = await supabase.auth.getUser();
+  return user ? supabase : createServiceClient();
+}
 
 const OFFER_SELECT = `
   id, type, status, origin, offer_number,
@@ -20,8 +26,8 @@ export async function getOffers(filters?: {
   customer_id?: string;
   search?: string;
 }) {
-  const supabase = createClient();
-  let query = supabase
+  const db = await getDb();
+  let query = db
     .from('offers')
     .select(OFFER_SELECT)
     .order('created_at', { ascending: false });
@@ -41,8 +47,8 @@ export async function getOffers(filters?: {
 }
 
 export async function getOffer(id: string) {
-  const supabase = createClient();
-  const { data, error } = await supabase
+  const db = await getDb();
+  const { data, error } = await db
     .from('offers')
     .select(`
       ${OFFER_SELECT},
@@ -69,8 +75,8 @@ export async function getOffer(id: string) {
 }
 
 export async function getOfferLines(offerId: string) {
-  const supabase = createClient();
-  const { data, error } = await supabase
+  const db = await getDb();
+  const { data, error } = await db
     .from('offer_lines')
     .select('*')
     .eq('offer_id', offerId)
@@ -81,9 +87,9 @@ export async function getOfferLines(offerId: string) {
 }
 
 export async function getOfferChain(id: string) {
-  const supabase = createClient();
+  const db = await getDb();
 
-  const { data: offer, error } = await supabase
+  const { data: offer, error } = await db
     .from('offers')
     .select('id, type, offer_number, status, supersedes_id, parent_offer_id, created_at')
     .eq('id', id)
@@ -96,7 +102,7 @@ export async function getOfferChain(id: string) {
   // Find all offers that share the same parent or supersede each other
   if (offer.parent_offer_id || offer.supersedes_id) {
     const rootId = offer.parent_offer_id ?? offer.supersedes_id;
-    const { data: related } = await supabase
+    const { data: related } = await db
       .from('offers')
       .select('id, type, offer_number, status, supersedes_id, parent_offer_id, created_at')
       .or(`id.eq.${rootId},parent_offer_id.eq.${rootId},supersedes_id.eq.${rootId}`)
@@ -107,7 +113,7 @@ export async function getOfferChain(id: string) {
   }
 
   // Also find offers that supersede this one
-  const { data: successors } = await supabase
+  const { data: successors } = await db
     .from('offers')
     .select('id, type, offer_number, status, supersedes_id, parent_offer_id, created_at')
     .eq('supersedes_id', id)
