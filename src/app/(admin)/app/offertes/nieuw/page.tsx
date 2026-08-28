@@ -98,6 +98,7 @@ export default function CreateOfferPage() {
   const [origin, setOrigin] = useState('manual');
   const [locale, setLocale] = useState('nl');
   const [validUntil, setValidUntil] = useState('');
+  const [estimatedDelivery, setEstimatedDelivery] = useState('');
   const [payerType, setPayerType] = useState<PayerType | ''>('');
   const [notes, setNotes] = useState('');
   const [lines, setLines] = useState<LineItem[]>([emptyLine()]);
@@ -204,6 +205,7 @@ export default function CreateOfferPage() {
           origin,
           locale,
           valid_until: validUntil || null,
+          estimated_delivery_at: estimatedDelivery ? new Date(estimatedDelivery).toISOString() : null,
           notes: notes || null,
           payer_type: payerType || null,
         }),
@@ -472,6 +474,15 @@ export default function CreateOfferPage() {
               type="date"
               value={validUntil}
               onChange={e => setValidUntil(e.target.value)}
+              className={inputClass}
+            />
+          </div>
+          <div>
+            <label className="mb-1 block text-[11px] text-ck-text-muted">{t('estimatedDelivery')}</label>
+            <input
+              type="date"
+              value={estimatedDelivery}
+              onChange={e => setEstimatedDelivery(e.target.value)}
               className={inputClass}
             />
           </div>

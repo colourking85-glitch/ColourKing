@@ -5,7 +5,7 @@ const OFFER_SELECT = `
   id, type, status, origin, offer_number,
   customer_id, vehicle_id, lead_id, job_id,
   parent_offer_id, supersedes_id,
-  locale, valid_until, notes,
+  locale, valid_until, estimated_delivery_at, notes,
   subtotal_cents, vat_cents, total_cents, discount_cents,
   approved_at, approved_by_name, approved_ip,
   rejected_at, rejected_reason, sent_at,

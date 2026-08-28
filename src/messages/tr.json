@@ -471,6 +471,7 @@
     "vehicle": "Araç",
     "total": "Toplam",
     "validUntil": "Geçerlilik tarihi",
+    "estimatedDelivery": "Tahmini teslim tarihi",
     "notes": "Notlar",
     "origin": "Kaynak",
     "offer": "Teklif",

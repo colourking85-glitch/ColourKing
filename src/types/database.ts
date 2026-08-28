@@ -242,6 +242,7 @@ export interface Offer {
   rejected_at: string | null;
   rejected_reason: string | null;
   sent_at: string | null;
+  estimated_delivery_at: string | null;
   created_by: string | null;
   created_at: string;
   updated_at: string;

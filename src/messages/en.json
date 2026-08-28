@@ -471,6 +471,7 @@
     "vehicle": "Vehicle",
     "total": "Total",
     "validUntil": "Valid until",
+    "estimatedDelivery": "Estimated delivery",
     "notes": "Notes",
     "origin": "Origin",
     "offer": "Quote",

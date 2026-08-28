@@ -43,6 +43,7 @@ type OfferDetail = {
   supersedes_id: string | null;
   locale: string;
   valid_until: string | null;
+  estimated_delivery_at: string | null;
   notes: string | null;
   subtotal_cents: number;
   vat_cents: number;
@@ -396,6 +397,7 @@ export default function OfferDetailPage() {
               <InfoRow icon={Calendar} label={t('status')} value={fmtDate(offer.created_at)} />
               {offer.sent_at && <InfoRow icon={Send} label={t('sent')} value={fmtDate(offer.sent_at)} />}
               {offer.valid_until && <InfoRow icon={Calendar} label={t('validUntil')} value={new Date(offer.valid_until).toLocaleDateString('nl-NL')} />}
+              {offer.estimated_delivery_at && <InfoRow icon={Calendar} label={t('estimatedDelivery')} value={new Date(offer.estimated_delivery_at).toLocaleDateString('nl-NL')} />}
               {offer.staff && <InfoRow icon={User} label={t('origin')} value={offer.staff.name} />}
               {offer.approved_at && (
                 <>

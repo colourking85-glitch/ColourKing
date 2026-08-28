@@ -11,6 +11,7 @@ export const OfferSchema = z.object({
   supersedes_id: z.string().uuid().nullable().optional(),
   locale: z.string().default('nl'),
   valid_until: z.string().nullable().optional(),
+  estimated_delivery_at: z.string().nullable().optional(),
   notes: z.string().nullable().optional(),
   payer_type: z.enum(['casco', 'wa', 'particulier', 'lease']).nullable().optional(),
 });
