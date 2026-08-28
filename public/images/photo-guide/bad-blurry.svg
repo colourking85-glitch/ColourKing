@@ -1,0 +1,69 @@
+<svg viewBox="0 0 400 300" xmlns="http://www.w3.org/2000/svg">
+  <defs>
+    <filter id="heavyBlur">
+      <feGaussianBlur stdDeviation="4.5"/>
+    </filter>
+    <filter id="lightBlur">
+      <feGaussianBlur stdDeviation="2"/>
+    </filter>
+    <linearGradient id="car3" x1="0" y1="0" x2="1" y2="1">
+      <stop offset="0%" stop-color="#3b82f6"/>
+      <stop offset="100%" stop-color="#1d4ed8"/>
+    </linearGradient>
+    <linearGradient id="ground3" x1="0" y1="0" x2="0" y2="1">
+      <stop offset="0%" stop-color="#374151"/>
+      <stop offset="100%" stop-color="#1f2937"/>
+    </linearGradient>
+  </defs>
+  <rect width="400" height="300" fill="#1a1f2e"/>
+
+  <!-- Everything is blurred -->
+  <g filter="url(#heavyBlur)">
+    <!-- Sky tint -->
+    <rect width="400" height="200" fill="#87CEEB" opacity="0.08"/>
+    <!-- Ground -->
+    <rect x="0" y="220" width="400" height="80" fill="url(#ground3)"/>
+    <!-- Car body -->
+    <path d="M60 180 Q60 140 100 130 L180 120 Q200 115 220 120 L300 130 Q340 140 340 180 L340 210 Q340 215 335 215 L65 215 Q60 215 60 210Z" fill="url(#car3)"/>
+    <!-- Roof -->
+    <path d="M120 130 L160 95 Q170 88 195 88 L225 88 Q250 88 260 95 L290 130" fill="#2563eb"/>
+    <!-- Windows -->
+    <path d="M130 128 L163 97 Q170 92 195 92 L215 92 L240 128Z" fill="#1e3a5f" opacity="0.8"/>
+    <path d="M250 128 L245 97 Q250 92 260 95 L280 128Z" fill="#1e3a5f" opacity="0.8"/>
+    <!-- Wheels -->
+    <circle cx="120" cy="215" r="25" fill="#111827"/>
+    <circle cx="120" cy="215" r="22" fill="#1f2937" stroke="#374151" stroke-width="2"/>
+    <circle cx="290" cy="215" r="25" fill="#111827"/>
+    <circle cx="290" cy="215" r="22" fill="#1f2937" stroke="#374151" stroke-width="2"/>
+    <!-- Damage -->
+    <path d="M290 155 Q310 148 325 160 L332 170 Q320 162 305 158Z" fill="#dc2626" opacity="0.6"/>
+    <line x1="295" y1="158" x2="325" y2="165" stroke="#fca5a5" stroke-width="2" opacity="0.6"/>
+    <!-- Headlights -->
+    <ellipse cx="80" cy="175" rx="12" ry="8" fill="#fbbf24" opacity="0.5"/>
+    <ellipse cx="325" cy="175" rx="12" ry="8" fill="#ef4444" opacity="0.4"/>
+  </g>
+
+  <!-- Motion blur lines (camera shake) -->
+  <line x1="30" y1="140" x2="55" y2="138" stroke="#4b5563" stroke-width="0.8" opacity="0.3"/>
+  <line x1="350" y1="160" x2="380" y2="158" stroke="#4b5563" stroke-width="0.8" opacity="0.3"/>
+  <line x1="20" y1="190" x2="50" y2="188" stroke="#4b5563" stroke-width="0.8" opacity="0.3"/>
+  <line x1="355" y1="200" x2="390" y2="198" stroke="#4b5563" stroke-width="0.8" opacity="0.3"/>
+
+  <!-- Shaking hand icon -->
+  <g transform="translate(320, 40)" opacity="0.5">
+    <!-- Phone outline -->
+    <rect x="0" y="0" width="22" height="38" rx="3" fill="none" stroke="#6b7280" stroke-width="1.5" transform="rotate(-8 11 19)"/>
+    <!-- Screen -->
+    <rect x="3" y="5" width="16" height="25" rx="1" fill="#374151" opacity="0.3" transform="rotate(-8 11 19)"/>
+    <!-- Shake lines -->
+    <path d="M-8 15 L-4 12 L-8 9" fill="none" stroke="#ef4444" stroke-width="1.2" opacity="0.6"/>
+    <path d="M30 15 L34 12 L30 9" fill="none" stroke="#ef4444" stroke-width="1.2" opacity="0.6"/>
+  </g>
+
+  <!-- Label -->
+  <rect x="12" y="258" width="140" height="28" rx="4" fill="#7f1d1d" opacity="0.9"/>
+  <text x="82" y="277" text-anchor="middle" fill="#fca5a5" font-family="system-ui,sans-serif" font-size="12" font-weight="600">BLURRY / SHAKY</text>
+  <!-- X badge -->
+  <circle cx="370" cy="25" r="16" fill="#dc2626" opacity="0.9"/>
+  <path d="M363 18 L377 32 M377 18 L363 32" stroke="white" stroke-width="2.5" stroke-linecap="round"/>
+</svg>

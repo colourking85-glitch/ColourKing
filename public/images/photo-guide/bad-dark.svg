@@ -1,0 +1,44 @@
+<svg viewBox="0 0 400 300" xmlns="http://www.w3.org/2000/svg">
+  <rect width="400" height="300" fill="#060810"/>
+  <!-- Very dark car, barely visible -->
+  <rect x="0" y="230" width="400" height="70" fill="#0a0e14"/>
+  <!-- Car body - extremely dark -->
+  <path d="M60 180 Q60 140 100 130 L180 120 Q200 115 220 120 L300 130 Q340 140 340 180 L340 210 Q340 215 335 215 L65 215 Q60 215 60 210Z" fill="#0d1117" opacity="0.9"/>
+  <!-- Roof -->
+  <path d="M120 130 L160 95 Q170 88 195 88 L225 88 Q250 88 260 95 L290 130" fill="#0a0f17" stroke="#111827" stroke-width="0.5"/>
+  <!-- Windows barely visible -->
+  <path d="M130 128 L163 97 Q170 92 195 92 L215 92 L240 128Z" fill="#070b12" opacity="0.8"/>
+  <path d="M250 128 L245 97 Q250 92 260 95 L280 128Z" fill="#070b12" opacity="0.8"/>
+  <!-- Wheels barely visible -->
+  <circle cx="120" cy="215" r="25" fill="#060810"/>
+  <circle cx="120" cy="215" r="22" fill="#080c14" stroke="#111827" stroke-width="1.5"/>
+  <circle cx="290" cy="215" r="25" fill="#060810"/>
+  <circle cx="290" cy="215" r="22" fill="#080c14" stroke="#111827" stroke-width="1.5"/>
+  <!-- Damage hidden in darkness -->
+  <path d="M290 155 Q310 148 325 160 L332 170 Q320 162 305 158Z" fill="#1a0000" opacity="0.3"/>
+  <!-- "?" indicating can't see -->
+  <text x="310" y="168" text-anchor="middle" fill="#374151" font-family="system-ui,sans-serif" font-size="18" font-weight="700" opacity="0.5">?</text>
+  <!-- Moon (indicating nighttime) -->
+  <circle cx="60" cy="45" r="15" fill="#374151" opacity="0.3"/>
+  <circle cx="55" cy="40" r="15" fill="#060810"/>
+  <!-- Flash indicator crossed out -->
+  <g transform="translate(340, 250)" opacity="0.4">
+    <path d="M0 0 L5 -12 L2 -12 L8 -25 L3 -12 L6 -12 L0 0Z" fill="#fbbf24" opacity="0.5"/>
+    <line x1="-5" y1="3" x2="12" y2="-28" stroke="#ef4444" stroke-width="2"/>
+  </g>
+  <!-- Noise/grain effect -->
+  <rect x="80" y="140" width="2" height="2" fill="#1f2937" opacity="0.3"/>
+  <rect x="150" y="170" width="2" height="2" fill="#1f2937" opacity="0.4"/>
+  <rect x="220" y="150" width="2" height="2" fill="#1f2937" opacity="0.3"/>
+  <rect x="280" y="180" width="2" height="2" fill="#1f2937" opacity="0.5"/>
+  <rect x="170" y="200" width="2" height="2" fill="#1f2937" opacity="0.3"/>
+  <rect x="250" y="140" width="2" height="2" fill="#1f2937" opacity="0.4"/>
+  <rect x="130" y="190" width="2" height="2" fill="#1f2937" opacity="0.3"/>
+  <rect x="310" y="165" width="2" height="2" fill="#1f2937" opacity="0.4"/>
+  <!-- Label -->
+  <rect x="12" y="258" width="140" height="28" rx="4" fill="#7f1d1d" opacity="0.9"/>
+  <text x="82" y="277" text-anchor="middle" fill="#fca5a5" font-family="system-ui,sans-serif" font-size="12" font-weight="600">TOO DARK</text>
+  <!-- X badge -->
+  <circle cx="370" cy="25" r="16" fill="#dc2626" opacity="0.9"/>
+  <path d="M363 18 L377 32 M377 18 L363 32" stroke="white" stroke-width="2.5" stroke-linecap="round"/>
+</svg>

@@ -1605,6 +1605,8 @@
       "photoGuideTip5": "Don't stand too far away. The damage must be clearly recognisable, not a tiny dot in the distance.",
       "photoGuideTip6": "Make sure the photo is sharp. Blurry or shaky photos make it impossible to assess the damage.",
       "photoGuideNote": "Tip: use your phone's rear camera for the best quality. Our AI checks each photo for lighting, sharpness, angle, distance, and damage visibility.",
+      "privacyConsent": "I agree to the processing of my personal data (name, email, phone number and photos) for preparing a quote. Your data will not be shared with third parties.",
+      "privacyRequired": "You must agree to the privacy statement to continue",
       "submit": "Submit",
       "submitting": "Submitting...",
       "success": "Thank you! Your request has been sent, we will contact you shortly.",

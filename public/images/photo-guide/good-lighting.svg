@@ -1,0 +1,75 @@
+<svg viewBox="0 0 400 300" xmlns="http://www.w3.org/2000/svg">
+  <defs>
+    <linearGradient id="sky" x1="0" y1="0" x2="0" y2="1">
+      <stop offset="0%" stop-color="#87CEEB" stop-opacity="0.3"/>
+      <stop offset="100%" stop-color="#e0f0ff" stop-opacity="0.1"/>
+    </linearGradient>
+    <linearGradient id="car1" x1="0" y1="0" x2="1" y2="1">
+      <stop offset="0%" stop-color="#3b82f6"/>
+      <stop offset="100%" stop-color="#1d4ed8"/>
+    </linearGradient>
+    <linearGradient id="ground1" x1="0" y1="0" x2="0" y2="1">
+      <stop offset="0%" stop-color="#374151"/>
+      <stop offset="100%" stop-color="#1f2937"/>
+    </linearGradient>
+    <radialGradient id="sun1" cx="0.85" cy="0.12">
+      <stop offset="0%" stop-color="#fbbf24" stop-opacity="0.8"/>
+      <stop offset="30%" stop-color="#fbbf24" stop-opacity="0.3"/>
+      <stop offset="100%" stop-color="#fbbf24" stop-opacity="0"/>
+    </radialGradient>
+    <linearGradient id="reflect1" x1="0" y1="0" x2="0" y2="1">
+      <stop offset="0%" stop-color="#fff" stop-opacity="0.15"/>
+      <stop offset="100%" stop-color="#fff" stop-opacity="0"/>
+    </linearGradient>
+  </defs>
+  <!-- Background -->
+  <rect width="400" height="300" fill="#1a1f2e"/>
+  <rect width="400" height="200" fill="url(#sky)"/>
+  <!-- Sun -->
+  <circle cx="340" cy="40" r="80" fill="url(#sun1)"/>
+  <circle cx="340" cy="40" r="18" fill="#fbbf24" opacity="0.9"/>
+  <!-- Sun rays -->
+  <line x1="340" y1="10" x2="340" y2="0" stroke="#fbbf24" stroke-width="1.5" opacity="0.4"/>
+  <line x1="365" y1="18" x2="375" y2="10" stroke="#fbbf24" stroke-width="1.5" opacity="0.4"/>
+  <line x1="370" y1="40" x2="385" y2="40" stroke="#fbbf24" stroke-width="1.5" opacity="0.4"/>
+  <line x1="315" y1="18" x2="305" y2="10" stroke="#fbbf24" stroke-width="1.5" opacity="0.4"/>
+  <!-- Ground -->
+  <rect x="0" y="230" width="400" height="70" fill="url(#ground1)"/>
+  <line x1="0" y1="230" x2="400" y2="230" stroke="#4b5563" stroke-width="0.5"/>
+  <!-- Car body -->
+  <path d="M60 180 Q60 140 100 130 L180 120 Q200 115 220 120 L300 130 Q340 140 340 180 L340 210 Q340 215 335 215 L65 215 Q60 215 60 210Z" fill="url(#car1)"/>
+  <!-- Car roof -->
+  <path d="M120 130 L160 95 Q170 88 195 88 L225 88 Q250 88 260 95 L290 130" fill="#2563eb" stroke="#1e40af" stroke-width="0.5"/>
+  <!-- Windshield -->
+  <path d="M130 128 L163 97 Q170 92 195 92 L215 92 L240 128Z" fill="#1e3a5f" opacity="0.8"/>
+  <!-- Rear window -->
+  <path d="M250 128 L245 97 Q250 92 260 95 L280 128Z" fill="#1e3a5f" opacity="0.8"/>
+  <!-- Car reflection -->
+  <path d="M70 160 L330 160 L330 180 Q300 170 200 170 Q100 170 70 180Z" fill="url(#reflect1)"/>
+  <!-- Headlights -->
+  <ellipse cx="80" cy="175" rx="12" ry="8" fill="#fbbf24" opacity="0.6"/>
+  <ellipse cx="325" cy="175" rx="12" ry="8" fill="#ef4444" opacity="0.5"/>
+  <!-- Wheels -->
+  <circle cx="120" cy="215" r="25" fill="#111827"/>
+  <circle cx="120" cy="215" r="22" fill="#1f2937" stroke="#374151" stroke-width="2"/>
+  <circle cx="120" cy="215" r="10" fill="#374151"/>
+  <circle cx="120" cy="215" r="4" fill="#6b7280"/>
+  <circle cx="290" cy="215" r="25" fill="#111827"/>
+  <circle cx="290" cy="215" r="22" fill="#1f2937" stroke="#374151" stroke-width="2"/>
+  <circle cx="290" cy="215" r="10" fill="#374151"/>
+  <circle cx="290" cy="215" r="4" fill="#6b7280"/>
+  <!-- DAMAGE: dent + scratch on right fender -->
+  <path d="M290 155 Q310 148 325 160 L332 170 Q320 162 305 158Z" fill="#dc2626" opacity="0.6"/>
+  <line x1="295" y1="158" x2="325" y2="165" stroke="#fca5a5" stroke-width="1.5" opacity="0.7"/>
+  <line x1="300" y1="163" x2="330" y2="168" stroke="#fca5a5" stroke-width="1" opacity="0.5"/>
+  <path d="M310 152 Q315 148 320 150" fill="none" stroke="#fca5a5" stroke-width="1.5" opacity="0.6"/>
+  <!-- Light indication arrows -->
+  <path d="M300 60 L310 90" stroke="#fbbf24" stroke-width="1" opacity="0.3" stroke-dasharray="4 3"/>
+  <path d="M320 50 L315 85" stroke="#fbbf24" stroke-width="1" opacity="0.3" stroke-dasharray="4 3"/>
+  <!-- Label -->
+  <rect x="12" y="258" width="160" height="28" rx="4" fill="#065f46" opacity="0.9"/>
+  <text x="92" y="277" text-anchor="middle" fill="#34d399" font-family="system-ui,sans-serif" font-size="12" font-weight="600">GOOD LIGHTING</text>
+  <!-- Checkmark badge -->
+  <circle cx="370" cy="25" r="16" fill="#059669" opacity="0.9"/>
+  <path d="M362 25 L367 30 L378 19" fill="none" stroke="white" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"/>
+</svg>

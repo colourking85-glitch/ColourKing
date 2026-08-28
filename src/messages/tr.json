@@ -1554,6 +1554,8 @@
       "photoGuideTip5": "Çok uzaktan çekmeyin. Hasar açıkça tanınabilir olmalı, uzaktaki küçük bir nokta değil.",
       "photoGuideTip6": "Fotoğrafın net olduğundan emin olun. Bulanık fotoğraflar hasarı değerlendirmeyi imkansız kılar.",
       "photoGuideNote": "İpucu: en iyi kalite için telefonunuzun arka kamerasını kullanın. AI'mız her fotoğrafı aydınlatma, netlik, açı, mesafe ve hasar görünürlüğü açısından kontrol eder.",
+      "privacyConsent": "Teklif hazırlanması amacıyla kişisel verilerimin (ad, e-posta, telefon numarası ve fotoğraflar) işlenmesini kabul ediyorum. Verileriniz üçüncü taraflarla paylaşılmayacaktır.",
+      "privacyRequired": "Devam etmek için gizlilik bildirimine onay vermelisiniz",
       "submit": "Gönder",
       "submitting": "Gönderiliyor...",
       "success": "Teşekkürler! Talebiniz gönderildi, en kısa sürede sizinle iletişime geçeceğiz.",
