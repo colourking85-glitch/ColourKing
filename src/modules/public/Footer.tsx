@@ -133,6 +133,19 @@ export function Footer() {
             {t('footer.kvk')}&nbsp;&nbsp;{t('footer.btw')}
           </p>
         </div>
+
+        {/* Developer credit */}
+        <div className="mt-6 flex items-center justify-center pb-2">
+          <a
+            href="https://dessystems.io"
+            target="_blank"
+            rel="noopener noreferrer"
+            className="group flex items-center gap-1.5 text-[11px] text-ck-text-muted/60 transition-colors hover:text-ck-text-muted"
+          >
+            <span>Developed by</span>
+            <span className="font-semibold tracking-wide group-hover:text-ck-text">dessystems.io</span>
+          </a>
+        </div>
       </div>
     </footer>
   );
