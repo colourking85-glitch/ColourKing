@@ -164,7 +164,9 @@ export default function OffertePage() {
   function validate() {
     const e: Record<string, string> = {};
     if (!form.name.trim()) e.name = t('offerte.requiredField');
-    if (form.email && !/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(form.email)) {
+    if (!form.email.trim()) {
+      e.email = t('offerte.requiredField');
+    } else if (!/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(form.email)) {
       e.email = t('offerte.invalidEmail');
     }
     if (!isForeignPlate && !vehicle && form.kenteken.trim()) {
@@ -328,8 +330,8 @@ export default function OffertePage() {
       </section>
 
       <section className="px-6 pb-24">
-        <div className="mx-auto grid max-w-7xl gap-px bg-ck-border lg:grid-cols-5">
-          <div className="bg-ck-bg p-8 sm:p-12 lg:col-span-3">
+        <div className="mx-auto max-w-7xl space-y-px">
+          <div className="bg-ck-bg p-8 sm:p-12">
             <h2 className="font-heading text-2xl font-bold uppercase tracking-tight text-ck-text">
               {t('offerte.formTitle')}
             </h2>
@@ -574,24 +576,23 @@ export default function OffertePage() {
                   <h3 className="text-xs font-semibold uppercase tracking-[0.15em] text-ck-red">
                     {t('offerte.contactSection')}
                   </h3>
-                  <div>
-                    <label htmlFor="name" className="block text-xs font-semibold uppercase tracking-wider text-ck-text-muted">
-                      {t('offerte.name')} *
-                    </label>
-                    <input
-                      id="name"
-                      type="text"
-                      value={form.name}
-                      onChange={e => handleChange('name', e.target.value)}
-                      className={inputClasses}
-                    />
-                    {errors.name && <p className="mt-1 text-xs text-ck-red">{errors.name}</p>}
-                  </div>
-
-                  <div className="grid gap-4 sm:grid-cols-2">
+                  <div className="grid gap-4 sm:grid-cols-3">
+                    <div>
+                      <label htmlFor="name" className="block text-xs font-semibold uppercase tracking-wider text-ck-text-muted">
+                        {t('offerte.name')} <span className="text-ck-red">*</span>
+                      </label>
+                      <input
+                        id="name"
+                        type="text"
+                        value={form.name}
+                        onChange={e => handleChange('name', e.target.value)}
+                        className={inputClasses}
+                      />
+                      {errors.name && <p className="mt-1 text-xs text-ck-red">{errors.name}</p>}
+                    </div>
                     <div>
                       <label htmlFor="email" className="block text-xs font-semibold uppercase tracking-wider text-ck-text-muted">
-                        {t('offerte.email')}
+                        {t('offerte.email')} <span className="text-ck-red">*</span>
                       </label>
                       <input
                         id="email"
@@ -729,13 +730,13 @@ export default function OffertePage() {
             )}
           </div>
 
-          <div className="flex flex-col gap-px bg-ck-border lg:col-span-2">
+          <div className="grid gap-px bg-ck-border lg:grid-cols-2">
             <div className="bg-ck-bg p-8 sm:p-12">
               <h2 className="font-heading text-2xl font-bold uppercase tracking-tight text-ck-text">
                 {t('contact.infoTitle')}
               </h2>
 
-              <div className="mt-8 space-y-6">
+              <div className="mt-8 grid gap-6 sm:grid-cols-2">
                 <div>
                   <p className="text-[11px] font-semibold uppercase tracking-[0.2em] text-ck-red">
                     {t('contact.address')}
@@ -749,7 +750,7 @@ export default function OffertePage() {
                   </p>
                   <a
                     href="tel:+31681631020"
-                    className="mt-2 block font-heading text-2xl font-bold text-ck-text transition-colors hover:text-ck-red"
+                    className="mt-2 block font-heading text-xl font-bold text-ck-text transition-colors hover:text-ck-red"
                   >
                     {t('footer.phone')}
                   </a>
@@ -780,8 +781,15 @@ export default function OffertePage() {
               </div>
             </div>
 
-            <div className="flex h-48 items-center justify-center bg-ck-bg lg:flex-1">
-              <p className="text-xs text-ck-text-faint">{t('contact.mapPlaceholder')}</p>
+            <div className="bg-ck-bg">
+              <iframe
+                src="https://www.google.com/maps/embed?pb=!1m18!1m12!1m3!1d2462.5!2d4.4851!3d51.8925!2m3!1f0!2f0!3f0!3m2!1i1024!2i768!4f13.1!3m3!1m2!1s0x47c434a3a7a08d7d%3A0x5e6a4a4a5e6a4a4a!2sSatijnbloem%206%2C%203068%20JP%20Rotterdam!5e0!3m2!1snl!2snl!4v1"
+                className="h-full min-h-[280px] w-full border-0"
+                allowFullScreen
+                loading="lazy"
+                referrerPolicy="no-referrer-when-downgrade"
+                title="Colourking location"
+              />
             </div>
           </div>
         </div>
