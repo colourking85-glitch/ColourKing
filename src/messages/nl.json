@@ -1549,6 +1549,7 @@
       "error": "Er is iets misgegaan. Probeer het later opnieuw of bel ons direct.",
       "requiredField": "Dit veld is verplicht",
       "invalidEmail": "Voer een geldig e-mailadres in",
+      "damageMinLength": "Minimaal 10 tekens vereist",
       "filesTooLarge": "Totale bestandsgrootte overschrijdt 20 MB. Verwijder enkele foto's.",
       "vehicleSection": "Voertuiggegevens",
       "foreignPlate": "Buitenlands kenteken / handmatig invoeren",

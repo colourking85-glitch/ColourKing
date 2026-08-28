@@ -178,6 +178,11 @@ export default function OffertePage() {
     if (serviceTypes.length === 0) {
       e.service = t('offerte.selectService');
     }
+    if (!form.damage.trim()) {
+      e.damage = t('offerte.requiredField');
+    } else if (form.damage.trim().length < 10) {
+      e.damage = t('offerte.damageMinLength');
+    }
     return e;
   }
 
@@ -621,7 +626,7 @@ export default function OffertePage() {
                 {/* --- Damage description --- */}
                 <div>
                   <label htmlFor="damage" className="block text-xs font-semibold uppercase tracking-wider text-ck-text-muted">
-                    {t('offerte.damageDescription')}
+                    {t('offerte.damageDescription')} <span className="text-ck-red">*</span>
                   </label>
                   <textarea
                     id="damage"
@@ -630,6 +635,7 @@ export default function OffertePage() {
                     onChange={e => handleChange('damage', e.target.value)}
                     className={`${inputClasses} resize-none`}
                   />
+                  {errors.damage && <p className="mt-1 text-xs text-ck-red">{errors.damage}</p>}
                 </div>
 
                 {/* --- Photos --- */}

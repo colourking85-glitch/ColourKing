@@ -1549,6 +1549,7 @@
       "error": "Bir şeyler ters gitti. Lütfen daha sonra tekrar deneyin veya bizi doğrudan arayın.",
       "requiredField": "Bu alan zorunludur",
       "invalidEmail": "Lütfen geçerli bir e-posta adresi girin",
+      "damageMinLength": "En az 10 karakter gerekli",
       "filesTooLarge": "Toplam dosya boyutu 20 MB'ı aşıyor. Lütfen bazı fotoğrafları kaldırın.",
       "vehicleSection": "Araç bilgileri",
       "foreignPlate": "Yabancı plaka / elle giriş",

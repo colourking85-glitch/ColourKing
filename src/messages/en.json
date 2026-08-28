@@ -1600,6 +1600,7 @@
       "error": "Something went wrong. Please try again later or call us directly.",
       "requiredField": "This field is required",
       "invalidEmail": "Enter a valid email address",
+      "damageMinLength": "Minimum 10 characters required",
       "filesTooLarge": "Total file size exceeds 20 MB. Please remove some photos.",
       "vehicleSection": "Vehicle details",
       "foreignPlate": "Foreign plate / enter manually",
