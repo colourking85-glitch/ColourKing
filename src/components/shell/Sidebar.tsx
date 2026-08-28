@@ -9,7 +9,7 @@ import {
   Package, Receipt, FolderOpen, CalendarDays, ClipboardList,
   BarChart3, Calculator, ShoppingCart, BookOpen, Settings, Bell,
   ChevronLeft, ChevronRight, ChevronDown, BookOpenCheck, Clock, Bot, Mail, HardDrive, Server,
-  Plug, Zap, CarFront, Coins, Shield, Activity,
+  Plug, Zap, CarFront, Coins, Shield, Activity, ClipboardCheck,
 } from 'lucide-react';
 import { ScreenBadge } from '@/components/ui/ScreenBadge';
 import { SCREEN_REGISTRY } from '@/lib/codes';
@@ -70,6 +70,7 @@ const NAV: NavSection[] = [
     items: [
       { label: 'jobs', href: '/app/jobs', icon: Wrench, code: 'JB05', permission: 'jobs.read' },
       { label: 'workshopBoard', href: '/app/jobs/board', icon: ClipboardList, code: 'JB15', permission: 'jobs.read' },
+      { label: 'inspections', href: '/app/inspecties', icon: ClipboardCheck, code: 'IN05', permission: 'jobs.read' },
       { label: 'parts', href: '/app/onderdelen', icon: Package, code: 'PT05', permission: 'parts.read' },
       { label: 'planning', href: '/app/planning', icon: CalendarDays, code: 'TS10', permission: 'tasks.own' },
     ],
