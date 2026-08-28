@@ -142,6 +142,16 @@ export interface Lead {
   locale: string;
   status: LeadStatus;
   lost_reason: string | null;
+  vehicle_make: string | null;
+  vehicle_model: string | null;
+  vehicle_year: number | null;
+  vehicle_colour: string | null;
+  vehicle_vin: string | null;
+  paint_code: string | null;
+  is_foreign_plate: boolean;
+  service_types: string[];
+  repair_locations: string[];
+  rdw_snapshot: Record<string, unknown> | null;
   created_at: string;
   updated_at: string;
 }

@@ -2,12 +2,6 @@ import { NextRequest, NextResponse } from 'next/server';
 import { z } from 'zod';
 import { admin } from '@/lib/supabase/admin';
 
-/**
- * Public endpoint: submit a quote request from the marketing site.
- * No auth required. Inserts a new lead using the service-role client
- * because RLS on `leads` only allows staff to read/write.
- */
-
 const QuoteRequestSchema = z.object({
   name: z.string().min(1, 'Name is required'),
   email: z.string().email('Invalid email address').optional(),
@@ -15,11 +9,18 @@ const QuoteRequestSchema = z.object({
   kenteken: z.string().optional(),
   damage: z.string().optional(),
   locale: z.enum(['nl', 'en', 'tr']).optional().default('nl'),
+  vehicle_make: z.string().optional(),
+  vehicle_model: z.string().optional(),
+  vehicle_year: z.number().int().min(1900).max(2100).optional(),
+  vehicle_colour: z.string().optional(),
+  vehicle_vin: z.string().max(17).optional(),
+  paint_code: z.string().optional(),
+  is_foreign_plate: z.boolean().optional().default(false),
+  service_types: z.array(z.string()).optional().default([]),
+  repair_locations: z.array(z.string()).optional().default([]),
+  rdw_snapshot: z.record(z.unknown()).optional(),
 });
 
-// Basic in-memory rate limiting (no external deps).
-// Not durable across server restarts or multiple instances, but stops
-// naive abuse without adding infrastructure.
 const RATE_LIMIT_MAX = 5;
 const RATE_LIMIT_WINDOW_MS = 60_000;
 const hits = new Map<string, { count: number; resetAt: number }>();
@@ -83,20 +84,30 @@ export async function POST(req: NextRequest) {
       );
     }
 
-    const { name, email, phone, kenteken, damage, locale } = parsed.data;
+    const d = parsed.data;
 
     const { data, error } = await admin
       .from('leads')
       .insert({
-        contact_name: name,
-        contact_email: email ?? null,
-        contact_phone: phone ?? null,
-        kenteken: kenteken ?? null,
-        damage_description: damage ?? null,
-        locale,
+        contact_name: d.name,
+        contact_email: d.email ?? null,
+        contact_phone: d.phone ?? null,
+        kenteken: d.kenteken ?? null,
+        damage_description: d.damage ?? null,
+        locale: d.locale,
         origin: 'Offerte-Web',
         channel: 'quote_form',
         status: 'new',
+        vehicle_make: d.vehicle_make ?? null,
+        vehicle_model: d.vehicle_model ?? null,
+        vehicle_year: d.vehicle_year ?? null,
+        vehicle_colour: d.vehicle_colour ?? null,
+        vehicle_vin: d.vehicle_vin ?? null,
+        paint_code: d.paint_code ?? null,
+        is_foreign_plate: d.is_foreign_plate,
+        service_types: d.service_types,
+        repair_locations: d.repair_locations,
+        rdw_snapshot: d.rdw_snapshot ?? null,
       })
       .select('id')
       .single();
