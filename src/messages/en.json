@@ -555,7 +555,24 @@
     "review": "Review",
     "hiddenDamage": "Hidden damage possible",
     "adas": "ADAS possible",
-    "paintRequired": "Paint required"
+    "paintRequired": "Paint required",
+    "hours": "Hours",
+    "indicative": "Indicative",
+    "date": "Date",
+    "noResults": "No results found",
+    "statuses": {
+      "CONCEPT": "Draft",
+      "BEZIG": "In progress",
+      "TER_AKKOORD": "Pending approval",
+      "AKKOORD": "Approved",
+      "VERGRENDELD": "Locked",
+      "GEANNULEERD": "Cancelled"
+    },
+    "purposes": {
+      "particulier": "Private",
+      "verzekering": "Insurance",
+      "intern": "Internal"
+    }
   },
   "es": {
     "title": "Quotes",

@@ -555,7 +555,24 @@
     "review": "Kontrol",
     "hiddenDamage": "Gizli hasar olabilir",
     "adas": "ADAS olabilir",
-    "paintRequired": "Boya gerekli"
+    "paintRequired": "Boya gerekli",
+    "hours": "Saat",
+    "indicative": "Tahmini",
+    "date": "Tarih",
+    "noResults": "Sonuç bulunamadı",
+    "statuses": {
+      "CONCEPT": "Taslak",
+      "BEZIG": "Devam ediyor",
+      "TER_AKKOORD": "Onay bekliyor",
+      "AKKOORD": "Onaylandı",
+      "VERGRENDELD": "Kilitli",
+      "GEANNULEERD": "İptal edildi"
+    },
+    "purposes": {
+      "particulier": "Özel",
+      "verzekering": "Sigorta",
+      "intern": "Dahili"
+    }
   },
   "es": {
     "title": "Teklifler",

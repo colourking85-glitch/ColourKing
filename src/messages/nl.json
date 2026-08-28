@@ -555,7 +555,24 @@
     "review": "Controle",
     "hiddenDamage": "Verborgen schade mogelijk",
     "adas": "ADAS mogelijk",
-    "paintRequired": "Spuitwerk vereist"
+    "paintRequired": "Spuitwerk vereist",
+    "hours": "Uren",
+    "indicative": "Indicatief",
+    "date": "Datum",
+    "noResults": "Geen resultaten gevonden",
+    "statuses": {
+      "CONCEPT": "Concept",
+      "BEZIG": "Bezig",
+      "TER_AKKOORD": "Ter akkoord",
+      "AKKOORD": "Akkoord",
+      "VERGRENDELD": "Vergrendeld",
+      "GEANNULEERD": "Geannuleerd"
+    },
+    "purposes": {
+      "particulier": "Particulier",
+      "verzekering": "Verzekering",
+      "intern": "Intern"
+    }
   },
   "es": {
     "title": "Offertes",
