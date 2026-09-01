@@ -2,10 +2,15 @@
 
 import { useState, useRef, useEffect, FormEvent } from 'react';
 import { useTranslations } from 'next-intl';
-import { useParams } from 'next/navigation';
+import { useParams, useSearchParams } from 'next/navigation';
+import CarDamagePicker from '@/modules/public/CarDamagePicker';
+import DamageAssessment from '@/modules/public/DamageAssessment';
 
+const MIN_PHOTOS = 3;
 const MAX_FILES = 5;
 const MAX_TOTAL_BYTES = 20 * 1024 * 1024;
+
+type IntentType = 'quote' | 'insurance' | 'lease';
 
 interface PhotoScore {
   lighting: 'good' | 'warning' | 'bad';
@@ -62,6 +67,14 @@ const REPAIR_LOCATIONS = [
 export default function OffertePage() {
   const t = useTranslations('pub');
   const { locale } = useParams<{ locale: string }>();
+  const searchParams = useSearchParams();
+
+  const [intent, setIntent] = useState<IntentType>('quote');
+  const [insurerName, setInsurerName] = useState('');
+  const [claimNumber, setClaimNumber] = useState('');
+  const [leaseCompany, setLeaseCompany] = useState('');
+  const [leaseContract, setLeaseContract] = useState('');
+  const [slaHours, setSlaHours] = useState(0);
 
   const [form, setForm] = useState({
     name: '',
@@ -100,11 +113,26 @@ export default function OffertePage() {
   const [privacyConsent, setPrivacyConsent] = useState(false);
 
   useEffect(() => {
+    const preKenteken = searchParams.get('kenteken');
+    if (preKenteken) {
+      setForm(prev => ({ ...prev, kenteken: preKenteken.toUpperCase() }));
+    }
+  }, [searchParams]);
+
+  useEffect(() => {
     fetch('/api/public/ai-config')
       .then(r => r.json())
       .then(data => {
         setAiEnabled(data.photo_check_enabled === true);
         setAiChecked(data.photo_check_enabled === true);
+      })
+      .catch(() => {});
+    fetch('/api/public/site-config')
+      .then(r => r.json())
+      .then(data => {
+        if (data.certifications?.response_sla_hours > 0) {
+          setSlaHours(data.certifications.response_sla_hours);
+        }
       })
       .catch(() => {});
   }, []);
@@ -185,6 +213,9 @@ export default function OffertePage() {
     } else if (form.damage.trim().length < 10) {
       e.damage = t('offerte.damageMinLength');
     }
+    if (files.length < MIN_PHOTOS) {
+      e.photos = t('offerte.photosRequiredError');
+    }
     if (!privacyConsent) {
       e.privacy = t('offerte.privacyRequired');
     }
@@ -221,6 +252,11 @@ export default function OffertePage() {
           vehicle_vin: form.vehicle_vin || undefined,
           paint_code: form.paint_code || undefined,
           is_foreign_plate: isForeignPlate,
+          intent,
+          insurer_name: intent === 'insurance' ? insurerName || undefined : undefined,
+          claim_number: intent === 'insurance' ? claimNumber || undefined : undefined,
+          lease_company: intent === 'lease' ? leaseCompany || undefined : undefined,
+          lease_contract: intent === 'lease' ? leaseContract || undefined : undefined,
           service_types: serviceTypes,
           repair_locations: repairLocations,
           rdw_snapshot: vehicle?.rdw_snapshot,
@@ -352,6 +388,96 @@ export default function OffertePage() {
               </div>
             ) : (
               <form onSubmit={handleSubmit} className="mt-8 space-y-6">
+                {/* --- Intent selector --- */}
+                <div className="space-y-3">
+                  <h3 className="text-xs font-semibold uppercase tracking-[0.15em] text-ck-red">
+                    {t('offerte.intentSection')}
+                  </h3>
+                  <div className="grid gap-3 sm:grid-cols-3">
+                    {(['quote', 'insurance', 'lease'] as const).map((key) => (
+                      <button
+                        key={key}
+                        type="button"
+                        onClick={() => setIntent(key)}
+                        className={`border p-4 text-left transition-colors ${
+                          intent === key
+                            ? 'border-ck-red bg-ck-red/10'
+                            : 'border-ck-border bg-ck-bg hover:border-ck-border-2'
+                        }`}
+                      >
+                        <p className={`text-sm font-semibold ${intent === key ? 'text-ck-red' : 'text-ck-text'}`}>
+                          {t(`offerte.intent_${key}`)}
+                        </p>
+                        <p className="mt-1 text-xs text-ck-text-muted">
+                          {t(`offerte.intent${key.charAt(0).toUpperCase() + key.slice(1)}Desc`)}
+                        </p>
+                      </button>
+                    ))}
+                  </div>
+
+                  {intent === 'insurance' && (
+                    <div className="grid gap-4 sm:grid-cols-2">
+                      <div>
+                        <label htmlFor="insurerName" className="block text-xs font-semibold uppercase tracking-wider text-ck-text-muted">
+                          {t('offerte.insurerName')}
+                        </label>
+                        <input
+                          id="insurerName"
+                          type="text"
+                          value={insurerName}
+                          onChange={(e) => setInsurerName(e.target.value)}
+                          placeholder={t('offerte.insurerNamePlaceholder')}
+                          className={inputClasses}
+                        />
+                      </div>
+                      <div>
+                        <label htmlFor="claimNumber" className="block text-xs font-semibold uppercase tracking-wider text-ck-text-muted">
+                          {t('offerte.claimNumber')}
+                        </label>
+                        <input
+                          id="claimNumber"
+                          type="text"
+                          value={claimNumber}
+                          onChange={(e) => setClaimNumber(e.target.value)}
+                          placeholder={t('offerte.claimNumberPlaceholder')}
+                          className={inputClasses}
+                        />
+                      </div>
+                    </div>
+                  )}
+
+                  {intent === 'lease' && (
+                    <div className="grid gap-4 sm:grid-cols-2">
+                      <div>
+                        <label htmlFor="leaseCompany" className="block text-xs font-semibold uppercase tracking-wider text-ck-text-muted">
+                          {t('offerte.leaseCompany')}
+                        </label>
+                        <input
+                          id="leaseCompany"
+                          type="text"
+                          value={leaseCompany}
+                          onChange={(e) => setLeaseCompany(e.target.value)}
+                          placeholder={t('offerte.leaseCompanyPlaceholder')}
+                          className={inputClasses}
+                        />
+                      </div>
+                      <div>
+                        <label htmlFor="leaseContract" className="block text-xs font-semibold uppercase tracking-wider text-ck-text-muted">
+                          {t('offerte.leaseContract')}
+                        </label>
+                        <input
+                          id="leaseContract"
+                          type="text"
+                          value={leaseContract}
+                          onChange={(e) => setLeaseContract(e.target.value)}
+                          placeholder={t('offerte.leaseContractPlaceholder')}
+                          className={inputClasses}
+                        />
+                      </div>
+                    </div>
+                  )}
+                </div>
+
                 {/* --- Vehicle identification --- */}
                 <div className="space-y-4">
                   <h3 className="text-xs font-semibold uppercase tracking-[0.15em] text-ck-red">
@@ -591,70 +717,15 @@ export default function OffertePage() {
                   {errors.service && <p className="text-xs text-ck-red">{errors.service}</p>}
                 </div>
 
-                {/* --- Repair location --- */}
+                {/* --- Repair location (visual car picker) --- */}
                 <div className="space-y-3">
                   <h3 className="text-xs font-semibold uppercase tracking-[0.15em] text-ck-text-muted">
                     {t('offerte.locationSection')}
                   </h3>
-                  <div className="flex flex-wrap gap-2">
-                    {REPAIR_LOCATIONS.map(key => (
-                      <button
-                        key={key}
-                        type="button"
-                        onClick={() => toggleLocation(key)}
-                        className={checkboxClasses(repairLocations.includes(key))}
-                      >
-                        {t(`offerte.loc_${key}`)}
-                      </button>
-                    ))}
-                  </div>
-                </div>
-
-                {/* --- Contact details --- */}
-                <div className="space-y-4">
-                  <h3 className="text-xs font-semibold uppercase tracking-[0.15em] text-ck-red">
-                    {t('offerte.contactSection')}
-                  </h3>
-                  <div className="grid gap-4 sm:grid-cols-3">
-                    <div>
-                      <label htmlFor="name" className="block text-xs font-semibold uppercase tracking-wider text-ck-text-muted">
-                        {t('offerte.name')} <span className="text-ck-red">*</span>
-                      </label>
-                      <input
-                        id="name"
-                        type="text"
-                        value={form.name}
-                        onChange={e => handleChange('name', e.target.value)}
-                        className={inputClasses}
-                      />
-                      {errors.name && <p className="mt-1 text-xs text-ck-red">{errors.name}</p>}
-                    </div>
-                    <div>
-                      <label htmlFor="email" className="block text-xs font-semibold uppercase tracking-wider text-ck-text-muted">
-                        {t('offerte.email')} <span className="text-ck-red">*</span>
-                      </label>
-                      <input
-                        id="email"
-                        type="email"
-                        value={form.email}
-                        onChange={e => handleChange('email', e.target.value)}
-                        className={inputClasses}
-                      />
-                      {errors.email && <p className="mt-1 text-xs text-ck-red">{errors.email}</p>}
-                    </div>
-                    <div>
-                      <label htmlFor="phone" className="block text-xs font-semibold uppercase tracking-wider text-ck-text-muted">
-                        {t('offerte.phone')}
-                      </label>
-                      <input
-                        id="phone"
-                        type="tel"
-                        value={form.phone}
-                        onChange={e => handleChange('phone', e.target.value)}
-                        className={inputClasses}
-                      />
-                    </div>
-                  </div>
+                  <CarDamagePicker
+                    selected={repairLocations}
+                    onToggle={toggleLocation}
+                  />
                 </div>
 
                 {/* --- Damage description --- */}
@@ -671,6 +742,9 @@ export default function OffertePage() {
                   />
                   {errors.damage && <p className="mt-1 text-xs text-ck-red">{errors.damage}</p>}
                 </div>
+
+                {/* --- AI damage assessment --- */}
+                <DamageAssessment locale={locale as string} />
 
                 {/* --- Photo guide --- */}
                 <div className="border border-ck-border/50 overflow-hidden">
@@ -737,11 +811,11 @@ export default function OffertePage() {
                   )}
                 </div>
 
-                {/* --- Photos --- */}
+                {/* --- Photos (required) --- */}
                 <div>
                   <div className="flex items-center justify-between">
                     <label className="block text-xs font-semibold uppercase tracking-wider text-ck-text-muted">
-                      {t('offerte.photos')} ({files.length}/{MAX_FILES})
+                      {t('offerte.photosRequired')} ({files.length}/{MAX_FILES}) <span className="text-ck-red">*</span>
                     </label>
                     {aiEnabled && (
                       <label className="flex min-h-[44px] cursor-pointer items-center gap-3 text-xs text-ck-text-muted">
@@ -818,6 +892,54 @@ export default function OffertePage() {
                     onChange={e => { handleFiles(e.target.files); e.target.value = ''; }}
                   />
                   <p className="mt-1 text-[10px] text-ck-text-faint">{t('offerte.photosHint')}</p>
+                  {errors.photos && <p className="mt-1 text-xs text-ck-red">{errors.photos}</p>}
+                </div>
+
+                {/* --- Contact details --- */}
+                <div className="space-y-4">
+                  <h3 className="text-xs font-semibold uppercase tracking-[0.15em] text-ck-red">
+                    {t('offerte.contactSection')}
+                  </h3>
+                  <div className="grid gap-4 sm:grid-cols-3">
+                    <div>
+                      <label htmlFor="name" className="block text-xs font-semibold uppercase tracking-wider text-ck-text-muted">
+                        {t('offerte.name')} <span className="text-ck-red">*</span>
+                      </label>
+                      <input
+                        id="name"
+                        type="text"
+                        value={form.name}
+                        onChange={e => handleChange('name', e.target.value)}
+                        className={inputClasses}
+                      />
+                      {errors.name && <p className="mt-1 text-xs text-ck-red">{errors.name}</p>}
+                    </div>
+                    <div>
+                      <label htmlFor="email" className="block text-xs font-semibold uppercase tracking-wider text-ck-text-muted">
+                        {t('offerte.email')} <span className="text-ck-red">*</span>
+                      </label>
+                      <input
+                        id="email"
+                        type="email"
+                        value={form.email}
+                        onChange={e => handleChange('email', e.target.value)}
+                        className={inputClasses}
+                      />
+                      {errors.email && <p className="mt-1 text-xs text-ck-red">{errors.email}</p>}
+                    </div>
+                    <div>
+                      <label htmlFor="phone" className="block text-xs font-semibold uppercase tracking-wider text-ck-text-muted">
+                        {t('offerte.phone')}
+                      </label>
+                      <input
+                        id="phone"
+                        type="tel"
+                        value={form.phone}
+                        onChange={e => handleChange('phone', e.target.value)}
+                        className={inputClasses}
+                      />
+                    </div>
+                  </div>
                 </div>
 
                 {/* --- Privacy consent --- */}
@@ -852,13 +974,29 @@ export default function OffertePage() {
                   <p className="text-sm text-ck-red">{t('offerte.error')}</p>
                 )}
 
-                <button
-                  type="submit"
-                  disabled={status === 'sending'}
-                  className="w-full bg-ck-red px-6 py-4 text-sm font-semibold uppercase tracking-wider text-white transition-colors hover:bg-ck-red-hover disabled:opacity-50"
-                >
-                  {status === 'sending' ? t('offerte.submitting') : t('offerte.submit')}
-                </button>
+                <div>
+                  <button
+                    type="submit"
+                    disabled={status === 'sending'}
+                    className="w-full bg-ck-red px-6 py-4 text-sm font-semibold uppercase tracking-wider text-white transition-colors hover:bg-ck-red-hover disabled:opacity-50"
+                  >
+                    {status === 'sending' ? t('offerte.submitting') : t('offerte.submitDefault')}
+                  </button>
+                  {slaHours > 0 && (
+                    <p className="mt-2 text-center text-xs text-ck-text-muted">
+                      {t('offerte.submitSla', { hours: slaHours })}
+                    </p>
+                  )}
+                  <p className="mt-4 text-center text-sm text-ck-text-muted">
+                    {t('offerte.bookAppointment')}{' '}
+                    <a
+                      href={`/${locale}/afspraak`}
+                      className="font-semibold text-ck-red transition-colors hover:text-ck-red-hover"
+                    >
+                      {t('booking.title')}
+                    </a>
+                  </p>
+                </div>
               </form>
             )}
           </div>

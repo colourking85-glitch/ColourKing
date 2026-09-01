@@ -136,8 +136,15 @@ export const SCREEN_REGISTRY: Record<string, ScreenMeta> = {
   // Environment Secrets
   '/app/instellingen/integraties': { id: 'SY50', title: 'Environment Secrets', titleNl: 'Omgevingsgeheimen', module: 'SY', route: '/app/instellingen/integraties' },
 
+  // Certifications & Website
+  '/app/instellingen/certificeringen': { id: 'SY55', title: 'Certifications & Website', titleNl: 'Certificeringen & Website', module: 'SY', route: '/app/instellingen/certificeringen' },
+
   // Analytics
   '/app/analytics': { id: 'AN05', title: 'Site Analytics', titleNl: 'Website Analyse', module: 'SY', route: '/app/analytics' },
+
+  // Public pages
+  '/faq': { id: 'PB10', title: 'FAQ', titleNl: 'Veelgestelde vragen', module: 'PB', route: '/faq' },
+  '/tracking': { id: 'PB20', title: 'Repair Tracking', titleNl: 'Reparatie Tracking', module: 'PB', route: '/tracking' },
 };
 
 export function getScreen(pathname: string): ScreenMeta | undefined {

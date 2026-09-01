@@ -140,10 +140,11 @@ export default function HandoverNotePage() {
   const handleSign = async (signatureData: string) => {
     if (!signerName.trim()) return;
     setActing(true);
-    const res = await fetch(`/api/repair-orders/${id}/sign`, {
-      method: 'POST',
+    const res = await fetch(`/api/handover-notes/${id}`, {
+      method: 'PATCH',
       headers: { 'Content-Type': 'application/json' },
       body: JSON.stringify({
+        action: 'sign',
         signer_name: signerName,
         signer_role: 'customer',
         signature_data: signatureData,

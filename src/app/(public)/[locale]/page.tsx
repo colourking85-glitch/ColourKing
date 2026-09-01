@@ -2,6 +2,9 @@ import Image from 'next/image';
 import { getTranslations } from 'next-intl/server';
 import { Link } from '@/i18n/routing';
 import HeroSlideshow from '@/modules/public/HeroSlideshow';
+import SnelstartBlock from '@/modules/public/SnelstartBlock';
+import TrustSection from '@/modules/public/TrustSection';
+import GoogleReviewsWidget from '@/modules/public/GoogleReviewsWidget';
 
 export async function generateMetadata({
   params: { locale },
@@ -63,6 +66,9 @@ export default async function HomePage({
           </div>
         </div>
       </section>
+
+      {/* Snelstart — quick kenteken entry */}
+      <SnelstartBlock />
 
       {/* Stats bar */}
       <section className="border-y border-ck-border bg-ck-surface">
@@ -199,6 +205,90 @@ export default async function HomePage({
         </div>
       </section>
 
+      {/* Process visualization */}
+      <section className="border-y border-ck-border bg-ck-surface py-24">
+        <div className="mx-auto max-w-7xl px-6">
+          <div className="mb-16">
+            <p className="mb-3 text-xs font-semibold uppercase tracking-[0.2em] text-ck-red">
+              {t('process.eyebrow')}
+            </p>
+            <h2
+              className="font-heading font-extrabold leading-tight text-ck-text"
+              style={{ fontSize: 'clamp(2rem, 5vw, 3.5rem)' }}
+            >
+              {t('process.title')}
+            </h2>
+          </div>
+
+          <div className="grid gap-8 sm:grid-cols-2 lg:grid-cols-4">
+            {([1, 2, 3, 4] as const).map((step) => (
+              <div key={step} className="relative">
+                <div className="mb-4 flex h-12 w-12 items-center justify-center border border-ck-red text-lg font-bold text-ck-red">
+                  {step}
+                </div>
+                {step < 4 && (
+                  <div className="absolute left-6 top-12 hidden h-8 w-px bg-ck-border lg:block" style={{ display: 'none' }} />
+                )}
+                <h3 className="font-heading text-lg font-bold text-ck-text">
+                  {t(`process.step${step}Title`)}
+                </h3>
+                <p className="mt-2 text-sm leading-relaxed text-ck-text-muted">
+                  {t(`process.step${step}Desc`)}
+                </p>
+              </div>
+            ))}
+          </div>
+
+          <div className="mt-4 hidden lg:block">
+            <div className="mx-auto flex max-w-3xl items-center px-6">
+              <div className="h-px flex-1 bg-gradient-to-r from-ck-red/60 to-ck-red/20" />
+              <svg className="mx-2 h-4 w-4 text-ck-red" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}>
+                <path strokeLinecap="round" strokeLinejoin="round" d="M5 12h14m-7-7 7 7-7 7" />
+              </svg>
+            </div>
+          </div>
+        </div>
+      </section>
+
+      {/* Damage type links — SEO landing pages */}
+      <section className="border-t border-ck-border px-6 py-24">
+        <div className="mx-auto max-w-7xl">
+          <div className="mb-12">
+            <p className="mb-3 text-xs font-semibold uppercase tracking-[0.2em] text-ck-red">
+              {t('damageTypes.eyebrow')}
+            </p>
+            <h2
+              className="font-heading font-extrabold leading-tight text-ck-text"
+              style={{ fontSize: 'clamp(2rem, 5vw, 3.5rem)' }}
+            >
+              {t('damageTypes.title')}
+            </h2>
+          </div>
+          <div className="grid gap-4 sm:grid-cols-2 lg:grid-cols-5">
+            {(['kras', 'deuk', 'lakschade', 'bumper', 'hagel'] as const).map((type) => (
+              <Link
+                key={type}
+                href={`/schade/${type}`}
+                className="group border border-ck-border p-6 transition-colors hover:border-ck-red/40"
+              >
+                <h3 className="font-heading text-lg font-bold text-ck-text transition-colors group-hover:text-ck-red">
+                  {t(`damageTypes.${type}`)}
+                </h3>
+                <p className="mt-2 text-xs text-ck-text-muted">
+                  {t(`damageTypes.${type}Desc`)}
+                </p>
+                <span className="mt-4 inline-flex items-center gap-1 text-xs font-semibold text-ck-red">
+                  {t('damageTypes.learnMore')}
+                  <svg className="h-3 w-3 transition-transform group-hover:translate-x-1" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}>
+                    <path strokeLinecap="round" strokeLinejoin="round" d="M9 5l7 7-7 7" />
+                  </svg>
+                </span>
+              </Link>
+            ))}
+          </div>
+        </div>
+      </section>
+
       {/* Before / After */}
       <section className="border-y border-ck-border bg-ck-surface py-24">
         <div className="mx-auto max-w-7xl px-6">
@@ -296,6 +386,12 @@ export default async function HomePage({
           </div>
         </div>
       </section>
+
+      {/* Google Reviews — dynamic from admin settings */}
+      <GoogleReviewsWidget />
+
+      {/* Trust / Certifications — dynamic from admin settings */}
+      <TrustSection />
 
       {/* CTA — prominent with phone number */}
       <section className="relative overflow-hidden py-28">

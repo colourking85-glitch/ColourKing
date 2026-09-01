@@ -3,7 +3,7 @@ import { createClient } from '@/lib/supabase/server';
 import { getHandoverNote, getSignatures } from '@/modules/repair-orders/queries';
 import { getDocumentChain } from '@/modules/documents/queries';
 import { issueDocument, updateDocumentPayload } from '@/modules/documents/actions';
-import { setGalleryConsent } from '@/modules/repair-orders/actions';
+import { setGalleryConsent, addSignature } from '@/modules/repair-orders/actions';
 
 export async function GET(
   _req: NextRequest,
@@ -34,6 +34,24 @@ export async function PATCH(
     if (body.action === 'gallery_consent') {
       const doc = await setGalleryConsent(params.id, body.consent);
       return NextResponse.json(doc);
+    }
+
+    if (body.action === 'sign') {
+      if (!body.signer_name || !body.signature_data) {
+        return NextResponse.json(
+          { error: 'signer_name and signature_data are required' },
+          { status: 400 }
+        );
+      }
+      const ip = req.headers.get('x-forwarded-for') ?? req.headers.get('x-real-ip') ?? undefined;
+      const sig = await addSignature(
+        params.id,
+        body.signer_name,
+        body.signer_role ?? 'customer',
+        body.signature_data,
+        ip
+      );
+      return NextResponse.json(sig, { status: 201 });
     }
 
     if (body.action === 'share') {
