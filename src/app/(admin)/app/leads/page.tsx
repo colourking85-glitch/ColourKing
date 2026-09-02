@@ -8,6 +8,7 @@ import { ScreenBadge } from '@/components/ui/ScreenBadge';
 
 type Lead = {
   id: string;
+  number: number | null;
   contact_name: string;
   contact_email: string | null;
   contact_phone: string | null;
@@ -243,6 +244,11 @@ export default function LeadsPage() {
                   >
                     <td className="px-4 py-3">
                       <div className="flex items-center gap-2">
+                        {lead.number && (
+                          <span className="rounded bg-ck-dark-surface px-1.5 py-0.5 font-mono text-[10px] text-ck-muted">
+                            LD-{String(lead.number).padStart(4, '0')}
+                          </span>
+                        )}
                         <Link href={`/app/leads/${lead.id}`} className="font-medium text-white hover:text-ck-red">
                           {lead.contact_name}
                         </Link>

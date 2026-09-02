@@ -11,6 +11,7 @@ type LeadPhoto = { id: string; storage_path: string; url: string; created_at: st
 
 type Lead = {
   id: string;
+  number: number | null;
   contact_name: string;
   contact_email: string | null;
   contact_phone: string | null;
@@ -206,6 +207,11 @@ export default function LeadDetailPage() {
             <ArrowLeft size={20} />
           </Link>
           <ScreenBadge code="LD10" />
+          {lead.number && (
+            <span className="rounded bg-ck-dark-surface px-2 py-1 font-mono text-xs text-ck-muted-light">
+              LD-{String(lead.number).padStart(4, '0')}
+            </span>
+          )}
           <h1 className="font-display text-2xl font-bold text-white">{lead.contact_name}</h1>
           <span className={`flex items-center gap-1.5 rounded-full border px-3 py-1 text-xs font-medium ${cfg.color}`}>
             <Icon size={12} />

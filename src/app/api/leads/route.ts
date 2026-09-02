@@ -2,6 +2,9 @@ import { NextRequest, NextResponse } from 'next/server';
 import { createClient } from '@/lib/supabase/server';
 import { LeadSchema } from '@/modules/leads/schema';
 
+const FIELDS_WITH_NUMBER = 'id, number, contact_name, contact_email, contact_phone, kenteken, damage_description, status, origin, preferred_date, channel, appointment_type, locale, created_at, customers(id, name), vehicles(id, kenteken, make, model)';
+const FIELDS_WITHOUT_NUMBER = 'id, contact_name, contact_email, contact_phone, kenteken, damage_description, status, origin, preferred_date, channel, appointment_type, locale, created_at, customers(id, name), vehicles(id, kenteken, make, model)';
+
 export async function GET(req: NextRequest) {
   const supabase = createClient();
   const search = req.nextUrl.searchParams.get('search');
@@ -13,18 +16,25 @@ export async function GET(req: NextRequest) {
   const allowedSorts = ['created_at', 'contact_name', 'status', 'origin'];
   const sortColumn = allowedSorts.includes(sortBy) ? sortBy : 'created_at';
 
-  let query = supabase
-    .from('leads')
-    .select('id, contact_name, contact_email, contact_phone, kenteken, damage_description, status, origin, preferred_date, channel, appointment_type, locale, created_at, customers(id, name), vehicles(id, kenteken, make, model)')
-    .order(sortColumn, { ascending: sortDir });
+  function buildQuery(fields: string) {
+    let query = supabase
+      .from('leads')
+      .select(fields)
+      .order(sortColumn, { ascending: sortDir });
 
-  if (status) query = query.eq('status', status);
-  if (origin) query = query.eq('origin', origin);
-  if (search) {
-    query = query.or(`contact_name.ilike.%${search}%,contact_email.ilike.%${search}%,kenteken.ilike.%${search}%`);
+    if (status) query = query.eq('status', status);
+    if (origin) query = query.eq('origin', origin);
+    if (search) {
+      query = query.or(`contact_name.ilike.%${search}%,contact_email.ilike.%${search}%,kenteken.ilike.%${search}%`);
+    }
+    return query;
   }
 
-  const { data, error } = await query;
+  let { data, error } = await buildQuery(FIELDS_WITH_NUMBER);
+  if (error?.message?.includes('number')) {
+    ({ data, error } = await buildQuery(FIELDS_WITHOUT_NUMBER));
+  }
+
   if (error) return NextResponse.json({ error: error.message }, { status: 500 });
   return NextResponse.json(data);
 }

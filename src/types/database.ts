@@ -933,6 +933,7 @@ export type Database = {
           location_address: string | null
           lost_reason: string | null
           notes: string | null
+          number: number
           origin: string | null
           paint_code: string | null
           preferred_date: string | null
@@ -968,6 +969,7 @@ export type Database = {
           location_address?: string | null
           lost_reason?: string | null
           notes?: string | null
+          number?: number
           origin?: string | null
           paint_code?: string | null
           preferred_date?: string | null
@@ -1003,6 +1005,7 @@ export type Database = {
           location_address?: string | null
           lost_reason?: string | null
           notes?: string | null
+          number?: number
           origin?: string | null
           paint_code?: string | null
           preferred_date?: string | null
