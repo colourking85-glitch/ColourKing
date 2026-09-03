@@ -499,21 +499,36 @@ export function Header() {
                   <div className="px-3 py-1.5 text-[10px] font-bold uppercase tracking-[0.14em] text-white/20">
                     Screens
                   </div>
-                  {results.map((s) => (
-                    <Link
-                      key={s.route}
-                      href={s.route}
-                      onClick={() => {
-                        setCmdkOpen(false);
-                        addRecentItem({ href: s.route, label: s.titleNl, screenId: s.id, type: 'screen' });
-                      }}
-                      className="flex items-center gap-3 rounded-md px-3 py-2 text-sm text-white/60 transition-colors hover:bg-white/[0.06] hover:text-white"
-                    >
-                      <ScreenBadge id={s.id} />
-                      <span>{s.titleNl}</span>
-                      <span className="ml-auto text-[11px] text-white/30">{s.title}</span>
-                    </Link>
-                  ))}
+                  {results.map((s) => {
+                    const isDynamic = s.route.includes('[');
+                    if (isDynamic) {
+                      return (
+                        <div
+                          key={s.route}
+                          className="flex items-center gap-3 rounded-md px-3 py-2 text-sm text-white/40"
+                        >
+                          <ScreenBadge id={s.id} />
+                          <span>{s.titleNl}</span>
+                          <span className="ml-auto text-[11px] text-white/20">{s.title}</span>
+                        </div>
+                      );
+                    }
+                    return (
+                      <Link
+                        key={s.route}
+                        href={s.route}
+                        onClick={() => {
+                          setCmdkOpen(false);
+                          addRecentItem({ href: s.route, label: s.titleNl, screenId: s.id, type: 'screen' });
+                        }}
+                        className="flex items-center gap-3 rounded-md px-3 py-2 text-sm text-white/60 transition-colors hover:bg-white/[0.06] hover:text-white"
+                      >
+                        <ScreenBadge id={s.id} />
+                        <span>{s.titleNl}</span>
+                        <span className="ml-auto text-[11px] text-white/30">{s.title}</span>
+                      </Link>
+                    );
+                  })}
                 </div>
               )}
 

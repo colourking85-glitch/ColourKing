@@ -149,7 +149,20 @@ export const SCREEN_REGISTRY: Record<string, ScreenMeta> = {
 };
 
 export function getScreen(pathname: string): ScreenMeta | undefined {
-  return SCREEN_REGISTRY[pathname];
+  const exact = SCREEN_REGISTRY[pathname];
+  if (exact) return exact;
+
+  // Match dynamic [id] segments: replace UUID/numeric segments with [id]
+  const segments = pathname.split('/');
+  for (let i = 0; i < segments.length; i++) {
+    if (/^[a-f0-9-]{8,}$/.test(segments[i]) || /^\d+$/.test(segments[i])) {
+      const attempt = [...segments];
+      attempt[i] = '[id]';
+      const match = SCREEN_REGISTRY[attempt.join('/')];
+      if (match) return match;
+    }
+  }
+  return undefined;
 }
 
 export function getScreenById(id: string): ScreenMeta | undefined {
@@ -160,9 +173,8 @@ export function searchScreens(query: string): ScreenMeta[] {
   const q = query.toLowerCase();
   return Object.values(SCREEN_REGISTRY).filter(
     (s) =>
-      !s.route.includes('[') &&
-      (s.id.toLowerCase().includes(q) ||
-       s.title.toLowerCase().includes(q) ||
-       s.titleNl.toLowerCase().includes(q))
+      s.id.toLowerCase().includes(q) ||
+      s.title.toLowerCase().includes(q) ||
+      s.titleNl.toLowerCase().includes(q)
   );
 }
