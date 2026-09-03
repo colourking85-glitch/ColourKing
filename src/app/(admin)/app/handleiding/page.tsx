@@ -41,6 +41,44 @@ const MODULES = [
     ],
   },
   {
+    id: 'inspections',
+    code: 'IN',
+    screens: [
+      {
+        code: 'IN05',
+        agentNotes: 'GET /api/inspections — returns array. Filter by status (draft/in_progress/review/locked). Searchable by reference or kenteken. Status cards show counts per status.',
+        userFlow: 'Browse all inspections in a searchable table. The top row shows four status cards: Bezig (in progress), Ter akkoord (review), Vergrendeld (locked), and Totaal (total count). Table columns show reference number, vehicle (kenteken, make/model), status badge, finding and photo counts, total hours, inspector name, and date. Search by reference or kenteken. Click a row to open the inspection detail.',
+        inputs: 'Search query, status filter dropdown.',
+        outputs: 'Filtered inspection list with status counts.',
+        crossScreen: 'Each row links to Inspection Detail (IN10). New inspections are created via the 7-step wizard (IN01). Locked inspections have a report available at IN15.',
+      },
+      {
+        code: 'IN01',
+        agentNotes: 'POST /api/inspections — multi-step wizard with 7 steps: vehicle selection, RDW lookup, incident details, guided photo capture (12 positions), findings entry (catalog-driven), summary review, and lock/sign. Creates inspection with findings, photos, and optional approval in one flow.',
+        userFlow: 'Seven-step inspection creation wizard:\n1. Vehicle: Select existing vehicle or enter kenteken for RDW lookup.\n2. RDW Data: Review and confirm auto-filled vehicle data (make, model, VIN, fuel, first registration).\n3. Incident: Enter event date, description, insurer name, claim number, and purpose.\n4. Photos: Guided photo capture with 12 fixed positions (front, rear, sides, dashboard, VIN plate, etc.). Each position shows an example overlay.\n5. Findings: Add damage findings using the component and damage type catalogs. Set severity, disposition, repair technique, hours, parts, and flags (hidden damage, ADAS).\n6. Summary: Review all entered data. Auto-calculated totals for repair hours, paint hours, and indicative amount.\n7. Lock & Sign: Inspector signs electronically. Optional customer signature. Creates snapshot hash and locks the inspection.\n\nThe wizard supports standalone use at ins.colourking.nl for field inspections.',
+        inputs: 'Vehicle selection or kenteken, RDW data confirmation, incident details, guided photos (12 positions), findings (component, damage, severity, disposition, hours, parts, flags), inspector signature, optional customer signature.',
+        outputs: 'Complete inspection record with findings, photos, approvals, and snapshot hash. Redirects to Inspection Detail (IN10).',
+        crossScreen: 'Uses component catalog and damage type catalog from /api/inspections/catalog/*. Vehicle data from RDW API. Photos stored in Supabase Storage. Locked inspection accessible as report at IN15. Standalone mode at ins.colourking.nl.',
+      },
+      {
+        code: 'IN10',
+        agentNotes: 'GET /api/inspections/[id] — returns full inspection with findings, photos, approvals, snapshots. POST /api/inspections/[id]/transition — advance status (draft→in_progress→review→locked). POST /api/inspections/[id]/findings — add finding. DELETE /api/inspections/[id]/findings/[findingId]. POST /api/inspections/[id]/photos — upload photo. 3-panel layout.',
+        userFlow: 'Full inspection detail view with three-panel layout. The header shows status (draft/in progress/review/locked) with transition buttons and the inspection reference number.\n\nLeft panel: Vehicle information (kenteken, make, model, VIN, mileage, fuel), incident details (date, description), and insurer/claim data.\n\nCenter panel: Findings list — each finding shows component, damage types, severity (1–4 dots), disposition (repair/replace/investigate), repair and paint hours, parts, hidden damage and ADAS flags. Add new findings with the catalog-driven form.\n\nRight panel: Photo gallery with guided shots (12 fixed positions around the vehicle) and per-finding damage photos. Upload via camera or file picker.\n\nStatus transitions: draft → in_progress (start inspection), in_progress → review (ready for QC), review → locked (finalise — creates snapshot hash). Locked inspections are immutable.',
+        inputs: 'Status transitions. Finding creation (component, damage types, severity, disposition, hours, parts, flags). Photo upload (guided or per-finding). Approval signatures.',
+        outputs: 'Complete inspection record with findings, photos, approvals. Snapshot hash on lock. Navigates to Report (IN15) for print output.',
+        crossScreen: 'Findings use component and damage type catalogs. Photos stored in Supabase Storage. Locked inspection generates report accessible at IN15. Approval signatures use eIDAS-compliant electronic signature flow.',
+      },
+      {
+        code: 'IN15',
+        agentNotes: 'GET /api/inspections/[id] — renders the full inspection data as a print-ready A4 report using the InspectionReportTemplate. Toolbar with back link, print button, and PDF download. Uses Neutral Base design system: Archivo (headings), Literata (prose), JetBrains Mono (data/references). Warm copper accent palette.',
+        userFlow: 'Print-ready inspection report in A4 format. Opens from the inspection detail page (IN10). The report is structured across multiple pages:\n\n1. Summary page: Vehicle details grid, KPI strip (findings count, photos, repair hours, paint hours), disposition breakdown bars, hours and indicative total, caveats (hidden damage, ADAS, pre-existing), and dual signature blocks (inspector + customer).\n2. Guided photos page: 4-column grid of all guided shots with references and captions.\n3. Findings detail pages: Each finding as a card with reference (copper accent), component name, severity indicator (colour-coded dots), and detail rows for zone, damage, repair method, paint work, hours, parts, and flags.\n4. Pre-existing damage page: Separate listing of out-of-scope findings.\n5. Findings table: Summary table with all findings, hours totals, and flag indicators.\n6. Verification page: Report metadata, snapshot and PDF hashes, approval signatures with eIDAS statement.\n\nEach page carries the ColourKing footer (address, KvK, BTW). Use the toolbar buttons to print or download as PDF.',
+        inputs: 'Print button, PDF download button, back to inspection link.',
+        outputs: 'A4 print-ready report with professional typography and layout. PDF via browser print dialog.',
+        crossScreen: 'Data loaded from inspection (IN10). Report is view-only — all editing happens on IN10. Snapshot hash on verification page proves document integrity. Accessible from IN10 via the Rapport button.',
+      },
+    ],
+  },
+  {
     id: 'customers',
     code: 'KL',
     screens: [
@@ -654,6 +692,7 @@ export default function ManualPage() {
             <div className="mt-4 space-y-4">
               {[
                 { name: 'Lead Status', flow: 'new → contacted → quoted → won | lost (terminal from any non-terminal state)' },
+                { name: 'Inspection Status', flow: 'draft → in_progress → review → locked (immutable after lock, snapshot hash created)' },
                 { name: 'Offer Status', flow: 'draft → sent (guard: has_lines) → approved | rejected | superseded' },
                 { name: 'Job Stage', flow: 'intake → quoted → approved → scheduled → checked_in → in_progress → qc → ready → delivered → closed (qc can loop back to in_progress)' },
                 { name: 'Invoice Status', flow: 'draft → sent (guard: has_lines) → paid | overdue | credited | cancelled (only draft can be cancelled; sent uses credit notes)' },
