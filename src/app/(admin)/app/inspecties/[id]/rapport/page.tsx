@@ -5,6 +5,7 @@ import { useParams } from 'next/navigation';
 import Link from 'next/link';
 import { ArrowLeft, Printer, FileDown } from 'lucide-react';
 import { useTranslations } from 'next-intl';
+import { ScreenBadge } from '@/components/ui/ScreenBadge';
 import {
   InspectionReportTemplate,
   type InspectionReportData,
@@ -43,13 +44,16 @@ export default function InspectionReportPage() {
     <div className="space-y-4">
       {/* Toolbar */}
       <div className="no-print flex items-center justify-between rounded-[10px] border-[0.5px] border-ck-dark-border bg-ck-dark-card p-3">
-        <Link
-          href={`/app/inspecties/${id}`}
-          className="flex items-center gap-1.5 text-sm text-ck-muted hover:text-white transition-colors"
-        >
-          <ArrowLeft size={14} />
-          Terug naar inspectie
-        </Link>
+        <div className="flex items-center gap-2">
+          <ScreenBadge code="IN15" />
+          <Link
+            href={`/app/inspecties/${id}`}
+            className="flex items-center gap-1.5 text-sm text-ck-muted hover:text-white transition-colors"
+          >
+            <ArrowLeft size={14} />
+            {tCommon('back')}
+          </Link>
+        </div>
         <div className="flex items-center gap-2">
           <button
             onClick={() => window.print()}

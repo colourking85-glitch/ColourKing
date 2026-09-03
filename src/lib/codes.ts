@@ -77,6 +77,7 @@ export const SCREEN_REGISTRY: Record<string, ScreenMeta> = {
   '/app/inspecties': { id: 'IN05', title: 'Inspection List', titleNl: 'Inspectielijst', module: 'IN', route: '/app/inspecties' },
   '/app/inspecties/nieuw': { id: 'IN01', title: 'Create Inspection', titleNl: 'Inspectie Aanmaken', module: 'IN', route: '/app/inspecties/nieuw' },
   '/app/inspecties/[id]': { id: 'IN10', title: 'Inspection Detail', titleNl: 'Inspectiedetail', module: 'IN', route: '/app/inspecties/[id]' },
+  '/app/inspecties/[id]/rapport': { id: 'IN15', title: 'Inspection Report', titleNl: 'Inspectierapport', module: 'IN', route: '/app/inspecties/[id]/rapport' },
 
   // Appointments
   '/app/afspraken': { id: 'AP05', title: 'Appointment Calendar', titleNl: 'Afsprakenkalender', module: 'AP', route: '/app/afspraken' },
