@@ -310,6 +310,8 @@
     "plateOriginPlaceholder": "bijv. NL, DE, BE, TR"
   },
   "ld": {
+    "createdAt": "Aangemaakt",
+    "createdAtHint": "Aanmaakmoment — getoond in jouw tijdzone ({tz})",
     "title": "Leads",
     "new": "Nieuwe lead",
     "name": "Naam",
@@ -1485,6 +1487,10 @@
     "sign": "Ondertekenen"
   },
   "monitor": {
+    "leadSubject": "Onderwerp",
+    "recentLeads": "Nieuwe leads",
+    "noRecentLeads": "Geen open leads",
+    "leadCreatedHint": "Aangemaakt — getoond in jouw tijdzone ({tz})",
     "title": "Monitoring",
     "subtitle": "Bodyshop Colour King",
     "newNotification": "Nieuwe melding",

@@ -20,7 +20,49 @@ export async function GET(req: NextRequest) {
   const { data, error } = await query;
   if (error) return NextResponse.json({ error: error.message }, { status: 500 });
 
-  return NextResponse.json(data ?? []);
+  // Attach lead details to notifications that point at a lead. Email log
+  // rows store ref_type='email' but keep the lead id in ref_id, so match
+  // any ref_id against leads (UUIDs don't collide across tables).
+  const refIds = Array.from(new Set((data ?? []).map(n => n.ref_id).filter((id): id is string => !!id)));
+  const leadsById = new Map<string, NotificationLead>();
+  if (refIds.length > 0) {
+    const { data: leads } = await supabase
+      .from('leads')
+      .select('id, number, created_at, damage_description, appointment_type, channel, service_types')
+      .in('id', refIds);
+    for (const l of leads ?? []) {
+      leadsById.set(l.id, {
+        id: l.id,
+        number: l.number,
+        created_at: l.created_at,
+        subject: leadSubject(l),
+        appointment_type: l.channel === 'appointment_form' ? (l.appointment_type ?? 'inspection') : null,
+      });
+    }
+  }
+
+  return NextResponse.json(
+    (data ?? []).map(n => ({ ...n, lead: (n.ref_id && leadsById.get(n.ref_id)) || null })),
+  );
+}
+
+type NotificationLead = {
+  id: string;
+  number: number | null;
+  created_at: string;
+  subject: string | null;
+  appointment_type: string | null;
+};
+
+/** Contact-form leads store "[Subject] message"; otherwise use the first line of the description. */
+function leadSubject(l: { damage_description: string | null; service_types: string[] | null }): string | null {
+  const desc = l.damage_description?.trim();
+  if (desc) {
+    const m = desc.match(/^\[([^\]]+)\]/);
+    const text = m ? m[1] : desc.split('\n')[0];
+    return text.length > 80 ? `${text.slice(0, 80)}…` : text;
+  }
+  return l.service_types?.length ? l.service_types.join(', ') : null;
 }
 
 export async function POST(req: NextRequest) {

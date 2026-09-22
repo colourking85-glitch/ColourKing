@@ -86,6 +86,46 @@ export function formatDateShort(
   }
 }
 
+// ── Date + time (viewer's time zone) ────────────────────────────────────────
+
+/**
+ * Format a timestamp as date + time in the viewer's own time zone
+ * (the browser's resolved zone). Call from client components only —
+ * on the server this would use the server's zone instead.
+ *
+ *   NL  → 22-09-2026 14:32 CEST
+ *   EN  → 22/09/2026 13:32 BST
+ *   TR  → 22.09.2026 15:32 GMT+3
+ */
+export function formatDateTimeLocal(
+  date: string | Date,
+  locale: SupportedLocale,
+): { date: string; time: string; zone: string; timeZone: string } {
+  const d = typeof date === 'string' ? new Date(date) : date;
+  const timeZone = Intl.DateTimeFormat().resolvedOptions().timeZone;
+  const parts = new Intl.DateTimeFormat(BCP[locale], {
+    hour: '2-digit',
+    minute: '2-digit',
+    hour12: false,
+    timeZoneName: 'short',
+    timeZone,
+  }).formatToParts(d);
+  const get = (type: Intl.DateTimeFormatPartTypes) =>
+    parts.find(p => p.type === type)?.value ?? '';
+  const dateStr = new Intl.DateTimeFormat(BCP[locale], {
+    day: '2-digit',
+    month: '2-digit',
+    year: 'numeric',
+    timeZone,
+  }).format(d);
+  return {
+    date: dateStr,
+    time: `${get('hour')}:${get('minute')}`,
+    zone: get('timeZoneName'),
+    timeZone,
+  };
+}
+
 // ── Number ──────────────────────────────────────────────────────────────────
 
 /**

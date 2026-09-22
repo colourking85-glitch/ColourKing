@@ -7,9 +7,10 @@ import {
   Volume2, VolumeX, RefreshCw, Maximize, LogOut, Filter,
   Car, Clock, Calendar, Timer, TrendingUp, Activity,
 } from 'lucide-react';
-import { useTranslations } from 'next-intl';
+import { useTranslations, useLocale } from 'next-intl';
 import { signOut } from '@/lib/auth';
 import type { NotificationType } from '@/types/database';
+import { formatDateTimeLocal, type SupportedLocale } from '@/lib/format';
 
 type Notification = {
   id: string;
@@ -19,6 +20,13 @@ type Notification = {
   link: string | null;
   read: boolean;
   created_at: string;
+  lead?: {
+    id: string;
+    number: number | null;
+    created_at: string;
+    subject: string | null;
+    appointment_type: string | null;
+  } | null;
 };
 
 type MonitorJob = {
@@ -30,6 +38,16 @@ type MonitorJob = {
   updated_at: string;
   customers: { id: string; name: string } | null;
   vehicles: { id: string; kenteken: string | null; make: string | null; model: string | null; colour: string | null } | null;
+};
+
+type MonitorLead = {
+  id: string;
+  number: number | null;
+  contact_name: string;
+  kenteken: string | null;
+  status: string;
+  origin: string | null;
+  created_at: string;
 };
 
 const TYPE_META: Record<NotificationType, { icon: React.ElementType; color: string; bg: string; hex: string }> = {
@@ -164,9 +182,15 @@ function useAlertSound() {
 
 export default function MonitorDashboard() {
   const t = useTranslations('monitor');
+  const tLd = useTranslations('ld');
+  const locale = useLocale() as SupportedLocale;
   const [notifications, setNotifications] = useState<Notification[]>([]);
   const [ongoing, setOngoing] = useState<MonitorJob[]>([]);
   const [scheduled, setScheduled] = useState<MonitorJob[]>([]);
+  const [leads, setLeads] = useState<MonitorLead[]>([]);
+  // Resolved after mount so SSR (server zone) and client markup don't diverge
+  const [viewerTimeZone, setViewerTimeZone] = useState('');
+  useEffect(() => { setViewerTimeZone(Intl.DateTimeFormat().resolvedOptions().timeZone); }, []);
   const [loading, setLoading] = useState(true);
   const [soundEnabled, setSoundEnabled] = useState(true);
   const [filter, setFilter] = useState<string>('all');
@@ -238,6 +262,7 @@ export default function MonitorDashboard() {
         const data = await monitorRes.json();
         setOngoing(data.ongoing ?? []);
         setScheduled(data.scheduled ?? []);
+        setLeads(data.leads ?? []);
       }
 
       setLastUpdated(new Date());
@@ -304,7 +329,9 @@ export default function MonitorDashboard() {
   }
 
   const unreadCount = notifications.filter(n => !n.read).length;
-  const filtered = filter === 'all' ? notifications : notifications.filter(n => n.type === filter);
+  const filtered = filter === 'all'
+    ? notifications
+    : notifications.filter(n => n.type === filter || (filter === 'new_lead' && !!n.lead));
 
   const recentUnread = notifications.filter(n => !n.read).slice(0, 8);
   const tickerItems = recentUnread.length > 0
@@ -331,7 +358,7 @@ export default function MonitorDashboard() {
     { label: t('unread'), value: unreadCount, color: 'text-[#E8364E]', pulse: unreadCount > 0 },
     { label: t('inProgress'), value: ongoing.length, color: 'text-amber-400' },
     { label: t('scheduled'), value: scheduled.length, color: 'text-cyan-400' },
-    { label: t('leads'), value: notifications.filter(n => n.type === 'new_lead' && !n.read).length, color: 'text-yellow-400' },
+    { label: t('leads'), value: leads.filter(l => l.status === 'new').length, color: 'text-yellow-400' },
     { label: t('emails'), value: notifications.filter(n => n.type === 'new_email' && !n.read).length, color: 'text-blue-400' },
     { label: t('payments'), value: notifications.filter(n => n.type === 'payment_received' && !n.read).length, color: 'text-emerald-400' },
   ];
@@ -609,6 +636,53 @@ export default function MonitorDashboard() {
             )}
           </div>
 
+          {/* New leads */}
+          <div className="border-b border-[#1e1e2a] p-4">
+            <div className="mb-3 flex items-center gap-2" title={t('leadCreatedHint', { tz: viewerTimeZone })}>
+              <Inbox size={14} className="text-yellow-400" />
+              <h2 className="text-[11px] font-bold uppercase tracking-widest text-white">{t('recentLeads')}</h2>
+              <span className="rounded-full bg-yellow-400/10 px-2 py-0.5 text-[10px] font-bold tabular-nums text-yellow-400">{leads.length}</span>
+            </div>
+            {leads.length === 0 ? (
+              <div className="rounded-xl border border-dashed border-[#1e1e2a] p-8 text-center text-xs text-[#3a3a50]">
+                {t('noRecentLeads')}
+              </div>
+            ) : (
+              <div className="space-y-2">
+                {leads.map((lead, i) => {
+                  const c = formatDateTimeLocal(lead.created_at, locale);
+                  return (
+                    <div key={lead.id} className="slide-in rounded-xl border border-yellow-400/20 bg-[#12121a] p-3" style={{ animationDelay: `${i * 50}ms` }}>
+                      <div className="flex items-center justify-between gap-2">
+                        <div className="flex min-w-0 items-center gap-2">
+                          <span className="truncate text-sm font-semibold text-white">{lead.contact_name}</span>
+                          <span className={`rounded-full px-1.5 py-0.5 text-[8px] font-bold uppercase tracking-wider ${
+                            lead.status === 'new' ? 'bg-blue-400/10 text-blue-400' : 'bg-amber-400/10 text-amber-400'
+                          }`}>
+                            {tLd(lead.status === 'new' ? 'new_status' : 'contacted')}
+                          </span>
+                        </div>
+                        {lead.number && (
+                          <span className="font-mono text-[10px] tabular-nums text-[#3a3a50]">LD-{String(lead.number).padStart(4, '0')}</span>
+                        )}
+                      </div>
+                      <div className="mt-1.5 flex items-center gap-3 text-[11px] text-[#6b6b80]">
+                        {lead.kenteken && <span className="font-mono uppercase">{lead.kenteken}</span>}
+                        {lead.origin && <span className="text-[#4a4a60]">· {tLd(lead.origin as 'website')}</span>}
+                      </div>
+                      <div className="mt-1.5 flex items-center gap-1 text-[10px] text-yellow-400/70" title={`${c.date} ${c.time} (${c.timeZone})`}>
+                        <Clock size={9} />
+                        <span className="font-mono tabular-nums">{c.date} {c.time}</span>
+                        <span className="text-[#4a4a60]">{c.zone}</span>
+                        <span className="ml-auto font-mono tabular-nums text-[#3a3a50]">{timeAgoLabel(lead.created_at)}</span>
+                      </div>
+                    </div>
+                  );
+                })}
+              </div>
+            )}
+          </div>
+
           {/* Performance panel */}
           <div className="p-4">
             <div className="mb-4 flex items-center gap-2">
@@ -723,6 +797,30 @@ export default function MonitorDashboard() {
                         {n.body && (
                           <div className="mt-0.5 text-[11px] text-[#6b6b80]">{n.body}</div>
                         )}
+                        {n.lead && (() => {
+                          const c = formatDateTimeLocal(n.lead.created_at, locale);
+                          const subject = n.lead.subject
+                            ?? (n.lead.appointment_type ? tLd(`type_${n.lead.appointment_type}` as 'type_inspection') : null);
+                          return (
+                            <div className="mt-1.5 flex flex-wrap items-center gap-x-3 gap-y-1 text-[11px]">
+                              {n.lead.number != null && (
+                                <span className="rounded bg-yellow-400/10 px-1.5 py-0.5 font-mono text-[10px] font-semibold text-yellow-400">
+                                  LD-{String(n.lead.number).padStart(4, '0')}
+                                </span>
+                              )}
+                              <span className="flex items-center gap-1 text-[#8a8aa0]" title={`${t('leadCreatedHint', { tz: c.timeZone })}`}>
+                                <Clock size={10} />
+                                <span className="font-mono tabular-nums">{c.date} {c.time}</span>
+                                <span className="text-[#4a4a60]">{c.zone}</span>
+                              </span>
+                              {subject && (
+                                <span className="min-w-0 truncate text-[#8a8aa0]">
+                                  <span className="text-[#4a4a60]">{t('leadSubject')}:</span> {subject}
+                                </span>
+                              )}
+                            </div>
+                          );
+                        })()}
                       </div>
                       <div className="flex items-center gap-3">
                         <span className="font-mono text-[11px] tabular-nums text-[#3a3a50]">{timeAgoLabel(n.created_at)}</span>

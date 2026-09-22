@@ -310,6 +310,8 @@
     "plateOriginPlaceholder": "örn. NL, DE, BE, TR"
   },
   "ld": {
+    "createdAt": "Oluşturulma",
+    "createdAtHint": "Kayıt oluşturulma zamanı — saat diliminizde gösterilir ({tz})",
     "title": "Talepler",
     "new": "Yeni talep",
     "name": "Ad",
@@ -1485,6 +1487,10 @@
     "sign": "İmzala"
   },
   "monitor": {
+    "leadSubject": "Konu",
+    "recentLeads": "Yeni talepler",
+    "noRecentLeads": "Açık talep yok",
+    "leadCreatedHint": "Oluşturulma — saat diliminizde gösterilir ({tz})",
     "title": "İzleme",
     "subtitle": "Bodyshop Colour King",
     "newNotification": "Yeni bildirim",

@@ -310,6 +310,8 @@
     "plateOriginPlaceholder": "e.g. NL, DE, BE, TR"
   },
   "ld": {
+    "createdAt": "Created",
+    "createdAtHint": "Entry created — shown in your time zone ({tz})",
     "title": "Leads",
     "new": "New lead",
     "name": "Name",
@@ -1485,6 +1487,10 @@
     "sign": "Sign"
   },
   "monitor": {
+    "leadSubject": "Subject",
+    "recentLeads": "New leads",
+    "noRecentLeads": "No open leads",
+    "leadCreatedHint": "Created — shown in your time zone ({tz})",
     "title": "Monitoring",
     "subtitle": "Bodyshop Colour King",
     "newNotification": "New notification",

@@ -3,8 +3,9 @@
 import { useState, useEffect, useCallback } from 'react';
 import Link from 'next/link';
 import { Plus, Search, Clock, MessageCircle, FileText, Trophy, XCircle, ArrowUpDown, ArrowUp, ArrowDown, RefreshCw, SlidersHorizontal, Calendar } from 'lucide-react';
-import { useTranslations } from 'next-intl';
+import { useTranslations, useLocale } from 'next-intl';
 import { ScreenBadge } from '@/components/ui/ScreenBadge';
+import { formatDateTimeLocal, type SupportedLocale } from '@/lib/format';
 
 type Lead = {
   id: string;
@@ -30,6 +31,10 @@ type SortDir = 'asc' | 'desc';
 export default function LeadsPage() {
   const t = useTranslations('ld');
   const tCommon = useTranslations('common');
+  const locale = useLocale() as SupportedLocale;
+  // Resolved after mount so SSR (server zone) and client markup don't diverge
+  const [viewerTimeZone, setViewerTimeZone] = useState('');
+  useEffect(() => { setViewerTimeZone(Intl.DateTimeFormat().resolvedOptions().timeZone); }, []);
 
   const STATUS_CONFIG: Record<string, { label: string; color: string; dotColor: string; icon: typeof Clock }> = {
     new: { label: t('new_status'), color: 'text-blue-400 bg-blue-400/10', dotColor: 'bg-blue-400', icon: Clock },
@@ -224,13 +229,16 @@ export default function LeadsPage() {
                   {tCommon('date')} <SortIcon field="created_at" />
                 </button>
               </th>
+              <th className="px-4 py-3 text-right" title={t('createdAtHint', { tz: viewerTimeZone })}>
+                <span className="text-xs font-semibold uppercase text-ck-muted">{t('createdAt')}</span>
+              </th>
             </tr>
           </thead>
           <tbody>
             {loading ? (
-              <tr><td colSpan={6} className="p-8 text-center text-ck-muted">{tCommon('loading')}</td></tr>
+              <tr><td colSpan={7} className="p-8 text-center text-ck-muted">{tCommon('loading')}</td></tr>
             ) : leads.length === 0 ? (
-              <tr><td colSpan={6} className="p-8 text-center text-ck-muted">
+              <tr><td colSpan={7} className="p-8 text-center text-ck-muted">
                 {search || statusFilter || originFilter ? t('noLeadsFound') : t('noLeadsMessage')}
               </td></tr>
             ) : (
@@ -299,6 +307,17 @@ export default function LeadsPage() {
                         month: 'short',
                         year: 'numeric',
                       })}
+                    </td>
+                    <td className="px-4 py-3 text-right text-xs whitespace-nowrap">
+                      {(() => {
+                        const c = formatDateTimeLocal(lead.created_at, locale);
+                        return (
+                          <span title={`${c.date} ${c.time} (${c.timeZone})`}>
+                            <span className="font-mono text-ck-muted-light">{c.date} {c.time}</span>
+                            <span className="ml-1.5 text-[10px] text-ck-muted">{c.zone}</span>
+                          </span>
+                        );
+                      })()}
                     </td>
                   </tr>
                 );
