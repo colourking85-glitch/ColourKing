@@ -99,7 +99,7 @@ export async function confirmAppointment(id: string) {
 
   if (error) throw error;
 
-  onAppointmentConfirmed(id).catch((e) => console.error('[EMAIL] onAppointmentConfirmed failed:', e));
+  await onAppointmentConfirmed(id).catch((e) => console.error('[EMAIL] onAppointmentConfirmed failed:', e));
 
   revalidatePath('/app/afspraken');
   return appointment;

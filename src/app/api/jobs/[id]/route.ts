@@ -59,7 +59,7 @@ export async function PATCH(
     });
 
     if (to === 'delivered') {
-      onRepairComplete(params.id).catch((e) => console.error('[EMAIL] onRepairComplete failed:', e));
+      await onRepairComplete(params.id).catch((e) => console.error('[EMAIL] onRepairComplete failed:', e));
     }
 
     const { data } = await supabase

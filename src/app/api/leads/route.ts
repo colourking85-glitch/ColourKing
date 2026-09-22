@@ -62,7 +62,7 @@ export async function POST(req: NextRequest) {
 
   if (error) return NextResponse.json({ error: error.message }, { status: 500 });
 
-  onLeadCreated(data.id).catch((e) => console.error('[EMAIL] onLeadCreated failed:', e));
+  await onLeadCreated(data.id).catch((e) => console.error('[EMAIL] onLeadCreated failed:', e));
 
   return NextResponse.json(data, { status: 201 });
 }

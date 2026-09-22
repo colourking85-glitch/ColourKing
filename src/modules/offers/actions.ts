@@ -303,7 +303,7 @@ export async function sendOffer(id: string) {
 
   if (error) throw error;
 
-  onOfferSent(id).catch((e) => console.error('[EMAIL] onOfferSent failed:', e));
+  await onOfferSent(id).catch((e) => console.error('[EMAIL] onOfferSent failed:', e));
 
   revalidatePath('/app/offertes');
   revalidatePath(`/app/offertes/${id}`);

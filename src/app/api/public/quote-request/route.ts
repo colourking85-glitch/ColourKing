@@ -117,7 +117,7 @@ export async function POST(req: NextRequest) {
       return NextResponse.json({ error: 'Failed to submit quote request' }, { status: 500, headers });
     }
 
-    onLeadCreated(data.id).catch((e) => console.error('[EMAIL] onLeadCreated failed:', e));
+    await onLeadCreated(data.id).catch((e) => console.error('[EMAIL] onLeadCreated failed:', e));
 
     return NextResponse.json({ success: true, id: data.id }, { status: 201, headers });
   } catch {
