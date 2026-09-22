@@ -281,18 +281,6 @@ export async function onLeadCreated(leadId: string): Promise<void> {
     return;
   }
 
-  // Send to all admin/office staff
-  const { data: staff } = await supabase
-    .from('staff')
-    .select('email, locale')
-    .in('role', ['admin', 'office'])
-    .eq('active', true);
-
-  if (!staff?.length) {
-    console.warn('[EMAIL TRIGGER] onLeadCreated: no staff to notify');
-    return;
-  }
-
   const data = {
     contactName: lead.contact_name,
     contactEmail: lead.contact_email,
@@ -303,7 +291,21 @@ export async function onLeadCreated(leadId: string): Promise<void> {
     leadUrl: `${APP_URL}/app/leads/${leadId}`,
   };
 
-  for (const member of staff) {
+  // Collect staff recipients; fall back to SHOP_EMAIL / hardcoded shop email
+  const { data: staff } = await supabase
+    .from('staff')
+    .select('email, locale')
+    .in('role', ['admin', 'office'])
+    .eq('active', true);
+
+  const SHOP_EMAIL = process.env.SHOP_EMAIL ?? 'colourking85@gmail.com';
+
+  const recipients: Array<{ email: string; locale: string }> =
+    staff?.length
+      ? staff
+      : [{ email: SHOP_EMAIL, locale: 'nl' }];
+
+  for (const member of recipients) {
     const locale = validLocale(member.locale);
     const html = renderTemplate('leadReceived', data, locale);
     const subject = getSubject('leadReceived', data, locale);

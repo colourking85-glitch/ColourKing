@@ -2,7 +2,7 @@
  * Communication log — stores sent email records in the notifications table.
  */
 
-import { createClient } from '@/lib/supabase/server';
+import { admin as supabase } from '@/lib/supabase/admin';
 import type { EmailLogInput } from './schema';
 
 /**
@@ -10,7 +10,6 @@ import type { EmailLogInput } from './schema';
  * Uses ref_type='email' to distinguish from other notification types.
  */
 export async function logEmail(entry: EmailLogInput): Promise<void> {
-  const supabase = createClient();
 
   const { error } = await supabase.from('notifications').insert({
     type: 'new_email' as const,
