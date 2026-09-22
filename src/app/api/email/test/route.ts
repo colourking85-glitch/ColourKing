@@ -1,0 +1,48 @@
+import { NextRequest, NextResponse } from 'next/server';
+import { admin } from '@/lib/supabase/admin';
+import { sendEmail } from '@/modules/email/sender';
+
+export const dynamic = 'force-dynamic';
+
+export async function GET(req: NextRequest) {
+  const cronAuth = req.headers.get('authorization');
+  const secret = req.nextUrl.searchParams.get('secret');
+  const isCronValid =
+    cronAuth && process.env.CRON_SECRET && cronAuth === `Bearer ${process.env.CRON_SECRET}`;
+  const isSecretValid = secret && process.env.CRON_SECRET && secret === process.env.CRON_SECRET;
+
+  if (!isCronValid && !isSecretValid) {
+    return NextResponse.json({ error: 'Unauthorized' }, { status: 401 });
+  }
+
+  const diagnostics: Record<string, unknown> = {};
+
+  // 1. Check env vars
+  diagnostics.resendKeySet = !!process.env.RESEND_API_KEY;
+  diagnostics.resendKeyPrefix = process.env.RESEND_API_KEY?.slice(0, 8) ?? 'NOT SET';
+  diagnostics.shopEmail = process.env.SHOP_EMAIL ?? '(not set, fallback: colourking85@gmail.com)';
+  diagnostics.emailFrom = process.env.EMAIL_FROM ?? '(not set, fallback: Colourking <noreply@colourking.nl>)';
+
+  // 2. Check staff table
+  const { data: staff, error: staffErr } = await admin
+    .from('staff')
+    .select('id, name, email, role, active')
+    .in('role', ['admin', 'office'])
+    .eq('active', true);
+
+  diagnostics.staffQuery = staffErr ? { error: staffErr.message } : { count: staff?.length ?? 0, rows: staff };
+
+  // 3. Test send to the target email
+  const targetEmail = req.nextUrl.searchParams.get('to') ?? 'colourking85@gmail.com';
+  diagnostics.targetEmail = targetEmail;
+
+  const result = await sendEmail(
+    targetEmail,
+    'Colourking Email Test',
+    `<h1>Email Test</h1><p>This is a diagnostic test from <strong>Colourking</strong> at ${new Date().toISOString()}.</p><p>If you see this, Resend is working.</p>`,
+  );
+
+  diagnostics.sendResult = result;
+
+  return NextResponse.json({ ok: result.success, diagnostics });
+}
