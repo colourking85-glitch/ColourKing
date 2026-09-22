@@ -6,6 +6,10 @@
     {
       "path": "/api/cron/db-cleanup",
       "schedule": "0 2 * * 0"
+    },
+    {
+      "path": "/api/email/imap-poll",
+      "schedule": "*/5 * * * *"
     }
   ]
 }

@@ -10,6 +10,7 @@ import {
   RecordPaymentSchema,
 } from './schema';
 import { canTransition, getGuard } from './machine';
+import { onInvoiceIssued, onPaymentReceived } from '@/modules/email/triggers';
 import type { InvoiceStatus } from '@/types/database';
 
 const TAX_RATES: Record<string, number> = {
@@ -361,6 +362,8 @@ export async function issueInvoice(id: string) {
     });
   }
 
+  onInvoiceIssued(id).catch((e) => console.error('[EMAIL] onInvoiceIssued failed:', e));
+
   revalidatePath('/app/facturen');
   revalidatePath(`/app/facturen/${id}`);
   return invoice;
@@ -520,6 +523,8 @@ export async function recordPayment(input: unknown) {
       })
       .eq('id', parsed.invoice_id);
   }
+
+  onPaymentReceived(payment.id).catch((e) => console.error('[EMAIL] onPaymentReceived failed:', e));
 
   revalidatePath('/app/facturen');
   revalidatePath(`/app/facturen/${parsed.invoice_id}`);

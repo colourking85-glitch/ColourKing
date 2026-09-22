@@ -29,7 +29,10 @@ export async function POST(req: NextRequest) {
     req.headers.get('x-poll-secret') ??
     new URL(req.url).searchParams.get('secret');
 
-  if (secret !== process.env.IMAP_POLL_SECRET) {
+  const cronAuth = req.headers.get('authorization');
+  const isCronValid = cronAuth && process.env.CRON_SECRET && cronAuth === `Bearer ${process.env.CRON_SECRET}`;
+
+  if (!isCronValid && secret !== process.env.IMAP_POLL_SECRET) {
     return NextResponse.json({ error: 'Unauthorized' }, { status: 401 });
   }
 

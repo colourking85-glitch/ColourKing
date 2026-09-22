@@ -1,6 +1,7 @@
 import { NextRequest, NextResponse } from 'next/server';
 import { createClient } from '@/lib/supabase/server';
 import { LeadSchema } from '@/modules/leads/schema';
+import { onLeadCreated } from '@/modules/email/triggers';
 
 const FIELDS_WITH_NUMBER = 'id, number, contact_name, contact_email, contact_phone, kenteken, damage_description, status, origin, preferred_date, channel, appointment_type, locale, created_at, customers(id, name), vehicles(id, kenteken, make, model)';
 const FIELDS_WITHOUT_NUMBER = 'id, contact_name, contact_email, contact_phone, kenteken, damage_description, status, origin, preferred_date, channel, appointment_type, locale, created_at, customers(id, name), vehicles(id, kenteken, make, model)';
@@ -59,5 +60,8 @@ export async function POST(req: NextRequest) {
     .single();
 
   if (error) return NextResponse.json({ error: error.message }, { status: 500 });
+
+  onLeadCreated(data.id).catch((e) => console.error('[EMAIL] onLeadCreated failed:', e));
+
   return NextResponse.json(data, { status: 201 });
 }

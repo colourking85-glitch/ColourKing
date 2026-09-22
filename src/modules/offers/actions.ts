@@ -4,6 +4,7 @@ import { revalidatePath } from 'next/cache';
 import { createClient } from '@/lib/supabase/server';
 import { OfferSchema, OfferLineSchema, ApproveOfferSchema, RejectOfferSchema } from './schema';
 import { canTransition, getGuard } from './machine';
+import { onOfferSent } from '@/modules/email/triggers';
 import type { OfferStatus } from '@/types/database';
 
 const TAX_RATES: Record<string, number> = {
@@ -301,6 +302,8 @@ export async function sendOffer(id: string) {
     .single();
 
   if (error) throw error;
+
+  onOfferSent(id).catch((e) => console.error('[EMAIL] onOfferSent failed:', e));
 
   revalidatePath('/app/offertes');
   revalidatePath(`/app/offertes/${id}`);

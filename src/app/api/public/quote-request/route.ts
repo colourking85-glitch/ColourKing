@@ -1,6 +1,7 @@
 import { NextRequest, NextResponse } from 'next/server';
 import { z } from 'zod';
 import { admin } from '@/lib/supabase/admin';
+import { onLeadCreated } from '@/modules/email/triggers';
 
 const QuoteRequestSchema = z.object({
   name: z.string().min(1, 'Name is required'),
@@ -115,6 +116,8 @@ export async function POST(req: NextRequest) {
     if (error) {
       return NextResponse.json({ error: 'Failed to submit quote request' }, { status: 500, headers });
     }
+
+    onLeadCreated(data.id).catch((e) => console.error('[EMAIL] onLeadCreated failed:', e));
 
     return NextResponse.json({ success: true, id: data.id }, { status: 201, headers });
   } catch {

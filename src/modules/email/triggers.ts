@@ -3,11 +3,11 @@
  * Each function fetches required data from the database,
  * renders the appropriate template, and sends the email.
  *
- * These are meant to be called from existing API routes / server actions
- * when the corresponding event occurs. Not wired up yet — just the functions.
+ * Called from API routes and server actions when the corresponding event
+ * occurs. Uses the admin (service role) client so it works in all contexts.
  */
 
-import { createClient } from '@/lib/supabase/server';
+import { admin as supabase } from '@/lib/supabase/admin';
 import { renderTemplate, getSubject } from './templates';
 import { sendEmail } from './sender';
 import { logEmail } from './log';
@@ -24,7 +24,6 @@ function validLocale(locale: string | null | undefined): EmailLocale {
  * Send offer email to customer when an offer is sent.
  */
 export async function onOfferSent(offerId: string): Promise<void> {
-  const supabase = createClient();
 
   const { data: offer, error } = await supabase
     .from('offers')
@@ -85,7 +84,6 @@ export async function onOfferSent(offerId: string): Promise<void> {
  * Send invoice email with payment link when an invoice is issued.
  */
 export async function onInvoiceIssued(invoiceId: string): Promise<void> {
-  const supabase = createClient();
 
   // invoices is stored via documents + offers — query the relevant data
   const { data: doc, error } = await supabase
@@ -146,7 +144,6 @@ export async function onInvoiceIssued(invoiceId: string): Promise<void> {
  * Send appointment confirmation email.
  */
 export async function onAppointmentConfirmed(appointmentId: string): Promise<void> {
-  const supabase = createClient();
 
   const { data: apt, error } = await supabase
     .from('appointments')
@@ -207,7 +204,6 @@ export async function onAppointmentConfirmed(appointmentId: string): Promise<voi
  * Send payment confirmation email.
  */
 export async function onPaymentReceived(paymentId: string): Promise<void> {
-  const supabase = createClient();
 
   // Payment data is stored as a job_event or via the invoices flow
   // For now, we look up via the document payload
@@ -273,7 +269,6 @@ export async function onPaymentReceived(paymentId: string): Promise<void> {
  * Send internal notification to staff about a new lead.
  */
 export async function onLeadCreated(leadId: string): Promise<void> {
-  const supabase = createClient();
 
   const { data: lead, error } = await supabase
     .from('leads')
@@ -332,7 +327,6 @@ export async function onLeadCreated(leadId: string): Promise<void> {
  * Send "your car is ready" email when repair is complete.
  */
 export async function onRepairComplete(jobId: string): Promise<void> {
-  const supabase = createClient();
 
   // Jobs table isn't explicitly defined in database.ts but follows the pattern
   // For now we query via offers → customers

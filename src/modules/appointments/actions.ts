@@ -2,6 +2,7 @@
 
 import { revalidatePath } from 'next/cache';
 import { createClient } from '@/lib/supabase/server';
+import { onAppointmentConfirmed } from '@/modules/email/triggers';
 import {
   AppointmentSchema,
   UpdateAppointmentSchema,
@@ -97,6 +98,8 @@ export async function confirmAppointment(id: string) {
     .single();
 
   if (error) throw error;
+
+  onAppointmentConfirmed(id).catch((e) => console.error('[EMAIL] onAppointmentConfirmed failed:', e));
 
   revalidatePath('/app/afspraken');
   return appointment;
