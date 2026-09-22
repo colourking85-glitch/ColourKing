@@ -1,7 +1,7 @@
 'use client';
 
 import { useState, useEffect, useMemo } from 'react';
-import { useTranslations } from 'next-intl';
+import { useTranslations, useLocale } from 'next-intl';
 import { Link } from '@/i18n/routing';
 import { Car, ClipboardCheck, PackageCheck, ChevronLeft, ChevronRight, Check, Clock, Calendar, User, Phone, Mail, FileText, Loader2, MapPin, Navigation } from 'lucide-react';
 
@@ -15,7 +15,14 @@ const TYPES = [
 
 type AppointmentType = typeof TYPES[number]['value'];
 
-const DAY_NAMES_NL = ['MA', 'DI', 'WO', 'DO', 'VR', 'ZA', 'ZO'];
+const BCP: Record<string, string> = { nl: 'nl-NL', en: 'en-GB', tr: 'tr-TR' };
+
+/** Short weekday names Monday→Sunday in the page locale (2024-01-01 is a Monday). */
+function weekdayNames(bcp: string): string[] {
+  return Array.from({ length: 7 }, (_, i) =>
+    new Date(2024, 0, 1 + i).toLocaleDateString(bcp, { weekday: 'short' }).replace('.', '').slice(0, 2).toUpperCase(),
+  );
+}
 
 function getMonday(d: Date): Date {
   const day = d.getDay();
@@ -38,6 +45,7 @@ function CalendarGrid({
   selectedDate: string;
   onSelect: (d: string) => void;
 }) {
+  const bcp = BCP[useLocale()] ?? 'nl-NL';
   const today = useMemo(() => {
     const t = new Date();
     t.setHours(0, 0, 0, 0);
@@ -80,7 +88,7 @@ function CalendarGrid({
   const nextMonthDate = new Date(viewYear, viewMonth + 1, 1);
   const canGoForward = nextMonthDate <= maxDate;
 
-  const monthName = new Date(viewYear, viewMonth).toLocaleDateString('nl-NL', { month: 'long', year: 'numeric' });
+  const monthName = new Date(viewYear, viewMonth).toLocaleDateString(bcp, { month: 'long', year: 'numeric' });
 
   function goBack() {
     if (!canGoBack) return;
@@ -127,7 +135,7 @@ function CalendarGrid({
 
       {/* Day headers */}
       <div className="mb-2 grid grid-cols-7 text-center">
-        {DAY_NAMES_NL.map(d => (
+        {weekdayNames(bcp).map(d => (
           <div key={d} className="py-1 text-xs font-semibold uppercase tracking-wider text-ck-text-faint">{d}</div>
         ))}
       </div>
@@ -174,6 +182,7 @@ function CalendarGrid({
 export default function BookingPage() {
   const t = useTranslations('pub.booking');
   const tCommon = useTranslations('common');
+  const bcp = BCP[useLocale()] ?? 'nl-NL';
 
   const [step, setStep] = useState(1);
   const [type, setType] = useState<AppointmentType | ''>('');
@@ -253,23 +262,23 @@ export default function BookingPage() {
           <div className="mx-auto mb-6 flex h-20 w-20 items-center justify-center rounded-full bg-green-500/10">
             <Check size={40} className="text-green-400" />
           </div>
-          <h1 className="font-heading text-3xl font-bold text-white">{t('successTitle')}</h1>
+          <h1 className="font-heading text-3xl font-bold text-ck-text">{t('successTitle')}</h1>
           <p className="mt-4 text-ck-text-muted leading-relaxed">{t('successMessage')}</p>
           <div className="mt-8 rounded-lg border border-ck-border bg-ck-surface-2 p-6 text-left">
             <div className="grid gap-3 text-sm">
               <div className="flex justify-between">
                 <span className="text-ck-text-muted">{t('type')}</span>
-                <span className="font-medium text-white">{t(`types.${type}`)}</span>
+                <span className="font-medium text-ck-text">{t(`types.${type}`)}</span>
               </div>
               <div className="flex justify-between">
                 <span className="text-ck-text-muted">{tCommon('date')}</span>
-                <span className="font-medium text-white">
-                  {new Date(date + 'T00:00:00').toLocaleDateString('nl-NL', { weekday: 'long', day: 'numeric', month: 'long', year: 'numeric' })}
+                <span className="font-medium text-ck-text">
+                  {new Date(date + 'T00:00:00').toLocaleDateString(bcp, { weekday: 'long', day: 'numeric', month: 'long', year: 'numeric' })}
                 </span>
               </div>
               <div className="flex justify-between">
                 <span className="text-ck-text-muted">{t('time')}</span>
-                <span className="font-medium text-white">{time}</span>
+                <span className="font-medium text-ck-text">{time}</span>
               </div>
             </div>
           </div>
@@ -492,7 +501,7 @@ export default function BookingPage() {
               {/* Selected date label */}
               {date && (
                 <div className="text-center text-sm font-medium text-ck-text">
-                  {new Date(date + 'T00:00:00').toLocaleDateString('nl-NL', { weekday: 'long', day: 'numeric', month: 'long', year: 'numeric' })}
+                  {new Date(date + 'T00:00:00').toLocaleDateString(bcp, { weekday: 'long', day: 'numeric', month: 'long', year: 'numeric' })}
                 </div>
               )}
 
@@ -576,7 +585,7 @@ export default function BookingPage() {
                   <div className="flex items-center gap-2">
                     <Calendar size={14} className="text-ck-red" />
                     <span className="text-ck-text-muted">
-                      {new Date(date + 'T00:00:00').toLocaleDateString('nl-NL', { weekday: 'short', day: 'numeric', month: 'short' })}
+                      {new Date(date + 'T00:00:00').toLocaleDateString(bcp, { weekday: 'short', day: 'numeric', month: 'short' })}
                     </span>
                   </div>
                   <div className="flex items-center gap-2">
