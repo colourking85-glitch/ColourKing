@@ -310,6 +310,9 @@
     "plateOriginPlaceholder": "bijv. NL, DE, BE, TR"
   },
   "ld": {
+    "delete": "Verwijderen",
+    "deleteConfirm": "Lead {name} verwijderen? De lead wordt uit alle lijsten verborgen (blijft bewaard in de database).",
+    "deleteFailed": "Lead kon niet worden verwijderd.",
     "createdAt": "Aangemaakt",
     "createdAtHint": "Aanmaakmoment — getoond in jouw tijdzone ({tz})",
     "title": "Leads",

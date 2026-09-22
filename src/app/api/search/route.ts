@@ -39,6 +39,7 @@ export async function GET(req: NextRequest) {
     supabase
       .from('leads')
       .select('id, name, email, phone, status')
+      .is('deleted_at', null)
       .or(`name.ilike.${pattern},email.ilike.${pattern},phone.ilike.${pattern}`)
       .limit(5),
     supabase

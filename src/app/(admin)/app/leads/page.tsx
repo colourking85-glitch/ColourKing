@@ -2,7 +2,7 @@
 
 import { useState, useEffect, useCallback } from 'react';
 import Link from 'next/link';
-import { Plus, Search, Clock, MessageCircle, FileText, Trophy, XCircle, ArrowUpDown, ArrowUp, ArrowDown, RefreshCw, SlidersHorizontal, Calendar } from 'lucide-react';
+import { Plus, Search, Clock, MessageCircle, FileText, Trophy, XCircle, ArrowUpDown, ArrowUp, ArrowDown, RefreshCw, SlidersHorizontal, Calendar, Trash2 } from 'lucide-react';
 import { useTranslations, useLocale } from 'next-intl';
 import { ScreenBadge } from '@/components/ui/ScreenBadge';
 import { formatDateTimeLocal, type SupportedLocale } from '@/lib/format';
@@ -77,6 +77,18 @@ export default function LeadsPage() {
       setSortBy(field);
       setSortDir(field === 'contact_name' ? 'asc' : 'desc');
     }
+  }
+
+  async function deleteLead(lead: Lead) {
+    if (!confirm(t('deleteConfirm', { name: lead.contact_name }))) return;
+    setUpdatingId(lead.id);
+    const res = await fetch(`/api/leads/${lead.id}`, { method: 'DELETE' });
+    if (res.ok) {
+      setLeads(prev => prev.filter(l => l.id !== lead.id));
+    } else {
+      alert(t('deleteFailed'));
+    }
+    setUpdatingId(null);
   }
 
   async function changeStatus(leadId: string, newStatus: string) {
@@ -232,13 +244,14 @@ export default function LeadsPage() {
               <th className="px-4 py-3 text-right" title={t('createdAtHint', { tz: viewerTimeZone })}>
                 <span className="text-xs font-semibold uppercase text-ck-muted">{t('createdAt')}</span>
               </th>
+              <th className="w-10 px-2 py-3"><span className="sr-only">{t('delete')}</span></th>
             </tr>
           </thead>
           <tbody>
             {loading ? (
-              <tr><td colSpan={7} className="p-8 text-center text-ck-muted">{tCommon('loading')}</td></tr>
+              <tr><td colSpan={8} className="p-8 text-center text-ck-muted">{tCommon('loading')}</td></tr>
             ) : leads.length === 0 ? (
-              <tr><td colSpan={7} className="p-8 text-center text-ck-muted">
+              <tr><td colSpan={8} className="p-8 text-center text-ck-muted">
                 {search || statusFilter || originFilter ? t('noLeadsFound') : t('noLeadsMessage')}
               </td></tr>
             ) : (
@@ -318,6 +331,17 @@ export default function LeadsPage() {
                           </span>
                         );
                       })()}
+                    </td>
+                    <td className="px-2 py-3 text-right">
+                      <button
+                        onClick={() => deleteLead(lead)}
+                        disabled={updatingId === lead.id}
+                        title={t('delete')}
+                        aria-label={t('delete')}
+                        className="rounded-md p-1.5 text-ck-muted transition-colors hover:bg-red-400/10 hover:text-red-400 disabled:opacity-50"
+                      >
+                        <Trash2 size={14} />
+                      </button>
                     </td>
                   </tr>
                 );

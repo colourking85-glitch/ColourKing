@@ -21,6 +21,7 @@ export async function GET(req: NextRequest) {
     let query = supabase
       .from('leads')
       .select(fields)
+      .is('deleted_at', null)
       .order(sortColumn, { ascending: sortDir });
 
     if (status) query = query.eq('status', status);

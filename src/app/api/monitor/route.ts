@@ -18,6 +18,7 @@ export async function GET() {
     supabase
       .from('leads')
       .select('id, number, contact_name, kenteken, status, origin, created_at')
+      .is('deleted_at', null)
       .in('status', ['new', 'contacted'])
       .order('created_at', { ascending: false })
       .limit(20),

@@ -310,6 +310,9 @@
     "plateOriginPlaceholder": "örn. NL, DE, BE, TR"
   },
   "ld": {
+    "delete": "Sil",
+    "deleteConfirm": "{name} talebi silinsin mi? Tüm listelerden gizlenir (veritabanında saklanır).",
+    "deleteFailed": "Talep silinemedi.",
     "createdAt": "Oluşturulma",
     "createdAtHint": "Kayıt oluşturulma zamanı — saat diliminizde gösterilir ({tz})",
     "title": "Talepler",

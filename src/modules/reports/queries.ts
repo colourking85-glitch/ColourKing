@@ -376,6 +376,7 @@ export async function getCustomerMetrics(
   const { data: leads, error: leadErr } = await supabase
     .from('leads')
     .select('status')
+    .is('deleted_at', null)
     .gte('created_at', startDate)
     .lte('created_at', endDate);
 

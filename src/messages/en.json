@@ -310,6 +310,9 @@
     "plateOriginPlaceholder": "e.g. NL, DE, BE, TR"
   },
   "ld": {
+    "delete": "Delete",
+    "deleteConfirm": "Delete lead {name}? It will be hidden from all lists (kept in the database).",
+    "deleteFailed": "Could not delete the lead.",
     "createdAt": "Created",
     "createdAtHint": "Entry created — shown in your time zone ({tz})",
     "title": "Leads",

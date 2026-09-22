@@ -39,3 +39,24 @@ export async function PATCH(
   if (error) return NextResponse.json({ error: error.message }, { status: 500 });
   return NextResponse.json(data);
 }
+
+/** Soft delete: stamps deleted_at/deleted_by, the row itself is kept. */
+export async function DELETE(
+  _req: NextRequest,
+  { params }: { params: { id: string } }
+) {
+  const supabase = createClient();
+  const { data: { user } } = await supabase.auth.getUser();
+
+  const { data, error } = await supabase
+    .from('leads')
+    .update({ deleted_at: new Date().toISOString(), deleted_by: user?.id ?? null })
+    .eq('id', params.id)
+    .is('deleted_at', null)
+    .select('id')
+    .maybeSingle();
+
+  if (error) return NextResponse.json({ error: error.message }, { status: 500 });
+  if (!data) return NextResponse.json({ error: 'Lead not found' }, { status: 404 });
+  return NextResponse.json({ ok: true });
+}

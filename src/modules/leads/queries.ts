@@ -5,6 +5,7 @@ export async function getLeads(status?: string, search?: string) {
   let query = supabase
     .from('leads')
     .select('*, customers(id, name), vehicles(id, kenteken, make, model)')
+    .is('deleted_at', null)
     .order('created_at', { ascending: false });
 
   if (status) {
@@ -36,7 +37,8 @@ export async function getLeadCounts() {
   const supabase = createClient();
   const { data, error } = await supabase
     .from('leads')
-    .select('status');
+    .select('status')
+    .is('deleted_at', null);
 
   if (error) throw error;
 
