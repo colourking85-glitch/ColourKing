@@ -1,9 +1,11 @@
 /**
- * Email sending abstraction using Resend API via fetch().
- * Gracefully falls back to console.log when RESEND_API_KEY is not set.
+ * Email sending via Zoho SMTP (smtp.zoho.eu).
+ * Emails appear in the Zoho Sent folder automatically.
+ * Falls back to console.log when SMTP credentials are not set.
  */
 
-const RESEND_API_URL = 'https://api.resend.com/emails';
+import nodemailer, { type SendMailOptions } from 'nodemailer';
+
 const MAX_RETRIES = 2;
 const RETRY_DELAY_MS = 1000;
 
@@ -12,7 +14,6 @@ type SendEmailOptions = {
   replyTo?: string;
   cc?: string[];
   bcc?: string[];
-  tags?: { name: string; value: string }[];
 };
 
 type SendEmailResult = {
@@ -21,16 +22,35 @@ type SendEmailResult = {
   error?: string;
 };
 
-function getApiKey(): string | undefined {
-  return process.env.RESEND_API_KEY;
+function getSmtpUser(): string {
+  return process.env.SMTP_USER ?? process.env.IMAP_USER ?? 'info@colourking.nl';
+}
+
+function getSmtpPass(): string | undefined {
+  return process.env.SMTP_PASS ?? process.env.IMAP_PASS;
 }
 
 function getDefaultFrom(): string {
-  return process.env.EMAIL_FROM ?? 'Colourking <noreply@colourking.nl>';
+  return process.env.EMAIL_FROM ?? `Colourking <${getSmtpUser()}>`;
 }
 
 function getDefaultReplyTo(): string {
   return process.env.EMAIL_REPLY_TO ?? 'info@colourking.nl';
+}
+
+function createTransport() {
+  const host = process.env.SMTP_HOST ?? 'smtp.zoho.eu';
+  const port = Number(process.env.SMTP_PORT ?? 465);
+
+  return nodemailer.createTransport({
+    host,
+    port,
+    secure: port === 465,
+    auth: {
+      user: getSmtpUser(),
+      pass: getSmtpPass(),
+    },
+  });
 }
 
 async function sleep(ms: number): Promise<void> {
@@ -43,10 +63,9 @@ export async function sendEmail(
   html: string,
   options?: SendEmailOptions,
 ): Promise<SendEmailResult> {
-  const apiKey = getApiKey();
+  const pass = getSmtpPass();
 
-  if (!apiKey) {
-    // Dry-run mode: log to console
+  if (!pass) {
     console.log('[EMAIL DRY-RUN]', {
       to,
       subject,
@@ -57,42 +76,24 @@ export async function sendEmail(
     return { success: true, messageId: `dry-run-${Date.now()}` };
   }
 
-  const payload = {
+  const transport = createTransport();
+
+  const mailOptions: SendMailOptions = {
     from: options?.from ?? getDefaultFrom(),
-    to: [to],
+    to,
     subject,
     html,
-    reply_to: options?.replyTo ?? getDefaultReplyTo(),
+    replyTo: options?.replyTo ?? getDefaultReplyTo(),
     ...(options?.cc?.length ? { cc: options.cc } : {}),
     ...(options?.bcc?.length ? { bcc: options.bcc } : {}),
-    ...(options?.tags?.length ? { tags: options.tags } : {}),
   };
 
   let lastError: string | undefined;
 
   for (let attempt = 0; attempt <= MAX_RETRIES; attempt++) {
     try {
-      const res = await fetch(RESEND_API_URL, {
-        method: 'POST',
-        headers: {
-          'Content-Type': 'application/json',
-          Authorization: `Bearer ${apiKey}`,
-        },
-        body: JSON.stringify(payload),
-      });
-
-      if (res.ok) {
-        const data = (await res.json()) as { id?: string };
-        return { success: true, messageId: data.id };
-      }
-
-      const errorBody = await res.text();
-      lastError = `Resend API ${res.status}: ${errorBody}`;
-
-      // Don't retry on 4xx client errors (except 429 rate limit)
-      if (res.status >= 400 && res.status < 500 && res.status !== 429) {
-        return { success: false, error: lastError };
-      }
+      const info = await transport.sendMail(mailOptions);
+      return { success: true, messageId: info.messageId };
     } catch (err) {
       lastError = err instanceof Error ? err.message : String(err);
     }

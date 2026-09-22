@@ -18,10 +18,11 @@ export async function GET(req: NextRequest) {
   const diagnostics: Record<string, unknown> = {};
 
   // 1. Check env vars
-  diagnostics.resendKeySet = !!process.env.RESEND_API_KEY;
-  diagnostics.resendKeyPrefix = process.env.RESEND_API_KEY?.slice(0, 8) ?? 'NOT SET';
+  diagnostics.smtpUser = process.env.SMTP_USER ?? process.env.IMAP_USER ?? 'info@colourking.nl';
+  diagnostics.smtpPassSet = !!(process.env.SMTP_PASS ?? process.env.IMAP_PASS);
+  diagnostics.smtpHost = process.env.SMTP_HOST ?? 'smtp.zoho.eu';
   diagnostics.shopEmail = process.env.SHOP_EMAIL ?? '(not set, fallback: colourking85@gmail.com)';
-  diagnostics.emailFrom = process.env.EMAIL_FROM ?? '(not set, fallback: Colourking <noreply@colourking.nl>)';
+  diagnostics.emailFrom = process.env.EMAIL_FROM ?? `(not set, fallback: Colourking <${diagnostics.smtpUser}>)`;
 
   // 2. Check staff table
   const { data: staff, error: staffErr } = await admin
@@ -39,7 +40,7 @@ export async function GET(req: NextRequest) {
   const result = await sendEmail(
     targetEmail,
     'Colourking Email Test',
-    `<h1>Email Test</h1><p>This is a diagnostic test from <strong>Colourking</strong> at ${new Date().toISOString()}.</p><p>If you see this, Resend is working.</p>`,
+    `<h1>Email Test</h1><p>This is a diagnostic test from <strong>Colourking</strong> at ${new Date().toISOString()}.</p><p>If you see this, Zoho SMTP is working.</p>`,
   );
 
   diagnostics.sendResult = result;
