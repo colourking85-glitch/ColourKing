@@ -31,7 +31,7 @@ function getSmtpPass(): string | undefined {
 }
 
 function getDefaultFrom(): string {
-  return process.env.EMAIL_FROM ?? `Colourking <${getSmtpUser()}>`;
+  return process.env.EMAIL_FROM ?? 'Colourking <sales@colourking.nl>';
 }
 
 function getDefaultReplyTo(): string {
