@@ -338,7 +338,7 @@ export async function issueInvoice(id: string) {
   // Also create a document record for the archive
   const { data: inv } = await supabase
     .from('invoices')
-    .select('customer_id, vehicle_id, job_id, offer_id, locale, subtotal_cents, vat_cents, total_cents')
+    .select('customer_id, vehicle_id, job_id, offer_id, locale, subtotal_cents, vat_cents, total_cents, payment_token, due_date')
     .eq('id', id)
     .single();
 
@@ -358,6 +358,8 @@ export async function issueInvoice(id: string) {
         subtotal_cents: inv.subtotal_cents,
         vat_cents: inv.vat_cents,
         total_cents: inv.total_cents,
+        payment_token: inv.payment_token,
+        due_date: inv.due_date,
       },
     });
   }

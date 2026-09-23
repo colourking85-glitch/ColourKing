@@ -118,7 +118,7 @@ export async function onInvoiceIssued(invoiceId: string): Promise<void> {
     vatCents: Number(payload.vat_cents ?? 0),
     totalCents: Number(payload.total_cents ?? 0),
     payUrl: payload.payment_token
-      ? `${APP_URL}/pay/${String(payload.payment_token)}`
+      ? `${APP_URL}/s/${String(payload.payment_token)}`
       : null,
   };
 
@@ -205,46 +205,52 @@ export async function onAppointmentConfirmed(appointmentId: string): Promise<voi
  */
 export async function onPaymentReceived(paymentId: string): Promise<void> {
 
-  // Payment data is stored as a job_event or via the invoices flow
-  // For now, we look up via the document payload
-  const { data: doc, error } = await supabase
-    .from('documents')
-    .select('*, customers(*)')
-    .eq('doc_type', 'invoice')
-    .order('created_at', { ascending: false })
-    .limit(50);
+  // Look up the payment, then its invoice + customer
+  const { data: payment, error: payErr } = await supabase
+    .from('payments')
+    .select('id, invoice_id, amount_cents, method, paid_at')
+    .eq('id', paymentId)
+    .single();
 
-  if (error || !doc?.length) {
-    console.error('[EMAIL TRIGGER] onPaymentReceived: no invoices found');
+  if (payErr || !payment) {
+    console.error('[EMAIL TRIGGER] onPaymentReceived: payment not found', paymentId);
     return;
   }
 
-  // Find the document whose payload references this payment
-  const matched = doc.find((d) => {
-    const p = (d.payload ?? {}) as Record<string, unknown>;
-    return p.payment_id === paymentId || d.id === paymentId;
-  });
+  const { data: invoice, error: invErr } = await supabase
+    .from('invoices')
+    .select('id, invoice_number, customer_id, locale, customers(id, name, email, locale)')
+    .eq('id', payment.invoice_id)
+    .single();
 
-  if (!matched) {
-    console.error('[EMAIL TRIGGER] onPaymentReceived: payment not matched', paymentId);
+  if (invErr || !invoice) {
+    console.error('[EMAIL TRIGGER] onPaymentReceived: invoice not found', payment.invoice_id);
     return;
   }
 
-  const customer = matched.customers as Record<string, unknown> | null;
+  const rawCustomer = invoice.customers;
+  const customer = (Array.isArray(rawCustomer) ? rawCustomer[0] : rawCustomer) as Record<string, unknown> | null;
   if (!customer?.email) {
     console.warn('[EMAIL TRIGGER] onPaymentReceived: customer has no email');
     return;
   }
 
-  const locale = validLocale(customer.locale as string);
-  const payload = (matched.payload ?? {}) as Record<string, unknown>;
+  const locale = validLocale((customer.locale as string) ?? invoice.locale);
+
+  const methodMap: Record<string, string> = {
+    ideal: 'iDEAL',
+    bank_transfer: 'Bankoverschrijving',
+    cash: 'Contant',
+    card: 'Pinpas',
+    mollie: 'Mollie',
+  };
 
   const data = {
     customerName: String(customer.name ?? ''),
-    invoiceNumber: matched.doc_number ?? '',
-    amountCents: Number(payload.total_cents ?? 0),
-    paidAt: new Date().toISOString(),
-    method: 'iDEAL',
+    invoiceNumber: invoice.invoice_number ?? '',
+    amountCents: payment.amount_cents,
+    paidAt: payment.paid_at ?? new Date().toISOString(),
+    method: methodMap[payment.method] ?? payment.method,
   };
 
   const html = renderTemplate('paymentReceived', data, locale);
