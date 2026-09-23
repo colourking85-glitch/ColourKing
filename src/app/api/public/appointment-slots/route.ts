@@ -1,6 +1,7 @@
 import { NextRequest, NextResponse } from 'next/server';
 import { admin } from '@/lib/supabase/admin';
 import type { AppointmentType } from '@/types/database';
+import { isSlotBookable } from '@/lib/booking-time';
 
 export async function GET(req: NextRequest) {
   const sp = req.nextUrl.searchParams;
@@ -83,6 +84,9 @@ export async function GET(req: NextRequest) {
         });
         return overlaps.length < r.capacity;
       });
+
+      // Past times and same-day times inside the 2h lead window are not offered
+      if (!isSlotBookable(date, timeStr)) continue;
 
       slots.push({ time: timeStr, available: availableResources.length > 0 });
     }

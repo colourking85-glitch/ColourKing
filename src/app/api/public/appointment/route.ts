@@ -2,6 +2,7 @@ import { NextRequest, NextResponse } from 'next/server';
 import { z } from 'zod';
 import { admin } from '@/lib/supabase/admin';
 import { onLeadCreated } from '@/modules/email/triggers';
+import { isSlotBookable } from '@/lib/booking-time';
 
 const PublicAppointmentSchema = z.object({
   type: z.enum(['inspection', 'drop_off', 'collection']),
@@ -64,6 +65,13 @@ export async function POST(req: NextRequest) {
     }
 
     const { type, contact_name, contact_email, contact_phone, kenteken, scheduled_date, scheduled_time, location, location_address, notes, locale } = parsed.data;
+
+    if (!isSlotBookable(scheduled_date, scheduled_time)) {
+      return NextResponse.json(
+        { error: 'This time slot is no longer available. Please choose a later time.' },
+        { status: 400 }
+      );
+    }
 
     const { data, error } = await admin
       .from('leads')

@@ -52,20 +52,14 @@ function CalendarGrid({
     return t;
   }, []);
 
-  const tomorrow = useMemo(() => {
-    const d = new Date(today);
-    d.setDate(d.getDate() + 1);
-    return d;
-  }, [today]);
-
   const maxDate = useMemo(() => {
     const d = new Date(today);
     d.setDate(d.getDate() + 35);
     return d;
   }, [today]);
 
-  const [viewMonth, setViewMonth] = useState(() => tomorrow.getMonth());
-  const [viewYear, setViewYear] = useState(() => tomorrow.getFullYear());
+  const [viewMonth, setViewMonth] = useState(() => today.getMonth());
+  const [viewYear, setViewYear] = useState(() => today.getFullYear());
 
   const calendarDays = useMemo(() => {
     const firstOfMonth = new Date(viewYear, viewMonth, 1);
@@ -84,7 +78,7 @@ function CalendarGrid({
     return needsSixRows ? days : days.slice(0, 35);
   }, [viewMonth, viewYear]);
 
-  const canGoBack = viewMonth !== tomorrow.getMonth() || viewYear !== tomorrow.getFullYear();
+  const canGoBack = viewMonth !== today.getMonth() || viewYear !== today.getFullYear();
   const nextMonthDate = new Date(viewYear, viewMonth + 1, 1);
   const canGoForward = nextMonthDate <= maxDate;
 
@@ -144,7 +138,8 @@ function CalendarGrid({
       <div className="grid grid-cols-7">
         {calendarDays.map((day, i) => {
           const inMonth = day.getMonth() === viewMonth;
-          const isPast = day < tomorrow;
+          // Today stays open; the slot API only offers times at least 2h ahead
+          const isPast = day < today;
           const isTooFar = day > maxDate;
           const isWeekend = day.getDay() === 0 || day.getDay() === 6;
           const disabled = !inMonth || isPast || isTooFar || isWeekend;
@@ -161,7 +156,7 @@ function CalendarGrid({
                 isSelected
                   ? 'rounded-lg bg-ck-red text-white shadow-lg shadow-ck-red/30'
                   : disabled
-                    ? 'text-ck-text-faint/30 cursor-not-allowed'
+                    ? 'text-ck-text-faint opacity-30 cursor-not-allowed'
                     : isToday
                       ? 'text-ck-red font-bold hover:bg-ck-red/10 rounded-lg'
                       : 'text-ck-text-2 hover:bg-ck-surface-3 rounded-lg'
@@ -263,21 +258,21 @@ export default function BookingPage() {
             <Check size={40} className="text-green-400" />
           </div>
           <h1 className="font-heading text-3xl font-bold text-ck-text">{t('successTitle')}</h1>
-          <p className="mt-4 text-ck-text-muted leading-relaxed">{t('successMessage')}</p>
+          <p className="mt-4 text-ck-text-2 leading-relaxed">{t('successMessage')}</p>
           <div className="mt-8 rounded-lg border border-ck-border bg-ck-surface-2 p-6 text-left">
             <div className="grid gap-3 text-sm">
               <div className="flex justify-between">
-                <span className="text-ck-text-muted">{t('type')}</span>
+                <span className="text-ck-text-3">{t('type')}</span>
                 <span className="font-medium text-ck-text">{t(`types.${type}`)}</span>
               </div>
               <div className="flex justify-between">
-                <span className="text-ck-text-muted">{tCommon('date')}</span>
+                <span className="text-ck-text-3">{tCommon('date')}</span>
                 <span className="font-medium text-ck-text">
                   {new Date(date + 'T00:00:00').toLocaleDateString(bcp, { weekday: 'long', day: 'numeric', month: 'long', year: 'numeric' })}
                 </span>
               </div>
               <div className="flex justify-between">
-                <span className="text-ck-text-muted">{t('time')}</span>
+                <span className="text-ck-text-3">{t('time')}</span>
                 <span className="font-medium text-ck-text">{time}</span>
               </div>
             </div>
