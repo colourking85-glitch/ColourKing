@@ -36,7 +36,7 @@ const STRINGS: Record<string, EmailStrings> = {
   nl: {
     dear: 'Beste',
     regards: 'Met vriendelijke groet',
-    team: 'Het Colourking team',
+    team: 'Colourking Team',
     viewOnline: 'Online bekijken',
     unsubscribe: 'Afmelden',
     companyFooter: 'Autospuitbedrijf Colour King | Satijnbloem 6, 3068 JP Rotterdam | KvK: 82199884 | BTW: NL821998840B03',
@@ -103,6 +103,17 @@ const STRINGS: Record<string, EmailStrings> = {
     apptType_drop_off: 'Auto afgeven',
     apptType_collection: 'Ophalen',
 
+    // Pending appointment banner
+    pendingBanner: 'AFSPRAAKVERZOEK — WACHT OP BEVESTIGING',
+    pendingDetail: 'Deze afspraak is een verzoek en moet nog worden bevestigd door het Colourking team.',
+
+    // Customer appointment request email
+    customerLeadSubject: 'Uw afspraakverzoek bij Colourking — {leadCode}',
+    customerLeadGreeting: 'Beste {contactName},',
+    customerLeadIntro: 'Bedankt voor uw afspraakverzoek bij Colourking. Wij hebben uw aanvraag ontvangen.',
+    customerPendingNotice: 'Let op: uw afspraak is nog niet definitief. Ons team zal uw verzoek beoordelen en u zo snel mogelijk een bevestiging sturen.',
+    customerLeadFooter: 'Heeft u vragen? Neem gerust contact met ons op.',
+
     // Repair ready
     readySubject: 'Uw voertuig is klaar - Colourking',
     readyIntro: 'Goed nieuws! Uw voertuig is gereed en kan worden opgehaald.',
@@ -115,7 +126,7 @@ const STRINGS: Record<string, EmailStrings> = {
   en: {
     dear: 'Dear',
     regards: 'Kind regards',
-    team: 'The Colourking team',
+    team: 'Colourking Team',
     viewOnline: 'View online',
     unsubscribe: 'Unsubscribe',
     companyFooter: 'Autospuitbedrijf Colour King | Satijnbloem 6, 3068 JP Rotterdam | CoC: 82199884 | VAT: NL821998840B03',
@@ -176,6 +187,15 @@ const STRINGS: Record<string, EmailStrings> = {
     apptType_drop_off: 'Drop off vehicle',
     apptType_collection: 'Collection',
 
+    pendingBanner: 'APPOINTMENT REQUEST — PENDING CONFIRMATION',
+    pendingDetail: 'This appointment is a request and still needs to be confirmed by the Colourking team.',
+
+    customerLeadSubject: 'Your appointment request at Colourking — {leadCode}',
+    customerLeadGreeting: 'Dear {contactName},',
+    customerLeadIntro: 'Thank you for your appointment request at Colourking. We have received your enquiry.',
+    customerPendingNotice: 'Please note: your appointment is not yet confirmed. Our team will review your request and send you a confirmation as soon as possible.',
+    customerLeadFooter: 'Any questions? Feel free to contact us.',
+
     readySubject: 'Your vehicle is ready - Colourking',
     readyIntro: 'Great news! Your vehicle is ready for collection.',
     readyVehicle: 'Vehicle',
@@ -187,7 +207,7 @@ const STRINGS: Record<string, EmailStrings> = {
   tr: {
     dear: 'Sayın',
     regards: 'Saygilarimizla',
-    team: 'Colourking ekibi',
+    team: 'Colourking Team',
     viewOnline: 'Online goruntuле',
     unsubscribe: 'Abonelikten cik',
     companyFooter: 'Autospuitbedrijf Colour King | Satijnbloem 6, 3068 JP Rotterdam | Ticaret Sicil: 82199884 | KDV: NL821998840B03',
@@ -247,6 +267,15 @@ const STRINGS: Record<string, EmailStrings> = {
     apptType_inspection: 'Inceleme',
     apptType_drop_off: 'Arac teslimi',
     apptType_collection: 'Arac alma',
+
+    pendingBanner: 'RANDEVU TALEBI — ONAY BEKLIYOR',
+    pendingDetail: 'Bu randevu bir taleptir ve Colourking ekibi tarafindan onaylanmasi gerekmektedir.',
+
+    customerLeadSubject: 'Colourking randevu talebiniz — {leadCode}',
+    customerLeadGreeting: 'Sayin {contactName},',
+    customerLeadIntro: 'Colourking randevu talebiniz icin tesekkur ederiz. Basvurunuzu aldik.',
+    customerPendingNotice: 'Dikkat: randevunuz henuz onaylanmamistir. Ekibimiz talebinizi inceleyecek ve en kisa surede size bir onay gonderecektir.',
+    customerLeadFooter: 'Sorulariniz mi var? Bizimle iletisime gecmekten cekinmeyin.',
 
     readySubject: 'Araciniz hazir - Colourking',
     readyIntro: 'Iyi haberler! Araciniz tamamlandi ve teslim alinabilir.',
@@ -374,6 +403,24 @@ function detailRow(label: string, value: string): string {
 </tr>`;
 }
 
+function highlightedDetailRow(label: string, value: string): string {
+  return `<tr>
+  <td style="padding:10px 12px;font-size:13px;color:#92400e;font-weight:bold;font-family:Arial,Helvetica,sans-serif;border-bottom:1px solid #fde68a;width:140px;background-color:#fffbeb;">${label}</td>
+  <td style="padding:10px 12px;font-size:14px;color:#92400e;font-weight:bold;font-family:Arial,Helvetica,sans-serif;border-bottom:1px solid #fde68a;background-color:#fffbeb;">${value}</td>
+</tr>`;
+}
+
+function pendingBanner(locale: string): string {
+  return `<table role="presentation" width="100%" cellpadding="0" cellspacing="0" border="0" style="margin:0 0 20px 0;border:2px solid #dc2626;border-radius:8px;overflow:hidden;">
+  <tr>
+    <td style="background-color:#fef2f2;padding:16px 20px;text-align:center;">
+      <div style="font-size:16px;font-weight:bold;color:#dc2626;font-family:Arial,Helvetica,sans-serif;letter-spacing:0.02em;margin-bottom:8px;">⚠️ ${t(locale, 'pendingBanner')}</div>
+      <div style="font-size:13px;color:#991b1b;font-family:Arial,Helvetica,sans-serif;line-height:1.5;">${t(locale, 'pendingDetail')}</div>
+    </td>
+  </tr>
+</table>`;
+}
+
 function detailTable(rows: string): string {
   return `<table role="presentation" width="100%" cellpadding="0" cellspacing="0" border="0" style="margin:16px 0;border:1px solid #e5e7eb;border-radius:6px;overflow:hidden;">
   ${rows}
@@ -498,8 +545,8 @@ function renderLeadReceived(data: TemplateDataMap['leadReceived'], locale: Email
     ${heading(t(locale, 'leadAppointmentTitle'))}
     ${detailTable(
       detailRow(t(locale, 'appointmentType'), t(locale, `apptType_${data.appointmentType}`)) +
-      (data.scheduledDate ? detailRow(t(locale, 'appointmentDate'), formatDate(data.scheduledDate, locale)) : '') +
-      (data.scheduledTime ? detailRow(t(locale, 'appointmentTime'), data.scheduledTime.slice(0, 5)) : '') +
+      (data.scheduledDate ? highlightedDetailRow(t(locale, 'appointmentDate'), formatDate(data.scheduledDate, locale)) : '') +
+      (data.scheduledTime ? highlightedDetailRow(t(locale, 'appointmentTime'), data.scheduledTime.slice(0, 5)) : '') +
       detailRow(
         t(locale, 'leadLocation'),
         data.location === 'other'
@@ -509,7 +556,10 @@ function renderLeadReceived(data: TemplateDataMap['leadReceived'], locale: Email
     )}`
     : '';
 
+  const banner = data.appointmentType ? pendingBanner(locale) : '';
+
   return `
+    ${banner}
     ${heading(t(locale, 'leadSubject', { contactName: data.contactName }))}
     ${paragraph(t(locale, 'leadIntro'))}
     ${detailTable(
@@ -594,7 +644,17 @@ export function getSubject<T extends keyof TemplateDataMap>(
   if (d.invoiceNumber) vars.invoiceNumber = String(d.invoiceNumber);
   if (d.contactName) vars.contactName = String(d.contactName);
 
-  return t(locale, key, vars);
+  let subject = t(locale, key, vars);
+
+  if (template === 'leadReceived') {
+    const parts: string[] = [];
+    if (d.kenteken) parts.push(String(d.kenteken));
+    if (d.appointmentType) parts.push(t(locale, `apptType_${String(d.appointmentType)}`));
+    if (d.leadNumber != null) parts.push(`LD-${String(d.leadNumber).padStart(4, '0')}`);
+    if (parts.length) subject += ' | ' + parts.join(' | ');
+  }
+
+  return subject;
 }
 
 /**
@@ -687,6 +747,54 @@ function escapeHtml(text: string): string {
     .replace(/</g, '&lt;')
     .replace(/>/g, '&gt;')
     .replace(/"/g, '&quot;');
+}
+
+/**
+ * Render a customer-facing appointment request acknowledgment email.
+ * Returns { html, subject } for direct use in the sender.
+ */
+export function renderAppointmentRequest(
+  data: {
+    contactName: string;
+    kenteken?: string | null;
+    appointmentType?: string | null;
+    scheduledDate?: string | null;
+    scheduledTime?: string | null;
+    location?: string | null;
+    locationAddress?: string | null;
+    leadCode: string;
+  },
+  locale: EmailLocale = 'nl',
+): { html: string; subject: string } {
+  const subject = t(locale, 'customerLeadSubject', { leadCode: data.leadCode });
+
+  const rows =
+    (data.appointmentType ? detailRow(t(locale, 'appointmentType'), t(locale, `apptType_${data.appointmentType}`)) : '') +
+    (data.scheduledDate ? highlightedDetailRow(t(locale, 'appointmentDate'), formatDate(data.scheduledDate, locale)) : '') +
+    (data.scheduledTime ? highlightedDetailRow(t(locale, 'appointmentTime'), data.scheduledTime.slice(0, 5)) : '') +
+    (data.kenteken ? detailRow(t(locale, 'leadPlate'), data.kenteken) : '') +
+    (data.location
+      ? detailRow(
+          t(locale, 'leadLocation'),
+          data.location === 'other'
+            ? `${t(locale, 'leadLocationOther')}${data.locationAddress ? `: ${data.locationAddress}` : ''}`
+            : t(locale, 'leadLocationShop'),
+        )
+      : '');
+
+  const body = `
+    ${pendingBanner(locale)}
+    ${paragraph(t(locale, 'customerLeadIntro'))}
+    <table role="presentation" width="100%" cellpadding="0" cellspacing="0" border="0" style="margin:16px 0;padding:14px 18px;background-color:#fef3c7;border:1px solid #f59e0b;border-radius:6px;">
+      <tr><td style="font-size:13px;color:#92400e;font-weight:bold;line-height:1.6;font-family:Arial,Helvetica,sans-serif;">
+        ${t(locale, 'customerPendingNotice')}
+      </td></tr>
+    </table>
+    ${detailTable(rows)}
+    ${paragraph(t(locale, 'customerLeadFooter'))}`;
+
+  const html = wrapLayout(locale, body);
+  return { html, subject };
 }
 
 /**

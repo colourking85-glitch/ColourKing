@@ -8,7 +8,7 @@
  */
 
 import { admin as supabase } from '@/lib/supabase/admin';
-import { renderTemplate, getSubject } from './templates';
+import { renderTemplate, getSubject, renderAppointmentRequest } from './templates';
 import { sendEmail } from './sender';
 import { logEmail } from './log';
 import type { EmailLocale } from './schema';
@@ -327,6 +327,41 @@ export async function onLeadCreated(leadId: string): Promise<void> {
       ref_id: leadId,
       status: result.success ? 'sent' : 'failed',
       error: result.error,
+    });
+  }
+
+  // Send confirmation email to the customer for appointment leads
+  if (lead.contact_email && lead.channel === 'appointment_form') {
+    const customerLocale = validLocale(lead.locale);
+    const leadCode = lead.number != null
+      ? `LD-${String(lead.number).padStart(4, '0')}`
+      : leadId.slice(0, 8);
+
+    const { html: custHtml, subject: custSubject } = renderAppointmentRequest(
+      {
+        contactName: lead.contact_name,
+        kenteken: lead.kenteken,
+        appointmentType: lead.appointment_type ?? 'inspection',
+        scheduledDate: lead.scheduled_date,
+        scheduledTime: lead.scheduled_time,
+        location: lead.location,
+        locationAddress: lead.location_address,
+        leadCode,
+      },
+      customerLocale,
+    );
+
+    const custResult = await sendEmail(lead.contact_email, custSubject, custHtml);
+
+    await logEmail({
+      to: lead.contact_email,
+      subject: custSubject,
+      template: 'leadReceived',
+      locale: customerLocale,
+      ref_type: 'lead',
+      ref_id: leadId,
+      status: custResult.success ? 'sent' : 'failed',
+      error: custResult.error,
     });
   }
 }
