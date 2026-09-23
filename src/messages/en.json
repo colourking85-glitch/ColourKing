@@ -2064,7 +2064,8 @@
       "verified": {
         "title": "Verified company",
         "active": "Active",
-        "company": "Company"
+        "company": "Company",
+        "bank": "IBAN"
       },
       "mapPlaceholder": "Map"
     },

@@ -307,6 +307,10 @@ export default function ContactPage() {
                     <span className="text-ck-text-muted">BTW</span>
                     <span className="font-medium text-ck-text">NL821998840B03</span>
                   </div>
+                  <div className="flex justify-between border-b border-ck-border pb-2">
+                    <span className="text-ck-text-muted">{t('contact.verified.bank')}</span>
+                    <span className="font-medium text-ck-text">NL12INGB0675653304</span>
+                  </div>
                   <div className="flex justify-between">
                     <span className="text-ck-text-muted">{t('contact.address')}</span>
                     <span className="font-medium text-ck-text text-right">Satijnbloem 6<br />3068 JP Rotterdam</span>

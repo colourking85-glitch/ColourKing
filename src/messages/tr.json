@@ -2013,7 +2013,8 @@
       "verified": {
         "title": "Doğrulanmış şirket",
         "active": "Aktif",
-        "company": "Şirket"
+        "company": "Şirket",
+        "bank": "IBAN"
       },
       "mapPlaceholder": "Harita"
     },
