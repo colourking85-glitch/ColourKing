@@ -1880,6 +1880,7 @@ export type Database = {
           entry_page: string
           exit_page: string | null
           id: string
+          ip_hash: string | null
           is_bot: boolean
           locale: string | null
           os: string | null
@@ -1901,6 +1902,7 @@ export type Database = {
           entry_page: string
           exit_page?: string | null
           id?: string
+          ip_hash?: string | null
           is_bot?: boolean
           locale?: string | null
           os?: string | null
@@ -1922,6 +1924,7 @@ export type Database = {
           entry_page?: string
           exit_page?: string | null
           id?: string
+          ip_hash?: string | null
           is_bot?: boolean
           locale?: string | null
           os?: string | null

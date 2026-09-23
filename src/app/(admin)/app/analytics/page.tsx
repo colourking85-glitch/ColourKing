@@ -2,7 +2,7 @@
 
 import { useState, useEffect, useCallback } from 'react';
 import { useTranslations } from 'next-intl';
-import { Activity, RefreshCw, Monitor, Smartphone, Tablet, Globe, ArrowDownRight, ArrowUpRight, Clock } from 'lucide-react';
+import { Activity, RefreshCw, Monitor, Smartphone, Tablet, Globe, ArrowDownRight, ArrowUpRight, Clock, Trash2, ShieldOff } from 'lucide-react';
 import { ScreenBadge } from '@/components/ui/ScreenBadge';
 
 interface SessionRow {
@@ -20,6 +20,7 @@ interface SessionRow {
   browser: string | null;
   channel: string;
   locale: string | null;
+  ip_hash: string | null;
 }
 
 interface NameCount {
@@ -47,6 +48,7 @@ interface AnalyticsData {
   browsers: NameCount[];
   daily: DailyCount[];
   sessions: SessionRow[];
+  viewerIpHash: string | null;
 }
 
 const PERIODS = ['24h', '3d', '7d', '30d', '90d'] as const;
@@ -132,6 +134,55 @@ export default function AnalyticsPage() {
   const [data, setData] = useState<AnalyticsData | null>(null);
   const [loading, setLoading] = useState(true);
   const [filter, setFilter] = useState('');
+  const [deleting, setDeleting] = useState<string | null>(null);
+  const [actionMsg, setActionMsg] = useState('');
+
+  const deleteSession = async (dbId: string) => {
+    setDeleting(dbId);
+    try {
+      const res = await fetch('/api/analytics', {
+        method: 'DELETE',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ session_db_id: dbId }),
+      });
+      if (res.ok) {
+        setData(prev => prev ? { ...prev, sessions: prev.sessions.filter(s => s.id !== dbId) } : prev);
+      }
+    } catch { /* ignore */ }
+    setDeleting(null);
+  };
+
+  const deleteMySessions = async () => {
+    const hash = data?.viewerIpHash;
+    if (!hash) return;
+    setDeleting('bulk');
+    try {
+      const res = await fetch('/api/analytics', {
+        method: 'DELETE',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ ip_hash: hash }),
+      });
+      if (res.ok) {
+        const result = await res.json();
+        setActionMsg(`${result.deleted} session(s) deleted`);
+        fetchData();
+      }
+    } catch { /* ignore */ }
+    setDeleting(null);
+  };
+
+  const excludeMyIp = async () => {
+    try {
+      const res = await fetch('/api/analytics', {
+        method: 'DELETE',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ action: 'exclude_my_ip' }),
+      });
+      if (res.ok) {
+        setActionMsg('Your IP is now excluded from tracking');
+      }
+    } catch { /* ignore */ }
+  };
 
   const fetchData = useCallback(async () => {
     setLoading(true);
@@ -179,6 +230,27 @@ export default function AnalyticsPage() {
           <span className="rounded-full bg-[#0a0a0f] px-3 py-1.5 text-[10px] font-semibold text-[#6b6b80]">
             🤖 {t('botsHidden')}
           </span>
+          {data?.viewerIpHash && (
+            <>
+              <button
+                onClick={deleteMySessions}
+                disabled={deleting === 'bulk'}
+                className="flex items-center gap-1.5 rounded-[10px] border border-amber-500/30 bg-amber-500/10 px-3 py-2 text-xs text-amber-400 transition-colors hover:bg-amber-500/20 disabled:opacity-50"
+                title={`Delete all sessions from your IP (${data.viewerIpHash})`}
+              >
+                <Trash2 className="h-3.5 w-3.5" />
+                {t('deleteMy')}
+              </button>
+              <button
+                onClick={excludeMyIp}
+                className="flex items-center gap-1.5 rounded-[10px] border border-red-500/30 bg-red-500/10 px-3 py-2 text-xs text-red-400 transition-colors hover:bg-red-500/20"
+                title="Exclude your IP from future tracking"
+              >
+                <ShieldOff className="h-3.5 w-3.5" />
+                {t('excludeIp')}
+              </button>
+            </>
+          )}
           <button
             onClick={fetchData}
             disabled={loading}
@@ -189,6 +261,13 @@ export default function AnalyticsPage() {
           </button>
         </div>
       </div>
+
+      {actionMsg && (
+        <div className="rounded-[10px] border border-green-500/30 bg-green-500/10 px-4 py-2 text-sm text-green-400 flex items-center justify-between">
+          <span>{actionMsg}</span>
+          <button onClick={() => setActionMsg('')} className="text-green-500/60 hover:text-green-400">✕</button>
+        </div>
+      )}
 
       {/* Period + channel filters */}
       <div className="flex items-center gap-4">
@@ -288,13 +367,16 @@ export default function AnalyticsPage() {
                 <th className="px-4 py-3">{t('location')}</th>
                 <th className="px-4 py-3">{t('device')}</th>
                 <th className="px-4 py-3">{t('channel')}</th>
+                <th className="px-4 py-3"></th>
               </tr>
             </thead>
             <tbody>
-              {filteredSessions.map((s) => (
-                <tr key={s.id} className="border-b border-[#1e1e2a]/50 hover:bg-[#1e1e2a]/30 transition-colors">
+              {filteredSessions.map((s) => {
+                const isOwn = data?.viewerIpHash && s.ip_hash === data.viewerIpHash;
+                return (
+                <tr key={s.id} className={`border-b border-[#1e1e2a]/50 transition-colors ${isOwn ? 'bg-amber-500/5 hover:bg-amber-500/10' : 'hover:bg-[#1e1e2a]/30'}`}>
                   <td className="px-4 py-2.5 text-[#c0c0cc] whitespace-nowrap">
-                    <span className="mr-1.5 inline-block h-2 w-2 rounded-full bg-green-500" />
+                    <span className={`mr-1.5 inline-block h-2 w-2 rounded-full ${isOwn ? 'bg-amber-500' : 'bg-green-500'}`} />
                     {new Date(s.started_at).toLocaleString('nl-NL', {
                       day: '2-digit', month: '2-digit', year: 'numeric',
                       hour: '2-digit', minute: '2-digit', second: '2-digit',
@@ -325,11 +407,22 @@ export default function AnalyticsPage() {
                   <td className="px-4 py-2.5">
                     <ChannelBadge channel={s.channel} />
                   </td>
+                  <td className="px-4 py-2.5">
+                    <button
+                      onClick={() => deleteSession(s.id)}
+                      disabled={deleting === s.id}
+                      className="rounded p-1 text-[#6b6b80] transition-colors hover:bg-red-500/10 hover:text-red-400 disabled:opacity-50"
+                      title="Delete session"
+                    >
+                      <Trash2 className="h-3.5 w-3.5" />
+                    </button>
+                  </td>
                 </tr>
-              ))}
+                );
+              })}
               {filteredSessions.length === 0 && (
                 <tr>
-                  <td colSpan={9} className="px-4 py-12 text-center text-sm text-[#6b6b80]">
+                  <td colSpan={10} className="px-4 py-12 text-center text-sm text-[#6b6b80]">
                     {loading ? '...' : t('noData')}
                   </td>
                 </tr>

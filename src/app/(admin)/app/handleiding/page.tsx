@@ -177,6 +177,36 @@ const MODULES = [
     ],
   },
   {
+    id: 'portfolio',
+    code: 'PF',
+    screens: [
+      {
+        code: 'PF05',
+        agentNotes: 'GET /api/portfolio (office/admin) — dossiers with cover_url, photo_count, brand/model joins, source job. Statuses: draft, published, archived. Soft-deleted rows hidden. Filter by status query param.',
+        userFlow: 'The Project Portfolio lists completed repair projects that are shown on the public website gallery (/gallerij). The table shows a cover photo thumbnail, dossier number, title, vehicle (brand + model), category badge (bodywork/paint/spot repair), status badge (draft/published/archived), and publish date.\n\nUse the status filter tabs at the top (All, Draft, Published, Archived) to narrow results. Click a row to open the dossier editor (PF10).\n\nDossier numbers follow the format CK-YYWWNN (e.g. CK-263901 = prefix CK, year 26, ISO week 39, sequence 01). The prefix is editable in Number Ranges (SY03). Numbers are assigned either immediately when converting from a work order, or at first publish for manually created dossiers.',
+        inputs: 'Status filter tabs.',
+        outputs: 'Dossier table with cover photo, number, title, vehicle, category, status, and publish date.',
+        crossScreen: 'Dossiers are created in PF01 (blank) or converted from a completed work order on JB10. Published dossiers appear on the public gallery (/gallerij) and individual dossier pages (/gallerij/{number}). Number prefix managed in SY03.',
+      },
+      {
+        code: 'PF01',
+        agentNotes: 'POST /api/portfolio { title_nl, category } → blank draft. POST /api/jobs/[id]/portfolio (admin only) → converts a delivered/closed work order: allocates dossier number immediately via portfolio_assign_dossier_number() RPC, copies vehicle (brand/model matched to managed lists), category (from job_type), handling (from payer_type), working days (check-in to delivery excluding weekends), work items (keyword-matched from approved offer line descriptions), and consent (from handover gallery_consent). NEVER copies customer details, licence plate, VIN, prices, or notes. One dossier per work order (unique job_id constraint).',
+        userFlow: 'Two ways to create a dossier:\n\n1. From a work order (recommended): The screen lists completed work orders (delivered or closed stage) that have not been converted yet. Click "Convert" to create a dossier that automatically copies:\n   - Vehicle brand and model (matched to the managed brand/model lists, falls back to free text)\n   - Build year, colour, and paint code\n   - Category (bodywork or paint, based on job type)\n   - Handling (insurance/private/lease, based on payer type)\n   - Duration in working days (from check-in to delivery, weekdays only)\n   - Work items (auto-detected from approved offer line descriptions using keyword matching)\n   - Suggested titles in Dutch, English, and Turkish\n   - Gallery consent (if customer signed on the handover note)\n   A dossier number (e.g. CK-263901) is assigned immediately.\n   Privacy: customer name, contact details, licence plate, VIN, prices, and notes are NEVER copied.\n\n2. Blank dossier: Start from scratch — enter a title and category. The dossier number is assigned when you first publish.\n\nAfter creation, you are redirected to the dossier editor (PF10).',
+        inputs: 'Work order selection (for conversion), or title + category (for blank dossier).',
+        outputs: 'Draft dossier with auto-filled details (from work order) or empty fields (blank). Redirect to PF10.',
+        crossScreen: 'Work order conversion is also available directly from Job Detail (JB10) via the "Convert to dossier" button (admin only). After conversion, JB10 shows a link to the created dossier and logs an event in the job timeline. One work order can only be converted once.',
+      },
+      {
+        code: 'PF10',
+        agentNotes: 'GET/PATCH/DELETE /api/portfolio/[id]. POST /api/portfolio/[id] { action: publish|unpublish|archive|restore }. Publish refused (422) until checklist passes: title_nl, category, brand or model text, before + after photo, every photo redaction-confirmed, consent received/not_required. Photos: POST /api/portfolio/[id]/photos (multipart, redacted JPEG/WebP only, confirmed=true), PATCH/DELETE /api/portfolio/[id]/photos/[photoId]. POST /api/portfolio/detect-plates suggests plate boxes (Claude Vision API). Bucket portfolio-public holds redacted images only.',
+        userFlow: 'Full dossier editor with multiple sections:\n\nDetails: Edit the title in Dutch, English, and Turkish (empty EN/TR falls back to Dutch on the public site). Select category (bodywork/paint/spot repair), handling type, and duration in working days.\n\nVehicle: Select brand and model from the managed lists (same as VH01), or enter free text. Add build year, colour name, and paint code.\n\nWork items: Toggle chips for each type of work performed (dent repair, PDR, panel replacement, straightening bench, bumper repair, scratch repair, spot repair, partial/full respray, polishing, rust repair, glass, sensor calibration). When converted from a work order, items are pre-selected based on keyword matching from the approved offer lines.\n\nPhotos: Upload photos or import them from the linked work order. Every photo goes through the licence plate redaction editor:\n   1. Click "Detect plates" — AI (Claude Vision) scans the image and suggests plate regions as blue boxes.\n   2. Adjust, add, or remove redaction boxes by drawing on the image.\n   3. Preview the result — plates are pixelated with a coarse 6-column grid and blurred.\n   4. Tick the confirmation checkbox ("I confirm all licence plates are redacted").\n   5. Save — only the pixelated, blurred version is uploaded. EXIF/GPS metadata is stripped. The original unredacted photo never leaves the browser.\n   Set each photo as before, during, or after phase. Give matching before/after photos the same pair number for the slider on the public page. Mark one photo as the cover image.\n\nConsent: Mark gallery consent as received, not required, or pending.\n\nPublish checklist (sidebar): Six items must all pass before publishing:\n   ✓ Title (Dutch) is filled in\n   ✓ Category is selected\n   ✓ Vehicle (brand or model text) is present\n   ✓ At least one before AND one after photo\n   ✓ All photos have confirmed redaction\n   ✓ Consent is received or not required\n\nActions: Publish (assigns number if not yet assigned, makes visible on /gallerij). Archive (takes offline, keeps number). Restore (back to draft). Delete (soft delete).',
+        inputs: 'Texts (NL/EN/TR), vehicle details, work item toggles, duration, handling, consent status, featured/sort order, photos with redaction editor.',
+        outputs: 'Published dossier visible on the public gallery with dossier number CK-YYWWNN.',
+        crossScreen: 'Linked work order accessible via JB10. Photos from job importable. Number range prefix managed in SY03. Public pages: /gallerij (gallery grid) and /gallerij/{number} (dossier detail with before/after slider, specs sidebar, JSON-LD SEO, CTA links to /offerte and /afspraak).',
+      },
+    ],
+  },
+  {
     id: 'jobs',
     code: 'JB',
     screens: [
@@ -677,7 +707,7 @@ export default function ManualPage() {
           <div className="rounded-[10px] border border-[#1e1e2a] bg-[#12121a] p-6">
             <h2 className="text-base font-medium text-white">Core Business Flow</h2>
             <div className="mt-4 flex flex-wrap items-center gap-2 text-sm">
-              {['Lead', 'Offer', 'Approval', 'Repair Order', 'Job', 'Parts', 'Tasks', 'Handover', 'Invoice', 'Paid', 'Delivered'].map((step, i, arr) => (
+              {['Lead', 'Offer', 'Approval', 'Repair Order', 'Job', 'Parts', 'Tasks', 'Handover', 'Invoice', 'Paid', 'Delivered', 'Portfolio'].map((step, i, arr) => (
                 <span key={step} className="flex items-center gap-2">
                   <span className="rounded-md bg-[#0a0a0f] px-3 py-1.5 text-white">{step}</span>
                   {i < arr.length - 1 && <ChevronRight className="h-3 w-3 text-[#6b6b80]" />}
@@ -701,6 +731,7 @@ export default function ManualPage() {
                 { name: 'Document Status', flow: 'draft → issued → cancelled (invoices cannot be cancelled — use credit notes)' },
                 { name: 'VAT Return', flow: 'open → draft → filed (LOCKED) → corrected (filed returns are immutable)' },
                 { name: 'Appointment', flow: 'requested → confirmed → completed | cancelled (inspections auto-confirm)' },
+                { name: 'Portfolio Dossier', flow: 'draft → published (guard: checklist — title, category, vehicle, before+after photos, all redacted, consent) → archived → draft (number kept once assigned)' },
               ].map((sm) => (
                 <div key={sm.name}>
                   <p className="text-sm font-medium text-white">{sm.name}</p>

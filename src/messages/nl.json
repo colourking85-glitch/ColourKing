@@ -2820,7 +2820,9 @@
     "noData": "Nog geen analysegegevens. Sessies worden automatisch bijgehouden op colourking.nl.",
     "botsHidden": "Bots verborgen",
     "refresh": "Vernieuwen",
-    "filterBySession": "Filter op sessie-ID..."
+    "filterBySession": "Filter op sessie-ID...",
+    "deleteMy": "Mijn sessies wissen",
+    "excludeIp": "Mijn IP uitsluiten"
   },
   "portfolio": {
     "dossierLabel": "Dossier",

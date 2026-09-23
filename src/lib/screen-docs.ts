@@ -149,7 +149,7 @@ export const MODULES: ModuleDoc[] = [
       {
         code: 'PF05',
         agentNotes: 'GET /api/portfolio (office/admin) — dossiers with cover_url, photo_count, brand/model, source job. Statuses: draft, published, archived. Soft-deleted rows are hidden.',
-        userFlow: 'The Project Portfolio lists completed repairs shown in the website gallery (/gallerij). Filter by status. The dossier number (CK-YYYY-NNNNN, number range "Projectdossier" in SY03) appears once a dossier is published, or immediately when it was converted from a work order. Click a row to edit.',
+        userFlow: 'The Project Portfolio lists completed repairs shown in the website gallery (/gallerij). Filter by status. The dossier number (e.g. CK-263901 — prefix + 2-digit ISO year + ISO week + sequence, managed in SY03) appears once a dossier is published, or immediately when converted from a work order. Click a row to edit.',
         inputs: 'Status filter.',
         outputs: 'Dossier table with cover photo, number, title, vehicle, category, status and publish date.',
         crossScreen: 'Dossiers are created in PF01 or from a completed work order (JB10, admin only). Published dossiers appear on the public gallery and on /gallerij/{dossier}.',
@@ -167,7 +167,7 @@ export const MODULES: ModuleDoc[] = [
         agentNotes: 'GET/PATCH/DELETE /api/portfolio/[id]; POST /api/portfolio/[id] { action: publish|unpublish|archive|restore }. Publish is refused (422) until the checklist passes: title_nl, category, brand or model text, a before + after photo, every photo redaction-confirmed, consent received/not_required. Photos: POST /api/portfolio/[id]/photos (multipart, redacted JPEG/WebP only, confirmed=true), PATCH/DELETE /api/portfolio/[id]/photos/[photoId]. POST /api/portfolio/detect-plates suggests plate boxes (Claude vision). Bucket portfolio-public holds redacted images only.',
         userFlow: 'Edit the dossier details in Dutch, English and Turkish (empty EN/TR falls back to Dutch). Upload photos or import them from the work order: every photo opens the plate editor, where AI suggests licence-plate areas; adjust, add or remove areas, preview the result, tick the confirmation and save. Only the pixelated, blurred version is stored (EXIF/GPS removed). Give matching before/after photos the same pair number for the slider. Publish when the checklist is complete. Archive to take it offline; a converted work order can be cancelled the same way (the number is kept).',
         inputs: 'Texts, vehicle, work items, duration, handling, consent, featured/order, photos with redaction areas.',
-        outputs: 'Published dossier with number CK-YYYY-NNNNN on the website gallery.',
+        outputs: 'Published dossier with number CK-YYWWNN on the website gallery.',
         crossScreen: 'Linked work order (JB10). Number range managed in SY03. Public pages: /gallerij and /gallerij/{dossier}.',
       },
     ],

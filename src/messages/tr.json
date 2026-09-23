@@ -2820,7 +2820,9 @@
     "noData": "Henüz analiz verisi yok. Oturumlar colourking.nl'de otomatik olarak izlenir.",
     "botsHidden": "Botlar gizlendi",
     "refresh": "Yenile",
-    "filterBySession": "Oturum ID'sine göre filtrele..."
+    "filterBySession": "Oturum ID'sine göre filtrele...",
+    "deleteMy": "Oturumlarımı sil",
+    "excludeIp": "IP'mi hariç tut"
   },
   "portfolio": {
     "dossierLabel": "Dosya",

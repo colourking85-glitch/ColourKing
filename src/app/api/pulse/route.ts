@@ -1,5 +1,10 @@
 import { NextRequest, NextResponse } from 'next/server';
 import { createClient } from '@/lib/supabase/server';
+import { createHash } from 'crypto';
+
+function hashIp(ip: string): string {
+  return createHash('sha256').update(ip.trim().toLowerCase()).digest('hex').slice(0, 16);
+}
 
 function detectChannel(referrer: string | null): string {
   if (!referrer) return 'direct';
@@ -62,6 +67,20 @@ export async function POST(req: NextRequest) {
     const ua = req.headers.get('user-agent') || '';
     const forwarded = req.headers.get('x-forwarded-for');
     const ip = forwarded ? forwarded.split(',')[0].trim() : req.headers.get('x-real-ip') || '';
+    const ipHash = ip ? hashIp(ip) : null;
+
+    // Check excluded IPs from settings
+    if (ipHash) {
+      const { data: setting } = await supabase
+        .from('settings')
+        .select('value')
+        .eq('key', 'analytics_excluded_ips')
+        .maybeSingle();
+      const excluded: string[] = setting?.value?.hashes || [];
+      if (excluded.includes(ipHash)) {
+        return NextResponse.json({ ok: true, excluded: true });
+      }
+    }
 
     if (action === 'start') {
       const channel = detectChannel(referrer || null);
@@ -104,6 +123,7 @@ export async function POST(req: NextRequest) {
         os,
         locale: locale || null,
         is_bot: bot,
+        ip_hash: ipHash,
       });
 
       if (error && error.code === '23505') {
