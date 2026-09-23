@@ -310,6 +310,18 @@
     "plateOriginPlaceholder": "örn. NL, DE, BE, TR"
   },
   "ld": {
+    "emailThread": "E-posta yazismasi",
+    "emailThreadEmpty": "Bu musteriyle henuz e-posta yok. Buradan gonderilen e-postalarin konusunda talep numarasi yer alir, boylece yanitlar burada otomatik gorunur.",
+    "checkReplies": "Yanitlari kontrol et",
+    "checkingReplies": "Kontrol ediliyor…",
+    "lastChecked": "Son kontrol",
+    "emailFromUs": "Colourking",
+    "emailTo": "Alici",
+    "emailSubjectAuto": "Konu (istege bagli)",
+    "emailSending": "Gonderiliyor…",
+    "emailFailed": "E-posta gonderilemedi.",
+    "showFullEmail": "Tum e-postayi goster",
+    "hideFullEmail": "Sadece yaniti goster",
     "delete": "Sil",
     "deleteConfirm": "{name} talebi silinsin mi? Tüm listelerden gizlenir (veritabanında saklanır).",
     "deleteFailed": "Talep silinemedi.",
@@ -2738,8 +2750,16 @@
     "items": "oge"
   },
   "imap": {
+    "frequencyValue": "Her gun 08:00 UTC, ayrica bir talep veya monitor acildiginda (en fazla 2 dakikada bir)",
+    "lastPolledAt": "Son yoklama",
+    "never": "Hic",
+    "statusOk": "OK",
+    "statusError": "Hata",
+    "throttled": "15 saniyeden kisa sure once yoklandi — birazdan tekrar deneyin",
+    "sent": "Gonderildi",
+    "received": "Alindi",
     "title": "IMAP E-posta Izleme",
-    "subtitle": "Zoho gelen kutusu yoklama — musteri e-posta yanitlarini takip",
+    "subtitle": "Zoho gelen kutusu yoklama — taleplere bagli musteri e-posta yanitlari",
     "refresh": "Yenile",
     "cronTitle": "Cron Gorevi — Zamanlanmis Yoklama",
     "jobName": "Gorev adi",
@@ -2757,7 +2777,7 @@
     "noLogs": "Yoklayiciyi baslatmak ve ciktiyi burada gormek icin \"Simdi Yokla\"ya tiklayin",
     "capturedReplies": "Yakalanan E-posta Yanitlari",
     "recent": "son",
-    "noEmails": "Henuz musteri yaniti yakalanmadi. Konuda [JB-ID] veya [LD-ID] iceren yanitlar burada gorunecek."
+    "noEmails": "Henuz musteri e-postasi yok. Talep e-postalarina yanitlar (konuda [LD-0001]), yanit basliklari veya bilinen talep gondericileri burada gorunur."
   },
   "an": {
     "title": "Site Analizi",

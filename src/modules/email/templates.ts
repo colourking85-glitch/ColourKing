@@ -94,6 +94,14 @@ const STRINGS: Record<string, EmailStrings> = {
     leadDamage: 'Schade',
     leadOrigin: 'Bron',
     leadView: 'Lead bekijken',
+    leadNumber: 'Leadnummer',
+    leadAppointmentTitle: 'Afspraakgegevens',
+    leadLocation: 'Locatie',
+    leadLocationShop: 'Bij Colourking (werkplaats)',
+    leadLocationOther: 'Op locatie',
+    apptType_inspection: 'Inspectie',
+    apptType_drop_off: 'Auto afgeven',
+    apptType_collection: 'Ophalen',
 
     // Repair ready
     readySubject: 'Uw voertuig is klaar - Colourking',
@@ -159,6 +167,14 @@ const STRINGS: Record<string, EmailStrings> = {
     leadDamage: 'Damage',
     leadOrigin: 'Source',
     leadView: 'View Lead',
+    leadNumber: 'Lead number',
+    leadAppointmentTitle: 'Appointment details',
+    leadLocation: 'Location',
+    leadLocationShop: 'At Colourking (workshop)',
+    leadLocationOther: 'On location',
+    apptType_inspection: 'Inspection',
+    apptType_drop_off: 'Drop off vehicle',
+    apptType_collection: 'Collection',
 
     readySubject: 'Your vehicle is ready - Colourking',
     readyIntro: 'Great news! Your vehicle is ready for collection.',
@@ -223,6 +239,14 @@ const STRINGS: Record<string, EmailStrings> = {
     leadDamage: 'Hasar',
     leadOrigin: 'Kaynak',
     leadView: 'Musteri Adayini Gor',
+    leadNumber: 'Talep no',
+    leadAppointmentTitle: 'Randevu detaylari',
+    leadLocation: 'Konum',
+    leadLocationShop: 'Colourking atolyesinde',
+    leadLocationOther: 'Yerinde',
+    apptType_inspection: 'Inceleme',
+    apptType_drop_off: 'Arac teslimi',
+    apptType_collection: 'Arac alma',
 
     readySubject: 'Araciniz hazir - Colourking',
     readyIntro: 'Iyi haberler! Araciniz tamamlandi ve teslim alinabilir.',
@@ -243,6 +267,9 @@ function t(locale: string, key: string, vars?: Record<string, string>): string {
 }
 
 /* ── Layout helpers ───────────────────────────────────────── */
+
+/** Transparent PNG (public/images/email-logo.png); SVG is not shown by Gmail/Outlook. */
+const EMAIL_LOGO_URL = `${process.env.EMAIL_ASSET_URL ?? 'https://www.colourking.nl'}/images/email-logo.png`;
 
 function wrapLayout(locale: string, body: string): string {
   const s = STRINGS[locale] ?? STRINGS.nl;
@@ -270,17 +297,17 @@ function wrapLayout(locale: string, body: string): string {
         <table role="presentation" width="600" cellpadding="0" cellspacing="0" border="0" style="max-width:600px;width:100%;background-color:#ffffff;border-radius:8px;overflow:hidden;">
           <!-- Header -->
           <tr>
-            <td style="background-color:#E8364E;padding:28px 32px;text-align:center;">
+            <td bgcolor="#E8364E" style="background-color:#E8364E;background-image:linear-gradient(120deg,#F47285 0%,#E8364E 45%,#C4223B 100%);padding:20px 24px;">
               <table role="presentation" width="100%" cellpadding="0" cellspacing="0" border="0">
                 <tr>
-                  <td style="font-size:26px;font-weight:bold;color:#ffffff;letter-spacing:0.04em;font-family:Arial,Helvetica,sans-serif;">
-                    COLOURKING
+                  <td width="96" valign="middle" style="width:96px;">
+                    <img src="${EMAIL_LOGO_URL}" width="88" height="69" alt="Colour King" style="display:block;width:88px;height:auto;border:0;outline:none;text-decoration:none;">
                   </td>
-                </tr>
-                <tr>
-                  <td style="font-size:11px;color:rgba(255,255,255,0.75);padding-top:4px;letter-spacing:0.06em;font-family:Arial,Helvetica,sans-serif;">
-                    BODYSHOP &amp; CARCARE
+                  <td valign="middle" style="text-align:center;">
+                    <div style="font-size:28px;font-weight:bold;color:#ffffff;letter-spacing:0.01em;font-family:Arial,Helvetica,sans-serif;">ColourKing</div>
+                    <div style="font-size:12px;color:#ffe4e8;padding-top:4px;letter-spacing:0.04em;font-family:Arial,Helvetica,sans-serif;">Bodyshop &amp; Carcare</div>
                   </td>
+                  <td width="96" style="width:96px;">&nbsp;</td>
                 </tr>
               </table>
             </td>
@@ -296,14 +323,14 @@ function wrapLayout(locale: string, body: string): string {
             <td style="padding:24px 32px;background-color:#f9fafb;border-top:1px solid #e5e7eb;">
               <table role="presentation" width="100%" cellpadding="0" cellspacing="0" border="0">
                 <tr>
-                  <td style="font-size:12px;color:#9ca3af;line-height:1.6;font-family:Arial,Helvetica,sans-serif;">
+                  <td style="font-size:13px;color:#374151;line-height:1.6;font-family:Arial,Helvetica,sans-serif;">
                     ${s.regards},<br>${s.team}
                   </td>
                 </tr>
                 <tr>
-                  <td style="padding-top:16px;font-size:10px;color:#d1d5db;line-height:1.6;font-family:Arial,Helvetica,sans-serif;">
+                  <td style="padding-top:16px;font-size:11px;color:#6b7280;line-height:1.7;font-family:Arial,Helvetica,sans-serif;">
                     ${s.companyFooter}<br>
-                    IBAN: NL00 INGB 0000 0000 00 | info@colourking.nl | 06 81 63 10 20
+                    <a href="mailto:info@colourking.nl" style="color:#C4223B;text-decoration:none;">info@colourking.nl</a> | <a href="tel:+31681631020" style="color:#C4223B;text-decoration:none;">06 81 63 10 20</a>
                   </td>
                 </tr>
               </table>
@@ -465,22 +492,35 @@ function renderPaymentReceived(data: TemplateDataMap['paymentReceived'], locale:
 }
 
 function renderLeadReceived(data: TemplateDataMap['leadReceived'], locale: EmailLocale): string {
-  const body = `
+  const appointment = data.appointmentType
+    ? `
+    ${divider()}
+    ${heading(t(locale, 'leadAppointmentTitle'))}
+    ${detailTable(
+      detailRow(t(locale, 'appointmentType'), t(locale, `apptType_${data.appointmentType}`)) +
+      (data.scheduledDate ? detailRow(t(locale, 'appointmentDate'), formatDate(data.scheduledDate, locale)) : '') +
+      (data.scheduledTime ? detailRow(t(locale, 'appointmentTime'), data.scheduledTime.slice(0, 5)) : '') +
+      detailRow(
+        t(locale, 'leadLocation'),
+        data.location === 'other'
+          ? `${t(locale, 'leadLocationOther')}${data.locationAddress ? `: ${data.locationAddress}` : ''}`
+          : t(locale, 'leadLocationShop'),
+      )
+    )}`
+    : '';
+
+  return `
     ${heading(t(locale, 'leadSubject', { contactName: data.contactName }))}
     ${paragraph(t(locale, 'leadIntro'))}
     ${detailTable(
+      (data.leadNumber != null ? detailRow(t(locale, 'leadNumber'), `LD-${String(data.leadNumber).padStart(4, '0')}`) : '') +
       detailRow(t(locale, 'leadName'), data.contactName) +
       (data.contactEmail ? detailRow(t(locale, 'leadEmail'), data.contactEmail) : '') +
       (data.contactPhone ? detailRow(t(locale, 'leadPhone'), data.contactPhone) : '') +
       (data.kenteken ? detailRow(t(locale, 'leadPlate'), data.kenteken) : '') +
       (data.damageDescription ? detailRow(t(locale, 'leadDamage'), data.damageDescription) : '') +
       detailRow(t(locale, 'leadOrigin'), data.origin)
-    )}
-    <div style="text-align:center;margin:24px 0;">
-      ${ctaButton(t(locale, 'leadView'), data.leadUrl)}
-    </div>`;
-
-  return body;
+    )}${appointment}`;
 }
 
 function renderRepairOrderReady(data: TemplateDataMap['repairOrderReady'], locale: EmailLocale): string {
@@ -621,6 +661,12 @@ export function getSampleData(template: string): Record<string, unknown> {
       damageDescription: 'Deuk linkervoor spatbord',
       origin: 'website',
       leadUrl: 'https://colourking.nl/app/leads/sample-id',
+      leadNumber: 18,
+      appointmentType: 'drop_off',
+      scheduledDate: '2026-09-25',
+      scheduledTime: '08:00:00',
+      location: 'shop',
+      locationAddress: null,
     },
     repairOrderReady: {
       customerName: 'Jan de Vries',
@@ -633,4 +679,25 @@ export function getSampleData(template: string): Record<string, unknown> {
   };
 
   return samples[template] ?? {};
+}
+
+function escapeHtml(text: string): string {
+  return text
+    .replace(/&/g, '&amp;')
+    .replace(/</g, '&lt;')
+    .replace(/>/g, '&gt;')
+    .replace(/"/g, '&quot;');
+}
+
+/**
+ * Wrap a free-text message written by staff (e.g. a lead reply) in the
+ * standard email layout. Blank lines split paragraphs; single newlines stay.
+ */
+export function renderMessage(text: string, locale: EmailLocale = 'nl'): string {
+  const body = text
+    .trim()
+    .split(/\n\s*\n/)
+    .map(p => paragraph(escapeHtml(p).replace(/\n/g, '<br>')))
+    .join('\n');
+  return wrapLayout(locale, body);
 }

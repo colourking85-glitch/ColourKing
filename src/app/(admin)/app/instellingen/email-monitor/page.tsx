@@ -1,19 +1,20 @@
 'use client';
 
 import { useState, useEffect, useCallback } from 'react';
-import { useTranslations } from 'next-intl';
+import { useTranslations, useLocale } from 'next-intl';
 import { ScreenBadge } from '@/components/ui/ScreenBadge';
 
 interface ImapConfig {
   name: string;
   schedule: string;
-  description: string;
   inbox: string;
   host: string;
 }
 
 interface EmailEntry {
   id: string;
+  direction: 'inbound' | 'outbound';
+  to_email: string | null;
   entity_type: string;
   entity_id: string;
   from_email: string;
@@ -29,23 +30,22 @@ interface PollResult {
   skippedDedup?: number;
   error?: string;
   logs?: string[];
+  throttled?: boolean;
 }
 
 function useCountdown() {
   const [countdown, setCountdown] = useState('');
   useEffect(() => {
     function calc() {
+      // Daily cron at 08:00 UTC (vercel.json)
       const now = new Date();
-      const mins = now.getMinutes();
-      const nextMins = Math.ceil((mins + 1) / 5) * 5;
       const next = new Date(now);
-      if (nextMins >= 60) {
-        next.setHours(next.getHours() + 1, 0, 0, 0);
-      } else {
-        next.setMinutes(nextMins, 0, 0);
-      }
+      next.setUTCHours(8, 0, 0, 0);
+      if (next <= now) next.setUTCDate(next.getUTCDate() + 1);
       const diff = Math.round((next.getTime() - now.getTime()) / 1000);
-      setCountdown(diff < 60 ? `${diff}s` : `${Math.floor(diff / 60)}m ${diff % 60}s`);
+      const h = Math.floor(diff / 3600);
+      const m = Math.floor((diff % 3600) / 60);
+      setCountdown(h > 0 ? `${h}h ${m}m` : `${m}m ${diff % 60}s`);
     }
     calc();
     const t = setInterval(calc, 1000);
@@ -56,6 +56,9 @@ function useCountdown() {
 
 export default function EmailMonitorPage() {
   const t = useTranslations('imap');
+  const bcp = ({ nl: 'nl-NL', en: 'en-GB', tr: 'tr-TR' } as Record<string, string>)[useLocale()] ?? 'nl-NL';
+  const [lastPolledAt, setLastPolledAt] = useState<string | null>(null);
+  const [lastResult, setLastResult] = useState<PollResult | null>(null);
   const [config, setConfig] = useState<ImapConfig | null>(null);
   const [emails, setEmails] = useState<EmailEntry[]>([]);
   const [loading, setLoading] = useState(true);
@@ -72,6 +75,9 @@ export default function EmailMonitorPage() {
       const json = await res.json();
       setConfig(json.imapConfig);
       setEmails(json.recentEmails ?? []);
+      setLastPolledAt(json.lastPolledAt ?? null);
+      setLastResult(json.lastResult ?? null);
+      setPollLogs(prev => (prev.length ? prev : json.lastResult?.logs ?? []));
       setLastRefreshed(new Date());
     } catch {
       // ignore
@@ -91,8 +97,10 @@ export default function EmailMonitorPage() {
     setPollResult(null);
     setPollLogs([]);
     try {
-      const res = await fetch('/api/email/imap-poll?secret=' + encodeURIComponent(process.env.NEXT_PUBLIC_IMAP_POLL_SECRET || ''), {
+      const res = await fetch('/api/email/poll', {
         method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ force: true }),
       });
       const json: PollResult = await res.json();
       setPollResult(json);
@@ -127,7 +135,7 @@ export default function EmailMonitorPage() {
         <div className="flex items-center gap-2">
           <span className="text-xs text-ck-muted-light" suppressHydrationWarning>
             {lastRefreshed
-              ? lastRefreshed.toLocaleTimeString('nl-NL', { hour: '2-digit', minute: '2-digit', second: '2-digit' })
+              ? lastRefreshed.toLocaleTimeString(bcp, { hour: '2-digit', minute: '2-digit', second: '2-digit' })
               : ''}
           </span>
           <button
@@ -155,11 +163,22 @@ export default function EmailMonitorPage() {
           <div className="mb-4 grid grid-cols-2 gap-3 md:grid-cols-3">
             {[
               { label: t('jobName'), value: config?.name ?? 'imap-inbox-poll', mono: true },
-              { label: t('schedule'), value: config?.schedule ?? '*/5 * * * *', mono: true },
-              { label: t('frequency'), value: config?.description ?? 'Every 5 minutes' },
+              { label: t('schedule'), value: config?.schedule ?? '0 8 * * *', mono: true },
+              { label: t('frequency'), value: t('frequencyValue') },
               { label: t('inbox'), value: config?.inbox ?? 'info@colourking.nl', mono: true },
               { label: t('imapHost'), value: config?.host ?? 'imappro.zoho.eu:993', mono: true },
-              { label: t('status'), value: 'Active', mono: false },
+              {
+                label: t('lastPolledAt'),
+                value: lastPolledAt
+                  ? new Date(lastPolledAt).toLocaleString(bcp, { day: '2-digit', month: '2-digit', hour: '2-digit', minute: '2-digit' })
+                  : t('never'),
+                mono: true,
+              },
+              {
+                label: t('status'),
+                value: !lastResult ? '—' : lastResult.ok ? t('statusOk') : `${t('statusError')}: ${lastResult.error ?? ''}`,
+                mono: false,
+              },
             ].map((row) => (
               <div key={row.label} className="rounded-lg bg-ck-dark-surface px-3 py-2.5">
                 <div className="mb-1 text-[10px] uppercase tracking-wider text-ck-muted-light">{row.label}</div>
@@ -194,9 +213,11 @@ export default function EmailMonitorPage() {
                     : 'border-red-700/40 bg-red-900/30 text-red-300'
                 }`}
               >
-                {pollResult.ok
-                  ? `OK — ${t('processed')} ${pollResult.processed} email(s)`
-                  : `Error: ${pollResult.error}`}
+                {pollResult.throttled
+                  ? t('throttled')
+                  : pollResult.ok
+                    ? `OK — ${t('processed')} ${pollResult.processed} email(s)`
+                    : `Error: ${pollResult.error}`}
               </span>
             )}
           </div>
@@ -266,7 +287,16 @@ export default function EmailMonitorPage() {
                 {emails.map((item) => (
                   <div key={item.id} className="rounded-lg border border-ck-dark-border bg-ck-dark-surface px-3 py-2.5">
                     <div className="mb-1 flex items-start justify-between gap-2">
-                      <span className="truncate font-mono text-[11px] text-blue-300">{item.from_email}</span>
+                      <span className="flex min-w-0 items-center gap-1.5">
+                        <span className={`shrink-0 rounded px-1 py-0.5 text-[9px] font-semibold uppercase ${
+                          item.direction === 'outbound' ? 'bg-emerald-400/10 text-emerald-400' : 'bg-blue-400/10 text-blue-300'
+                        }`}>
+                          {item.direction === 'outbound' ? t('sent') : t('received')}
+                        </span>
+                        <span className="truncate font-mono text-[11px] text-blue-300">
+                          {item.direction === 'outbound' ? item.to_email : item.from_email}
+                        </span>
+                      </span>
                       <a
                         href={`${entityRoute[item.entity_type] || '/app'}/${item.entity_id}`}
                         className="flex shrink-0 items-center gap-0.5 text-[10px] text-ck-muted-light hover:text-white"
@@ -284,7 +314,7 @@ export default function EmailMonitorPage() {
                       <div className="line-clamp-2 text-[10px] italic text-ck-muted-light">{item.snippet}</div>
                     )}
                     <div className="mt-1.5 font-mono text-[10px] text-ck-muted-light" suppressHydrationWarning>
-                      {new Date(item.created_at).toLocaleString('nl-NL', {
+                      {new Date(item.received_at ?? item.created_at).toLocaleString(bcp, {
                         day: '2-digit',
                         month: '2-digit',
                         year: 'numeric',

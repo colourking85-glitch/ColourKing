@@ -3,9 +3,10 @@
 import { useState, useEffect, useRef, useCallback } from 'react';
 import { useParams, useRouter } from 'next/navigation';
 import Link from 'next/link';
-import { ArrowLeft, Clock, MessageCircle, FileText, Trophy, XCircle, Image as ImageIcon, X, Car, Send, Plus, Minus, RotateCcw, Calendar, MapPin, CheckCircle2, Wrench, Globe } from 'lucide-react';
+import { ArrowLeft, Clock, MessageCircle, FileText, Trophy, XCircle, Image as ImageIcon, X, Car, Plus, Minus, RotateCcw, Calendar, MapPin, CheckCircle2, Wrench, Globe } from 'lucide-react';
 import { useTranslations } from 'next-intl';
 import { ScreenBadge } from '@/components/ui/ScreenBadge';
+import { LeadEmailThread } from '@/components/leads/LeadEmailThread';
 
 type LeadPhoto = { id: string; storage_path: string; url: string; created_at: string };
 
@@ -75,9 +76,6 @@ export default function LeadDetailPage() {
   const dragStart = useRef({ x: 0, y: 0, panX: 0, panY: 0 });
   const [loading, setLoading] = useState(true);
   const [updating, setUpdating] = useState(false);
-  const [replyText, setReplyText] = useState('');
-  const [sending, setSending] = useState(false);
-  const [sent, setSent] = useState(false);
   const [confirming, setConfirming] = useState(false);
 
   const openPhoto = useCallback((url: string) => {
@@ -107,25 +105,6 @@ export default function LeadDetailPage() {
   }, [dragging]);
 
   const handlePointerUp = useCallback(() => setDragging(false), []);
-
-  async function handleReply() {
-    if (!replyText.trim() || !lead?.contact_email) return;
-    setSending(true);
-    try {
-      const res = await fetch(`/api/leads/${id}/reply`, {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ message: replyText, to: lead.contact_email }),
-      });
-      if (res.ok) {
-        setSent(true);
-        setReplyText('');
-        setTimeout(() => setSent(false), 3000);
-      }
-    } finally {
-      setSending(false);
-    }
-  }
 
   useEffect(() => {
     fetch(`/api/leads/${id}`)
@@ -446,31 +425,7 @@ export default function LeadDetailPage() {
           </div>
 
           {lead.contact_email && (
-            <div className="rounded-lg border border-ck-dark-border bg-ck-dark-card p-6">
-              <h2 className="mb-3 flex items-center gap-2 text-sm font-semibold uppercase text-ck-muted">
-                <Send size={14} />
-                {t('quickReply')}
-              </h2>
-              <p className="mb-2 text-xs text-ck-text-3">{lead.contact_email}</p>
-              <textarea
-                value={replyText}
-                onChange={e => setReplyText(e.target.value)}
-                rows={3}
-                placeholder={t('replyPlaceholder')}
-                className="w-full resize-none rounded-lg border border-ck-dark-border bg-ck-dark-surface px-3 py-2 text-sm text-white placeholder:text-ck-text-muted focus:border-ck-red focus:outline-none"
-              />
-              <div className="mt-2 flex items-center gap-2">
-                <button
-                  onClick={handleReply}
-                  disabled={sending || !replyText.trim()}
-                  className="flex items-center gap-1.5 rounded-lg bg-ck-red px-4 py-1.5 text-xs font-semibold text-white hover:bg-ck-red-hover disabled:opacity-50"
-                >
-                  <Send size={12} />
-                  {sending ? tCommon('loading') : t('sendReply')}
-                </button>
-                {sent && <span className="text-xs text-green-400">{t('replySent')}</span>}
-              </div>
-            </div>
+            <LeadEmailThread leadId={lead.id} leadNumber={lead.number} contactEmail={lead.contact_email} />
           )}
         </div>
       </div>

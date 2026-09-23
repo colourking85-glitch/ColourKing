@@ -310,6 +310,18 @@
     "plateOriginPlaceholder": "e.g. NL, DE, BE, TR"
   },
   "ld": {
+    "emailThread": "Email conversation",
+    "emailThreadEmpty": "No emails with this customer yet. Emails you send here get the lead number in the subject, so replies show up here automatically.",
+    "checkReplies": "Check for replies",
+    "checkingReplies": "Checking…",
+    "lastChecked": "Last checked",
+    "emailFromUs": "Colourking",
+    "emailTo": "To",
+    "emailSubjectAuto": "Subject (optional)",
+    "emailSending": "Sending…",
+    "emailFailed": "Email could not be sent.",
+    "showFullEmail": "Show full email",
+    "hideFullEmail": "Show reply only",
     "delete": "Delete",
     "deleteConfirm": "Delete lead {name}? It will be hidden from all lists (kept in the database).",
     "deleteFailed": "Could not delete the lead.",
@@ -2738,8 +2750,16 @@
     "items": "items"
   },
   "imap": {
+    "frequencyValue": "Daily 08:00 UTC, plus when a lead or the monitor is opened (max every 2 min)",
+    "lastPolledAt": "Last poll",
+    "never": "Never",
+    "statusOk": "OK",
+    "statusError": "Error",
+    "throttled": "Polled less than 15 seconds ago — try again shortly",
+    "sent": "Sent",
+    "received": "Received",
     "title": "IMAP Email Monitor",
-    "subtitle": "Zoho inbox polling — customer email reply tracking",
+    "subtitle": "Zoho inbox polling — customer email replies linked to leads",
     "refresh": "Refresh",
     "cronTitle": "Cron Job — Scheduled Polling",
     "jobName": "Job name",
@@ -2757,7 +2777,7 @@
     "noLogs": "Click \"Poll Now\" to run the poller and see output here",
     "capturedReplies": "Captured Email Replies",
     "recent": "recent",
-    "noEmails": "No customer replies captured yet. Replies matching [JB-ID] or [LD-ID] in the subject will appear here."
+    "noEmails": "No customer emails yet. Replies to lead emails ([LD-0001] in the subject), reply headers or a known lead sender appear here."
   },
   "an": {
     "title": "Site Analytics",

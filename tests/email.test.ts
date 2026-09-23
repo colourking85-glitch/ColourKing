@@ -96,7 +96,8 @@ describe('Email templates', () => {
   it('renders offerSent template as valid HTML', () => {
     const html = renderTemplate('offerSent', offerData, 'nl');
     expect(html).toContain('<!DOCTYPE html>');
-    expect(html).toContain('COLOURKING');
+    expect(html).toContain('ColourKing');
+    expect(html).toContain('/images/email-logo.png');
     expect(html).toContain('Jan de Vries');
     expect(html).toContain('OFF-2026-0042');
   });
@@ -427,5 +428,27 @@ describe('Edge cases', () => {
     const subject = getSubject('offerSent', offerData, 'nl');
     expect(subject).toBeDefined();
     expect(subject.length).toBeGreaterThan(0);
+  });
+});
+
+describe('Lead received email', () => {
+  const base = getSampleData('leadReceived') as Parameters<typeof renderTemplate<'leadReceived'>>[1];
+
+  it('shows lead number and appointment details, no view-lead button', () => {
+    const html = renderTemplate('leadReceived', base, 'nl');
+    expect(html).toContain('LD-0018');
+    expect(html).toContain('Afspraakgegevens');
+    expect(html).toContain('Auto afgeven');
+    expect(html).toContain('08:00');
+    expect(html).not.toContain('Lead bekijken');
+  });
+
+  it('omits the appointment block for non-appointment leads', () => {
+    const html = renderTemplate('leadReceived', { ...base, appointmentType: null }, 'en');
+    expect(html).not.toContain('Appointment details');
+  });
+
+  it('has no placeholder IBAN in the footer', () => {
+    expect(renderTemplate('leadReceived', base, 'nl')).not.toContain('NL00 INGB');
   });
 });

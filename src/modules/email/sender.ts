@@ -14,6 +14,11 @@ type SendEmailOptions = {
   replyTo?: string;
   cc?: string[];
   bcc?: string[];
+  /** Plain-text alternative part */
+  text?: string;
+  /** Message-ID of the email being answered, so clients thread the reply */
+  inReplyTo?: string;
+  references?: string[];
 };
 
 type SendEmailResult = {
@@ -86,6 +91,9 @@ export async function sendEmail(
     replyTo: options?.replyTo ?? getDefaultReplyTo(),
     ...(options?.cc?.length ? { cc: options.cc } : {}),
     ...(options?.bcc?.length ? { bcc: options.bcc } : {}),
+    ...(options?.text ? { text: options.text } : {}),
+    ...(options?.inReplyTo ? { inReplyTo: options.inReplyTo } : {}),
+    ...(options?.references?.length ? { references: options.references } : {}),
   };
 
   let lastError: string | undefined;

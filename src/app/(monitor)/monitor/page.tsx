@@ -241,6 +241,9 @@ export default function MonitorDashboard() {
   }, [soundEnabled, playAlert]);
 
   const load = useCallback(async () => {
+    // Check the inbox for customer replies (server throttles to once per 2 min);
+    // new replies arrive as notifications on this or the next refresh.
+    fetch('/api/email/poll', { method: 'POST' }).catch(() => {});
     try {
       const [notifRes, monitorRes] = await Promise.all([
         fetch('/api/notifications?limit=100'),

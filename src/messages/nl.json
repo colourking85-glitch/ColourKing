@@ -310,6 +310,18 @@
     "plateOriginPlaceholder": "bijv. NL, DE, BE, TR"
   },
   "ld": {
+    "emailThread": "E-mailgesprek",
+    "emailThreadEmpty": "Nog geen e-mails met deze klant. E-mails die je hier verstuurt krijgen het leadnummer in het onderwerp, zodat antwoorden hier vanzelf verschijnen.",
+    "checkReplies": "Controleer op antwoorden",
+    "checkingReplies": "Controleren…",
+    "lastChecked": "Laatst gecontroleerd",
+    "emailFromUs": "Colourking",
+    "emailTo": "Aan",
+    "emailSubjectAuto": "Onderwerp (optioneel)",
+    "emailSending": "Versturen…",
+    "emailFailed": "E-mail kon niet worden verzonden.",
+    "showFullEmail": "Volledige e-mail tonen",
+    "hideFullEmail": "Alleen antwoord tonen",
     "delete": "Verwijderen",
     "deleteConfirm": "Lead {name} verwijderen? De lead wordt uit alle lijsten verborgen (blijft bewaard in de database).",
     "deleteFailed": "Lead kon niet worden verwijderd.",
@@ -2738,8 +2750,16 @@
     "items": "items"
   },
   "imap": {
+    "frequencyValue": "Dagelijks 08:00 UTC, plus bij openen van een lead of de monitor (max. elke 2 min)",
+    "lastPolledAt": "Laatste poll",
+    "never": "Nooit",
+    "statusOk": "OK",
+    "statusError": "Fout",
+    "throttled": "Minder dan 15 seconden geleden gepold — probeer het zo opnieuw",
+    "sent": "Verzonden",
+    "received": "Ontvangen",
     "title": "IMAP E-mail Monitor",
-    "subtitle": "Zoho inbox polling — e-mailreacties van klanten bijhouden",
+    "subtitle": "Zoho inbox polling — e-mailreacties van klanten gekoppeld aan leads",
     "refresh": "Vernieuwen",
     "cronTitle": "Cron Job — Geplande Polling",
     "jobName": "Taaknaam",
@@ -2757,7 +2777,7 @@
     "noLogs": "Klik op \"Nu Pollen\" om de poller te starten en de uitvoer hier te zien",
     "capturedReplies": "Ontvangen E-mailreacties",
     "recent": "recent",
-    "noEmails": "Nog geen klantreacties ontvangen. Antwoorden met [JB-ID] of [LD-ID] in het onderwerp verschijnen hier."
+    "noEmails": "Nog geen klant-e-mails. Antwoorden op lead-e-mails ([LD-0001] in het onderwerp), antwoordkoppen of een bekende lead-afzender verschijnen hier."
   },
   "an": {
     "title": "Website Analyse",

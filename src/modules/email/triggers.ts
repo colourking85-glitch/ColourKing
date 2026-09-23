@@ -289,6 +289,12 @@ export async function onLeadCreated(leadId: string): Promise<void> {
     damageDescription: lead.damage_description,
     origin: lead.origin,
     leadUrl: `${APP_URL}/app/leads/${leadId}`,
+    leadNumber: lead.number ?? null,
+    appointmentType: lead.channel === 'appointment_form' ? (lead.appointment_type ?? 'inspection') : null,
+    scheduledDate: lead.scheduled_date ?? null,
+    scheduledTime: lead.scheduled_time ?? null,
+    location: lead.location ?? null,
+    locationAddress: lead.location_address ?? null,
   };
 
   // Collect staff recipients; fall back to SHOP_EMAIL / hardcoded shop email

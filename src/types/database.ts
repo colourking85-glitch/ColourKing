@@ -351,37 +351,52 @@ export type Database = {
       }
       email_log: {
         Row: {
+          body_text: string | null
           created_at: string
+          direction: string
           entity_id: string | null
           entity_type: string
           from_email: string
           id: string
+          in_reply_to: string | null
           message_id: string | null
           received_at: string | null
+          sent_by: string | null
           snippet: string | null
           subject: string | null
+          to_email: string | null
         }
         Insert: {
+          body_text?: string | null
           created_at?: string
+          direction?: string
           entity_id?: string | null
           entity_type?: string
           from_email: string
           id?: string
+          in_reply_to?: string | null
           message_id?: string | null
           received_at?: string | null
+          sent_by?: string | null
           snippet?: string | null
           subject?: string | null
+          to_email?: string | null
         }
         Update: {
+          body_text?: string | null
           created_at?: string
+          direction?: string
           entity_id?: string | null
           entity_type?: string
           from_email?: string
           id?: string
+          in_reply_to?: string | null
           message_id?: string | null
           received_at?: string | null
+          sent_by?: string | null
           snippet?: string | null
           subject?: string | null
+          to_email?: string | null
         }
         Relationships: []
       }

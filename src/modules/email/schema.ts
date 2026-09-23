@@ -84,6 +84,12 @@ export const LeadReceivedData = z.object({
   damageDescription: z.string().nullable().optional(),
   origin: z.string(),
   leadUrl: z.string().url(),
+  leadNumber: z.number().nullable().optional(),
+  appointmentType: z.string().nullable().optional(),
+  scheduledDate: z.string().nullable().optional(),
+  scheduledTime: z.string().nullable().optional(),
+  location: z.string().nullable().optional(),
+  locationAddress: z.string().nullable().optional(),
 });
 
 export const RepairOrderReadyData = z.object({
