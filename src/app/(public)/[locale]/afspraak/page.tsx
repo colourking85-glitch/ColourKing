@@ -141,8 +141,8 @@ function CalendarGrid({
           // Today stays open; the slot API only offers times at least 2h ahead
           const isPast = day < today;
           const isTooFar = day > maxDate;
-          const isWeekend = day.getDay() === 0 || day.getDay() === 6;
-          const disabled = !inMonth || isPast || isTooFar || isWeekend;
+          const isSunday = day.getDay() === 0;
+          const disabled = !inMonth || isPast || isTooFar || isSunday;
           const isToday = isSameDay(day, today);
           const isSelected = selectedObj && isSameDay(day, selectedObj);
           const ymd = formatYMD(day);
