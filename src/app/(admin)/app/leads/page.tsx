@@ -19,6 +19,8 @@ type Lead = {
   origin: string;
   channel: string | null;
   appointment_type: string | null;
+  scheduled_date: string | null;
+  scheduled_time: string | null;
   created_at: string;
 };
 
@@ -221,6 +223,11 @@ export default function LeadsPage() {
                 </button>
               </th>
               <th className="px-4 py-3 text-left">
+                <button onClick={() => toggleSort('created_at')} className="flex items-center gap-1.5 text-xs font-semibold uppercase text-ck-muted hover:text-white">
+                  {tCommon('date')} <SortIcon field="created_at" />
+                </button>
+              </th>
+              <th className="px-4 py-3 text-left">
                 <span className="text-xs font-semibold uppercase text-ck-muted">{t('contact')}</span>
               </th>
               <th className="px-4 py-3 text-left">
@@ -234,11 +241,6 @@ export default function LeadsPage() {
               <th className="px-4 py-3 text-left">
                 <button onClick={() => toggleSort('origin')} className="flex items-center gap-1.5 text-xs font-semibold uppercase text-ck-muted hover:text-white">
                   {t('source')} <SortIcon field="origin" />
-                </button>
-              </th>
-              <th className="px-4 py-3 text-right">
-                <button onClick={() => toggleSort('created_at')} className="flex items-center gap-1.5 text-xs font-semibold uppercase text-ck-muted hover:text-white ml-auto">
-                  {tCommon('date')} <SortIcon field="created_at" />
                 </button>
               </th>
               <th className="px-4 py-3 text-right" title={t('createdAtHint', { tz: viewerTimeZone })}>
@@ -281,6 +283,23 @@ export default function LeadsPage() {
                         )}
                       </div>
                     </td>
+                    <td className="px-4 py-3 text-xs">
+                      {lead.scheduled_date ? (
+                        <div className="flex items-center gap-1.5">
+                          <Calendar size={12} className="text-amber-400 shrink-0" />
+                          <span className="text-ck-muted-light">
+                            {new Date(lead.scheduled_date + 'T00:00:00').toLocaleDateString('nl-NL', { day: 'numeric', month: 'short', year: 'numeric' })}
+                          </span>
+                          {lead.scheduled_time && (
+                            <span className="font-mono text-amber-400">{lead.scheduled_time}</span>
+                          )}
+                        </div>
+                      ) : (
+                        <span className="text-ck-muted">
+                          {new Date(lead.created_at).toLocaleDateString('nl-NL', { day: 'numeric', month: 'short', year: 'numeric' })}
+                        </span>
+                      )}
+                    </td>
                     <td className="px-4 py-3 text-xs text-ck-muted">
                       <div className="max-w-[200px] truncate">
                         {lead.contact_email && <span>{lead.contact_email}</span>}
@@ -313,13 +332,6 @@ export default function LeadsPage() {
                     </td>
                     <td className="px-4 py-3 text-xs text-ck-muted-light">
                       {lead.origin ? t(lead.origin as 'website') : '—'}
-                    </td>
-                    <td className="px-4 py-3 text-right text-xs text-ck-muted">
-                      {new Date(lead.created_at).toLocaleDateString('nl-NL', {
-                        day: 'numeric',
-                        month: 'short',
-                        year: 'numeric',
-                      })}
                     </td>
                     <td className="px-4 py-3 text-right text-xs whitespace-nowrap">
                       {(() => {

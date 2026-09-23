@@ -3,8 +3,8 @@ import { createClient } from '@/lib/supabase/server';
 import { LeadSchema } from '@/modules/leads/schema';
 import { onLeadCreated } from '@/modules/email/triggers';
 
-const FIELDS_WITH_NUMBER = 'id, number, contact_name, contact_email, contact_phone, kenteken, damage_description, status, origin, preferred_date, channel, appointment_type, locale, created_at, customers(id, name), vehicles(id, kenteken, make, model)';
-const FIELDS_WITHOUT_NUMBER = 'id, contact_name, contact_email, contact_phone, kenteken, damage_description, status, origin, preferred_date, channel, appointment_type, locale, created_at, customers(id, name), vehicles(id, kenteken, make, model)';
+const FIELDS_WITH_NUMBER = 'id, number, contact_name, contact_email, contact_phone, kenteken, damage_description, status, origin, preferred_date, channel, appointment_type, scheduled_date, scheduled_time, locale, created_at, customers(id, name), vehicles(id, kenteken, make, model)';
+const FIELDS_WITHOUT_NUMBER = 'id, contact_name, contact_email, contact_phone, kenteken, damage_description, status, origin, preferred_date, channel, appointment_type, scheduled_date, scheduled_time, locale, created_at, customers(id, name), vehicles(id, kenteken, make, model)';
 
 export async function GET(req: NextRequest) {
   const supabase = createClient();
