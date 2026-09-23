@@ -9,7 +9,7 @@ import {
   Package, Receipt, FolderOpen, CalendarDays, ClipboardList,
   BarChart3, Calculator, ShoppingCart, BookOpen, Settings, Bell,
   ChevronLeft, ChevronRight, ChevronDown, BookOpenCheck, Clock, Bot, Mail, HardDrive, Server,
-  Plug, Zap, CarFront, Coins, Shield, Activity, ClipboardCheck, Award,
+  Plug, Zap, CarFront, Coins, Shield, Activity, ClipboardCheck, Award, Images,
 } from 'lucide-react';
 import { ScreenBadge } from '@/components/ui/ScreenBadge';
 import { SCREEN_REGISTRY } from '@/lib/codes';
@@ -63,6 +63,7 @@ const NAV: NavSection[] = [
       { label: 'customers', href: '/app/klanten', icon: Users, code: 'KL05', permission: 'customers.read' },
       { label: 'vehicles', href: '/app/voertuigen', icon: Car, code: 'VH05', permission: 'vehicles.read' },
       { label: 'offers', href: '/app/offertes', icon: FileText, code: 'ES05', permission: 'offers.read' },
+      { label: 'portfolio', href: '/app/portfolio', icon: Images, code: 'PF05', permission: 'portfolio.read' },
     ],
   },
   {

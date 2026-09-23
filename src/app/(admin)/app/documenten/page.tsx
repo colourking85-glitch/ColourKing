@@ -24,6 +24,7 @@ const DOC_TYPE_KEYS: Record<DocType, string> = {
   handover_note: 'handover_note',
   invoice: 'invoice',
   credit_note: 'credit_note',
+  project_dossier: 'project_dossier',
 };
 
 const DOC_TYPE_COLORS: Record<DocType, string> = {
@@ -32,6 +33,7 @@ const DOC_TYPE_COLORS: Record<DocType, string> = {
   handover_note: 'text-purple-400 bg-purple-400/10',
   invoice: 'text-amber-400 bg-amber-400/10',
   credit_note: 'text-red-400 bg-red-400/10',
+  project_dossier: 'text-fuchsia-400 bg-fuchsia-400/10',
 };
 
 const STATUS_KEYS: Record<DocStatus, string> = {
@@ -102,7 +104,7 @@ export default function DocumentArchivePage() {
           className="rounded-[10px] border-[0.5px] border-ck-border bg-ck-surface px-3 py-2 text-sm text-ck-text focus:border-ck-red focus:outline-none"
         >
           <option value="">{t('allTypes')}</option>
-          {(Object.keys(DOC_TYPE_KEYS) as DocType[]).map(k => (
+          {(Object.keys(DOC_TYPE_KEYS) as DocType[]).filter(k => k !== 'project_dossier').map(k => (
             <option key={k} value={k}>{t(DOC_TYPE_KEYS[k])}</option>
           ))}
         </select>

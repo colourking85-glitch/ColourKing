@@ -18,6 +18,7 @@ const DOC_TYPE_LABELS: Record<string, string> = {
   credit_note: 'doc.credit_note',
   repair_order: 'doc.repair_order',
   handover_note: 'doc.handover_note',
+  project_dossier: 'doc.project_dossier',
 };
 
 export default function NumberingPage() {
@@ -90,12 +91,24 @@ export default function NumberingPage() {
         return tDoc('repair_order');
       case 'handover_note':
         return tDoc('handover_note');
+      case 'project_dossier':
+        return tDoc('project_dossier');
       default:
         return docType;
     }
   }
 
   function formatNextNumber(range: NumberRange): string {
+    if (range.doc_type === 'project_dossier') {
+      const now = new Date();
+      const yy = String(now.getFullYear() % 100).padStart(2, '0');
+      const d = new Date(Date.UTC(now.getUTCFullYear(), now.getUTCMonth(), now.getUTCDate()));
+      const day = d.getUTCDay() || 7;
+      d.setUTCDate(d.getUTCDate() + 4 - day);
+      const yearStart = Date.UTC(d.getUTCFullYear(), 0, 1);
+      const ww = String(Math.ceil(((d.getTime() - yearStart) / 86400000 + 1) / 7)).padStart(2, '0');
+      return `${range.prefix}-${yy}${ww}${String(range.next_number).padStart(2, '0')}`;
+    }
     return `${range.prefix}-${range.year}-${String(range.next_number).padStart(4, '0')}`;
   }
 
@@ -172,7 +185,7 @@ export default function NumberingPage() {
                   </td>
                   <td className="px-4 py-3 font-mono text-[#6b6b80]">
                     {editing === range.id
-                      ? `${editPrefix}-${range.year}-${String(range.next_number).padStart(4, '0')}`
+                      ? formatNextNumber({ ...range, prefix: editPrefix })
                       : formatNextNumber(range)}
                   </td>
                   <td className="px-4 py-3 text-right">

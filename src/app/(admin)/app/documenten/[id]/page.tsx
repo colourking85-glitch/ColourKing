@@ -51,6 +51,7 @@ const DOC_TYPE_KEYS: Record<DocType, string> = {
   handover_note: 'handover_note',
   invoice: 'invoice',
   credit_note: 'credit_note',
+  project_dossier: 'project_dossier',
 };
 
 const STATUS_KEYS: Record<DocStatus, string> = {

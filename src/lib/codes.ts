@@ -11,6 +11,7 @@ export const MODULE_COLORS: Record<string, string> = {
   KL: 'bg-purple-900/30 text-purple-400',
   VH: 'bg-blue-900/30 text-blue-400',
   ES: 'bg-green-900/30 text-green-400',
+  PF: 'bg-fuchsia-900/30 text-fuchsia-400',
   JB: 'bg-cyan-900/30 text-cyan-400',
   PT: 'bg-orange-900/30 text-orange-400',
   FA: 'bg-emerald-900/30 text-emerald-400',
@@ -47,6 +48,9 @@ export const SCREEN_REGISTRY: Record<string, ScreenMeta> = {
 
   // Offers
   '/app/offertes': { id: 'ES05', title: 'Offer List', titleNl: 'Offertelijst', module: 'ES', route: '/app/offertes' },
+  '/app/portfolio': { id: 'PF05', title: 'Project Portfolio', titleNl: 'Projectportfolio', module: 'PF', route: '/app/portfolio' },
+  '/app/portfolio/nieuw': { id: 'PF01', title: 'New Project Dossier', titleNl: 'Nieuw Projectdossier', module: 'PF', route: '/app/portfolio/nieuw' },
+  '/app/portfolio/[id]': { id: 'PF10', title: 'Project Dossier', titleNl: 'Projectdossier', module: 'PF', route: '/app/portfolio/[id]' },
   '/app/offertes/nieuw': { id: 'ES01', title: 'Create Offer', titleNl: 'Offerte Aanmaken', module: 'ES', route: '/app/offertes/nieuw' },
   '/app/offertes/[id]': { id: 'ES10', title: 'Offer Detail', titleNl: 'Offertedetail', module: 'ES', route: '/app/offertes/[id]' },
 

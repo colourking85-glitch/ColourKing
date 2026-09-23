@@ -6,6 +6,7 @@ import Link from 'next/link';
 import { useTranslations } from 'next-intl';
 import { ArrowLeft, ChevronRight, MessageSquare, Clock, Camera, Upload, Trash2, X, FileCheck } from 'lucide-react';
 import { ScreenBadge } from '@/components/ui/ScreenBadge';
+import { ConvertToDossier } from '@/components/portfolio/ConvertToDossier';
 import {
   STAGE_LABELS,
   STAGE_COLORS,
@@ -258,6 +259,11 @@ export default function JobDetailPage() {
               <FileCheck size={16} />
               {t('createHandover')}
             </Link>
+          )}
+
+          {/* Project portfolio — managers turn a completed work order into a public dossier */}
+          {(['delivered', 'closed'] as JobStage[]).includes(job.stage) && (
+            <ConvertToDossier jobId={id} photoCount={photos.length} />
           )}
 
           {/* Photos */}

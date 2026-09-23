@@ -143,6 +143,36 @@ export const MODULES: ModuleDoc[] = [
     ],
   },
   {
+    id: 'portfolio',
+    code: 'PF',
+    screens: [
+      {
+        code: 'PF05',
+        agentNotes: 'GET /api/portfolio (office/admin) — dossiers with cover_url, photo_count, brand/model, source job. Statuses: draft, published, archived. Soft-deleted rows are hidden.',
+        userFlow: 'The Project Portfolio lists completed repairs shown in the website gallery (/gallerij). Filter by status. The dossier number (CK-YYYY-NNNNN, number range "Projectdossier" in SY03) appears once a dossier is published, or immediately when it was converted from a work order. Click a row to edit.',
+        inputs: 'Status filter.',
+        outputs: 'Dossier table with cover photo, number, title, vehicle, category, status and publish date.',
+        crossScreen: 'Dossiers are created in PF01 or from a completed work order (JB10, admin only). Published dossiers appear on the public gallery and on /gallerij/{dossier}.',
+      },
+      {
+        code: 'PF01',
+        agentNotes: 'POST /api/portfolio { title_nl, category } → blank draft. POST /api/jobs/[id]/portfolio (admin only) → converts a delivered/closed work order: allocates the dossier number immediately via portfolio_assign_dossier_number(), copies vehicle, category (job_type), handling (payer_type), working days, work items (approved offer lines) and consent (handover gallery_consent). One dossier per work order (unique job_id).',
+        userFlow: 'Admins see completed work orders without a dossier and can convert one with a single click. Everyone with portfolio access can start a blank dossier instead; its number is assigned when it is first published.',
+        inputs: 'Work order to convert, or title + category.',
+        outputs: 'Draft dossier; redirect to PF10.',
+        crossScreen: 'JB10 shows the same conversion and, afterwards, a link to the dossier.',
+      },
+      {
+        code: 'PF10',
+        agentNotes: 'GET/PATCH/DELETE /api/portfolio/[id]; POST /api/portfolio/[id] { action: publish|unpublish|archive|restore }. Publish is refused (422) until the checklist passes: title_nl, category, brand or model text, a before + after photo, every photo redaction-confirmed, consent received/not_required. Photos: POST /api/portfolio/[id]/photos (multipart, redacted JPEG/WebP only, confirmed=true), PATCH/DELETE /api/portfolio/[id]/photos/[photoId]. POST /api/portfolio/detect-plates suggests plate boxes (Claude vision). Bucket portfolio-public holds redacted images only.',
+        userFlow: 'Edit the dossier details in Dutch, English and Turkish (empty EN/TR falls back to Dutch). Upload photos or import them from the work order: every photo opens the plate editor, where AI suggests licence-plate areas; adjust, add or remove areas, preview the result, tick the confirmation and save. Only the pixelated, blurred version is stored (EXIF/GPS removed). Give matching before/after photos the same pair number for the slider. Publish when the checklist is complete. Archive to take it offline; a converted work order can be cancelled the same way (the number is kept).',
+        inputs: 'Texts, vehicle, work items, duration, handling, consent, featured/order, photos with redaction areas.',
+        outputs: 'Published dossier with number CK-YYYY-NNNNN on the website gallery.',
+        crossScreen: 'Linked work order (JB10). Number range managed in SY03. Public pages: /gallerij and /gallerij/{dossier}.',
+      },
+    ],
+  },
+  {
     id: 'jobs',
     code: 'JB',
     screens: [

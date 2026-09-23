@@ -1493,6 +1493,171 @@ export type Database = {
           },
         ]
       }
+      portfolio_photos: {
+        Row: {
+          alt_en: string | null
+          alt_nl: string | null
+          alt_tr: string | null
+          created_at: string
+          height: number | null
+          id: string
+          is_cover: boolean
+          pair_group: number | null
+          phase: Database["public"]["Enums"]["photo_phase"]
+          project_id: string
+          redaction_confirmed_at: string | null
+          redaction_confirmed_by: string | null
+          redaction_regions: Json
+          sort_order: number
+          source_job_photo_id: string | null
+          storage_path: string
+          width: number | null
+        }
+        Insert: {
+          alt_en?: string | null
+          alt_nl?: string | null
+          alt_tr?: string | null
+          created_at?: string
+          height?: number | null
+          id?: string
+          is_cover?: boolean
+          pair_group?: number | null
+          phase?: Database["public"]["Enums"]["photo_phase"]
+          project_id: string
+          redaction_confirmed_at?: string | null
+          redaction_confirmed_by?: string | null
+          redaction_regions?: Json
+          sort_order?: number
+          source_job_photo_id?: string | null
+          storage_path: string
+          width?: number | null
+        }
+        Update: {
+          alt_en?: string | null
+          alt_nl?: string | null
+          alt_tr?: string | null
+          created_at?: string
+          height?: number | null
+          id?: string
+          is_cover?: boolean
+          pair_group?: number | null
+          phase?: Database["public"]["Enums"]["photo_phase"]
+          project_id?: string
+          redaction_confirmed_at?: string | null
+          redaction_confirmed_by?: string | null
+          redaction_regions?: Json
+          sort_order?: number
+          source_job_photo_id?: string | null
+          storage_path?: string
+          width?: number | null
+        }
+        Relationships: []
+      }
+      portfolio_projects: {
+        Row: {
+          brand_id: string | null
+          build_year: number | null
+          category: string
+          colour_name: string | null
+          consent_document_id: string | null
+          consent_status: string
+          converted_at: string | null
+          converted_by: string | null
+          created_at: string
+          created_by: string | null
+          deleted_at: string | null
+          dossier_number: string | null
+          duration_working_days: number | null
+          featured: boolean
+          handling: string | null
+          id: string
+          job_id: string | null
+          model_free_text: string | null
+          model_id: string | null
+          paint_code: string | null
+          published_at: string | null
+          sort_order: number
+          source: string
+          status: string
+          summary_en: string | null
+          summary_nl: string | null
+          summary_tr: string | null
+          title_en: string | null
+          title_nl: string
+          title_tr: string | null
+          updated_at: string
+          work_items: string[]
+        }
+        Insert: {
+          brand_id?: string | null
+          build_year?: number | null
+          category?: string
+          colour_name?: string | null
+          consent_document_id?: string | null
+          consent_status?: string
+          converted_at?: string | null
+          converted_by?: string | null
+          created_at?: string
+          created_by?: string | null
+          deleted_at?: string | null
+          dossier_number?: string | null
+          duration_working_days?: number | null
+          featured?: boolean
+          handling?: string | null
+          id?: string
+          job_id?: string | null
+          model_free_text?: string | null
+          model_id?: string | null
+          paint_code?: string | null
+          published_at?: string | null
+          sort_order?: number
+          source?: string
+          status?: string
+          summary_en?: string | null
+          summary_nl?: string | null
+          summary_tr?: string | null
+          title_en?: string | null
+          title_nl?: string
+          title_tr?: string | null
+          updated_at?: string
+          work_items?: string[]
+        }
+        Update: {
+          brand_id?: string | null
+          build_year?: number | null
+          category?: string
+          colour_name?: string | null
+          consent_document_id?: string | null
+          consent_status?: string
+          converted_at?: string | null
+          converted_by?: string | null
+          created_at?: string
+          created_by?: string | null
+          deleted_at?: string | null
+          dossier_number?: string | null
+          duration_working_days?: number | null
+          featured?: boolean
+          handling?: string | null
+          id?: string
+          job_id?: string | null
+          model_free_text?: string | null
+          model_id?: string | null
+          paint_code?: string | null
+          published_at?: string | null
+          sort_order?: number
+          source?: string
+          status?: string
+          summary_en?: string | null
+          summary_nl?: string | null
+          summary_tr?: string | null
+          title_en?: string | null
+          title_nl?: string
+          title_tr?: string | null
+          updated_at?: string
+          work_items?: string[]
+        }
+        Relationships: []
+      }
       purchases: {
         Row: {
           category: string
@@ -2120,6 +2285,10 @@ export type Database = {
         Returns: string
       }
       is_active_staff: { Args: never; Returns: boolean }
+      portfolio_assign_dossier_number: {
+        Args: { p_project_id: string }
+        Returns: string
+      }
       is_admin_staff: { Args: never; Returns: boolean }
       is_office_or_admin_staff: { Args: never; Returns: boolean }
     }
@@ -2135,6 +2304,7 @@ export type Database = {
         | "handover_note"
         | "invoice"
         | "credit_note"
+        | "project_dossier"
       invoice_status:
         | "draft"
         | "sent"
@@ -2342,6 +2512,7 @@ export const Constants = {
         "handover_note",
         "invoice",
         "credit_note",
+        "project_dossier",
       ],
       invoice_status: [
         "draft",
