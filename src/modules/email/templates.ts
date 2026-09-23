@@ -108,7 +108,7 @@ const STRINGS: Record<string, EmailStrings> = {
     pendingDetail: 'Deze afspraak is een verzoek en moet nog worden bevestigd door het Colourking team.',
 
     // Customer appointment request email
-    customerLeadSubject: 'Uw afspraakverzoek bij Colourking — {leadCode}',
+    customerLeadSubject: 'Uw afspraakverzoek bij Colourking — {kenteken}',
     customerLeadGreeting: 'Beste {contactName},',
     customerLeadIntro: 'Bedankt voor uw afspraakverzoek bij Colourking. Wij hebben uw aanvraag ontvangen.',
     customerPendingNotice: 'Let op: uw afspraak is nog niet definitief. Ons team zal uw verzoek beoordelen en u zo snel mogelijk een bevestiging sturen.',
@@ -190,7 +190,7 @@ const STRINGS: Record<string, EmailStrings> = {
     pendingBanner: 'APPOINTMENT REQUEST — PENDING CONFIRMATION',
     pendingDetail: 'This appointment is a request and still needs to be confirmed by the Colourking team.',
 
-    customerLeadSubject: 'Your appointment request at Colourking — {leadCode}',
+    customerLeadSubject: 'Your appointment request at Colourking — {kenteken}',
     customerLeadGreeting: 'Dear {contactName},',
     customerLeadIntro: 'Thank you for your appointment request at Colourking. We have received your enquiry.',
     customerPendingNotice: 'Please note: your appointment is not yet confirmed. Our team will review your request and send you a confirmation as soon as possible.',
@@ -271,7 +271,7 @@ const STRINGS: Record<string, EmailStrings> = {
     pendingBanner: 'RANDEVU TALEBI — ONAY BEKLIYOR',
     pendingDetail: 'Bu randevu bir taleptir ve Colourking ekibi tarafindan onaylanmasi gerekmektedir.',
 
-    customerLeadSubject: 'Colourking randevu talebiniz — {leadCode}',
+    customerLeadSubject: 'Colourking randevu talebiniz — {kenteken}',
     customerLeadGreeting: 'Sayin {contactName},',
     customerLeadIntro: 'Colourking randevu talebiniz icin tesekkur ederiz. Basvurunuzu aldik.',
     customerPendingNotice: 'Dikkat: randevunuz henuz onaylanmamistir. Ekibimiz talebinizi inceleyecek ve en kisa surede size bir onay gonderecektir.',
@@ -567,7 +567,7 @@ function renderLeadReceived(data: TemplateDataMap['leadReceived'], locale: Email
       detailRow(t(locale, 'leadName'), data.contactName) +
       (data.contactEmail ? detailRow(t(locale, 'leadEmail'), data.contactEmail) : '') +
       (data.contactPhone ? detailRow(t(locale, 'leadPhone'), data.contactPhone) : '') +
-      (data.kenteken ? detailRow(t(locale, 'leadPlate'), data.kenteken) : '') +
+      (data.kenteken ? highlightedDetailRow(t(locale, 'leadPlate'), data.kenteken) : '') +
       (data.damageDescription ? detailRow(t(locale, 'leadDamage'), data.damageDescription) : '') +
       detailRow(t(locale, 'leadOrigin'), data.origin)
     )}${appointment}`;
@@ -650,7 +650,8 @@ export function getSubject<T extends keyof TemplateDataMap>(
     const parts: string[] = [];
     if (d.kenteken) parts.push(String(d.kenteken));
     if (d.appointmentType) parts.push(t(locale, `apptType_${String(d.appointmentType)}`));
-    if (d.leadNumber != null) parts.push(`LD-${String(d.leadNumber).padStart(4, '0')}`);
+    if (d.scheduledDate) parts.push(formatDate(String(d.scheduledDate), locale));
+    if (d.scheduledTime) parts.push(String(d.scheduledTime).slice(0, 5));
     if (parts.length) subject += ' | ' + parts.join(' | ');
   }
 
@@ -762,17 +763,16 @@ export function renderAppointmentRequest(
     scheduledTime?: string | null;
     location?: string | null;
     locationAddress?: string | null;
-    leadCode: string;
   },
   locale: EmailLocale = 'nl',
 ): { html: string; subject: string } {
-  const subject = t(locale, 'customerLeadSubject', { leadCode: data.leadCode });
+  const subject = t(locale, 'customerLeadSubject', { kenteken: data.kenteken ?? '' });
 
   const rows =
+    (data.kenteken ? highlightedDetailRow(t(locale, 'leadPlate'), data.kenteken) : '') +
     (data.appointmentType ? detailRow(t(locale, 'appointmentType'), t(locale, `apptType_${data.appointmentType}`)) : '') +
     (data.scheduledDate ? highlightedDetailRow(t(locale, 'appointmentDate'), formatDate(data.scheduledDate, locale)) : '') +
     (data.scheduledTime ? highlightedDetailRow(t(locale, 'appointmentTime'), data.scheduledTime.slice(0, 5)) : '') +
-    (data.kenteken ? detailRow(t(locale, 'leadPlate'), data.kenteken) : '') +
     (data.location
       ? detailRow(
           t(locale, 'leadLocation'),

@@ -333,9 +333,6 @@ export async function onLeadCreated(leadId: string): Promise<void> {
   // Send confirmation email to the customer for appointment leads
   if (lead.contact_email && lead.channel === 'appointment_form') {
     const customerLocale = validLocale(lead.locale);
-    const leadCode = lead.number != null
-      ? `LD-${String(lead.number).padStart(4, '0')}`
-      : leadId.slice(0, 8);
 
     const { html: custHtml, subject: custSubject } = renderAppointmentRequest(
       {
@@ -346,7 +343,6 @@ export async function onLeadCreated(leadId: string): Promise<void> {
         scheduledTime: lead.scheduled_time,
         location: lead.location,
         locationAddress: lead.location_address,
-        leadCode,
       },
       customerLocale,
     );
