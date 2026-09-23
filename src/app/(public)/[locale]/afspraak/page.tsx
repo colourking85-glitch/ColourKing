@@ -130,7 +130,7 @@ function CalendarGrid({
       {/* Day headers */}
       <div className="mb-2 grid grid-cols-7 text-center">
         {weekdayNames(bcp).map(d => (
-          <div key={d} className="py-1 text-xs font-semibold uppercase tracking-wider text-ck-text-faint">{d}</div>
+          <div key={d} className="py-1 text-xs font-semibold uppercase tracking-wider text-ck-text-muted">{d}</div>
         ))}
       </div>
 
@@ -297,7 +297,7 @@ export default function BookingPage() {
             <Calendar size={28} className="text-ck-red" />
           </div>
           <h1 className="font-heading text-3xl font-bold text-ck-text md:text-4xl">{t('title')}</h1>
-          <p className="mt-3 text-ck-text-muted">{t('subtitle')}</p>
+          <p className="mt-3 text-ck-text-3">{t('subtitle')}</p>
         </div>
 
         {/* Step indicator — desmobil style with line connectors */}
@@ -366,9 +366,9 @@ export default function BookingPage() {
                         <span className={`text-base font-semibold ${type === value ? 'text-ck-text' : 'text-ck-text-2'}`}>
                           {t(`types.${value}`)}
                         </span>
-                        <p className="mt-0.5 text-sm text-ck-text-faint">{t(`typeDesc.${value}`)}</p>
+                        <p className="mt-0.5 text-sm text-ck-text-muted">{t(`typeDesc.${value}`)}</p>
                       </div>
-                      <div className="flex items-center gap-1 text-xs text-ck-text-faint">
+                      <div className="flex items-center gap-1 text-xs text-ck-text-muted">
                         <Clock size={12} />
                         <span>±{duration} min</span>
                       </div>
@@ -399,7 +399,7 @@ export default function BookingPage() {
                         {t('locationShop')}
                       </span>
                       <p className="mt-1 text-sm font-medium text-ck-text">Satijnbloem 6, 3068 JP</p>
-                      <p className="text-xs text-ck-text-faint">Rotterdam · {t('freeParking')}</p>
+                      <p className="text-xs text-ck-text-muted">Rotterdam · {t('freeParking')}</p>
                     </div>
                   </button>
                   <button
@@ -420,7 +420,7 @@ export default function BookingPage() {
                         {t('locationOther')}
                       </span>
                       <p className="mt-1 text-sm font-medium text-ck-text">{t('locationOtherDesc')}</p>
-                      <p className="text-xs text-ck-text-faint">{t('locationOtherHint')}</p>
+                      <p className="text-xs text-ck-text-muted">{t('locationOtherHint')}</p>
                     </div>
                   </button>
                 </div>
@@ -428,7 +428,7 @@ export default function BookingPage() {
                 {location === 'other' && (
                   <div className="mt-4 grid gap-3">
                     <div>
-                      <label className="mb-1.5 block text-xs font-semibold uppercase tracking-wide text-ck-text-muted">{t('street')}</label>
+                      <label className="mb-1.5 block text-xs font-semibold uppercase tracking-wide text-ck-text-3">{t('street')}</label>
                       <input
                         type="text"
                         value={street}
@@ -439,7 +439,7 @@ export default function BookingPage() {
                     </div>
                     <div className="grid grid-cols-2 gap-3">
                       <div>
-                        <label className="mb-1.5 block text-xs font-semibold uppercase tracking-wide text-ck-text-muted">{t('postcode')}</label>
+                        <label className="mb-1.5 block text-xs font-semibold uppercase tracking-wide text-ck-text-3">{t('postcode')}</label>
                         <input
                           type="text"
                           value={postcode}
@@ -449,7 +449,7 @@ export default function BookingPage() {
                         />
                       </div>
                       <div>
-                        <label className="mb-1.5 block text-xs font-semibold uppercase tracking-wide text-ck-text-muted">{t('city')}</label>
+                        <label className="mb-1.5 block text-xs font-semibold uppercase tracking-wide text-ck-text-3">{t('city')}</label>
                         <input
                           type="text"
                           value={city}
@@ -464,7 +464,7 @@ export default function BookingPage() {
               </div>
 
               <div className="flex items-center justify-between border-t border-ck-border pt-6">
-                <span className="text-xs text-ck-text-faint">{t('stepOf', { step: 1, total: 3 })}</span>
+                <span className="text-xs text-ck-text-muted">{t('stepOf', { step: 1, total: 3 })}</span>
                 <button
                   onClick={() => setStep(2)}
                   disabled={!canGoStep2}
@@ -503,17 +503,17 @@ export default function BookingPage() {
               {/* Time slots */}
               {date && (
                 <div>
-                  <label className="mb-3 flex items-center gap-1.5 text-sm font-medium text-ck-text-muted">
+                  <label className="mb-3 flex items-center gap-1.5 text-sm font-medium text-ck-text-3">
                     <Clock size={14} />
                     {t('time')}
                   </label>
                   {loadingSlots ? (
-                    <div className="flex items-center justify-center gap-2 py-6 text-ck-text-faint">
+                    <div className="flex items-center justify-center gap-2 py-6 text-ck-text-muted">
                       <Loader2 size={16} className="animate-spin" />
                       {tCommon('loading')}
                     </div>
                   ) : slots.length === 0 ? (
-                    <p className="py-6 text-center text-sm text-ck-text-faint">{t('noSlots')}</p>
+                    <p className="py-6 text-center text-sm text-ck-text-muted">{t('noSlots')}</p>
                   ) : (
                     <div className="grid grid-cols-4 gap-2 sm:grid-cols-6">
                       {slots.map(slot => (
@@ -540,7 +540,7 @@ export default function BookingPage() {
               <div className="flex justify-between border-t border-ck-border pt-6">
                 <button
                   onClick={() => setStep(1)}
-                  className="flex items-center gap-2 border border-ck-border px-5 py-3 text-sm font-medium text-ck-text-muted transition-colors hover:text-ck-text hover:border-ck-border-2"
+                  className="flex items-center gap-2 border border-ck-border px-5 py-3 text-sm font-medium text-ck-text-3 transition-colors hover:text-ck-text hover:border-ck-border-2"
                 >
                   <ChevronLeft size={16} />
                   {tCommon('back')}
@@ -575,28 +575,28 @@ export default function BookingPage() {
                 <div className="flex flex-wrap gap-4 text-sm">
                   <div className="flex items-center gap-2">
                     <ClipboardCheck size={14} className="text-ck-red" />
-                    <span className="text-ck-text-muted">{t(`types.${type}`)}</span>
+                    <span className="text-ck-text-3">{t(`types.${type}`)}</span>
                   </div>
                   <div className="flex items-center gap-2">
                     <Calendar size={14} className="text-ck-red" />
-                    <span className="text-ck-text-muted">
+                    <span className="text-ck-text-3">
                       {new Date(date + 'T00:00:00').toLocaleDateString(bcp, { weekday: 'short', day: 'numeric', month: 'short' })}
                     </span>
                   </div>
                   <div className="flex items-center gap-2">
                     <Clock size={14} className="text-ck-red" />
-                    <span className="text-ck-text-muted">{time}</span>
+                    <span className="text-ck-text-3">{time}</span>
                   </div>
                   <div className="flex items-center gap-2">
                     <MapPin size={14} className="text-ck-red" />
-                    <span className="text-ck-text-muted">{location === 'shop' ? t('locationShop') : t('locationOther')}</span>
+                    <span className="text-ck-text-3">{location === 'shop' ? t('locationShop') : t('locationOther')}</span>
                   </div>
                 </div>
               </div>
 
               <div className="grid gap-4">
                 <div>
-                  <label className="mb-1.5 block text-sm font-medium text-ck-text-muted">
+                  <label className="mb-1.5 block text-sm font-medium text-ck-text-3">
                     <User size={14} className="mr-1.5 inline" />
                     {t('name')} *
                   </label>
@@ -611,7 +611,7 @@ export default function BookingPage() {
                 </div>
                 <div className="grid gap-4 sm:grid-cols-2">
                   <div>
-                    <label className="mb-1.5 block text-sm font-medium text-ck-text-muted">
+                    <label className="mb-1.5 block text-sm font-medium text-ck-text-3">
                       <Phone size={14} className="mr-1.5 inline" />
                       {t('phone')} *
                     </label>
@@ -625,7 +625,7 @@ export default function BookingPage() {
                     />
                   </div>
                   <div>
-                    <label className="mb-1.5 block text-sm font-medium text-ck-text-muted">
+                    <label className="mb-1.5 block text-sm font-medium text-ck-text-3">
                       <Mail size={14} className="mr-1.5 inline" />
                       {t('email')} *
                     </label>
@@ -640,7 +640,7 @@ export default function BookingPage() {
                   </div>
                 </div>
                 <div>
-                  <label className="mb-1.5 block text-sm font-medium text-ck-text-muted">
+                  <label className="mb-1.5 block text-sm font-medium text-ck-text-3">
                     <Car size={14} className="mr-1.5 inline" />
                     {t('kenteken')}
                   </label>
@@ -653,7 +653,7 @@ export default function BookingPage() {
                   />
                 </div>
                 <div>
-                  <label className="mb-1.5 block text-sm font-medium text-ck-text-muted">
+                  <label className="mb-1.5 block text-sm font-medium text-ck-text-3">
                     <FileText size={14} className="mr-1.5 inline" />
                     {t('notes')}
                   </label>
@@ -674,7 +674,7 @@ export default function BookingPage() {
               <div className="flex justify-between border-t border-ck-border pt-6">
                 <button
                   onClick={() => setStep(2)}
-                  className="flex items-center gap-2 border border-ck-border px-5 py-3 text-sm font-medium text-ck-text-muted transition-colors hover:text-ck-text hover:border-ck-border-2"
+                  className="flex items-center gap-2 border border-ck-border px-5 py-3 text-sm font-medium text-ck-text-3 transition-colors hover:text-ck-text hover:border-ck-border-2"
                 >
                   <ChevronLeft size={16} />
                   {tCommon('back')}
@@ -710,11 +710,11 @@ export default function BookingPage() {
                   <MapPin size={20} className="text-ck-red" />
                 </div>
                 <div>
-                  <h3 className="text-sm font-semibold uppercase tracking-wide text-ck-text-muted">{t('locationShop')}</h3>
+                  <h3 className="text-sm font-semibold uppercase tracking-wide text-ck-text-3">{t('locationShop')}</h3>
                   <p className="mt-1 text-lg font-semibold text-ck-text">Satijnbloem 6</p>
-                  <p className="text-sm text-ck-text-muted">3068 JP Rotterdam</p>
-                  <p className="text-sm text-ck-text-muted">The Netherlands</p>
-                  <div className="mt-3 flex flex-wrap gap-3 text-xs text-ck-text-faint">
+                  <p className="text-sm text-ck-text-3">3068 JP Rotterdam</p>
+                  <p className="text-sm text-ck-text-3">The Netherlands</p>
+                  <div className="mt-3 flex flex-wrap gap-3 text-xs text-ck-text-muted">
                     <span className="flex items-center gap-1"><Clock size={12} /> {t('openingHours')}</span>
                     <span className="flex items-center gap-1"><Car size={12} /> {t('freeParking')}</span>
                   </div>
@@ -732,7 +732,7 @@ export default function BookingPage() {
                       href="https://www.google.com/maps/search/?api=1&query=Satijnbloem+6+3068+JP+Rotterdam"
                       target="_blank"
                       rel="noopener noreferrer"
-                      className="inline-flex items-center gap-2 rounded-lg border border-ck-border px-4 py-2 text-sm font-medium text-ck-text-muted transition-colors hover:text-ck-text hover:border-ck-border-2"
+                      className="inline-flex items-center gap-2 rounded-lg border border-ck-border px-4 py-2 text-sm font-medium text-ck-text-3 transition-colors hover:text-ck-text hover:border-ck-border-2"
                     >
                       <MapPin size={14} />
                       {t('openInMaps')}
@@ -756,7 +756,7 @@ export default function BookingPage() {
         )}
 
         {/* Footer info */}
-        <div className="mt-8 text-center text-xs text-ck-text-faint">
+        <div className="mt-8 text-center text-xs text-ck-text-muted">
           <p>{t('openingHours')}</p>
         </div>
       </div>
