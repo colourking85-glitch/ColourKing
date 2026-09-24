@@ -9,6 +9,7 @@ export const InvoiceSchema = z.object({
   due_date: z.string().nullable().optional(),
   notes: z.string().nullable().optional(),
   terms: z.string().nullable().optional(),
+  invoice_type: z.enum(['standard', 'deposit']).default('standard'),
 });
 
 export const InvoiceLineSchema = z.object({

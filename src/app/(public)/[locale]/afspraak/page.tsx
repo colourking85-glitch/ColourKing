@@ -3,9 +3,19 @@
 import { useState, useEffect, useMemo } from 'react';
 import { useTranslations, useLocale } from 'next-intl';
 import { Link } from '@/i18n/routing';
-import { Car, ClipboardCheck, PackageCheck, ChevronLeft, ChevronRight, Check, Clock, Calendar, User, Phone, Mail, FileText, Loader2, MapPin, Navigation } from 'lucide-react';
+import { Car, ClipboardCheck, PackageCheck, ChevronLeft, ChevronRight, Check, Clock, Calendar, User, Phone, Mail, FileText, Loader2, MapPin, Navigation, Search, Globe } from 'lucide-react';
 
 type Slot = { time: string; available: boolean };
+
+type VehicleInfo = {
+  kenteken: string;
+  make?: string;
+  model?: string;
+  colour?: string;
+  fuel?: string;
+  body_type?: string;
+  year?: number;
+};
 
 const TYPES = [
   { value: 'inspection' as const, icon: ClipboardCheck, duration: 30 },
@@ -192,6 +202,10 @@ export default function BookingPage() {
   const [phone, setPhone] = useState('');
   const [kenteken, setKenteken] = useState('');
   const [notes, setNotes] = useState('');
+  const [isForeignPlate, setIsForeignPlate] = useState(false);
+  const [vehicle, setVehicle] = useState<VehicleInfo | null>(null);
+  const [rdwLoading, setRdwLoading] = useState(false);
+  const [rdwError, setRdwError] = useState('');
   const [street, setStreet] = useState('');
   const [postcode, setPostcode] = useState('');
   const [city, setCity] = useState('');
@@ -210,6 +224,31 @@ export default function BookingPage() {
       .catch(() => setSlots([]))
       .finally(() => setLoadingSlots(false));
   }, [date, type]);
+
+  async function lookupPlate() {
+    const plate = kenteken.replace(/[-\s]/g, '').toUpperCase();
+    if (!plate || plate.length < 4) {
+      setRdwError(t('rdwMinChars'));
+      return;
+    }
+    setRdwLoading(true);
+    setRdwError('');
+    setVehicle(null);
+    try {
+      const res = await fetch(`/api/rdw?kenteken=${encodeURIComponent(plate)}`);
+      if (!res.ok) {
+        setRdwError(t('rdwNotFound'));
+        return;
+      }
+      const data: VehicleInfo = await res.json();
+      setVehicle(data);
+      setKenteken(data.kenteken);
+    } catch {
+      setRdwError(t('rdwError'));
+    } finally {
+      setRdwLoading(false);
+    }
+  }
 
   async function handleSubmit() {
     setSubmitting(true);
@@ -644,13 +683,94 @@ export default function BookingPage() {
                     <Car size={14} className="mr-1.5 inline" />
                     {t('kenteken')}
                   </label>
-                  <input
-                    type="text"
-                    value={kenteken}
-                    onChange={e => setKenteken(e.target.value.toUpperCase())}
-                    placeholder="AB-123-CD"
-                    className="w-full rounded-lg border border-ck-border bg-ck-surface-2 px-4 py-3 font-mono uppercase text-ck-text placeholder:text-ck-text-faint focus:border-ck-red focus:outline-none"
-                  />
+
+                  {/* Dutch-style license plate input */}
+                  <div className="flex items-stretch gap-2">
+                    <div className={`flex flex-1 items-stretch overflow-hidden rounded-lg border ${rdwError ? 'border-ck-red' : 'border-ck-border'}`}>
+                      {!isForeignPlate && (
+                        <div className="flex w-10 shrink-0 flex-col items-center justify-center bg-[#003399]">
+                          <span className="text-[8px] font-bold leading-none text-white">NL</span>
+                        </div>
+                      )}
+                      <input
+                        type="text"
+                        value={kenteken}
+                        onChange={e => {
+                          setKenteken(e.target.value.toUpperCase());
+                          if (vehicle) setVehicle(null);
+                          if (rdwError) setRdwError('');
+                        }}
+                        onKeyDown={e => {
+                          if (e.key === 'Enter' && !isForeignPlate) { e.preventDefault(); lookupPlate(); }
+                        }}
+                        placeholder={isForeignPlate ? t('kentekenPlaceholder') : 'AB-123-CD'}
+                        className={`w-full px-4 py-3 text-center font-mono text-lg font-bold uppercase tracking-widest outline-none ${
+                          isForeignPlate
+                            ? 'bg-ck-surface-2 text-ck-text placeholder:text-ck-text-faint'
+                            : 'bg-[#f5c518] text-[#1a1a1a] placeholder:text-[#1a1a1a]/40'
+                        }`}
+                      />
+                    </div>
+                    {!isForeignPlate && (
+                      <button
+                        type="button"
+                        onClick={lookupPlate}
+                        disabled={rdwLoading}
+                        className="flex items-center gap-1.5 whitespace-nowrap rounded-lg bg-[#003399] px-4 py-3 text-xs font-semibold uppercase tracking-wider text-white transition-colors hover:bg-[#002277] disabled:opacity-50"
+                      >
+                        {rdwLoading ? (
+                          <Loader2 size={14} className="animate-spin" />
+                        ) : (
+                          <Search size={14} />
+                        )}
+                        {t('lookupPlate')}
+                      </button>
+                    )}
+                  </div>
+                  {rdwError && <p className="mt-1.5 text-xs text-ck-red">{rdwError}</p>}
+
+                  {/* Abroad toggle */}
+                  <label className="mt-2 flex cursor-pointer items-center gap-2 text-xs text-ck-text-muted">
+                    <input
+                      type="checkbox"
+                      checked={isForeignPlate}
+                      onChange={() => {
+                        setIsForeignPlate(!isForeignPlate);
+                        setVehicle(null);
+                        setRdwError('');
+                      }}
+                      className="h-3.5 w-3.5 accent-ck-red"
+                    />
+                    <Globe size={12} />
+                    {t('foreignPlate')}
+                  </label>
+
+                  {/* Vehicle info from RDW */}
+                  {vehicle && (
+                    <div className="mt-3 rounded-lg border border-green-600/30 bg-green-500/5 p-4">
+                      <div className="flex items-start justify-between gap-4">
+                        <div>
+                          <p className="text-sm font-semibold text-ck-text">
+                            {vehicle.make} {vehicle.model}
+                          </p>
+                          <div className="mt-1.5 flex flex-wrap gap-x-4 gap-y-1 text-xs text-ck-text-muted">
+                            {vehicle.year && (
+                              <span>{t('vehicleYear')}: {vehicle.year}</span>
+                            )}
+                            {vehicle.colour && (
+                              <span>{t('vehicleColour')}: {vehicle.colour}</span>
+                            )}
+                            {vehicle.fuel && (
+                              <span>{t('vehicleFuel')}: {vehicle.fuel}</span>
+                            )}
+                          </div>
+                        </div>
+                        <span className="shrink-0 rounded bg-green-500/10 px-2 py-1 font-mono text-xs font-bold text-green-600">
+                          {vehicle.kenteken}
+                        </span>
+                      </div>
+                    </div>
+                  )}
                 </div>
                 <div>
                   <label className="mb-1.5 block text-sm font-medium text-ck-text-3">

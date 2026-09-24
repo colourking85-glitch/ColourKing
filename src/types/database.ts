@@ -470,6 +470,7 @@ export type Database = {
           due_date: string | null
           id: string
           invoice_number: string | null
+          invoice_type: string
           issued_at: string | null
           issued_by: string | null
           job_id: string | null
@@ -501,6 +502,7 @@ export type Database = {
           due_date?: string | null
           id?: string
           invoice_number?: string | null
+          invoice_type?: string
           issued_at?: string | null
           issued_by?: string | null
           job_id?: string | null
@@ -532,6 +534,7 @@ export type Database = {
           due_date?: string | null
           id?: string
           invoice_number?: string | null
+          invoice_type?: string
           issued_at?: string | null
           issued_by?: string | null
           job_id?: string | null

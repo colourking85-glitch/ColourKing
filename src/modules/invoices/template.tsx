@@ -26,6 +26,7 @@ type InvoiceData = {
   invoice_number: string | null;
   status: string;
   locale: string;
+  invoice_type?: string;
   subtotal_cents: number;
   vat_cents: number;
   total_cents: number;
@@ -92,6 +93,7 @@ type LocaleStrings = Record<string, string>;
 const LOCALES: Record<string, LocaleStrings> = {
   nl: {
     title: 'FACTUUR',
+    depositTitle: 'VOORSCHOTFACTUUR',
     creditNoteTitle: 'CREDITNOTA',
     invoiceNumber: 'Factuurnummer',
     invoiceDate: 'Factuurdatum',
@@ -125,6 +127,7 @@ const LOCALES: Record<string, LocaleStrings> = {
   },
   en: {
     title: 'INVOICE',
+    depositTitle: 'DEPOSIT INVOICE',
     creditNoteTitle: 'CREDIT NOTE',
     invoiceNumber: 'Invoice number',
     invoiceDate: 'Invoice date',
@@ -158,6 +161,7 @@ const LOCALES: Record<string, LocaleStrings> = {
   },
   tr: {
     title: 'FATURA',
+    depositTitle: 'DEPOZITO FATURASI',
     creditNoteTitle: 'ALACAK DEKONTU',
     invoiceNumber: 'Fatura numarasi',
     invoiceDate: 'Fatura tarihi',
@@ -195,7 +199,8 @@ export function InvoiceTemplate({ invoice }: { invoice: InvoiceData }) {
   const locale = invoice.locale || 'nl';
   const t = LOCALES[locale] ?? LOCALES.nl;
   const isCreditNote = !!invoice.credit_note_id;
-  const title = isCreditNote ? t.creditNoteTitle : t.title;
+  const isDeposit = invoice.invoice_type === 'deposit';
+  const title = isCreditNote ? t.creditNoteTitle : isDeposit ? t.depositTitle : t.title;
 
   const customer = invoice.customers;
 
@@ -243,7 +248,7 @@ export function InvoiceTemplate({ invoice }: { invoice: InvoiceData }) {
             fontSize: '28px',
             fontWeight: 600,
             letterSpacing: '0.08em',
-            color: isCreditNote ? '#c2410c' : '#111',
+            color: isCreditNote ? '#c2410c' : isDeposit ? '#b45309' : '#111',
           }}>
             {title}
           </div>
@@ -478,7 +483,7 @@ export function InvoiceTemplate({ invoice }: { invoice: InvoiceData }) {
             <div>
               <div style={{ color: '#888', fontSize: '11px', marginBottom: '2px' }}>{t.iban}</div>
               <div style={{ fontFamily: 'JetBrains Mono, monospace', fontWeight: 500, color: '#111', letterSpacing: '0.02em' }}>
-                NL00 INGB 0000 0000 00
+                NL12 INGB 0675 6533 04
               </div>
             </div>
             <div>
@@ -535,7 +540,7 @@ export function InvoiceTemplate({ invoice }: { invoice: InvoiceData }) {
         lineHeight: '1.6',
       }}>
         <div>Autospuitbedrijf Colour King | Satijnbloem 6, 3068 JP Rotterdam | {t.kvk}: 82199884 | {t.btw}: NL821998840B03</div>
-        <div>IBAN: NL00 INGB 0000 0000 00 | BIC: INGBNL2A | info@colourking.nl | 06 81 63 10 20</div>
+        <div>IBAN: NL12 INGB 0675 6533 04 | BIC: INGBNL2A | info@colourking.nl | 06 81 63 10 20</div>
       </div>
     </div>
   );

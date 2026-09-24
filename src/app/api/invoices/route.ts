@@ -1,6 +1,6 @@
 import { NextRequest, NextResponse } from 'next/server';
 import { listInvoices } from '@/modules/invoices/queries';
-import { createInvoiceFromOffer } from '@/modules/invoices/actions';
+import { createInvoiceFromOffer, createInvoice } from '@/modules/invoices/actions';
 import type { InvoiceStatus } from '@/types/database';
 
 export async function GET(req: NextRequest) {
@@ -22,7 +22,9 @@ export async function GET(req: NextRequest) {
 export async function POST(req: NextRequest) {
   try {
     const body = await req.json();
-    const invoice = await createInvoiceFromOffer(body);
+    const invoice = body.offer_id
+      ? await createInvoiceFromOffer(body)
+      : await createInvoice(body);
     return NextResponse.json(invoice, { status: 201 });
   } catch (e) {
     const msg = (e as Error).message;

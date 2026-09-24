@@ -79,10 +79,8 @@ export default function InvoicePreviewPage() {
           {isDraft && (
             <button
               onClick={async () => {
-                const res = await fetch(`/api/invoices/${id}`, {
-                  method: 'PATCH',
-                  headers: { 'Content-Type': 'application/json' },
-                  body: JSON.stringify({ action: 'issue' }),
+                const res = await fetch(`/api/invoices/${id}/issue`, {
+                  method: 'POST',
                 });
                 if (res.ok) {
                   window.location.href = `/app/facturen/${id}`;

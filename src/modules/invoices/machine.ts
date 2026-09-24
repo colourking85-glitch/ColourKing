@@ -11,7 +11,10 @@ const TRANSITIONS: Transition[] = [
   { from: 'sent', to: 'paid' },
   { from: 'sent', to: 'overdue' },
   { from: 'sent', to: 'credited' },
-  { from: 'draft', to: 'cancelled' }, // only drafts can be deleted/cancelled
+  { from: 'overdue', to: 'paid' },
+  { from: 'overdue', to: 'credited' },
+  { from: 'paid', to: 'credited' },
+  { from: 'draft', to: 'cancelled' },
 ];
 
 const TERMINAL: InvoiceStatus[] = ['paid', 'cancelled', 'credited'];

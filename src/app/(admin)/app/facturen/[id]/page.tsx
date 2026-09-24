@@ -46,6 +46,7 @@ type InvoiceDetail = {
   id: string;
   invoice_number: string | null;
   status: InvoiceStatus;
+  invoice_type: string;
   customer_id: string;
   vehicle_id: string | null;
   job_id: string | null;
@@ -287,7 +288,7 @@ export default function InvoiceDetailPage() {
               </span>
             </div>
             <p className="mt-0.5 text-[11px] text-ck-text-muted">
-              {t('number')} {invoice.credit_note_id ? `(${t('creditNote')})` : ''}
+              {t('number')} {invoice.credit_note_id ? `(${t('creditNote')})` : invoice.invoice_type === 'deposit' ? `(${t('depositInvoice')})` : ''}
             </p>
           </div>
         </div>

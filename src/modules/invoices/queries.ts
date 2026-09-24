@@ -2,7 +2,7 @@ import { createClient } from '@/lib/supabase/server';
 import type { InvoiceStatus } from '@/types/database';
 
 const INVOICE_SELECT = `
-  id, invoice_number, status,
+  id, invoice_number, status, invoice_type,
   customer_id, vehicle_id, job_id, offer_id,
   locale,
   subtotal_cents, vat_cents, total_cents, discount_cents, tax_summary,

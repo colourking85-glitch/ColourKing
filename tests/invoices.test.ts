@@ -416,6 +416,18 @@ describe('Invoice state machine', () => {
       expect(canTransition('overdue', 'draft')).toBe(false);
     });
 
+    it('allows overdue -> paid', () => {
+      expect(canTransition('overdue', 'paid')).toBe(true);
+    });
+
+    it('allows overdue -> credited', () => {
+      expect(canTransition('overdue', 'credited')).toBe(true);
+    });
+
+    it('allows paid -> credited', () => {
+      expect(canTransition('paid', 'credited')).toBe(true);
+    });
+
     it('blocks credited -> anything', () => {
       const statuses: InvoiceStatus[] = ['draft', 'sent', 'paid', 'overdue', 'cancelled'];
       for (const s of statuses) {
@@ -483,8 +495,15 @@ describe('Invoice state machine', () => {
       expect(allowed).toHaveLength(3);
     });
 
-    it('paid has no transitions', () => {
-      expect(allowedTransitions('paid')).toHaveLength(0);
+    it('overdue can go to paid or credited', () => {
+      const allowed = allowedTransitions('overdue');
+      expect(allowed).toContain('paid');
+      expect(allowed).toContain('credited');
+      expect(allowed).toHaveLength(2);
+    });
+
+    it('paid can only be credited', () => {
+      expect(allowedTransitions('paid')).toEqual(['credited']);
     });
 
     it('credited has no transitions', () => {
