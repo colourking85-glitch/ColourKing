@@ -305,7 +305,7 @@ export default function ContactPage() {
                   </div>
                   <div className="flex justify-between border-b border-ck-border pb-2">
                     <span className="text-ck-text-muted">BTW</span>
-                    <span className="font-medium text-ck-text">NL821998840B03</span>
+                    <span className="font-medium text-ck-text">NL003653356B56</span>
                   </div>
                   <div className="flex justify-between border-b border-ck-border pb-2">
                     <span className="text-ck-text-muted">{t('contact.verified.bank')}</span>

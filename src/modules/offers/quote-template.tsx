@@ -210,7 +210,7 @@ export function QuoteTemplate({ quote }: { quote: QuoteData }) {
           <div style={{ marginTop: '8px', fontSize: '11px', color: '#888' }}>
             <span>{t.kvk}: 82199884</span>
             <span style={{ margin: '0 8px' }}>|</span>
-            <span>{t.btw}: NL821998840B03</span>
+            <span>{t.btw}: NL003653356B56</span>
           </div>
         </div>
 
@@ -460,7 +460,7 @@ export function QuoteTemplate({ quote }: { quote: QuoteData }) {
         textAlign: 'center',
         lineHeight: '1.6',
       }}>
-        <div>Autospuitbedrijf Colour King | Satijnbloem 6, 3068 JP Rotterdam | {t.kvk}: 82199884 | {t.btw}: NL821998840B03</div>
+        <div>Autospuitbedrijf Colour King | Satijnbloem 6, 3068 JP Rotterdam | {t.kvk}: 82199884 | {t.btw}: NL003653356B56</div>
         <div>IBAN: NL00 INGB 0000 0000 00 | BIC: INGBNL2A | info@colourking.nl | 06 81 63 10 20</div>
       </div>
     </div>

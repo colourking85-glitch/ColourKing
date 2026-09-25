@@ -673,7 +673,7 @@ export function InspectionReportTemplate({ data }: { data: InspectionReportData 
 
         <div style={S.footer}>
           <span>ColourKing Autoschade · Satijnbloem 6 · 3068 JP Rotterdam</span>
-          <span>KvK 82199884 · BTW NL821998840B03</span>
+          <span>KvK 82199884 · BTW NL003653356B56</span>
         </div>
       </div>
 
@@ -721,7 +721,7 @@ export function InspectionReportTemplate({ data }: { data: InspectionReportData 
 
           <div style={S.footer}>
             <span>ColourKing Autoschade · Satijnbloem 6 · 3068 JP Rotterdam</span>
-            <span>KvK 82199884 · BTW NL821998840B03</span>
+            <span>KvK 82199884 · BTW NL003653356B56</span>
           </div>
         </div>
       )}
@@ -798,7 +798,7 @@ export function InspectionReportTemplate({ data }: { data: InspectionReportData 
 
           <div style={S.footer}>
             <span>ColourKing Autoschade · Satijnbloem 6 · 3068 JP Rotterdam</span>
-            <span>KvK 82199884 · BTW NL821998840B03</span>
+            <span>KvK 82199884 · BTW NL003653356B56</span>
           </div>
         </div>
       )}
@@ -830,7 +830,7 @@ export function InspectionReportTemplate({ data }: { data: InspectionReportData 
 
           <div style={S.footer}>
             <span>ColourKing Autoschade · Satijnbloem 6 · 3068 JP Rotterdam</span>
-            <span>KvK 82199884 · BTW NL821998840B03</span>
+            <span>KvK 82199884 · BTW NL003653356B56</span>
           </div>
         </div>
       )}
@@ -893,7 +893,7 @@ export function InspectionReportTemplate({ data }: { data: InspectionReportData 
 
         <div style={S.footer}>
           <span>ColourKing Autoschade · Satijnbloem 6 · 3068 JP Rotterdam</span>
-          <span>KvK 82199884 · BTW NL821998840B03</span>
+          <span>KvK 82199884 · BTW NL003653356B56</span>
         </div>
       </div>
 
@@ -959,7 +959,7 @@ export function InspectionReportTemplate({ data }: { data: InspectionReportData 
 
         <div style={S.footer}>
           <span>ColourKing Autoschade · Satijnbloem 6 · 3068 JP Rotterdam</span>
-          <span>KvK 82199884 · BTW NL821998840B03</span>
+          <span>KvK 82199884 · BTW NL003653356B56</span>
         </div>
       </div>
     </div>
