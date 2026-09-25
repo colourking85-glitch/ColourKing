@@ -14,6 +14,7 @@ import type { InvoiceStatus, OfferLineKind, TaxCode, PaymentMethod } from '@/typ
 import { InvoiceTemplate } from '@/modules/invoices/template';
 import { formatCurrency } from '@/lib/format';
 import { useAppLocale } from '@/components/AdminIntlProvider';
+import type { CompanyInfo } from '@/lib/company';
 
 type InvoiceLine = {
   id: string;
@@ -146,18 +147,20 @@ export default function InvoiceDetailPage() {
   const [paymentRef, setPaymentRef] = useState('');
   const [showInvoice, setShowInvoice] = useState(false);
   const [linkCopied, setLinkCopied] = useState(false);
+  const [company, setCompany] = useState<CompanyInfo | undefined>();
 
   const load = () => {
     setLoading(true);
-    fetch(`/api/invoices/${id}`)
-      .then(r => r.ok ? r.json() : null)
-      .then(data => {
-        setInvoice(data);
-        if (data) {
-          setPaymentAmount(data.total_cents);
-        }
-      })
-      .finally(() => setLoading(false));
+    Promise.all([
+      fetch(`/api/invoices/${id}`).then(r => r.ok ? r.json() : null),
+      fetch('/api/settings/company').then(r => r.ok ? r.json() : undefined),
+    ]).then(([data, comp]) => {
+      setInvoice(data);
+      setCompany(comp);
+      if (data) {
+        setPaymentAmount(data.total_cents);
+      }
+    }).finally(() => setLoading(false));
   };
 
   useEffect(load, [id]);
@@ -264,7 +267,7 @@ export default function InvoiceDetailPage() {
             {tc('back')}
           </button>
         </div>
-        <InvoiceTemplate invoice={invoice} />
+        <InvoiceTemplate invoice={invoice} company={company} />
       </div>
     );
   }
@@ -452,7 +455,7 @@ export default function InvoiceDetailPage() {
         <div className="space-y-6 lg:col-span-2">
           {/* Invoice preview */}
           <div className="rounded-[10px] border-[0.5px] border-ck-border bg-white overflow-hidden">
-            <InvoiceTemplate invoice={invoice} />
+            <InvoiceTemplate invoice={invoice} company={company} />
           </div>
 
           {/* Payments */}

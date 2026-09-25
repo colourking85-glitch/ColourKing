@@ -1,8 +1,20 @@
 'use client';
 
-import { useState, FormEvent } from 'react';
+import { useState, useEffect, FormEvent } from 'react';
 import { useTranslations } from 'next-intl';
 import { useParams } from 'next/navigation';
+
+type CompanyData = {
+  legal_name?: string;
+  kvk?: string;
+  vat_number?: string;
+  iban?: string;
+  address?: string;
+  postcode?: string;
+  city?: string;
+  phone?: string;
+  email?: string;
+};
 
 const SUBJECT_KEYS = [
   'damageRepair',
@@ -16,6 +28,11 @@ const SUBJECT_KEYS = [
 export default function ContactPage() {
   const t = useTranslations('pub');
   const { locale } = useParams<{ locale: string }>();
+
+  const [company, setCompany] = useState<CompanyData>({});
+  useEffect(() => {
+    fetch('/api/settings/company').then(r => r.ok ? r.json() : {}).then(setCompany);
+  }, []);
 
   const [form, setForm] = useState({
     name: '',
@@ -242,10 +259,10 @@ export default function ContactPage() {
                     {t('contact.phone')}
                   </p>
                   <a
-                    href="tel:+31681631020"
+                    href={`tel:${company.phone?.replace(/[\s-]/g, '') ?? '+31681631020'}`}
                     className="mt-2 block font-heading text-2xl font-bold text-ck-text transition-colors hover:text-ck-red"
                   >
-                    {t('footer.phone')}
+                    {company.phone ?? t('footer.phone')}
                   </a>
                 </div>
 
@@ -254,10 +271,10 @@ export default function ContactPage() {
                     {t('contact.email')}
                   </p>
                   <a
-                    href="mailto:info@colourking.nl"
+                    href={`mailto:${company.email ?? 'info@colourking.nl'}`}
                     className="mt-2 block text-sm text-ck-text transition-colors hover:text-ck-red"
                   >
-                    {t('footer.email')}
+                    {company.email ?? t('footer.email')}
                   </a>
                 </div>
 
@@ -297,23 +314,23 @@ export default function ContactPage() {
                 <div className="mt-5 space-y-3 text-sm">
                   <div className="flex justify-between border-b border-ck-border pb-2">
                     <span className="text-ck-text-muted">{t('contact.verified.company')}</span>
-                    <span className="font-medium text-ck-text">Autospuitbedrijf Colour King</span>
+                    <span className="font-medium text-ck-text">{company.legal_name ?? 'Autospuitbedrijf Colour King'}</span>
                   </div>
                   <div className="flex justify-between border-b border-ck-border pb-2">
                     <span className="text-ck-text-muted">KvK</span>
-                    <span className="font-medium text-ck-text">82199884</span>
+                    <span className="font-medium text-ck-text">{company.kvk ?? '82199884'}</span>
                   </div>
                   <div className="flex justify-between border-b border-ck-border pb-2">
                     <span className="text-ck-text-muted">BTW</span>
-                    <span className="font-medium text-ck-text">NL003653356B56</span>
+                    <span className="font-medium text-ck-text">{company.vat_number ?? 'NL003653356B56'}</span>
                   </div>
                   <div className="flex justify-between border-b border-ck-border pb-2">
                     <span className="text-ck-text-muted">{t('contact.verified.bank')}</span>
-                    <span className="font-medium text-ck-text">NL12INGB0675653304</span>
+                    <span className="font-medium text-ck-text">{company.iban ?? 'NL12INGB0675653304'}</span>
                   </div>
                   <div className="flex justify-between">
                     <span className="text-ck-text-muted">{t('contact.address')}</span>
-                    <span className="font-medium text-ck-text text-right">Satijnbloem 6<br />3068 JP Rotterdam</span>
+                    <span className="font-medium text-ck-text text-right">{company.address ?? 'Satijnbloem 6'}<br />{company.postcode ?? '3068 JP'} {company.city ?? 'Rotterdam'}</span>
                   </div>
                 </div>
               </div>

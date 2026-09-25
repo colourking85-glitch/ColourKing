@@ -6,18 +6,23 @@ import Link from 'next/link';
 import { ArrowLeft, Printer, Send } from 'lucide-react';
 import { QuoteTemplate } from '@/modules/offers/quote-template';
 import { useTranslations } from 'next-intl';
+import type { CompanyInfo } from '@/lib/company';
 
 export default function QuotePreviewPage() {
   const { id } = useParams<{ id: string }>();
   const t = useTranslations('es');
   const [offer, setOffer] = useState<Parameters<typeof QuoteTemplate>[0]['quote'] | null>(null);
+  const [company, setCompany] = useState<CompanyInfo | undefined>();
   const [loading, setLoading] = useState(true);
 
   useEffect(() => {
-    fetch(`/api/offers/${id}`)
-      .then(r => r.ok ? r.json() : null)
-      .then(setOffer)
-      .finally(() => setLoading(false));
+    Promise.all([
+      fetch(`/api/offers/${id}`).then(r => r.ok ? r.json() : null),
+      fetch('/api/settings/company').then(r => r.ok ? r.json() : undefined),
+    ]).then(([off, comp]) => {
+      setOffer(off);
+      setCompany(comp);
+    }).finally(() => setLoading(false));
   }, [id]);
 
   if (loading) {
@@ -79,7 +84,7 @@ export default function QuotePreviewPage() {
 
       {/* Preview */}
       <div className="rounded-[10px] border-[0.5px] border-ck-border bg-white shadow-md">
-        <QuoteTemplate quote={offer} />
+        <QuoteTemplate quote={offer} company={company} />
       </div>
     </div>
   );

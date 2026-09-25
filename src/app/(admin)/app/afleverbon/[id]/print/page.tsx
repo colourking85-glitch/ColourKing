@@ -3,22 +3,25 @@
 import { useState, useEffect } from 'react';
 import { useParams } from 'next/navigation';
 import { HandoverTemplate } from '@/modules/repair-orders/handover-template';
+import type { CompanyInfo } from '@/lib/company';
 
 export default function HandoverPrintPage() {
   const { id } = useParams<{ id: string }>();
   const [doc, setDoc] = useState<Parameters<typeof HandoverTemplate>[0]['handover'] | null>(null);
+  const [company, setCompany] = useState<CompanyInfo | undefined>();
   const [loading, setLoading] = useState(true);
 
   useEffect(() => {
-    fetch(`/api/handover-notes/${id}`)
-      .then(r => r.ok ? r.json() : null)
-      .then(data => {
-        if (data) setDoc(data);
-      })
-      .finally(() => {
-        setLoading(false);
-        setTimeout(() => window.print(), 500);
-      });
+    Promise.all([
+      fetch(`/api/handover-notes/${id}`).then(r => r.ok ? r.json() : null),
+      fetch('/api/settings/company').then(r => r.ok ? r.json() : undefined),
+    ]).then(([data, comp]) => {
+      if (data) setDoc(data);
+      setCompany(comp);
+    }).finally(() => {
+      setLoading(false);
+      setTimeout(() => window.print(), 500);
+    });
   }, [id]);
 
   if (loading || !doc || !doc.payload) {
@@ -30,5 +33,5 @@ export default function HandoverPrintPage() {
     );
   }
 
-  return <HandoverTemplate handover={doc} />;
+  return <HandoverTemplate handover={doc} company={company} />;
 }

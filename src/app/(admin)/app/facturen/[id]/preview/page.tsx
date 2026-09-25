@@ -6,19 +6,24 @@ import Link from 'next/link';
 import { ArrowLeft, Printer, Send, Link2, Copy } from 'lucide-react';
 import { InvoiceTemplate } from '@/modules/invoices/template';
 import { useTranslations } from 'next-intl';
+import type { CompanyInfo } from '@/lib/company';
 
 export default function InvoicePreviewPage() {
   const { id } = useParams<{ id: string }>();
   const t = useTranslations('fa');
   const [invoice, setInvoice] = useState<Parameters<typeof InvoiceTemplate>[0]['invoice'] | null>(null);
+  const [company, setCompany] = useState<CompanyInfo | undefined>();
   const [loading, setLoading] = useState(true);
   const [linkCopied, setLinkCopied] = useState(false);
 
   useEffect(() => {
-    fetch(`/api/invoices/${id}`)
-      .then(r => r.ok ? r.json() : null)
-      .then(setInvoice)
-      .finally(() => setLoading(false));
+    Promise.all([
+      fetch(`/api/invoices/${id}`).then(r => r.ok ? r.json() : null),
+      fetch('/api/settings/company').then(r => r.ok ? r.json() : undefined),
+    ]).then(([inv, comp]) => {
+      setInvoice(inv);
+      setCompany(comp);
+    }).finally(() => setLoading(false));
   }, [id]);
 
   const copyPaymentLink = () => {
@@ -97,7 +102,7 @@ export default function InvoicePreviewPage() {
 
       {/* Preview */}
       <div className="rounded-[10px] border-[0.5px] border-ck-border bg-white shadow-md">
-        <InvoiceTemplate invoice={invoice} />
+        <InvoiceTemplate invoice={invoice} company={company} />
       </div>
     </div>
   );

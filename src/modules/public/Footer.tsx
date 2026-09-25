@@ -1,12 +1,28 @@
 'use client';
 
+import { useState, useEffect } from 'react';
 import { useTranslations } from 'next-intl';
 import { Link } from '@/i18n/routing';
 import { ThemeSwitcher } from '@/components/ThemeSwitcher';
 
+type CompanyData = {
+  kvk?: string;
+  vat_number?: string;
+  phone?: string;
+  email?: string;
+  address?: string;
+  postcode?: string;
+  city?: string;
+};
+
 export function Footer() {
   const t = useTranslations('pub');
   const year = new Date().getFullYear();
+
+  const [company, setCompany] = useState<CompanyData>({});
+  useEffect(() => {
+    fetch('/api/settings/company').then(r => r.ok ? r.json() : {}).then(setCompany);
+  }, []);
 
   return (
     <footer className="border-t border-ck-border bg-ck-bg">
@@ -138,7 +154,7 @@ export function Footer() {
           </p>
           <ThemeSwitcher />
           <p className="text-xs text-ck-text-muted">
-            {t('footer.kvk')}&nbsp;&nbsp;{t('footer.btw')}
+            KvK: {company.kvk ?? '82199884'}&nbsp;&nbsp;BTW: {company.vat_number ?? 'NL003653356B56'}
           </p>
         </div>
       </div>

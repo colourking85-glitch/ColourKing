@@ -12,6 +12,7 @@ import { renderTemplate, getSubject, renderAppointmentRequest } from './template
 import { sendEmail } from './sender';
 import { logEmail } from './log';
 import type { EmailLocale } from './schema';
+import { getCompanyInfo } from '@/lib/company';
 
 const APP_URL = process.env.NEXT_PUBLIC_APP_URL ?? 'https://colourking.nl';
 
@@ -62,7 +63,8 @@ export async function onOfferSent(offerId: string): Promise<void> {
     rejectUrl: `${APP_URL}/offerte/${offerId}/reject`,
   };
 
-  const html = renderTemplate('offerSent', data, locale);
+  const company = await getCompanyInfo();
+  const html = renderTemplate('offerSent', data, locale, company);
   const subject = getSubject('offerSent', data, locale);
   const to = String(customer.email);
 
@@ -122,7 +124,8 @@ export async function onInvoiceIssued(invoiceId: string): Promise<void> {
       : null,
   };
 
-  const html = renderTemplate('invoiceSent', data, locale);
+  const company = await getCompanyInfo();
+  const html = renderTemplate('invoiceSent', data, locale, company);
   const subject = getSubject('invoiceSent', data, locale);
   const to = String(customer.email);
 
@@ -172,18 +175,19 @@ export async function onAppointmentConfirmed(appointmentId: string): Promise<voi
     ? `${vehicle.kenteken ?? ''} (${vehicle.make ?? ''} ${vehicle.model ?? ''})`.trim()
     : null;
 
+  const company = await getCompanyInfo();
+
   const data = {
     customerName: apt.contact_name ?? String(customer?.name ?? ''),
     appointmentType: apt.type,
     scheduledDate: apt.scheduled_date,
     scheduledTime: apt.scheduled_time,
     durationMinutes: apt.duration_minutes,
-    address: 'Satijnbloem 6, 3068 JP Rotterdam',
+    address: `${company.address}, ${company.postcode} ${company.city}`,
     vehicleInfo,
     cancelUrl: `${APP_URL}/afspraak/${appointmentId}/cancel`,
   };
-
-  const html = renderTemplate('appointmentConfirmed', data, locale);
+  const html = renderTemplate('appointmentConfirmed', data, locale, company);
   const subject = getSubject('appointmentConfirmed', data, locale);
 
   const result = await sendEmail(to, subject, html);
@@ -253,7 +257,8 @@ export async function onPaymentReceived(paymentId: string): Promise<void> {
     method: methodMap[payment.method] ?? payment.method,
   };
 
-  const html = renderTemplate('paymentReceived', data, locale);
+  const company = await getCompanyInfo();
+  const html = renderTemplate('paymentReceived', data, locale, company);
   const subject = getSubject('paymentReceived', data, locale);
   const to = String(customer.email);
 
@@ -317,9 +322,11 @@ export async function onLeadCreated(leadId: string): Promise<void> {
       ? staff
       : [{ email: SHOP_EMAIL, locale: 'nl' }];
 
+  const company = await getCompanyInfo();
+
   for (const member of recipients) {
     const locale = validLocale(member.locale);
-    const html = renderTemplate('leadReceived', data, locale);
+    const html = renderTemplate('leadReceived', data, locale, company);
     const subject = getSubject('leadReceived', data, locale);
 
     const result = await sendEmail(member.email, subject, html);
@@ -351,6 +358,7 @@ export async function onLeadCreated(leadId: string): Promise<void> {
         locationAddress: lead.location_address,
       },
       customerLocale,
+      company,
     );
 
     const custResult = await sendEmail(lead.contact_email, custSubject, custHtml);
@@ -402,16 +410,18 @@ export async function onRepairComplete(jobId: string): Promise<void> {
     ? `${vehicle.kenteken ?? ''} (${vehicle.make ?? ''} ${vehicle.model ?? ''})`.trim()
     : '';
 
+  const company = await getCompanyInfo();
+
   const data = {
     customerName: String(customer.name ?? ''),
     vehicleInfo,
     jobNumber: jobId.slice(0, 8),
     collectionDate: null,
     collectionTime: null,
-    address: 'Satijnbloem 6, 3068 JP Rotterdam',
+    address: `${company.address}, ${company.postcode} ${company.city}`,
   };
 
-  const html = renderTemplate('repairOrderReady', data, locale);
+  const html = renderTemplate('repairOrderReady', data, locale, company);
   const subject = getSubject('repairOrderReady', data, locale);
   const to = String(customer.email);
 

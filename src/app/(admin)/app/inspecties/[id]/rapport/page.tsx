@@ -10,18 +10,23 @@ import {
   InspectionReportTemplate,
   type InspectionReportData,
 } from '@/modules/inspectie/template';
+import type { CompanyInfo } from '@/lib/company';
 
 export default function InspectionReportPage() {
   const { id } = useParams<{ id: string }>();
   const tCommon = useTranslations('common');
   const [data, setData] = useState<InspectionReportData | null>(null);
+  const [company, setCompany] = useState<CompanyInfo | undefined>();
   const [loading, setLoading] = useState(true);
 
   useEffect(() => {
-    fetch(`/api/inspections/${id}`)
-      .then(r => r.ok ? r.json() : null)
-      .then(setData)
-      .finally(() => setLoading(false));
+    Promise.all([
+      fetch(`/api/inspections/${id}`).then(r => r.ok ? r.json() : null),
+      fetch('/api/settings/company').then(r => r.ok ? r.json() : undefined),
+    ]).then(([d, comp]) => {
+      setData(d);
+      setCompany(comp);
+    }).finally(() => setLoading(false));
   }, [id]);
 
   if (loading) {
@@ -74,7 +79,7 @@ export default function InspectionReportPage() {
 
       {/* Report */}
       <div className="mx-auto overflow-hidden rounded-[10px] border-[0.5px] border-ck-dark-border shadow-xl">
-        <InspectionReportTemplate data={data} />
+        <InspectionReportTemplate data={data} company={company} />
       </div>
     </div>
   );

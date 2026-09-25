@@ -6,6 +6,8 @@
  */
 
 import type { TemplateDataMap, EmailLocale } from './schema';
+import type { CompanyInfo } from '@/lib/company';
+import { formatCompanyFooter } from '@/lib/company';
 
 /* ── Formatting helpers ───────────────────────────────────── */
 
@@ -300,8 +302,11 @@ function t(locale: string, key: string, vars?: Record<string, string>): string {
 /** Transparent PNG (public/images/email-logo.png); SVG is not shown by Gmail/Outlook. */
 const EMAIL_LOGO_URL = `${process.env.EMAIL_ASSET_URL ?? 'https://www.colourking.nl'}/images/email-logo.png`;
 
-function wrapLayout(locale: string, body: string): string {
+function wrapLayout(locale: string, body: string, company?: CompanyInfo): string {
   const s = STRINGS[locale] ?? STRINGS.nl;
+  const footer = company ? formatCompanyFooter(company, locale) : s.companyFooter;
+  const email = company?.email ?? 'info@colourking.nl';
+  const phone = company?.phone ?? '06 81 63 10 20';
   return `<!DOCTYPE html>
 <html lang="${locale}" dir="ltr">
 <head>
@@ -358,8 +363,8 @@ function wrapLayout(locale: string, body: string): string {
                 </tr>
                 <tr>
                   <td style="padding-top:16px;font-size:11px;color:#6b7280;line-height:1.7;font-family:Arial,Helvetica,sans-serif;">
-                    ${s.companyFooter}<br>
-                    <a href="mailto:info@colourking.nl" style="color:#C4223B;text-decoration:none;">info@colourking.nl</a> | <a href="tel:+31681631020" style="color:#C4223B;text-decoration:none;">06 81 63 10 20</a>
+                    ${footer}<br>
+                    <a href="mailto:${email}" style="color:#C4223B;text-decoration:none;">${email}</a> | <a href="tel:+31681631020" style="color:#C4223B;text-decoration:none;">${phone}</a>
                   </td>
                 </tr>
               </table>
@@ -610,11 +615,12 @@ export function renderTemplate<T extends keyof TemplateDataMap>(
   template: T,
   data: TemplateDataMap[T],
   locale: EmailLocale = 'nl',
+  company?: CompanyInfo,
 ): string {
   const renderer = RENDERERS[template];
   if (!renderer) throw new Error(`Unknown email template: ${template}`);
   const body = renderer(data, locale);
-  return wrapLayout(locale, body);
+  return wrapLayout(locale, body, company);
 }
 
 /**
@@ -765,6 +771,7 @@ export function renderAppointmentRequest(
     locationAddress?: string | null;
   },
   locale: EmailLocale = 'nl',
+  company?: CompanyInfo,
 ): { html: string; subject: string } {
   const subject = t(locale, 'customerLeadSubject', { kenteken: data.kenteken ?? '' });
 
@@ -793,7 +800,7 @@ export function renderAppointmentRequest(
     ${detailTable(rows)}
     ${paragraph(t(locale, 'customerLeadFooter'))}`;
 
-  const html = wrapLayout(locale, body);
+  const html = wrapLayout(locale, body, company);
   return { html, subject };
 }
 
@@ -801,11 +808,11 @@ export function renderAppointmentRequest(
  * Wrap a free-text message written by staff (e.g. a lead reply) in the
  * standard email layout. Blank lines split paragraphs; single newlines stay.
  */
-export function renderMessage(text: string, locale: EmailLocale = 'nl'): string {
+export function renderMessage(text: string, locale: EmailLocale = 'nl', company?: CompanyInfo): string {
   const body = text
     .trim()
     .split(/\n\s*\n/)
     .map(p => paragraph(escapeHtml(p).replace(/\n/g, '<br>')))
     .join('\n');
-  return wrapLayout(locale, body);
+  return wrapLayout(locale, body, company);
 }

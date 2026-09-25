@@ -10,6 +10,7 @@ import { admin as supabase } from '@/lib/supabase/admin';
 import { sendEmail } from './sender';
 import { renderMessage } from './templates';
 import type { EmailLocale } from './schema';
+import { getCompanyInfo } from '@/lib/company';
 
 const LOCALES: EmailLocale[] = ['nl', 'en', 'tr'];
 
@@ -98,7 +99,8 @@ export async function sendLeadEmail(input: SendLeadEmailInput): Promise<SendLead
     || (last?.subject ? `Re: ${last.subject.replace(/^(re|aw|antw):\s*/i, '')}` : DEFAULT_SUBJECT[locale]);
   const subject = withLeadTag(baseSubject, lead.number);
 
-  const result = await sendEmail(lead.contact_email, subject, renderMessage(input.message, locale), {
+  const company = await getCompanyInfo();
+  const result = await sendEmail(lead.contact_email, subject, renderMessage(input.message, locale, company), {
     text: input.message.trim(),
     ...(last?.message_id ? { inReplyTo: last.message_id, references: [last.message_id] } : {}),
   });

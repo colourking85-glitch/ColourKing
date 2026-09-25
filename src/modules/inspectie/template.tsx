@@ -3,6 +3,8 @@
  * A4 proportions, Archivo / Literata / JetBrains Mono.
  */
 
+import type { CompanyInfo } from '@/lib/company';
+
 type Finding = {
   id: string;
   reference: string;
@@ -457,7 +459,7 @@ const S = {
 
 /* ── Template ────────────────────────────────────────────────────────────── */
 
-export function InspectionReportTemplate({ data }: { data: InspectionReportData }) {
+export function InspectionReportTemplate({ data, company: c }: { data: InspectionReportData; company?: CompanyInfo }) {
   const findings = data.ins_findings || [];
   const photos = data.ins_photos || [];
   const approvals = data.ins_approvals || [];
@@ -672,8 +674,8 @@ export function InspectionReportTemplate({ data }: { data: InspectionReportData 
         </div>
 
         <div style={S.footer}>
-          <span>ColourKing Autoschade · Satijnbloem 6 · 3068 JP Rotterdam</span>
-          <span>KvK 82199884 · BTW NL003653356B56</span>
+          <span>{c?.legal_name ?? 'ColourKing Autoschade'} · {c?.address ?? 'Satijnbloem 6'} · {c?.postcode ?? '3068 JP'} {c?.city ?? 'Rotterdam'}</span>
+          <span>KvK {c?.kvk ?? '82199884'} · BTW {c?.vat_number ?? 'NL003653356B56'}</span>
         </div>
       </div>
 
@@ -720,8 +722,8 @@ export function InspectionReportTemplate({ data }: { data: InspectionReportData 
           </div>
 
           <div style={S.footer}>
-            <span>ColourKing Autoschade · Satijnbloem 6 · 3068 JP Rotterdam</span>
-            <span>KvK 82199884 · BTW NL003653356B56</span>
+            <span>{c?.legal_name ?? 'ColourKing Autoschade'} · {c?.address ?? 'Satijnbloem 6'} · {c?.postcode ?? '3068 JP'} {c?.city ?? 'Rotterdam'}</span>
+            <span>KvK {c?.kvk ?? '82199884'} · BTW {c?.vat_number ?? 'NL003653356B56'}</span>
           </div>
         </div>
       )}
@@ -797,8 +799,8 @@ export function InspectionReportTemplate({ data }: { data: InspectionReportData 
           })}
 
           <div style={S.footer}>
-            <span>ColourKing Autoschade · Satijnbloem 6 · 3068 JP Rotterdam</span>
-            <span>KvK 82199884 · BTW NL003653356B56</span>
+            <span>{c?.legal_name ?? 'ColourKing Autoschade'} · {c?.address ?? 'Satijnbloem 6'} · {c?.postcode ?? '3068 JP'} {c?.city ?? 'Rotterdam'}</span>
+            <span>KvK {c?.kvk ?? '82199884'} · BTW {c?.vat_number ?? 'NL003653356B56'}</span>
           </div>
         </div>
       )}
@@ -829,8 +831,8 @@ export function InspectionReportTemplate({ data }: { data: InspectionReportData 
           ))}
 
           <div style={S.footer}>
-            <span>ColourKing Autoschade · Satijnbloem 6 · 3068 JP Rotterdam</span>
-            <span>KvK 82199884 · BTW NL003653356B56</span>
+            <span>{c?.legal_name ?? 'ColourKing Autoschade'} · {c?.address ?? 'Satijnbloem 6'} · {c?.postcode ?? '3068 JP'} {c?.city ?? 'Rotterdam'}</span>
+            <span>KvK {c?.kvk ?? '82199884'} · BTW {c?.vat_number ?? 'NL003653356B56'}</span>
           </div>
         </div>
       )}
@@ -892,8 +894,8 @@ export function InspectionReportTemplate({ data }: { data: InspectionReportData 
         </div>
 
         <div style={S.footer}>
-          <span>ColourKing Autoschade · Satijnbloem 6 · 3068 JP Rotterdam</span>
-          <span>KvK 82199884 · BTW NL003653356B56</span>
+          <span>{c?.legal_name ?? 'ColourKing Autoschade'} · {c?.address ?? 'Satijnbloem 6'} · {c?.postcode ?? '3068 JP'} {c?.city ?? 'Rotterdam'}</span>
+          <span>KvK {c?.kvk ?? '82199884'} · BTW {c?.vat_number ?? 'NL003653356B56'}</span>
         </div>
       </div>
 
@@ -958,8 +960,8 @@ export function InspectionReportTemplate({ data }: { data: InspectionReportData 
         </p>
 
         <div style={S.footer}>
-          <span>ColourKing Autoschade · Satijnbloem 6 · 3068 JP Rotterdam</span>
-          <span>KvK 82199884 · BTW NL003653356B56</span>
+          <span>{c?.legal_name ?? 'ColourKing Autoschade'} · {c?.address ?? 'Satijnbloem 6'} · {c?.postcode ?? '3068 JP'} {c?.city ?? 'Rotterdam'}</span>
+          <span>KvK {c?.kvk ?? '82199884'} · BTW {c?.vat_number ?? 'NL003653356B56'}</span>
         </div>
       </div>
     </div>

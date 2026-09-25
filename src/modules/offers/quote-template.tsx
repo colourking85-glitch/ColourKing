@@ -1,4 +1,5 @@
 import type { OfferLineKind, TaxCode } from '@/types/database';
+import type { CompanyInfo } from '@/lib/company';
 
 type QuoteLine = {
   id: string;
@@ -168,7 +169,7 @@ const KIND_COLORS: Record<OfferLineKind, string> = {
   other: '#6b7280',
 };
 
-export function QuoteTemplate({ quote }: { quote: QuoteData }) {
+export function QuoteTemplate({ quote, company: c }: { quote: QuoteData; company?: CompanyInfo }) {
   const locale = quote.locale || 'nl';
   const t = LOCALES[locale] ?? LOCALES.nl;
   const isDraft = quote.status === 'draft';
@@ -199,18 +200,18 @@ export function QuoteTemplate({ quote }: { quote: QuoteData }) {
       <div style={{ display: 'grid', gridTemplateColumns: '1fr auto', gap: '32px', marginBottom: '40px' }}>
         <div>
           <div style={{ fontSize: '22px', fontWeight: 600, letterSpacing: '-0.02em', color: '#111' }}>
-            Colourking
+            {c?.name ?? 'Colourking'}
           </div>
           <div style={{ marginTop: '8px', fontSize: '12px', lineHeight: '1.7', color: '#555' }}>
-            <div>Satijnbloem 6</div>
-            <div>3068 JP Rotterdam</div>
-            <div>{t.tel}: 06 81 63 10 20</div>
-            <div>info@colourking.nl</div>
+            <div>{c?.address ?? 'Satijnbloem 6'}</div>
+            <div>{c?.postcode ?? '3068 JP'} {c?.city ?? 'Rotterdam'}</div>
+            <div>{t.tel}: {c?.phone ?? '06 81 63 10 20'}</div>
+            <div>{c?.email ?? 'info@colourking.nl'}</div>
           </div>
           <div style={{ marginTop: '8px', fontSize: '11px', color: '#888' }}>
-            <span>{t.kvk}: 82199884</span>
+            <span>{t.kvk}: {c?.kvk ?? '82199884'}</span>
             <span style={{ margin: '0 8px' }}>|</span>
-            <span>{t.btw}: NL003653356B56</span>
+            <span>{t.btw}: {c?.vat_number ?? 'NL003653356B56'}</span>
           </div>
         </div>
 
@@ -460,8 +461,8 @@ export function QuoteTemplate({ quote }: { quote: QuoteData }) {
         textAlign: 'center',
         lineHeight: '1.6',
       }}>
-        <div>Autospuitbedrijf Colour King | Satijnbloem 6, 3068 JP Rotterdam | {t.kvk}: 82199884 | {t.btw}: NL003653356B56</div>
-        <div>IBAN: NL00 INGB 0000 0000 00 | BIC: INGBNL2A | info@colourking.nl | 06 81 63 10 20</div>
+        <div>{c?.legal_name ?? 'Autospuitbedrijf Colour King'} | {c?.address ?? 'Satijnbloem 6'}, {c?.postcode ?? '3068 JP'} {c?.city ?? 'Rotterdam'} | {t.kvk}: {c?.kvk ?? '82199884'} | {t.btw}: {c?.vat_number ?? 'NL003653356B56'}</div>
+        <div>IBAN: {c?.iban ?? 'NL12 INGB 0675 6533 04'} | BIC: {c?.bic ?? 'INGBNL2A'} | {c?.email ?? 'info@colourking.nl'} | {c?.phone ?? '06 81 63 10 20'}</div>
       </div>
     </div>
   );
