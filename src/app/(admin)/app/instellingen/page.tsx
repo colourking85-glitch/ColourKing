@@ -142,7 +142,7 @@ export default function SettingsPage() {
     }).catch(() => {});
 
     setSaved(true);
-    setTimeout(() => setSaved(false), 2000);
+    setTimeout(() => window.location.reload(), 800);
   }
 
   const STYLES = [
