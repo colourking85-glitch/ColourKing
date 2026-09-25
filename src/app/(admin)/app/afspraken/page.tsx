@@ -2,7 +2,7 @@
 
 import { useState, useEffect, useMemo } from 'react';
 import Link from 'next/link';
-import { ChevronLeft, ChevronRight, Plus, Calendar, Filter } from 'lucide-react';
+import { ChevronLeft, ChevronRight, Plus, Filter } from 'lucide-react';
 import { useTranslations } from 'next-intl';
 import { ScreenBadge } from '@/components/ui/ScreenBadge';
 import type { AppointmentType, AppointmentStatus } from '@/types/database';
@@ -22,11 +22,8 @@ type AppointmentRow = {
   resources: { id: string; name: string } | null;
 };
 
-type ResourceRow = {
-  id: string;
-  type: string;
-  name: string;
-};
+type ResourceRow = { id: string; type: string; name: string };
+type ViewMode = 'day' | '3day' | 'week' | 'month';
 
 const TYPE_KEYS: Record<AppointmentType, string> = {
   inspection: 'inspection',
@@ -42,6 +39,13 @@ const TYPE_COLORS: Record<AppointmentType, string> = {
   repair_slot: 'bg-amber-400/15 text-amber-400 border-amber-400',
 };
 
+const TYPE_DOT: Record<AppointmentType, string> = {
+  inspection: 'bg-emerald-400',
+  drop_off: 'bg-blue-400',
+  collection: 'bg-purple-400',
+  repair_slot: 'bg-amber-400',
+};
+
 const STATUS_STYLES: Record<AppointmentStatus, string> = {
   requested: 'border-dashed',
   confirmed: 'border-solid',
@@ -49,7 +53,8 @@ const STATUS_STYLES: Record<AppointmentStatus, string> = {
   completed: 'border-solid opacity-70',
 };
 
-const DAY_KEYS = ['dayMo', 'dayTu', 'dayWe', 'dayTh', 'dayFr', 'daySa', 'daySu'] as const;
+const SHORT_DAYS = ['dayMo', 'dayTu', 'dayWe', 'dayTh', 'dayFr', 'daySa', 'daySu'] as const;
+const HOURS = Array.from({ length: 12 }, (_, i) => i + 7);
 
 function getMonday(date: Date): Date {
   const d = new Date(date);
@@ -60,36 +65,88 @@ function getMonday(date: Date): Date {
   return d;
 }
 
-function formatDate(d: Date): string {
+function getFirstOfMonth(date: Date): Date {
+  return new Date(date.getFullYear(), date.getMonth(), 1);
+}
+
+function fmt(d: Date): string {
   return d.toISOString().split('T')[0];
 }
 
-function formatDateDisplay(d: Date): string {
+function fmtDisplay(d: Date): string {
   return d.toLocaleDateString('nl-NL', { day: 'numeric', month: 'short' });
 }
 
-const HOURS = Array.from({ length: 12 }, (_, i) => i + 7); // 07:00 - 18:00
+function addDays(d: Date, n: number): Date {
+  const r = new Date(d);
+  r.setDate(r.getDate() + n);
+  return r;
+}
 
 export default function AppointmentCalendarPage() {
   const t = useTranslations('ap');
-  const tc = useTranslations('common');
-  const [weekStart, setWeekStart] = useState(() => getMonday(new Date()));
+  const [view, setView] = useState<ViewMode>('week');
+  const [anchor, setAnchor] = useState(() => new Date());
   const [appointments, setAppointments] = useState<AppointmentRow[]>([]);
   const [resources, setResources] = useState<ResourceRow[]>([]);
   const [loading, setLoading] = useState(true);
   const [typeFilter, setTypeFilter] = useState('');
   const [resourceFilter, setResourceFilter] = useState('');
 
-  const weekDays = useMemo(() => {
-    return Array.from({ length: 7 }, (_, i) => {
-      const d = new Date(weekStart);
-      d.setDate(d.getDate() + i);
-      return d;
-    });
-  }, [weekStart]);
+  const { days, dateFrom, dateTo, rangeLabel } = useMemo(() => {
+    const today = new Date();
+    today.setHours(0, 0, 0, 0);
 
-  const dateFrom = formatDate(weekDays[0]);
-  const dateTo = formatDate(weekDays[6]);
+    if (view === 'day') {
+      const d = new Date(anchor);
+      d.setHours(0, 0, 0, 0);
+      return {
+        days: [d],
+        dateFrom: fmt(d),
+        dateTo: fmt(d),
+        rangeLabel: d.toLocaleDateString('nl-NL', { weekday: 'long', day: 'numeric', month: 'long', year: 'numeric' }),
+      };
+    }
+
+    if (view === '3day') {
+      const start = new Date(anchor);
+      start.setHours(0, 0, 0, 0);
+      const ds = Array.from({ length: 3 }, (_, i) => addDays(start, i));
+      return {
+        days: ds,
+        dateFrom: fmt(ds[0]),
+        dateTo: fmt(ds[2]),
+        rangeLabel: `${fmtDisplay(ds[0])} — ${fmtDisplay(ds[2])} ${ds[2].getFullYear()}`,
+      };
+    }
+
+    if (view === 'month') {
+      const first = getFirstOfMonth(anchor);
+      const last = new Date(first.getFullYear(), first.getMonth() + 1, 0);
+      const startDay = getMonday(first);
+      const endDay = addDays(startDay, 41); // 6 weeks
+      const ds: Date[] = [];
+      for (let d = new Date(startDay); d <= endDay; d = addDays(d, 1)) {
+        ds.push(new Date(d));
+      }
+      return {
+        days: ds,
+        dateFrom: fmt(startDay),
+        dateTo: fmt(endDay),
+        rangeLabel: first.toLocaleDateString('nl-NL', { month: 'long', year: 'numeric' }),
+      };
+    }
+
+    // week
+    const monday = getMonday(anchor);
+    const ds = Array.from({ length: 7 }, (_, i) => addDays(monday, i));
+    return {
+      days: ds,
+      dateFrom: fmt(ds[0]),
+      dateTo: fmt(ds[6]),
+      rangeLabel: `${ds[0].toLocaleDateString('nl-NL', { day: 'numeric', month: 'long', year: 'numeric' })} — ${ds[6].toLocaleDateString('nl-NL', { day: 'numeric', month: 'long', year: 'numeric' })}`,
+    };
+  }, [view, anchor]);
 
   useEffect(() => {
     setLoading(true);
@@ -107,122 +164,162 @@ export default function AppointmentCalendarPage() {
       .finally(() => setLoading(false));
   }, [dateFrom, dateTo, typeFilter]);
 
-  const filteredAppointments = useMemo(() => {
-    let filtered = appointments;
-    if (resourceFilter) {
-      filtered = filtered.filter(a => a.resource_id === resourceFilter);
-    }
-    return filtered;
+  const filtered = useMemo(() => {
+    if (!resourceFilter) return appointments;
+    return appointments.filter(a => a.resource_id === resourceFilter);
   }, [appointments, resourceFilter]);
 
-  function prevWeek() {
-    const d = new Date(weekStart);
-    d.setDate(d.getDate() - 7);
-    setWeekStart(d);
-  }
-
-  function nextWeek() {
-    const d = new Date(weekStart);
-    d.setDate(d.getDate() + 7);
-    setWeekStart(d);
+  function navigate(dir: -1 | 1) {
+    const d = new Date(anchor);
+    if (view === 'day') d.setDate(d.getDate() + dir);
+    else if (view === '3day') d.setDate(d.getDate() + dir * 3);
+    else if (view === 'week') d.setDate(d.getDate() + dir * 7);
+    else d.setMonth(d.getMonth() + dir);
+    setAnchor(d);
   }
 
   function goToday() {
-    setWeekStart(getMonday(new Date()));
+    setAnchor(new Date());
   }
 
-  const today = formatDate(new Date());
+  const todayStr = fmt(new Date());
 
-  function getAppointmentsForDay(date: Date) {
-    const dateStr = formatDate(date);
-    return filteredAppointments.filter(a => a.scheduled_date === dateStr);
+  function getApptsForDay(date: Date) {
+    return filtered.filter(a => a.scheduled_date === fmt(date));
   }
 
   function getTopOffset(time: string): number {
     const [h, m] = time.split(':').map(Number);
-    return ((h - 7) * 60 + m) * (60 / 60); // 60px per hour
+    return ((h - 7) * 60 + m);
   }
 
-  function getHeight(minutes: number): number {
-    return minutes * (60 / 60); // 60px per hour
+  const viewButtons: { mode: ViewMode; label: string }[] = [
+    { mode: 'day', label: t('viewDay') },
+    { mode: '3day', label: t('view3Day') },
+    { mode: 'week', label: t('viewWeek') },
+    { mode: 'month', label: t('viewMonth') },
+  ];
+
+  // ---------- Month Grid ----------
+  if (view === 'month') {
+    const weeks: Date[][] = [];
+    for (let i = 0; i < days.length; i += 7) {
+      weeks.push(days.slice(i, i + 7));
+    }
+    const monthNum = getFirstOfMonth(anchor).getMonth();
+
+    return (
+      <div className="space-y-4">
+        <Header
+          t={t}
+          viewButtons={viewButtons}
+          view={view}
+          setView={setView}
+          rangeLabel={rangeLabel}
+          navigate={navigate}
+          goToday={goToday}
+          typeFilter={typeFilter}
+          setTypeFilter={setTypeFilter}
+          resourceFilter={resourceFilter}
+          setResourceFilter={setResourceFilter}
+          resources={resources}
+        />
+
+        <div className="rounded-[10px] border-[0.5px] border-ck-border bg-ck-surface overflow-hidden">
+          {loading ? (
+            <div className="flex h-96 items-center justify-center">
+              <div className="h-8 w-8 animate-spin rounded-full border-2 border-ck-border border-t-ck-red" />
+            </div>
+          ) : (
+            <div>
+              {/* Day headers */}
+              <div className="grid grid-cols-7 border-b border-ck-border">
+                {SHORT_DAYS.map(dk => (
+                  <div key={dk} className="py-2 text-center text-[11px] font-medium text-ck-text-muted">
+                    {t(dk)}
+                  </div>
+                ))}
+              </div>
+
+              {/* Weeks */}
+              {weeks.map((week, wi) => (
+                <div key={wi} className="grid grid-cols-7 border-b border-ck-divider last:border-b-0">
+                  {week.map((day, di) => {
+                    const dateStr = fmt(day);
+                    const isToday = dateStr === todayStr;
+                    const isCurrentMonth = day.getMonth() === monthNum;
+                    const dayAppts = getApptsForDay(day);
+
+                    return (
+                      <div
+                        key={di}
+                        className={`min-h-[90px] border-r border-ck-divider last:border-r-0 p-1.5 ${
+                          !isCurrentMonth ? 'opacity-40' : ''
+                        }`}
+                      >
+                        <div className={`mb-1 text-right text-[11px] font-medium ${
+                          isToday ? 'text-ck-red' : 'text-ck-text-muted'
+                        }`}>
+                          {isToday ? (
+                            <span className="inline-flex h-5 w-5 items-center justify-center rounded-full bg-ck-red text-[10px] text-white">
+                              {day.getDate()}
+                            </span>
+                          ) : (
+                            day.getDate()
+                          )}
+                        </div>
+                        <div className="space-y-0.5">
+                          {dayAppts.slice(0, 3).map(appt => (
+                            <Link
+                              key={appt.id}
+                              href={`/app/afspraken/${appt.id}`}
+                              className={`flex items-center gap-1 rounded px-1 py-0.5 text-[10px] truncate hover:opacity-80 ${TYPE_COLORS[appt.type]} ${STATUS_STYLES[appt.status]}`}
+                            >
+                              <span className="font-medium">{appt.scheduled_time.slice(0, 5)}</span>
+                              <span className="truncate">{appt.contact_name}</span>
+                            </Link>
+                          ))}
+                          {dayAppts.length > 3 && (
+                            <button
+                              onClick={() => { setView('day'); setAnchor(day); }}
+                              className="w-full text-center text-[9px] text-ck-text-muted hover:text-ck-red"
+                            >
+                              +{dayAppts.length - 3} {t('more')}
+                            </button>
+                          )}
+                        </div>
+                      </div>
+                    );
+                  })}
+                </div>
+              ))}
+            </div>
+          )}
+        </div>
+
+        <Legend t={t} />
+      </div>
+    );
   }
 
+  // ---------- Day / 3-Day / Week Grid ----------
   return (
     <div className="space-y-4">
-      {/* Header */}
-      <div className="flex items-center justify-between">
-        <div className="flex items-center gap-3">
-          <ScreenBadge code="AP05" />
-          <div>
-            <h1 className="text-base font-medium text-ck-text">{t('agenda')}</h1>
-            <p className="mt-0.5 text-[11px] text-ck-text-muted">
-              {t('weekOverview')}
-            </p>
-          </div>
-        </div>
-        <Link
-          href="/app/afspraken/nieuw"
-          className="flex items-center gap-2 rounded-[10px] bg-ck-red px-4 py-2 text-sm font-medium text-white hover:bg-ck-red-hover transition-colors"
-        >
-          <Plus size={16} />
-          {t('new')}
-        </Link>
-      </div>
+      <Header
+        t={t}
+        viewButtons={viewButtons}
+        view={view}
+        setView={setView}
+        rangeLabel={rangeLabel}
+        navigate={navigate}
+        goToday={goToday}
+        typeFilter={typeFilter}
+        setTypeFilter={setTypeFilter}
+        resourceFilter={resourceFilter}
+        setResourceFilter={setResourceFilter}
+        resources={resources}
+      />
 
-      {/* Navigation & Filters */}
-      <div className="flex items-center justify-between">
-        <div className="flex items-center gap-2">
-          <button
-            onClick={prevWeek}
-            className="rounded-[10px] border-[0.5px] border-ck-border bg-ck-surface p-2 text-ck-text-2 hover:bg-ck-surface-2 transition-colors"
-          >
-            <ChevronLeft size={16} />
-          </button>
-          <button
-            onClick={goToday}
-            className="rounded-[10px] border-[0.5px] border-ck-border bg-ck-surface px-3 py-2 text-sm text-ck-text-2 hover:bg-ck-surface-2 transition-colors"
-          >
-            {t('today')}
-          </button>
-          <button
-            onClick={nextWeek}
-            className="rounded-[10px] border-[0.5px] border-ck-border bg-ck-surface p-2 text-ck-text-2 hover:bg-ck-surface-2 transition-colors"
-          >
-            <ChevronRight size={16} />
-          </button>
-          <span className="ml-2 text-sm font-medium text-ck-text">
-            {weekDays[0].toLocaleDateString('nl-NL', { day: 'numeric', month: 'long', year: 'numeric' })}
-            {' — '}
-            {weekDays[6].toLocaleDateString('nl-NL', { day: 'numeric', month: 'long', year: 'numeric' })}
-          </span>
-        </div>
-
-        <div className="flex items-center gap-2">
-          <Filter size={14} className="text-ck-text-muted" />
-          <select
-            value={typeFilter}
-            onChange={e => setTypeFilter(e.target.value)}
-            className="rounded-[10px] border-[0.5px] border-ck-border bg-ck-surface px-3 py-1.5 text-sm text-ck-text focus:border-ck-red focus:outline-none"
-          >
-            <option value="">{t('allTypes')}</option>
-            {(Object.keys(TYPE_KEYS) as AppointmentType[]).map(k => (
-              <option key={k} value={k}>{t(TYPE_KEYS[k])}</option>
-            ))}
-          </select>
-          <select
-            value={resourceFilter}
-            onChange={e => setResourceFilter(e.target.value)}
-            className="rounded-[10px] border-[0.5px] border-ck-border bg-ck-surface px-3 py-1.5 text-sm text-ck-text focus:border-ck-red focus:outline-none"
-          >
-            <option value="">{t('allResources')}</option>
-            {resources.map(r => (
-              <option key={r.id} value={r.id}>{r.name}</option>
-            ))}
-          </select>
-        </div>
-      </div>
-
-      {/* Calendar Grid */}
       <div className="rounded-[10px] border-[0.5px] border-ck-border bg-ck-surface overflow-hidden">
         {loading ? (
           <div className="flex h-96 items-center justify-center">
@@ -243,10 +340,11 @@ export default function AppointmentCalendarPage() {
             </div>
 
             {/* Day columns */}
-            {weekDays.map((day, i) => {
-              const dateStr = formatDate(day);
-              const isToday = dateStr === today;
-              const dayAppts = getAppointmentsForDay(day);
+            {days.map((day, i) => {
+              const dateStr = fmt(day);
+              const isToday = dateStr === todayStr;
+              const dayAppts = getApptsForDay(day);
+              const dayIdx = (day.getDay() + 6) % 7; // 0=Mon
 
               return (
                 <div key={i} className="flex-1 min-w-0 border-r border-ck-divider last:border-r-0">
@@ -256,9 +354,9 @@ export default function AppointmentCalendarPage() {
                       isToday ? 'bg-ck-red/10 text-ck-red font-medium' : 'text-ck-text-muted'
                     }`}
                   >
-                    <span>{t(DAY_KEYS[i])}</span>
+                    <span>{t(SHORT_DAYS[dayIdx])}</span>
                     <span className={isToday ? 'rounded-full bg-ck-red px-1.5 py-0.5 text-white text-[10px]' : ''}>
-                      {formatDateDisplay(day)}
+                      {fmtDisplay(day)}
                     </span>
                   </div>
 
@@ -271,7 +369,7 @@ export default function AppointmentCalendarPage() {
                     {/* Appointment blocks */}
                     {dayAppts.map(appt => {
                       const top = getTopOffset(appt.scheduled_time);
-                      const height = Math.max(getHeight(appt.duration_minutes), 20);
+                      const height = Math.max(appt.duration_minutes, 20);
                       const colorClass = TYPE_COLORS[appt.type];
                       const statusClass = STATUS_STYLES[appt.status];
 
@@ -307,19 +405,130 @@ export default function AppointmentCalendarPage() {
         )}
       </div>
 
-      {/* Legend */}
-      <div className="flex items-center gap-4 text-[10px] text-ck-text-muted">
-        {(Object.keys(TYPE_KEYS) as AppointmentType[]).map(k => (
-          <div key={k} className="flex items-center gap-1.5">
-            <div className={`h-2.5 w-2.5 rounded-sm ${TYPE_COLORS[k].split(' ')[0]}`} />
-            <span>{t(TYPE_KEYS[k])}</span>
-          </div>
-        ))}
-        <span className="ml-4">|</span>
-        <span className="ml-2">---  = {t('legendRequested')}</span>
-        <span>___  = {t('legendConfirmed')}</span>
-        <span className="line-through">abc = {t('legendCancelled')}</span>
+      <Legend t={t} />
+    </div>
+  );
+}
+
+// ---------- Shared Sub-Components ----------
+
+function Header({
+  t, viewButtons, view, setView, rangeLabel, navigate, goToday,
+  typeFilter, setTypeFilter, resourceFilter, setResourceFilter, resources,
+}: {
+  t: ReturnType<typeof useTranslations>;
+  viewButtons: { mode: ViewMode; label: string }[];
+  view: ViewMode;
+  setView: (v: ViewMode) => void;
+  rangeLabel: string;
+  navigate: (dir: -1 | 1) => void;
+  goToday: () => void;
+  typeFilter: string;
+  setTypeFilter: (v: string) => void;
+  resourceFilter: string;
+  setResourceFilter: (v: string) => void;
+  resources: ResourceRow[];
+}) {
+  return (
+    <>
+      {/* Title row */}
+      <div className="flex items-center justify-between">
+        <div className="flex items-center gap-3">
+          <ScreenBadge code="AP05" />
+          <h1 className="text-base font-medium text-ck-text">{t('agenda')}</h1>
+        </div>
+        <Link
+          href="/app/afspraken/nieuw"
+          className="flex items-center gap-2 rounded-[10px] bg-ck-red px-4 py-2 text-sm font-medium text-white hover:bg-ck-red-hover transition-colors"
+        >
+          <Plus size={16} />
+          {t('new')}
+        </Link>
       </div>
+
+      {/* Navigation + view toggle + filters */}
+      <div className="flex items-center justify-between flex-wrap gap-2">
+        <div className="flex items-center gap-2">
+          <button
+            onClick={() => navigate(-1)}
+            className="rounded-[10px] border-[0.5px] border-ck-border bg-ck-surface p-2 text-ck-text-2 hover:bg-ck-surface-2 transition-colors"
+          >
+            <ChevronLeft size={16} />
+          </button>
+          <button
+            onClick={goToday}
+            className="rounded-[10px] border-[0.5px] border-ck-border bg-ck-surface px-3 py-2 text-sm text-ck-text-2 hover:bg-ck-surface-2 transition-colors"
+          >
+            {t('today')}
+          </button>
+          <button
+            onClick={() => navigate(1)}
+            className="rounded-[10px] border-[0.5px] border-ck-border bg-ck-surface p-2 text-ck-text-2 hover:bg-ck-surface-2 transition-colors"
+          >
+            <ChevronRight size={16} />
+          </button>
+          <span className="ml-2 text-sm font-medium text-ck-text">{rangeLabel}</span>
+        </div>
+
+        <div className="flex items-center gap-2">
+          {/* View toggle */}
+          <div className="flex rounded-[10px] border-[0.5px] border-ck-border bg-ck-surface overflow-hidden">
+            {viewButtons.map(b => (
+              <button
+                key={b.mode}
+                onClick={() => setView(b.mode)}
+                className={`px-3 py-1.5 text-xs font-medium transition-colors ${
+                  view === b.mode
+                    ? 'bg-ck-red text-white'
+                    : 'text-ck-text-muted hover:text-ck-text hover:bg-ck-surface-2'
+                }`}
+              >
+                {b.label}
+              </button>
+            ))}
+          </div>
+
+          {/* Filters */}
+          <Filter size={14} className="text-ck-text-muted ml-2" />
+          <select
+            value={typeFilter}
+            onChange={e => setTypeFilter(e.target.value)}
+            className="rounded-[10px] border-[0.5px] border-ck-border bg-ck-surface px-3 py-1.5 text-sm text-ck-text focus:border-ck-red focus:outline-none"
+          >
+            <option value="">{t('allTypes')}</option>
+            {(Object.keys(TYPE_KEYS) as AppointmentType[]).map(k => (
+              <option key={k} value={k}>{t(TYPE_KEYS[k])}</option>
+            ))}
+          </select>
+          <select
+            value={resourceFilter}
+            onChange={e => setResourceFilter(e.target.value)}
+            className="rounded-[10px] border-[0.5px] border-ck-border bg-ck-surface px-3 py-1.5 text-sm text-ck-text focus:border-ck-red focus:outline-none"
+          >
+            <option value="">{t('allResources')}</option>
+            {resources.map(r => (
+              <option key={r.id} value={r.id}>{r.name}</option>
+            ))}
+          </select>
+        </div>
+      </div>
+    </>
+  );
+}
+
+function Legend({ t }: { t: ReturnType<typeof useTranslations> }) {
+  return (
+    <div className="flex items-center gap-4 text-[10px] text-ck-text-muted">
+      {(Object.keys(TYPE_KEYS) as AppointmentType[]).map(k => (
+        <div key={k} className="flex items-center gap-1.5">
+          <div className={`h-2.5 w-2.5 rounded-sm ${TYPE_DOT[k]}`} />
+          <span>{t(TYPE_KEYS[k])}</span>
+        </div>
+      ))}
+      <span className="ml-4">|</span>
+      <span className="ml-2">---  = {t('legendRequested')}</span>
+      <span>___  = {t('legendConfirmed')}</span>
+      <span className="line-through">abc = {t('legendCancelled')}</span>
     </div>
   );
 }
