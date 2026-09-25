@@ -95,16 +95,37 @@ export default function LeadsPage() {
 
   async function changeStatus(leadId: string, newStatus: string) {
     setUpdatingId(leadId);
-    const body: Record<string, unknown> = { status: newStatus };
+    const lead = leads.find(l => l.id === leadId);
+
     if (newStatus === 'lost') {
       const reason = prompt(t('lostReasonPrompt'));
       if (reason === null) { setUpdatingId(null); return; }
-      body.lost_reason = reason;
+      const res = await fetch(`/api/leads/${leadId}`, {
+        method: 'PATCH',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ status: 'lost', lost_reason: reason }),
+      });
+      if (res.ok) {
+        const updated = await res.json();
+        setLeads(prev => prev.map(l => l.id === leadId ? { ...l, status: updated.status } : l));
+      }
+      setUpdatingId(null);
+      return;
     }
+
+    if (newStatus === 'won' && lead?.channel === 'appointment_form' && lead?.appointment_type) {
+      const res = await fetch(`/api/leads/${leadId}/confirm-appointment`, { method: 'POST' });
+      if (res.ok) {
+        setLeads(prev => prev.map(l => l.id === leadId ? { ...l, status: 'won' } : l));
+      }
+      setUpdatingId(null);
+      return;
+    }
+
     const res = await fetch(`/api/leads/${leadId}`, {
       method: 'PATCH',
       headers: { 'Content-Type': 'application/json' },
-      body: JSON.stringify(body),
+      body: JSON.stringify({ status: newStatus }),
     });
     if (res.ok) {
       const updated = await res.json();
@@ -268,9 +289,9 @@ export default function LeadsPage() {
                     <td className="px-4 py-3">
                       <div className="flex items-center gap-2">
                         {lead.number && (
-                          <span className="rounded bg-ck-dark-surface px-1.5 py-0.5 font-mono text-[10px] text-ck-muted">
+                          <Link href={`/app/leads/${lead.id}`} className="rounded bg-ck-dark-surface px-1.5 py-0.5 font-mono text-[10px] text-ck-muted hover:text-ck-red transition-colors">
                             LD-{String(lead.number).padStart(4, '0')}
-                          </span>
+                          </Link>
                         )}
                         <Link href={`/app/leads/${lead.id}`} className="font-medium text-white hover:text-ck-red">
                           {lead.contact_name}
