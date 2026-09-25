@@ -16,6 +16,10 @@ export interface AppSettings {
   dateFormat: string;
   timezone: string;
   currency: string;
+  notifLead: boolean;
+  notifStage: boolean;
+  notifEmail: boolean;
+  notifAppointment: boolean;
 }
 
 const DEFAULTS: AppSettings = {
@@ -31,6 +35,10 @@ const DEFAULTS: AppSettings = {
   dateFormat: 'dd-MM-yyyy',
   timezone: 'Europe/Amsterdam',
   currency: 'EUR',
+  notifLead: true,
+  notifStage: true,
+  notifEmail: true,
+  notifAppointment: false,
 };
 
 const STORAGE_KEY = 'ck-settings';
@@ -87,6 +95,14 @@ const STYLE_VARS: Record<string, Record<string, string>> = {
     '--ck-border': '#3d4470',
     '--ck-accent': '#6366f1',
     '--ck-accent-hover': '#4f46e5',
+  },
+  glossy: {
+    '--ck-bg': '#0a0a0f',
+    '--ck-surface': '#15151e',
+    '--ck-surface-2': '#1c1c28',
+    '--ck-border': '#2a2a3a',
+    '--ck-accent': '#f43f5e',
+    '--ck-accent-hover': '#e11d48',
   },
 };
 

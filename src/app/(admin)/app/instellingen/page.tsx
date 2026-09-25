@@ -31,10 +31,10 @@ export default function SettingsPage() {
   const [currency, setCurrency] = useState(settings.currency);
   const [saved, setSaved] = useState(false);
 
-  const [notifLead, setNotifLead] = useState(true);
-  const [notifStage, setNotifStage] = useState(true);
-  const [notifEmail, setNotifEmail] = useState(true);
-  const [notifAppointment, setNotifAppointment] = useState(false);
+  const [notifLead, setNotifLead] = useState(settings.notifLead);
+  const [notifStage, setNotifStage] = useState(settings.notifStage);
+  const [notifEmail, setNotifEmail] = useState(settings.notifEmail);
+  const [notifAppointment, setNotifAppointment] = useState(settings.notifAppointment);
 
   const [aiPhotoCheck, setAiPhotoCheck] = useState(false);
   const [aiKeyConfigured, setAiKeyConfigured] = useState(false);
@@ -70,6 +70,10 @@ export default function SettingsPage() {
       dateFormat,
       timezone,
       currency,
+      notifLead,
+      notifStage,
+      notifEmail,
+      notifAppointment,
     });
 
     fetch('/api/settings/ai', {
@@ -88,7 +92,7 @@ export default function SettingsPage() {
     { id: 'corporate', label: tSy('styleCorporate'), desc: tSy('styleCorporateDesc'), colors: ['#0c1222', '#162032', '#0ea5e9', '#64748b'] },
     { id: 'soft', label: tSy('styleSoft'), desc: tSy('styleSoftDesc'), colors: ['#18181b', '#27272a', '#a78bfa', '#a1a1aa'] },
     { id: 'polaris', label: tSy('stylePolaris'), desc: tSy('stylePolarisDesc'), colors: ['#1a1f36', '#2d3250', '#6366f1', '#94a3b8'] },
-    { id: 'glossy', label: tSy('styleGlossy'), desc: tSy('styleGlossyDesc'), colors: ['#0a0a0f', '#15151e', '#f43f5e', '#71717a'], disabled: true },
+    { id: 'glossy', label: tSy('styleGlossy'), desc: tSy('styleGlossyDesc'), colors: ['#0a0a0f', '#15151e', '#f43f5e', '#71717a'] },
   ];
 
   const TEXT_SIZES = [
@@ -149,13 +153,10 @@ export default function SettingsPage() {
                   {STYLES.map(s => (
                     <button
                       key={s.id}
-                      disabled={s.disabled}
-                      onClick={() => !s.disabled && setStyle(s.id)}
+                      onClick={() => setStyle(s.id)}
                       className={`group relative rounded-xl border-2 p-3 transition-all ${
                         style === s.id
                           ? 'border-ck-red'
-                          : s.disabled
-                          ? 'cursor-not-allowed border-ck-dark-border opacity-40'
                           : 'border-ck-dark-border hover:border-ck-muted/50'
                       }`}
                     >
@@ -176,11 +177,6 @@ export default function SettingsPage() {
                         <div className="absolute right-2 top-2 flex h-5 w-5 items-center justify-center rounded-full bg-ck-red">
                           <Check size={12} className="text-white" />
                         </div>
-                      )}
-                      {s.disabled && (
-                        <span className="absolute right-2 top-2 rounded bg-ck-dark-border px-1.5 py-0.5 text-[9px] font-bold uppercase text-ck-muted">
-                          {tCommon('soon')}
-                        </span>
                       )}
                     </button>
                   ))}
