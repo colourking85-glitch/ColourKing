@@ -487,7 +487,7 @@ export function BusinessFlowChart() {
             { code: 'BW', name: 'VAT', screens: ['BW05', 'BW40'] },
             { code: 'PU', name: 'Purchases', screens: ['PU01', 'PU05'] },
             { code: 'BK', name: 'Bookkeeping', screens: ['BK10'] },
-            { code: 'SY', name: 'System', screens: ['SY01', 'SY02', 'SY03', 'SY05', 'SY10', 'SY15', 'SY20', 'SY25', 'SY30', 'SY35', 'SY40', 'SY45', 'SY50'] },
+            { code: 'SY', name: 'System', screens: ['SY01', 'SY02', 'SY03', 'SY05', 'SY06', 'SY10', 'SY15', 'SY20', 'SY25', 'SY30', 'SY35', 'SY40', 'SY45', 'SY50', 'SY55', 'SY60', 'AN05'] },
           ].map(m => {
             const c = MOD_HEX[m.code] ?? MOD_HEX.SY;
             return (
