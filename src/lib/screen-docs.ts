@@ -576,11 +576,13 @@ export const MODULES: ModuleDoc[] = [
       },
       {
         code: 'SY15',
-        agentNotes: 'Mirrors vercel.json crons: /api/cron/reminders (0 7 * * * UTC), /api/email/imap-poll (0 8 * * *), /api/cron/db-cleanup (0 2 * * 0). Cron routes authenticate with Authorization: Bearer CRON_SECRET or a signed-in admin session (lib/cron-auth.ts requireCronOrAdmin) and fail closed (503) when CRON_SECRET is unset. "Run now" POSTs the endpoint as the admin.',
-        userFlow: 'Lists the three real scheduled jobs: Reminder emails (daily 09:00 Amsterdam), IMAP inbox poll (daily 08:00 UTC) and Database cleanup (weekly). Each card shows the schedule, endpoint, timeout and the result of the last manual run. Admins can press Run now on the reminder and cleanup jobs; the reminder card links to the reminder log (SY60).',
+        agentNotes: 'Mirrors vercel.json crons: /api/cron/reminders (0 7 * * * UTC), /api/email/imap-poll (0 8 * * *), /api/cron/db-cleanup (0 2 * * 0). Cron routes authenticate with Authorization: Bearer CRON_SECRET or a signed-in admin session (lib/cron-auth.ts requireCronOrAdmin) and fail closed (503) when CRON_SECRET is unset. runReminders() writes settings key reminders_state { last_run_at, trigger cron|admin, ok, evaluated, sent, skipped, failed, marked_overdue, error }; GET /api/reminders/state returns it. The reminders job is idempotent (reminder_log unique key) so an external scheduler may POST it every 15 minutes — required for hour-based moments because Vercel Hobby cron is daily only.',
+        userFlow: 'Lists the three real scheduled jobs: Reminder emails, IMAP inbox poll (daily 08:00 UTC) and Database cleanup (weekly). Each card shows the schedule, endpoint, timeout and the result of the last run. The Reminder card shows the last run with its trigger (scheduler or manual) and counts — this is how you check that the external scheduler is alive. Admins can press Run now on the reminder and cleanup jobs; the reminder card links to the reminder log (SY60).
+
+Scheduling the reminder job: the built-in Vercel cron runs it once a day at 09:00 Amsterdam (Hobby plan limit), enough for day-based moments. For hour-based moments (e.g. 2 hours before an appointment) add a free external scheduler such as cron-job.org: URL https://admin.colourking.nl/api/cron/reminders, method POST, every 15 minutes, header Authorization: Bearer <CRON_SECRET> (same value as in Vercel), timeout 30 s. A 401 in its history means the header is wrong; a 200 with JSON {"ok":true,…} means it works, and SY15 shows "scheduler" as the last trigger. Running both schedules is harmless — every reminder is sent once.',
         inputs: 'Run now button (admin).',
-        outputs: 'Run result summary per job.',
-        crossScreen: 'Reminder rules live in Settings > E-mail (SY01); sent reminders appear in Reminder Log (SY60). IMAP results in Email Monitor (SY25). CRON_SECRET status in Environment Secrets (SY50).',
+        outputs: 'Run result summary per job; last reminder run with trigger and counts.',
+        crossScreen: 'Reminder moments live in Settings > E-mail (SY01); sent reminders appear in Reminder Log (SY60). IMAP results in Email Monitor (SY25). CRON_SECRET status in Environment Secrets (SY50).',
       },
       {
         code: 'SY20',
