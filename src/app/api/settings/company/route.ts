@@ -1,6 +1,7 @@
 import { NextRequest, NextResponse } from 'next/server';
 import { admin } from '@/lib/supabase/admin';
 import { invalidateCompanyCache } from '@/lib/company';
+import { getStaffUser } from '@/lib/supabase/staff';
 
 export async function GET() {
   try {
@@ -17,6 +18,9 @@ export async function GET() {
 }
 
 export async function PUT(req: NextRequest) {
+  const staff = await getStaffUser();
+  if (!staff || staff.role !== 'admin') return NextResponse.json({ error: 'Forbidden' }, { status: 403 });
+
   try {
     const body = await req.json();
 

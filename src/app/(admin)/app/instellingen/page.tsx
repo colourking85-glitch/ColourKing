@@ -2,12 +2,13 @@
 
 import { useState, useEffect, useCallback, useRef } from 'react';
 import { useTranslations } from 'next-intl';
-import { Settings, Palette, Globe, Building2, Bell, Check, Type, Maximize2, Bot, Landmark, CreditCard, FileText, Upload, Trash2, Image as ImageIcon } from 'lucide-react';
+import { Settings, Palette, Globe, Building2, Bell, Check, Type, Maximize2, Bot, Landmark, CreditCard, FileText, Upload, Trash2, Image as ImageIcon, Mail } from 'lucide-react';
 import { ScreenBadge } from '@/components/ui/ScreenBadge';
 import { useAppLocale } from '@/components/AdminIntlProvider';
 import { useSettings } from '@/components/SettingsProvider';
+import { EmailSettingsTab } from '@/components/settings/EmailSettingsTab';
 
-type Tab = 'company' | 'appearance' | 'general' | 'notifications';
+type Tab = 'company' | 'email' | 'appearance' | 'general' | 'notifications';
 
 type CompanyData = {
   name: string;
@@ -201,6 +202,7 @@ export default function SettingsPage() {
 
   const tabs: { id: Tab; label: string; icon: React.ElementType }[] = [
     { id: 'company', label: tSy('companyTab'), icon: Building2 },
+    { id: 'email', label: tSy('emailTab'), icon: Mail },
     { id: 'appearance', label: tSy('appearance'), icon: Palette },
     { id: 'general', label: tSy('general'), icon: Globe },
     { id: 'notifications', label: tSy('notifications'), icon: Bell },
@@ -384,6 +386,9 @@ export default function SettingsPage() {
               </div>
             </>
           )}
+
+          {/* Email tab */}
+          {tab === 'email' && <EmailSettingsTab />}
 
           {/* Appearance tab */}
           {tab === 'appearance' && (
@@ -802,8 +807,8 @@ export default function SettingsPage() {
             </>
           )}
 
-          {/* Save button (not shown on company tab — it has its own) */}
-          {tab !== 'company' && (
+          {/* Save button (company and email tabs have their own) */}
+          {tab !== 'company' && tab !== 'email' && (
             <div className="flex items-center gap-3">
               <button
                 onClick={handleSave}

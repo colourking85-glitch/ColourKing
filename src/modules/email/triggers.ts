@@ -13,6 +13,7 @@ import { sendEmail } from './sender';
 import { logEmail } from './log';
 import type { EmailLocale } from './schema';
 import { getCompanyInfo } from '@/lib/company';
+import { getSender } from '@/lib/email-identity';
 
 const APP_URL = process.env.NEXT_PUBLIC_APP_URL ?? 'https://colourking.nl';
 
@@ -59,8 +60,8 @@ export async function onOfferSent(offerId: string): Promise<void> {
     subtotalCents: offer.subtotal_cents,
     vatCents: offer.vat_cents,
     totalCents: offer.total_cents,
-    approveUrl: `${APP_URL}/offerte/${offerId}/approve`,
-    rejectUrl: `${APP_URL}/offerte/${offerId}/reject`,
+    approveUrl: `${APP_URL}/contact?ref=${encodeURIComponent(offer.offer_number ?? offerId.slice(0, 8))}&action=approve`,
+    rejectUrl: `${APP_URL}/contact?ref=${encodeURIComponent(offer.offer_number ?? offerId.slice(0, 8))}&action=reject`,
   };
 
   const company = await getCompanyInfo();
@@ -68,7 +69,8 @@ export async function onOfferSent(offerId: string): Promise<void> {
   const subject = getSubject('offerSent', data, locale);
   const to = String(customer.email);
 
-  const result = await sendEmail(to, subject, html);
+  const sender = await getSender('offers');
+  const result = await sendEmail(to, subject, html, sender);
 
   await logEmail({
     to,
@@ -79,6 +81,8 @@ export async function onOfferSent(offerId: string): Promise<void> {
     ref_id: offerId,
     status: result.success ? 'sent' : 'failed',
     error: result.error,
+    from: sender.from,
+    messageId: result.messageId,
   });
 }
 
@@ -129,7 +133,8 @@ export async function onInvoiceIssued(invoiceId: string): Promise<void> {
   const subject = getSubject('invoiceSent', data, locale);
   const to = String(customer.email);
 
-  const result = await sendEmail(to, subject, html);
+  const sender = await getSender('invoices');
+  const result = await sendEmail(to, subject, html, sender);
 
   await logEmail({
     to,
@@ -140,6 +145,8 @@ export async function onInvoiceIssued(invoiceId: string): Promise<void> {
     ref_id: invoiceId,
     status: result.success ? 'sent' : 'failed',
     error: result.error,
+    from: sender.from,
+    messageId: result.messageId,
   });
 }
 
@@ -185,12 +192,13 @@ export async function onAppointmentConfirmed(appointmentId: string): Promise<voi
     durationMinutes: apt.duration_minutes,
     address: `${company.address}, ${company.postcode} ${company.city}`,
     vehicleInfo,
-    cancelUrl: `${APP_URL}/afspraak/${appointmentId}/cancel`,
+    cancelUrl: `${APP_URL}/contact?ref=AP-${appointmentId.slice(0, 8)}&action=cancel`,
   };
   const html = renderTemplate('appointmentConfirmed', data, locale, company);
   const subject = getSubject('appointmentConfirmed', data, locale);
 
-  const result = await sendEmail(to, subject, html);
+  const sender = await getSender('appointments');
+  const result = await sendEmail(to, subject, html, sender);
 
   await logEmail({
     to,
@@ -201,6 +209,8 @@ export async function onAppointmentConfirmed(appointmentId: string): Promise<voi
     ref_id: appointmentId,
     status: result.success ? 'sent' : 'failed',
     error: result.error,
+    from: sender.from,
+    messageId: result.messageId,
   });
 }
 
@@ -262,7 +272,8 @@ export async function onPaymentReceived(paymentId: string): Promise<void> {
   const subject = getSubject('paymentReceived', data, locale);
   const to = String(customer.email);
 
-  const result = await sendEmail(to, subject, html);
+  const sender = await getSender('invoices');
+  const result = await sendEmail(to, subject, html, sender);
 
   await logEmail({
     to,
@@ -273,6 +284,8 @@ export async function onPaymentReceived(paymentId: string): Promise<void> {
     ref_id: paymentId,
     status: result.success ? 'sent' : 'failed',
     error: result.error,
+    from: sender.from,
+    messageId: result.messageId,
   });
 }
 
@@ -323,13 +336,14 @@ export async function onLeadCreated(leadId: string): Promise<void> {
       : [{ email: SHOP_EMAIL, locale: 'nl' }];
 
   const company = await getCompanyInfo();
+  const sender = await getSender('leads');
 
   for (const member of recipients) {
     const locale = validLocale(member.locale);
     const html = renderTemplate('leadReceived', data, locale, company);
     const subject = getSubject('leadReceived', data, locale);
 
-    const result = await sendEmail(member.email, subject, html);
+    const result = await sendEmail(member.email, subject, html, sender);
 
     await logEmail({
       to: member.email,
@@ -340,6 +354,8 @@ export async function onLeadCreated(leadId: string): Promise<void> {
       ref_id: leadId,
       status: result.success ? 'sent' : 'failed',
       error: result.error,
+      from: sender.from,
+      messageId: result.messageId,
     });
   }
 
@@ -361,7 +377,8 @@ export async function onLeadCreated(leadId: string): Promise<void> {
       company,
     );
 
-    const custResult = await sendEmail(lead.contact_email, custSubject, custHtml);
+    const custSender = await getSender('appointments');
+    const custResult = await sendEmail(lead.contact_email, custSubject, custHtml, custSender);
 
     await logEmail({
       to: lead.contact_email,
@@ -372,69 +389,70 @@ export async function onLeadCreated(leadId: string): Promise<void> {
       ref_id: leadId,
       status: custResult.success ? 'sent' : 'failed',
       error: custResult.error,
+      from: custSender.from,
+      messageId: custResult.messageId,
     });
   }
 }
 
 /**
- * Send "your car is ready" email when repair is complete.
+ * "Your car is ready" email. Sent on request from JB10 (staff confirms) or by
+ * the reminder engine. Returns the send result so the caller can log it.
  */
-export async function onRepairComplete(jobId: string): Promise<void> {
+export async function sendVehicleReady(jobId: string): Promise<{
+  success: boolean;
+  to?: string;
+  locale?: EmailLocale;
+  messageId?: string;
+  error?: string;
+}> {
+  const { data: job, error } = await supabase
+    .from('jobs')
+    .select('id, number, customers(name, email, locale), vehicles(kenteken, make, model)')
+    .eq('id', jobId)
+    .single();
 
-  // Jobs table isn't explicitly defined in database.ts but follows the pattern
-  // For now we query via offers → customers
-  const { data: offers, error } = await supabase
-    .from('offers')
-    .select('*, customers(*), vehicles:vehicles(*)')
-    .eq('job_id', jobId)
-    .order('created_at', { ascending: false })
-    .limit(1);
+  if (error || !job) return { success: false, error: 'job_not_found' };
 
-  if (error || !offers?.length) {
-    console.error('[EMAIL TRIGGER] onRepairComplete: no offer for job', jobId);
-    return;
-  }
+  const customer = (Array.isArray(job.customers) ? job.customers[0] : job.customers) as Record<string, unknown> | null;
+  const vehicle = (Array.isArray(job.vehicles) ? job.vehicles[0] : job.vehicles) as Record<string, unknown> | null;
 
-  const offer = offers[0];
-  const customer = offer.customers as Record<string, unknown> | null;
-  const vehicle = offer.vehicles as Record<string, unknown> | null;
-
-  if (!customer?.email) {
-    console.warn('[EMAIL TRIGGER] onRepairComplete: customer has no email');
-    return;
-  }
+  if (!customer?.email) return { success: false, error: 'no_email' };
 
   const locale = validLocale(customer.locale as string);
-
+  const to = String(customer.email);
   const vehicleInfo = vehicle
     ? `${vehicle.kenteken ?? ''} (${vehicle.make ?? ''} ${vehicle.model ?? ''})`.trim()
     : '';
 
   const company = await getCompanyInfo();
-
   const data = {
     customerName: String(customer.name ?? ''),
     vehicleInfo,
-    jobNumber: jobId.slice(0, 8),
+    jobNumber: job.number != null ? `JB-${job.number}` : null,
     collectionDate: null,
     collectionTime: null,
     address: `${company.address}, ${company.postcode} ${company.city}`,
+    openingHours: 'Ma – Vr: 08:00 – 17:30 | Za: 09:00 – 13:00',
   };
 
-  const html = renderTemplate('repairOrderReady', data, locale, company);
-  const subject = getSubject('repairOrderReady', data, locale);
-  const to = String(customer.email);
-
-  const result = await sendEmail(to, subject, html);
+  const html = renderTemplate('vehicleReady', data, locale, company);
+  const subject = `${getSubject('vehicleReady', data, locale)} [JB-${job.number}]`;
+  const sender = await getSender('workshop');
+  const result = await sendEmail(to, subject, html, sender);
 
   await logEmail({
     to,
     subject,
-    template: 'repairOrderReady',
+    template: 'vehicleReady',
     locale,
     ref_type: 'job',
     ref_id: jobId,
     status: result.success ? 'sent' : 'failed',
     error: result.error,
+    from: sender.from,
+    messageId: result.messageId,
   });
+
+  return { success: result.success, to, locale, messageId: result.messageId, error: result.error };
 }

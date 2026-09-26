@@ -3239,6 +3239,59 @@ export type Database = {
           },
         ]
       }
+      reminder_log: {
+        Row: {
+          created_at: string
+          entity_id: string
+          entity_type: string
+          error: string | null
+          id: string
+          kind: Database["public"]["Enums"]["reminder_kind"]
+          locale: string
+          message_id: string | null
+          recipient: string
+          sent_by: string | null
+          stage: string
+          status: string
+        }
+        Insert: {
+          created_at?: string
+          entity_id: string
+          entity_type: string
+          error?: string | null
+          id?: string
+          kind: Database["public"]["Enums"]["reminder_kind"]
+          locale?: string
+          message_id?: string | null
+          recipient: string
+          sent_by?: string | null
+          stage: string
+          status: string
+        }
+        Update: {
+          created_at?: string
+          entity_id?: string
+          entity_type?: string
+          error?: string | null
+          id?: string
+          kind?: Database["public"]["Enums"]["reminder_kind"]
+          locale?: string
+          message_id?: string | null
+          recipient?: string
+          sent_by?: string | null
+          stage?: string
+          status?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "reminder_log_sent_by_fkey"
+            columns: ["sent_by"]
+            isOneToOne: false
+            referencedRelation: "staff"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       resources: {
         Row: {
           active: boolean
@@ -3816,6 +3869,26 @@ export type Database = {
       }
       generate_tracking_code: { Args: never; Returns: string }
       ins_in_transition: { Args: never; Returns: boolean }
+      ins_approve: {
+        Args: {
+          p_id: string
+          p_role: string
+          p_signer_name: string
+          p_identification: string
+          p_statement_text: string
+          p_signature_path?: string | null
+          p_signer_email?: string | null
+          p_ip_address?: unknown
+          p_user_agent?: string | null
+        }
+        Returns: Database["public"]["Tables"]["ins_approvals"]["Row"]
+      }
+      ins_build_snapshot: { Args: { p_id: string }; Returns: Json }
+      ins_recount: { Args: { p_id: string }; Returns: undefined }
+      ins_transition: {
+        Args: { p_id: string; p_to: string; p_payload?: Json }
+        Returns: Database["public"]["Tables"]["ins_inspections"]["Row"]
+      }
       ins_next_reference: { Args: never; Returns: string }
       is_active_staff: { Args: never; Returns: boolean }
       is_admin_staff: { Args: never; Returns: boolean }
@@ -3965,6 +4038,12 @@ export type Database = {
       photo_phase: "before" | "during" | "after"
       preferred_channel: "email" | "phone" | "whatsapp" | "portal"
       preferred_language: "nl" | "en" | "tr" | "bg" | "de"
+      reminder_kind:
+        | "invoice_due_soon"
+        | "invoice_overdue"
+        | "offer_expiring"
+        | "appointment_reminder"
+        | "vehicle_ready"
       repair_network: "none" | "schadegarant" | "topherstel" | "other"
       replacement_vehicle_policy:
         | "included"
@@ -4261,6 +4340,13 @@ export const Constants = {
       photo_phase: ["before", "during", "after"],
       preferred_channel: ["email", "phone", "whatsapp", "portal"],
       preferred_language: ["nl", "en", "tr", "bg", "de"],
+      reminder_kind: [
+        "invoice_due_soon",
+        "invoice_overdue",
+        "offer_expiring",
+        "appointment_reminder",
+        "vehicle_ready",
+      ],
       repair_network: ["none", "schadegarant", "topherstel", "other"],
       replacement_vehicle_policy: [
         "included",
@@ -4305,6 +4391,7 @@ export type PartStatus = Database['public']['Enums']['part_status']
 export type PayerType = Database['public']['Enums']['payer_type']
 export type PaymentMethod = Database['public']['Enums']['payment_method']
 export type PhotoPhase = Database['public']['Enums']['photo_phase']
+export type ReminderKind = Database['public']['Enums']['reminder_kind']
 export type ResourceType = Database['public']['Enums']['resource_type']
 export type StaffRole = Database['public']['Enums']['staff_role']
 export type TaskStatus = Database['public']['Enums']['task_status']

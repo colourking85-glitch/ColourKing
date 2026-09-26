@@ -123,6 +123,20 @@ const STRINGS: Record<string, EmailStrings> = {
     readyJob: 'Opdrachtnummer',
     readyCollection: 'Ophaalmoment',
     readyAddress: 'Adres',
+    readyHours: 'Openingstijden',
+
+    // Reminders
+    offerExpiringSubject: 'Herinnering: offerte {offerNumber} verloopt binnenkort',
+    offerExpiringIntro: 'Uw offerte verloopt binnenkort. Wilt u de werkzaamheden laten uitvoeren? Laat het ons weten, dan plannen we het in.',
+    offerExpiringContact: 'Neem contact op',
+    invoiceDueSoonSubject: 'Herinnering: factuur {invoiceNumber} vervalt binnenkort',
+    invoiceDueSoonIntro: 'De betaaltermijn van onderstaande factuur verloopt binnenkort. Heeft u al betaald? Dan kunt u deze e-mail negeren.',
+    invoiceOverdueSubject: 'Betalingsherinnering: factuur {invoiceNumber}',
+    invoiceOverdueIntro: 'Volgens onze administratie is onderstaande factuur nog niet betaald. Wij verzoeken u vriendelijk het bedrag alsnog over te maken.',
+    invoiceOverdueDays: 'Dagen te laat',
+    invoiceAmount: 'Openstaand bedrag',
+    invoiceIban: 'Rekeningnummer',
+    invoiceAlreadyPaid: 'Heeft u inmiddels betaald? Dan kunt u deze herinnering als niet verzonden beschouwen.',
   },
 
   en: {
@@ -204,6 +218,19 @@ const STRINGS: Record<string, EmailStrings> = {
     readyJob: 'Job number',
     readyCollection: 'Collection',
     readyAddress: 'Address',
+    readyHours: 'Opening hours',
+
+    offerExpiringSubject: 'Reminder: quote {offerNumber} expires soon',
+    offerExpiringIntro: 'Your quote is about to expire. Would you like us to carry out the work? Let us know and we will schedule it.',
+    offerExpiringContact: 'Contact us',
+    invoiceDueSoonSubject: 'Reminder: invoice {invoiceNumber} is due soon',
+    invoiceDueSoonIntro: 'The payment term of the invoice below ends soon. If you have already paid, please ignore this email.',
+    invoiceOverdueSubject: 'Payment reminder: invoice {invoiceNumber}',
+    invoiceOverdueIntro: 'According to our records the invoice below has not been paid yet. We kindly ask you to transfer the amount.',
+    invoiceOverdueDays: 'Days overdue',
+    invoiceAmount: 'Outstanding amount',
+    invoiceIban: 'Bank account',
+    invoiceAlreadyPaid: 'Already paid? Then please disregard this reminder.',
   },
 
   tr: {
@@ -285,6 +312,19 @@ const STRINGS: Record<string, EmailStrings> = {
     readyJob: 'Is numarasi',
     readyCollection: 'Teslim zamani',
     readyAddress: 'Adres',
+    readyHours: 'Calisma saatleri',
+
+    offerExpiringSubject: 'Hatirlatma: {offerNumber} numarali teklifin suresi doluyor',
+    offerExpiringIntro: 'Teklifinizin suresi yakinda doluyor. Isin yapilmasini ister misiniz? Bize bildirin, planlayalim.',
+    offerExpiringContact: 'Bize ulasin',
+    invoiceDueSoonSubject: 'Hatirlatma: {invoiceNumber} numarali faturanin vadesi yaklasiyor',
+    invoiceDueSoonIntro: 'Asagidaki faturanin odeme suresi yakinda doluyor. Odemeyi yaptiysaniz bu e-postayi dikkate almayin.',
+    invoiceOverdueSubject: 'Odeme hatirlatmasi: fatura {invoiceNumber}',
+    invoiceOverdueIntro: 'Kayitlarimiza gore asagidaki fatura henuz odenmemistir. Tutari aktarmanizi rica ederiz.',
+    invoiceOverdueDays: 'Gecikme (gun)',
+    invoiceAmount: 'Odenmemis tutar',
+    invoiceIban: 'Banka hesabi',
+    invoiceAlreadyPaid: 'Odemeyi yaptiysaniz bu hatirlatmayi dikkate almayin.',
   },
 };
 
@@ -578,10 +618,10 @@ function renderLeadReceived(data: TemplateDataMap['leadReceived'], locale: Email
     )}${appointment}`;
 }
 
-function renderRepairOrderReady(data: TemplateDataMap['repairOrderReady'], locale: EmailLocale): string {
+function renderVehicleReady(data: TemplateDataMap['vehicleReady'], locale: EmailLocale): string {
   const collectionStr = data.collectionDate
     ? `${formatDate(data.collectionDate, locale)}${data.collectionTime ? ` ${data.collectionTime}` : ''}`
-    : '—';
+    : null;
 
   const body = `
     ${greeting(locale, data.customerName)}
@@ -589,23 +629,62 @@ function renderRepairOrderReady(data: TemplateDataMap['repairOrderReady'], local
     ${detailTable(
       detailRow(t(locale, 'readyVehicle'), data.vehicleInfo) +
       (data.jobNumber ? detailRow(t(locale, 'readyJob'), data.jobNumber) : '') +
-      detailRow(t(locale, 'readyCollection'), collectionStr) +
-      detailRow(t(locale, 'readyAddress'), data.address)
+      (collectionStr ? detailRow(t(locale, 'readyCollection'), collectionStr) : '') +
+      detailRow(t(locale, 'readyAddress'), data.address) +
+      (data.openingHours ? detailRow(t(locale, 'readyHours'), data.openingHours) : '')
     )}`;
 
   return body;
+}
+
+function renderOfferExpiring(data: TemplateDataMap['offerExpiring'], locale: EmailLocale): string {
+  return `
+    ${greeting(locale, data.customerName)}
+    ${paragraph(t(locale, 'offerExpiringIntro'))}
+    ${detailTable(
+      detailRow(t(locale, 'paymentReference'), data.offerNumber) +
+      highlightedDetailRow(t(locale, 'offerValidUntil'), formatDate(data.validUntil, locale)) +
+      detailRow(t(locale, 'offerGrandTotal'), formatCurrency(data.totalCents, locale))
+    )}
+    <div style="text-align:center;margin:24px 0;">${ctaButton(t(locale, 'offerExpiringContact'), data.contactUrl)}</div>`;
+}
+
+function renderInvoiceReminder(
+  data: TemplateDataMap['invoiceDueSoon'] & { daysOverdue?: number },
+  locale: EmailLocale,
+  overdue: boolean,
+): string {
+  const dueRow = overdue
+    ? highlightedDetailRow(t(locale, 'invoiceDueDate'), formatDate(data.dueDate, locale)) +
+      highlightedDetailRow(t(locale, 'invoiceOverdueDays'), String(data.daysOverdue ?? 0))
+    : detailRow(t(locale, 'invoiceDueDate'), formatDate(data.dueDate, locale));
+
+  return `
+    ${greeting(locale, data.customerName)}
+    ${paragraph(t(locale, overdue ? 'invoiceOverdueIntro' : 'invoiceDueSoonIntro'))}
+    ${detailTable(
+      detailRow(t(locale, 'paymentReference'), data.invoiceNumber) +
+      dueRow +
+      detailRow(t(locale, 'invoiceAmount'), formatCurrency(data.totalCents, locale)) +
+      detailRow(t(locale, 'invoiceIban'), data.iban)
+    )}
+    ${data.payUrl ? `<div style="text-align:center;margin:24px 0;">${ctaButton(t(locale, 'invoicePayNow'), data.payUrl)}</div>` : ''}
+    ${paragraph(`<span style="color:#6b7280;font-size:12px;">${t(locale, 'invoiceAlreadyPaid')}</span>`)}`;
 }
 
 /* ── Public API ────────────────────────────────────────────── */
 
 const RENDERERS: Record<string, (data: unknown, locale: EmailLocale) => string> = {
   offerSent: (d, l) => renderOfferSent(d as TemplateDataMap['offerSent'], l),
+  offerExpiring: (d, l) => renderOfferExpiring(d as TemplateDataMap['offerExpiring'], l),
   invoiceSent: (d, l) => renderInvoiceSent(d as TemplateDataMap['invoiceSent'], l),
+  invoiceDueSoon: (d, l) => renderInvoiceReminder(d as TemplateDataMap['invoiceDueSoon'], l, false),
+  invoiceOverdue: (d, l) => renderInvoiceReminder(d as TemplateDataMap['invoiceOverdue'], l, true),
   appointmentConfirmed: (d, l) => renderAppointmentConfirmed(d as TemplateDataMap['appointmentConfirmed'], l),
   appointmentReminder: (d, l) => renderAppointmentReminder(d as TemplateDataMap['appointmentReminder'], l),
   paymentReceived: (d, l) => renderPaymentReceived(d as TemplateDataMap['paymentReceived'], l),
   leadReceived: (d, l) => renderLeadReceived(d as TemplateDataMap['leadReceived'], l),
-  repairOrderReady: (d, l) => renderRepairOrderReady(d as TemplateDataMap['repairOrderReady'], l),
+  vehicleReady: (d, l) => renderVehicleReady(d as TemplateDataMap['vehicleReady'], l),
 };
 
 /**
@@ -633,12 +712,15 @@ export function getSubject<T extends keyof TemplateDataMap>(
 ): string {
   const subjectKeys: Record<string, string> = {
     offerSent: 'offerSubject',
+    offerExpiring: 'offerExpiringSubject',
     invoiceSent: 'invoiceSubject',
+    invoiceDueSoon: 'invoiceDueSoonSubject',
+    invoiceOverdue: 'invoiceOverdueSubject',
     appointmentConfirmed: 'appointmentSubject',
     appointmentReminder: 'reminderSubject',
     paymentReceived: 'paymentSubject',
     leadReceived: 'leadSubject',
-    repairOrderReady: 'readySubject',
+    vehicleReady: 'readySubject',
   };
   const key = subjectKeys[template];
   if (!key) return 'Colourking';
@@ -735,13 +817,37 @@ export function getSampleData(template: string): Record<string, unknown> {
       location: 'shop',
       locationAddress: null,
     },
-    repairOrderReady: {
+    vehicleReady: {
       customerName: 'Jan de Vries',
       vehicleInfo: 'AB-123-CD (BMW 3 Serie)',
       jobNumber: 'JOB-2026-0015',
       collectionDate: '2026-09-05',
       collectionTime: '14:00',
       address: 'Satijnbloem 6, 3068 JP Rotterdam',
+    },
+    offerExpiring: {
+      customerName: 'Jan de Vries',
+      offerNumber: 'OFF-2026-0042',
+      validUntil: '2026-09-15',
+      totalCents: 115555,
+      contactUrl: 'https://colourking.nl/contact',
+    },
+    invoiceDueSoon: {
+      customerName: 'Jan de Vries',
+      invoiceNumber: 'FAC-2026-0018',
+      dueDate: '2026-09-25',
+      totalCents: 115555,
+      payUrl: 'https://colourking.nl/s/sample',
+      iban: 'NL12 INGB 0675 6533 04',
+    },
+    invoiceOverdue: {
+      customerName: 'Jan de Vries',
+      invoiceNumber: 'FAC-2026-0018',
+      dueDate: '2026-09-25',
+      daysOverdue: 2,
+      totalCents: 115555,
+      payUrl: 'https://colourking.nl/s/sample',
+      iban: 'NL12 INGB 0675 6533 04',
     },
   };
 

@@ -1,14 +1,12 @@
 import { NextRequest, NextResponse } from 'next/server';
 import { createServiceClient } from '@/lib/supabase/server';
+import { requireCronOrAdmin } from '@/lib/cron-auth';
 
 export const maxDuration = 300;
 
 export async function POST(req: NextRequest) {
-  const authHeader = req.headers.get('authorization');
-  const cronSecret = process.env.CRON_SECRET;
-  if (cronSecret && authHeader !== `Bearer ${cronSecret}`) {
-    return NextResponse.json({ error: 'Unauthorized' }, { status: 401 });
-  }
+  const auth = await requireCronOrAdmin(req);
+  if (auth instanceof NextResponse) return auth;
 
   const supabase = createServiceClient();
   const cutoff = new Date();

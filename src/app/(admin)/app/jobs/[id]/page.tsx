@@ -4,7 +4,7 @@ import { useState, useEffect, useCallback, useRef } from 'react';
 import { useParams, useRouter } from 'next/navigation';
 import Link from 'next/link';
 import { useTranslations } from 'next-intl';
-import { ArrowLeft, ChevronRight, MessageSquare, Clock, Camera, Upload, Trash2, X, FileCheck } from 'lucide-react';
+import { ArrowLeft, ChevronRight, MessageSquare, Clock, Camera, Upload, Trash2, X, FileCheck, Mail, Check } from 'lucide-react';
 import { ScreenBadge } from '@/components/ui/ScreenBadge';
 import { ConvertToDossier } from '@/components/portfolio/ConvertToDossier';
 import {
@@ -71,6 +71,18 @@ export default function JobDetailPage() {
   const [lightbox, setLightbox] = useState<string | null>(null);
   const fileInputRef = useRef<HTMLInputElement>(null);
 
+  const [readyPrompt, setReadyPrompt] = useState(false);
+  const [readyEmailSent, setReadyEmailSent] = useState<string | null>(null);
+  const [readyEmailBusy, setReadyEmailBusy] = useState(false);
+  const [readyEmailError, setReadyEmailError] = useState<string | null>(null);
+
+  const loadReadyEmail = useCallback(() => {
+    fetch(`/api/jobs/${id}/notify-ready`)
+      .then(r => r.ok ? r.json() : null)
+      .then(d => setReadyEmailSent(d?.sent ? d.last?.created_at ?? '' : null))
+      .catch(() => {});
+  }, [id]);
+
   const load = useCallback(() => {
     fetch(`/api/jobs/${id}`)
       .then(r => r.ok ? r.json() : null)
@@ -84,18 +96,34 @@ export default function JobDetailPage() {
       .then(setPhotos);
   }, [id]);
 
-  useEffect(() => { load(); loadPhotos(); }, [load, loadPhotos]);
+  useEffect(() => { load(); loadPhotos(); loadReadyEmail(); }, [load, loadPhotos, loadReadyEmail]);
 
   async function handleTransition(to: JobStage) {
     if (!job) return;
     setTransitioning(true);
-    await fetch(`/api/jobs/${id}`, {
+    const res = await fetch(`/api/jobs/${id}`, {
       method: 'PATCH',
       headers: { 'Content-Type': 'application/json' },
       body: JSON.stringify({ stage: to, from_stage: job.stage }),
     });
     load();
     setTransitioning(false);
+    if (res.ok && to === 'ready') setReadyPrompt(true);
+  }
+
+  async function sendReadyEmail() {
+    setReadyEmailBusy(true);
+    setReadyEmailError(null);
+    const res = await fetch(`/api/jobs/${id}/notify-ready`, { method: 'POST' });
+    if (res.ok) {
+      setReadyPrompt(false);
+      loadReadyEmail();
+      load();
+    } else {
+      const body = await res.json().catch(() => ({}));
+      setReadyEmailError(body.error === 'no_email' ? t('readyEmailNoEmail') : t('readyEmailFailed'));
+    }
+    setReadyEmailBusy(false);
   }
 
   async function handleAddNote() {
@@ -143,6 +171,22 @@ export default function JobDetailPage() {
 
   return (
     <div className="space-y-6">
+      {readyPrompt && (
+        <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/60 p-4" onClick={() => setReadyPrompt(false)}>
+          <div className="w-full max-w-md rounded-lg border border-ck-dark-border bg-ck-dark-card p-6" onClick={e => e.stopPropagation()}>
+            <h3 className="flex items-center gap-2 text-base font-semibold text-white"><Mail size={18} /> {t('readyEmailTitle')}</h3>
+            <p className="mt-2 text-sm text-ck-muted-light">{t('readyEmailBody')}</p>
+            {job.customers?.email
+              ? <p className="mt-2 font-mono text-xs text-ck-muted">{job.customers.email}</p>
+              : <p className="mt-2 text-xs text-amber-400">{t('readyEmailNoEmail')}</p>}
+            {readyEmailError && <p className="mt-2 text-xs text-red-400">{readyEmailError}</p>}
+            <div className="mt-5 flex justify-end gap-2">
+              <button onClick={() => setReadyPrompt(false)} className="rounded-lg border border-ck-dark-border px-4 py-2 text-sm text-ck-muted-light hover:text-white">{t('readyEmailSkip')}</button>
+              <button onClick={sendReadyEmail} disabled={readyEmailBusy || !job.customers?.email} className="rounded-lg bg-ck-red px-4 py-2 text-sm font-semibold text-white hover:bg-ck-red-hover disabled:opacity-50">{t('readyEmailSend')}</button>
+            </div>
+          </div>
+        </div>
+      )}
       {/* Header */}
       <div className="flex items-center justify-between">
         <div className="flex items-center gap-3">
@@ -247,6 +291,27 @@ export default function JobDetailPage() {
                   <ChevronRight size={14} />
                 </button>
               ))}
+            </div>
+          )}
+
+          {/* "Car ready" email — staff decides, nothing is sent automatically */}
+          {(['ready', 'delivered'] as JobStage[]).includes(job.stage) && (
+            <div className="flex flex-wrap items-center gap-3">
+              <button
+                onClick={sendReadyEmail}
+                disabled={readyEmailBusy || !job.customers?.email}
+                className="flex items-center gap-2 rounded-lg border border-blue-500/30 bg-blue-500/5 px-4 py-2 text-sm font-medium text-blue-300 hover:border-blue-500/50 hover:bg-blue-500/10 transition-colors disabled:opacity-50"
+              >
+                <Mail size={16} />
+                {t('readyEmailButton')}
+              </button>
+              {readyEmailSent !== null && (
+                <span className="flex items-center gap-1.5 text-xs text-green-400">
+                  <Check size={12} /> {t('readyEmailSentAt')}{readyEmailSent ? ` · ${new Date(readyEmailSent).toLocaleString('nl-NL')}` : ''}
+                </span>
+              )}
+              {!job.customers?.email && <span className="text-xs text-ck-muted">{t('readyEmailNoEmail')}</span>}
+              {readyEmailError && <span className="text-xs text-red-400">{readyEmailError}</span>}
             </div>
           )}
 

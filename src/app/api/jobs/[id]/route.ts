@@ -2,7 +2,6 @@ import { NextRequest, NextResponse } from 'next/server';
 import { createClient } from '@/lib/supabase/server';
 import { JobSchema } from '@/modules/jobs/schema';
 import { canTransition, type JobStage } from '@/modules/jobs/machine';
-import { onRepairComplete } from '@/modules/email/triggers';
 
 export async function GET(
   _req: NextRequest,
@@ -57,10 +56,6 @@ export async function PATCH(
       to_stage: to,
       note: body.note ?? `${from} → ${to}`,
     });
-
-    if (to === 'delivered') {
-      await onRepairComplete(params.id).catch((e) => console.error('[EMAIL] onRepairComplete failed:', e));
-    }
 
     const { data } = await supabase
       .from('jobs')

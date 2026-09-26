@@ -11,6 +11,7 @@ import { sendEmail } from './sender';
 import { renderMessage } from './templates';
 import type { EmailLocale } from './schema';
 import { getCompanyInfo } from '@/lib/company';
+import { getSender } from '@/lib/email-identity';
 
 const LOCALES: EmailLocale[] = ['nl', 'en', 'tr'];
 
@@ -100,7 +101,9 @@ export async function sendLeadEmail(input: SendLeadEmailInput): Promise<SendLead
   const subject = withLeadTag(baseSubject, lead.number);
 
   const company = await getCompanyInfo();
+  const sender = await getSender('leads');
   const result = await sendEmail(lead.contact_email, subject, renderMessage(input.message, locale, company), {
+    ...sender,
     text: input.message.trim(),
     ...(last?.message_id ? { inReplyTo: last.message_id, references: [last.message_id] } : {}),
   });
@@ -108,7 +111,7 @@ export async function sendLeadEmail(input: SendLeadEmailInput): Promise<SendLead
   if (!result.success) return { ok: false, status: 502, error: result.error ?? 'Email could not be sent' };
 
   const sentAt = new Date().toISOString();
-  const fromEmail = process.env.EMAIL_FROM ?? 'Colourking <sales@colourking.nl>';
+  const fromEmail = sender.from ?? process.env.EMAIL_FROM ?? 'Colourking <sales@colourking.nl>';
 
   const { data: row, error } = await supabase
     .from('email_log')

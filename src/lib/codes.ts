@@ -144,6 +144,9 @@ export const SCREEN_REGISTRY: Record<string, ScreenMeta> = {
   // Certifications & Website
   '/app/instellingen/certificeringen': { id: 'SY55', title: 'Certifications & Website', titleNl: 'Certificeringen & Website', module: 'SY', route: '/app/instellingen/certificeringen' },
 
+  // Reminder log
+  '/app/instellingen/herinneringen': { id: 'SY60', title: 'Reminder Log', titleNl: 'Herinneringen', module: 'SY', route: '/app/instellingen/herinneringen' },
+
   // Analytics
   '/app/analytics': { id: 'AN05', title: 'Site Analytics', titleNl: 'Website Analyse', module: 'SY', route: '/app/analytics' },
 

@@ -9,7 +9,7 @@ import {
   AppointmentReminderData,
   PaymentReceivedData,
   LeadReceivedData,
-  RepairOrderReadyData,
+  VehicleReadyData,
   EmailTemplateName,
   EmailLocale,
 } from '@/modules/email/schema';
@@ -135,8 +135,8 @@ describe('Email templates', () => {
     expect(html).toContain('website');
   });
 
-  it('renders repairOrderReady template', () => {
-    const html = renderTemplate('repairOrderReady', readyData, 'nl');
+  it('renders vehicleReady template', () => {
+    const html = renderTemplate('vehicleReady', readyData, 'nl');
     expect(html).toContain('AB-123-CD');
     expect(html).toContain('JOB-2026-0015');
   });
@@ -338,8 +338,8 @@ describe('Email schemas', () => {
     expect(result.success).toBe(true);
   });
 
-  it('validates RepairOrderReadyData schema', () => {
-    const result = RepairOrderReadyData.safeParse(readyData);
+  it('validates VehicleReadyData schema', () => {
+    const result = VehicleReadyData.safeParse(readyData);
     expect(result.success).toBe(true);
   });
 
@@ -359,8 +359,8 @@ describe('Email schemas', () => {
     expect(templates).toContain('appointmentReminder');
     expect(templates).toContain('paymentReceived');
     expect(templates).toContain('leadReceived');
-    expect(templates).toContain('repairOrderReady');
-    expect(templates).toHaveLength(7);
+    expect(templates).toContain('vehicleReady');
+    expect(templates).toHaveLength(10);
   });
 
   it('validates EmailLocale enum options', () => {
@@ -413,7 +413,7 @@ describe('Edge cases', () => {
 
   it('renders repair ready without collection date', () => {
     const data = { ...readyData, collectionDate: null, collectionTime: null };
-    const html = renderTemplate('repairOrderReady', data, 'nl');
+    const html = renderTemplate('vehicleReady', data, 'nl');
     expect(html).toContain('AB-123-CD');
   });
 

@@ -9,7 +9,7 @@ import {
   Package, Receipt, FolderOpen, CalendarDays, ClipboardList,
   BarChart3, Calculator, ShoppingCart, BookOpen, Settings, Bell,
   ChevronLeft, ChevronRight, ChevronDown, BookOpenCheck, Clock, Bot, Mail, HardDrive, Server,
-  Plug, Zap, CarFront, Coins, Shield, Activity, ClipboardCheck, Award, Images,
+  Plug, Zap, CarFront, Coins, Shield, Activity, ClipboardCheck, Award, Images, BellRing,
 } from 'lucide-react';
 import { ScreenBadge } from '@/components/ui/ScreenBadge';
 import { SCREEN_REGISTRY } from '@/lib/codes';
@@ -108,6 +108,7 @@ const NAV: NavSection[] = [
           { label: 'brandModels', href: '/app/instellingen/merken', icon: CarFront, code: 'SY40' },
           { label: 'labourRates', href: '/app/instellingen/tarieven', icon: Coins, code: 'SY45' },
           { label: 'certifications', href: '/app/instellingen/certificeringen', icon: Award, code: 'SY55' },
+          { label: 'reminders', href: '/app/instellingen/herinneringen', icon: BellRing, code: 'SY60' },
         ],
       },
       {
