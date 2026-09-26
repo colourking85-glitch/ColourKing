@@ -115,11 +115,11 @@ export function SentEmailsTable() {
                   <td className="px-3 py-2">
                     {href ? <Link href={href} className="text-ck-red hover:underline">{r.entity_type}</Link> : <span className="text-ck-muted">{r.entity_type}</span>}
                   </td>
-                  <td className="px-3 py-2">
-                    <span className={`rounded-md px-2 py-0.5 ${s.status === 'failed' ? 'bg-red-500/10 text-red-400' : 'bg-green-500/10 text-green-400'}`} title={s.error ?? ''}>
+                  <td className="min-w-[140px] px-3 py-2">
+                    <span className={`whitespace-nowrap rounded-md px-2 py-0.5 ${s.status === 'failed' ? 'bg-red-500/10 text-red-400' : 'bg-green-500/10 text-green-400'}`}>
                       {s.status === 'failed' ? t('statusFailed') : t('sent')}
                     </span>
-                    {s.error && <span className="ml-2 text-[10px] text-red-400">{s.error}</span>}
+                    {s.error && <div className="mt-1 max-w-[260px] truncate text-[10px] text-red-400" title={s.error}>{s.error}</div>}
                   </td>
                 </tr>
               );
