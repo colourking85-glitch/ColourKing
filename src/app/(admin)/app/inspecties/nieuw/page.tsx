@@ -2,9 +2,10 @@
 
 import { useState, useEffect, useCallback, useMemo } from 'react';
 import { useRouter, useSearchParams } from 'next/navigation';
-import { useTranslations } from 'next-intl';
+import { useTranslations, useLocale } from 'next-intl';
 import { Loader2 } from 'lucide-react';
 import { PhotoCapture } from '@/components/ui/PhotoCapture';
+import { VehicleDamageMap, COMPONENT_SLOTS, defaultPointForKey, type MapPoint, type MapSlot, type MapMarker } from '@/components/shared/VehicleDamageMap';
 import { STATUS_LABELS, type InsStatus } from '@/modules/inspectie/machine';
 import { GUIDED_SHOTS, getShotProgress, type ShotKey } from '@/modules/inspectie/checklist';
 import { suggestHours } from '@/modules/inspectie/suggest-hours';
@@ -59,6 +60,7 @@ type Finding = {
   reference: string;
   sequence_no: number;
   component_key: string;
+  hotspot_point: MapPoint | null;
   sub_location: string | null;
   damage_types: string[];
   severity: number;
@@ -231,6 +233,7 @@ export default function InspectieNieuwPage() {
   const presetVehicleId = searchParams.get('vehicle');
   const presetCustomerId = searchParams.get('customer');
   const t = useTranslations('in');
+  const locale = useLocale();
 
   // wizard state
   const [step, setStep] = useState(0);
@@ -277,6 +280,7 @@ export default function InspectieNieuwPage() {
   const [components, setComponents] = useState<Component[]>([]);
   const [damageTypes, setDamageTypes] = useState<DamageType[]>([]);
   const [showPicker, setShowPicker] = useState(false);
+  const [slotChoice, setSlotChoice] = useState<{ slot: MapSlot; point: MapPoint } | null>(null);
   const [selectedFindingId, setSelectedFindingId] = useState<string | null>(null);
   const [editingFinding, setEditingFinding] = useState<Partial<Finding> | null>(null);
 
@@ -600,7 +604,7 @@ export default function InspectieNieuwPage() {
 
   // ---- start new finding from picker ----
 
-  const startNewFinding = useCallback((comp: Component) => {
+  const startNewFinding = useCallback((comp: Component, point?: MapPoint) => {
     const origin = isPreStep ? 'pre_existent' : 'schade';
     const suggested = suggestHours({
       panelSize: comp.panel_size as 'xs' | 's' | 'm' | 'l' | 'xl',
@@ -612,6 +616,7 @@ export default function InspectieNieuwPage() {
     });
     setEditingFinding({
       component_key: comp.key,
+      hotspot_point: point ?? defaultPointForKey(comp.key),
       sub_location: null,
       damage_types: [],
       severity: 2,
@@ -628,8 +633,25 @@ export default function InspectieNieuwPage() {
       adas_possible: false,
       description: null,
     });
+    setSlotChoice(null);
     setShowPicker(false);
   }, [isPreStep]);
+
+  // ---- damage map helpers ----
+
+  const componentLabel = useCallback((key: string) => {
+    const c = components.find(x => x.key === key);
+    if (!c) return key;
+    if (locale === 'en' && c.name_en) return c.name_en;
+    if (locale === 'tr' && c.name_tr) return c.name_tr;
+    return c.name_nl;
+  }, [components, locale]);
+
+  const mapMarkers = useMemo<MapMarker[]>(() => findings.flatMap(f => {
+    const point = f.hotspot_point ?? defaultPointForKey(f.component_key);
+    if (!point) return [];
+    return [{ id: f.id, point, label: f.reference, muted: f.origin === 'pre_existent', active: f.id === selectedFindingId }];
+  }), [findings, selectedFindingId]);
 
   // ---- recalc hours helper ----
 
@@ -1255,6 +1277,19 @@ export default function InspectieNieuwPage() {
                   </button>
                 </div>
 
+                {/* Damage map with markers (tap a marker to select the finding) */}
+                {findings.length > 0 && (
+                  <div className="mt-4 flex justify-center rounded-xl border border-ck-dark-border bg-ck-dark-card p-3">
+                    <VehicleDamageMap
+                      slots={COMPONENT_SLOTS}
+                      className="w-full max-w-[220px]"
+                      showLabels={false}
+                      markers={mapMarkers}
+                      onMarkerClick={id => setSelectedFindingId(id)}
+                    />
+                  </div>
+                )}
+
                 {/* Finding chips strip */}
                 {currentFindings.length > 0 && (
                   <div className="flex gap-2 mt-4 overflow-x-auto pb-1">
@@ -1865,7 +1900,7 @@ export default function InspectieNieuwPage() {
               <h3 className="text-lg font-semibold text-white">{t('wizard.pickerTitle')}</h3>
               <span className="flex-1 text-[12px] text-ck-muted">{t('wizard.pickerHint')}</span>
               <button
-                onClick={() => setShowPicker(false)}
+                onClick={() => { setShowPicker(false); setSlotChoice(null); }}
                 className="rounded-lg border border-ck-dark-border bg-ck-dark-surface px-3 py-1.5 text-[13px] text-ck-muted-light hover:text-white"
               >
                 {t('wizard.pickerClose')}
@@ -1873,6 +1908,45 @@ export default function InspectieNieuwPage() {
             </div>
             {/* Modal body */}
             <div className="flex-1 overflow-auto px-6 py-4">
+              <div className="mb-5 flex flex-col items-center gap-4 sm:flex-row sm:items-start">
+                <VehicleDamageMap
+                  slots={COMPONENT_SLOTS}
+                  className="w-full max-w-[260px] flex-none"
+                  markers={mapMarkers}
+                  onSlotClick={(slot, point) => {
+                    const candidates = slot.keys
+                      .map(k => components.find(c => c.key === k && c.active))
+                      .filter((c): c is Component => !!c);
+                    if (candidates.length === 1) startNewFinding(candidates[0], point);
+                    else if (candidates.length > 1) setSlotChoice({ slot, point });
+                  }}
+                  labelFor={slot => componentLabel(slot.keys[0])}
+                />
+                <div className="min-w-0 flex-1">
+                  <p className="text-[12px] text-ck-muted">{t('wizard.mapHint')}</p>
+                  {slotChoice && (
+                    <div className="mt-3 rounded-lg border border-ck-red/30 bg-ck-dark-surface p-3">
+                      <span className="text-[10px] font-semibold uppercase tracking-widest text-ck-muted">{t('wizard.mapChooseComponent')}</span>
+                      <div className="mt-2 flex flex-wrap gap-2">
+                        {slotChoice.slot.keys.map(k => {
+                          const c = components.find(x => x.key === k && x.active);
+                          if (!c) return null;
+                          return (
+                            <button
+                              key={k}
+                              onClick={() => startNewFinding(c, slotChoice.point)}
+                              className="rounded-md border border-ck-dark-border bg-ck-dark-card px-3 py-2 text-[13px] text-white hover:bg-ck-dark-surface"
+                              style={{ minHeight: 44 }}
+                            >
+                              {componentLabel(k)}
+                            </button>
+                          );
+                        })}
+                      </div>
+                    </div>
+                  )}
+                </div>
+              </div>
               {componentGroups.map(g => (
                 <div key={g.zone} className="mb-4">
                   <span className="text-[10px] font-semibold uppercase tracking-widest text-ck-muted">{g.zoneKey ? t(g.zoneKey) : g.zone}</span>

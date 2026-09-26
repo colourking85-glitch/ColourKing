@@ -10,6 +10,7 @@ import {
 import { useTranslations, useLocale } from 'next-intl';
 import { ScreenBadge } from '@/components/ui/ScreenBadge';
 import { NotesPanel } from '@/components/shared/NotesPanel';
+import { VehicleDamageMap, COMPONENT_SLOTS, defaultPointForKey, type MapMarker } from '@/components/shared/VehicleDamageMap';
 import { STATUS_LABELS as INS_STATUS_LABELS, STATUS_COLORS as INS_STATUS_COLORS, type InsStatus } from '@/modules/inspectie/machine';
 
 const RDW_LABELS: Record<string, string> = {
@@ -128,6 +129,9 @@ type Inspection = {
   created_at: string;
   staff: { id: string; name: string } | null;
 };
+
+type MapFinding = { id: string; reference: string; component_key: string; origin: string; hotspot_point: { x: number; y: number } | null };
+type MapInspection = { id: string; reference: string; status: InsStatus; ins_findings: MapFinding[] };
 
 type Activity = {
   inspections: Inspection[];
@@ -276,6 +280,8 @@ export default function VehicleDetailPage() {
   const [activity, setActivity] = useState<Activity | null>(null);
   const [customers, setCustomers] = useState<{ id: string; name: string }[]>([]);
   const [contacts, setContacts] = useState<Contact[]>([]);
+  const [mapInspection, setMapInspection] = useState<MapInspection | null>(null);
+  const [componentNames, setComponentNames] = useState<Record<string, string>>({});
   const [loading, setLoading] = useState(true);
   const [saving, setSaving] = useState(false);
 
@@ -293,6 +299,22 @@ export default function VehicleDetailPage() {
       setCustomers(rows.map(c => ({ id: c.id, name: c.name })))
     ).catch(() => {});
   }, [id, loadVehicle]);
+
+  // Damage map source: the latest locked inspection, else the latest one.
+  useEffect(() => {
+    if (!activity) return;
+    const src = activity.inspections.find(i => i.status === 'VERGRENDELD') ?? activity.inspections[0];
+    if (!src) { setMapInspection(null); return; }
+    fetch(`/api/inspections/${src.id}`).then(r => r.ok ? r.json() : null).then(setMapInspection).catch(() => {});
+  }, [activity]);
+
+  useEffect(() => {
+    fetch('/api/inspections/catalog/components').then(r => r.ok ? r.json() : []).then((rows: { key: string; name_nl: string; name_en: string | null; name_tr: string | null }[]) => {
+      const names: Record<string, string> = {};
+      rows.forEach(c => { names[c.key] = (locale === 'en' && c.name_en) || (locale === 'tr' && c.name_tr) || c.name_nl; });
+      setComponentNames(names);
+    }).catch(() => {});
+  }, [locale]);
 
   useEffect(() => {
     if (!vehicle?.customer_id) return;
@@ -516,6 +538,44 @@ export default function VehicleDetailPage() {
                     )}
                   </div>
                 ))}
+              </div>
+            )}
+          </div>
+
+          {/* Damage map from the latest (locked) inspection */}
+          <div className="rounded-lg border border-ck-dark-border bg-ck-dark-card p-6">
+            <div className="mb-4 flex items-center justify-between">
+              <h2 className="text-sm font-semibold uppercase text-ck-muted">{t('damageMap')}</h2>
+              {mapInspection && (
+                <Link href={`/app/inspecties/${mapInspection.id}`} className="text-xs text-ck-red hover:underline">
+                  {t('damageMapFrom', { ref: mapInspection.reference })}
+                </Link>
+              )}
+            </div>
+            {!mapInspection || mapInspection.ins_findings.length === 0 ? (
+              <p className="text-sm text-ck-muted">{t('noDamageMap')}</p>
+            ) : (
+              <div className="flex gap-6">
+                <VehicleDamageMap
+                  slots={COMPONENT_SLOTS}
+                  className="w-[200px] flex-none"
+                  showLabels={false}
+                  markers={mapInspection.ins_findings.flatMap<MapMarker>(f => {
+                    const point = f.hotspot_point ?? defaultPointForKey(f.component_key);
+                    return point ? [{ id: f.id, point, label: f.reference, muted: f.origin === 'pre_existent' }] : [];
+                  })}
+                  onMarkerClick={() => router.push(`/app/inspecties/${mapInspection.id}`)}
+                />
+                <ul className="min-w-0 flex-1 space-y-1">
+                  {mapInspection.ins_findings.map(f => (
+                    <li key={f.id} className="flex items-center gap-2 text-xs text-ck-muted-light">
+                      <span className={`h-2 w-2 rounded-full ${f.origin === 'pre_existent' ? 'bg-ck-muted' : 'bg-ck-red'}`} />
+                      <span className="font-mono">{f.reference}</span>
+                      <span className="truncate">{componentNames[f.component_key] ?? f.component_key}</span>
+                      {f.origin === 'pre_existent' && <span className="text-ck-muted">({t('preExisting')})</span>}
+                    </li>
+                  ))}
+                </ul>
               </div>
             )}
           </div>

@@ -396,6 +396,10 @@
     "relationship_score": "İlişki Puanı"
   },
   "vh": {
+    "damageMap": "Hasar haritası",
+    "damageMapFrom": "{ref} ekspertizinden",
+    "noDamageMap": "Gösterilecek ekspertiz bulgusu yok",
+    "preExisting": "önceden mevcut",
     "newInspection": "Yeni ekspertiz",
     "inspections": "Ekspertizler",
     "noInspections": "Bu araç için henüz ekspertiz yok",
@@ -686,6 +690,7 @@
   },
   "in": {
     "detail": {
+      "damageMap": "Hasar haritası",
       "submit": "Onaya gönder",
       "backToProgress": "Devam ediyor durumuna al",
       "approveAndLock": "Onayla ve kilitle",
@@ -805,6 +810,8 @@
       "paintPanel": "Panel",
       "paintPanelBlend": "Panel + geçiş",
       "paintPolish": "Polisaj",
+      "mapHint": "Çizimde hasarın olduğu parçaya dokunun. Mevcut bulgular işaret olarak gösterilir.",
+      "mapChooseComponent": "Hangi parça?",
       "errorSelectCustomer": "Yeni araç için sahibini (müşteri) seçin",
       "labelSelectCustomer": "Sahip (müşteri)",
       "placeholderSearchCustomer": "Ad, e-posta veya telefonla müşteri ara",

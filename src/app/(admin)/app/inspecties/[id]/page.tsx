@@ -3,11 +3,12 @@
 import { useState, useEffect, useRef, useMemo, useCallback } from 'react';
 import { useParams } from 'next/navigation';
 import Link from 'next/link';
-import { useTranslations } from 'next-intl';
+import { useTranslations, useLocale } from 'next-intl';
 import { ArrowLeft, Printer, Link2, FileDown, Camera, Send, Undo2, CheckCircle2, XCircle, X, Lock } from 'lucide-react';
 import { getSession } from '@/lib/auth';
 import { ScreenBadge } from '@/components/ui/ScreenBadge';
 import { PhotoCapture } from '@/components/ui/PhotoCapture';
+import { VehicleDamageMap, COMPONENT_SLOTS, defaultPointForKey, type MapMarker } from '@/components/shared/VehicleDamageMap';
 import {
   STATUS_LABELS, STATUS_COLORS, isTerminal,
   type InsStatus
@@ -20,6 +21,7 @@ type Finding = {
   reference: string;
   sequence_no: number;
   component_key: string;
+  hotspot_point: { x: number; y: number } | null;
   sub_location: string | null;
   damage_types: string[];
   severity: number;
@@ -161,6 +163,8 @@ export default function InspectieDetailPage() {
   const t = useTranslations('in');
   const tCommon = useTranslations('common');
   const tIn = useTranslations('in');
+  const locale = useLocale();
+  const [components, setComponents] = useState<{ key: string; name_nl: string; name_en: string | null; name_tr: string | null }[]>([]);
 
   const [ins, setIns] = useState<Inspection | null>(null);
   const [busy, setBusy] = useState(false);
@@ -191,7 +195,16 @@ export default function InspectieDetailPage() {
 
   useEffect(() => {
     getSession().then(s => { if (s?.name) setSignerName(s.name); }).catch(() => {});
+    fetch('/api/inspections/catalog/components').then(r => r.ok ? r.json() : []).then(setComponents).catch(() => {});
   }, []);
+
+  const componentLabel = useCallback((key: string) => {
+    const c = components.find(x => x.key === key);
+    if (!c) return key;
+    if (locale === 'en' && c.name_en) return c.name_en;
+    if (locale === 'tr' && c.name_tr) return c.name_tr;
+    return c.name_nl;
+  }, [components, locale]);
 
   const reload = useCallback(async () => {
     const r = await fetch(`/api/inspections/${id}`);
@@ -900,6 +913,37 @@ export default function InspectieDetailPage() {
             {/* ═══ Bevindingen view (table) ═══ */}
             {view === 'bevindingen' && (
               <div className="space-y-4">
+                {/* Damage map */}
+                <div className="flex gap-6 rounded-lg border border-ck-dark-border bg-ck-dark-card p-5">
+                  <VehicleDamageMap
+                    slots={COMPONENT_SLOTS}
+                    className="w-[220px] flex-none"
+                    showLabels={false}
+                    markers={findings.flatMap<MapMarker>(f => {
+                      const point = f.hotspot_point ?? defaultPointForKey(f.component_key);
+                      return point ? [{ id: f.reference, point, label: f.reference, muted: f.origin === 'pre_existent', active: f.reference === selectedRef }] : [];
+                    })}
+                    onMarkerClick={ref => scrollToFinding(ref)}
+                  />
+                  <div className="min-w-0 flex-1">
+                    <h3 className="mb-2 text-base font-semibold text-white">{tIn('detail.damageMap')}</h3>
+                    <ul className="space-y-1">
+                      {findings.map(f => (
+                        <li key={f.id}>
+                          <button
+                            onClick={() => scrollToFinding(f.reference)}
+                            className={`flex w-full items-center gap-2 rounded px-2 py-1 text-left text-[12px] hover:bg-ck-dark-surface ${f.reference === selectedRef ? 'text-white' : 'text-ck-muted-light'}`}
+                          >
+                            <span className={`h-2 w-2 rounded-full ${f.origin === 'pre_existent' ? 'bg-ck-muted' : 'bg-ck-red'}`} />
+                            <span className="font-mono">{f.reference}</span>
+                            <span className="truncate">{componentLabel(f.component_key)}</span>
+                          </button>
+                        </li>
+                      ))}
+                    </ul>
+                  </div>
+                </div>
+
                 {/* Zone cards */}
                 {(() => {
                   const zones: Record<string, { count: number; hours: number }> = {};

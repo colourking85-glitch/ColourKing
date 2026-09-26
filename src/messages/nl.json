@@ -396,6 +396,10 @@
     "relationship_score": "Relatiescore"
   },
   "vh": {
+    "damageMap": "Schadekaart",
+    "damageMapFrom": "Uit inspectie {ref}",
+    "noDamageMap": "Nog geen inspectiebevindingen om te tonen",
+    "preExisting": "pre-existent",
     "newInspection": "Nieuwe inspectie",
     "inspections": "Inspecties",
     "noInspections": "Nog geen inspecties voor dit voertuig",
@@ -686,6 +690,7 @@
   },
   "in": {
     "detail": {
+      "damageMap": "Schadekaart",
       "submit": "Indienen ter akkoord",
       "backToProgress": "Terug naar bezig",
       "approveAndLock": "Akkoord & vergrendelen",
@@ -805,6 +810,8 @@
       "paintPanel": "Paneel",
       "paintPanelBlend": "Paneel + inspuiten",
       "paintPolish": "Polijsten",
+      "mapHint": "Tik op de tekening op het onderdeel waar de schade zit. Bestaande bevindingen staan als markering.",
+      "mapChooseComponent": "Welk onderdeel?",
       "errorSelectCustomer": "Kies de eigenaar (klant) voor het nieuwe voertuig",
       "labelSelectCustomer": "Eigenaar (klant)",
       "placeholderSearchCustomer": "Zoek klant op naam, e-mail of telefoon",

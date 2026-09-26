@@ -396,6 +396,10 @@
     "relationship_score": "Relationship Score"
   },
   "vh": {
+    "damageMap": "Damage map",
+    "damageMapFrom": "From inspection {ref}",
+    "noDamageMap": "No inspection findings to show yet",
+    "preExisting": "pre-existing",
     "newInspection": "New inspection",
     "inspections": "Inspections",
     "noInspections": "No inspections for this vehicle yet",
@@ -686,6 +690,7 @@
   },
   "in": {
     "detail": {
+      "damageMap": "Damage map",
       "submit": "Submit for approval",
       "backToProgress": "Back to in progress",
       "approveAndLock": "Approve & lock",
@@ -805,6 +810,8 @@
       "paintPanel": "Panel",
       "paintPanelBlend": "Panel + blend",
       "paintPolish": "Polishing",
+      "mapHint": "Tap the part on the drawing where the damage is. Existing findings are shown as markers.",
+      "mapChooseComponent": "Which part?",
       "errorSelectCustomer": "Select the owner (customer) for the new vehicle",
       "labelSelectCustomer": "Owner (customer)",
       "placeholderSearchCustomer": "Search customer by name, email or phone",
