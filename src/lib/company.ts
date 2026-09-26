@@ -18,6 +18,7 @@ export type CompanyInfo = {
   payment_terms_days: number;
   quote_validity_days: number;
   default_invoice_notes: string;
+  logo_url: string;
 };
 
 const DEFAULTS: CompanyInfo = {
@@ -38,6 +39,7 @@ const DEFAULTS: CompanyInfo = {
   payment_terms_days: 14,
   quote_validity_days: 30,
   default_invoice_notes: '',
+  logo_url: '',
 };
 
 let cached: CompanyInfo | null = null;

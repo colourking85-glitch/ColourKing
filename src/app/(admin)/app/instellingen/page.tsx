@@ -1,8 +1,8 @@
 'use client';
 
-import { useState, useEffect, useCallback } from 'react';
+import { useState, useEffect, useCallback, useRef } from 'react';
 import { useTranslations } from 'next-intl';
-import { Settings, Palette, Globe, Building2, Bell, Check, Type, Maximize2, Bot, Landmark, CreditCard, FileText } from 'lucide-react';
+import { Settings, Palette, Globe, Building2, Bell, Check, Type, Maximize2, Bot, Landmark, CreditCard, FileText, Upload, Trash2, Image as ImageIcon } from 'lucide-react';
 import { ScreenBadge } from '@/components/ui/ScreenBadge';
 import { useAppLocale } from '@/components/AdminIntlProvider';
 import { useSettings } from '@/components/SettingsProvider';
@@ -70,12 +70,17 @@ export default function SettingsPage() {
   const [companySaving, setCompanySaving] = useState(false);
   const [companySaved, setCompanySaved] = useState(false);
 
+  const [logoUrl, setLogoUrl] = useState<string | null>(null);
+  const [logoUploading, setLogoUploading] = useState(false);
+  const logoInputRef = useRef<HTMLInputElement>(null);
+
   const fetchCompany = useCallback(async () => {
     try {
       const res = await fetch('/api/settings/company');
       if (res.ok) {
         const data = await res.json();
         setCompany({ ...COMPANY_DEFAULTS, ...data });
+        if (data.logo_url) setLogoUrl(data.logo_url);
       }
     } catch { /* ignore */ }
   }, []);
@@ -109,6 +114,27 @@ export default function SettingsPage() {
 
   function updateCompany(field: keyof CompanyData, value: string | number) {
     setCompany(prev => ({ ...prev, [field]: value }));
+  }
+
+  async function handleLogoUpload(file: File) {
+    setLogoUploading(true);
+    try {
+      const form = new FormData();
+      form.append('file', file);
+      const res = await fetch('/api/settings/logo', { method: 'POST', body: form });
+      if (res.ok) {
+        const data = await res.json();
+        setLogoUrl(data.url);
+      }
+    } catch { /* ignore */ }
+    setLogoUploading(false);
+  }
+
+  async function handleLogoDelete() {
+    try {
+      await fetch('/api/settings/logo', { method: 'DELETE' });
+      setLogoUrl(null);
+    } catch { /* ignore */ }
   }
 
   function handleSave() {
@@ -579,9 +605,59 @@ export default function SettingsPage() {
                   </div>
                   <div>
                     <label className="mb-1 block text-xs text-ck-muted">{tSy('companyLogo')}</label>
-                    <div className="flex h-20 items-center justify-center rounded-lg border-2 border-dashed border-ck-dark-border text-sm text-ck-muted transition-colors hover:border-ck-muted/50">
-                      {tSy('uploadLogo')}
-                    </div>
+                    <input
+                      ref={logoInputRef}
+                      type="file"
+                      accept="image/png,image/jpeg,image/webp,image/svg+xml"
+                      className="hidden"
+                      onChange={e => {
+                        const file = e.target.files?.[0];
+                        if (file) handleLogoUpload(file);
+                        e.target.value = '';
+                      }}
+                    />
+                    {logoUrl ? (
+                      <div className="flex items-center gap-4">
+                        <div className="flex h-20 w-40 items-center justify-center rounded-lg border border-ck-dark-border bg-ck-dark-surface p-2">
+                          {/* eslint-disable-next-line @next/next/no-img-element */}
+                          <img src={logoUrl} alt="Logo" className="max-h-full max-w-full object-contain" />
+                        </div>
+                        <div className="flex flex-col gap-2">
+                          <button
+                            onClick={() => logoInputRef.current?.click()}
+                            className="flex items-center gap-1.5 rounded-lg border border-ck-dark-border px-3 py-1.5 text-xs text-ck-muted-light hover:border-ck-muted/50 hover:text-white transition-colors"
+                          >
+                            <Upload size={12} /> {tSy('changeLogo')}
+                          </button>
+                          <button
+                            onClick={handleLogoDelete}
+                            className="flex items-center gap-1.5 rounded-lg border border-red-500/30 px-3 py-1.5 text-xs text-red-400 hover:bg-red-500/10 transition-colors"
+                          >
+                            <Trash2 size={12} /> {tSy('removeLogo')}
+                          </button>
+                        </div>
+                      </div>
+                    ) : (
+                      <button
+                        onClick={() => logoInputRef.current?.click()}
+                        disabled={logoUploading}
+                        onDragOver={e => { e.preventDefault(); e.stopPropagation(); }}
+                        onDrop={e => {
+                          e.preventDefault();
+                          e.stopPropagation();
+                          const file = e.dataTransfer.files?.[0];
+                          if (file) handleLogoUpload(file);
+                        }}
+                        className="flex h-20 w-full items-center justify-center gap-2 rounded-lg border-2 border-dashed border-ck-dark-border text-sm text-ck-muted transition-colors hover:border-ck-muted/50 hover:text-white disabled:opacity-50"
+                      >
+                        {logoUploading ? (
+                          <div className="h-4 w-4 animate-spin rounded-full border-2 border-ck-dark-border border-t-ck-red" />
+                        ) : (
+                          <ImageIcon size={16} />
+                        )}
+                        {logoUploading ? tSy('uploading') : tSy('uploadLogo')}
+                      </button>
+                    )}
                   </div>
                 </div>
               </section>
