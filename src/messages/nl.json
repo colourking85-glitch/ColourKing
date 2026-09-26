@@ -493,7 +493,8 @@
     "notes": "Notities",
     "notesPlaceholder": "Extra definities, opmerkingen, schadenotities...",
     "plateOrigin": "Kenteken herkomst",
-    "plateOriginPlaceholder": "bijv. NL, DE, BE, TR"
+    "plateOriginPlaceholder": "bijv. NL, DE, BE, TR",
+    "deleteConfirm": "Voertuig {plate} verwijderen? Het voertuig wordt verborgen uit alle lijsten (blijft bewaard in de database)."
   },
   "ld": {
     "emailThread": "E-mailgesprek",

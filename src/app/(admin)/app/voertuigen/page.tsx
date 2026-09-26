@@ -2,7 +2,7 @@
 
 import { useState, useEffect, useCallback } from 'react';
 import Link from 'next/link';
-import { Plus, Search, AlertTriangle, ArrowUpDown, ArrowUp, ArrowDown, X } from 'lucide-react';
+import { Plus, Search, AlertTriangle, ArrowUpDown, ArrowUp, ArrowDown, X, Trash2 } from 'lucide-react';
 import { useTranslations } from 'next-intl';
 import { ScreenBadge } from '@/components/ui/ScreenBadge';
 
@@ -52,6 +52,13 @@ export default function VehiclesPage() {
   }, [search, statusFilter, sortField, sortDir]);
 
   useEffect(() => { fetchVehicles(); }, [fetchVehicles]);
+
+  async function handleDelete(v: Vehicle) {
+    if (!window.confirm(t('deleteConfirm', { plate: v.kenteken ?? '' }))) return;
+    const res = await fetch(`/api/vehicles/${v.id}`, { method: 'DELETE' });
+    if (res.ok) setVehicles(prev => prev.filter(x => x.id !== v.id));
+    else window.alert((await res.json().catch(() => ({}))).error ?? tCommon('saveFailed'));
+  }
 
   function toggleSort(field: SortField) {
     if (sortField === field) {
@@ -159,6 +166,7 @@ export default function VehiclesPage() {
                 </th>
                 <th className="px-4 py-3">{t('owner')}</th>
                 <th className="px-4 py-3">{t('status')}</th>
+                <th className="w-12 px-2 py-3" />
               </tr>
             </thead>
             <tbody>
@@ -195,6 +203,15 @@ export default function VehiclesPage() {
                         </span>
                       )}
                     </div>
+                  </td>
+                  <td className="px-2 py-3 text-right">
+                    <button
+                      onClick={() => handleDelete(v)}
+                      className="rounded-lg border border-transparent p-1.5 text-ck-muted hover:border-red-500/30 hover:bg-red-500/10 hover:text-red-400"
+                      title={tCommon('delete')}
+                    >
+                      <Trash2 size={14} />
+                    </button>
                   </td>
                 </tr>
               ))}

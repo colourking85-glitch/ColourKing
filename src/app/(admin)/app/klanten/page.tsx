@@ -2,7 +2,7 @@
 
 import { useState, useEffect, useMemo, useCallback } from 'react';
 import Link from 'next/link';
-import { Plus, Search, User, Building2, Truck, Store, Shield, Car, ChevronUp, ChevronDown, ChevronsUpDown, AlertTriangle } from 'lucide-react';
+import { Plus, Search, User, Building2, Truck, Store, Shield, Car, ChevronUp, ChevronDown, ChevronsUpDown, AlertTriangle, Trash2 } from 'lucide-react';
 import { useTranslations } from 'next-intl';
 import { ScreenBadge } from '@/components/ui/ScreenBadge';
 
@@ -75,6 +75,13 @@ export default function CustomersPage() {
       .then(setCustomers)
       .finally(() => setLoading(false));
   }, [search, statusFilter]);
+
+  async function handleDelete(c: Customer) {
+    if (!window.confirm(t('deleteConfirm'))) return;
+    const res = await fetch(`/api/customers/${c.id}`, { method: 'DELETE' });
+    if (res.ok) setCustomers(prev => prev.filter(x => x.id !== c.id));
+    else window.alert((await res.json().catch(() => ({}))).error ?? tCommon('saveFailed'));
+  }
 
   function handleSort(key: SortKey) {
     if (sortKey === key) {
@@ -188,6 +195,7 @@ export default function CustomersPage() {
                     </span>
                   </th>
                 ))}
+                <th className="w-12 px-2 py-3" />
               </tr>
             </thead>
             <tbody>
@@ -220,6 +228,15 @@ export default function CustomersPage() {
                     <td className="whitespace-nowrap px-4 py-3 text-xs text-ck-muted-light tabular-nums" title={new Date(c.created_at).toLocaleString('nl-NL')}>
                       {new Date(c.created_at).toLocaleDateString('nl-NL', { day: '2-digit', month: '2-digit', year: 'numeric' })}{' '}
                       <span className="text-ck-muted">{new Date(c.created_at).toLocaleTimeString('nl-NL', { hour: '2-digit', minute: '2-digit' })}</span>
+                    </td>
+                    <td className="px-2 py-3 text-right">
+                      <button
+                        onClick={() => handleDelete(c)}
+                        className="rounded-lg border border-transparent p-1.5 text-ck-muted hover:border-red-500/30 hover:bg-red-500/10 hover:text-red-400"
+                        title={tCommon('delete')}
+                      >
+                        <Trash2 size={14} />
+                      </button>
                     </td>
                   </tr>
                 );

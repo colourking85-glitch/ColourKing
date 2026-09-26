@@ -493,7 +493,8 @@
     "notes": "Notlar",
     "notesPlaceholder": "Ekstra tanımlar, açıklamalar, hasar notları...",
     "plateOrigin": "Plaka kökeni",
-    "plateOriginPlaceholder": "örn. NL, DE, BE, TR"
+    "plateOriginPlaceholder": "örn. NL, DE, BE, TR",
+    "deleteConfirm": "{plate} plakalı araç silinsin mi? Tüm listelerden gizlenir (veritabanında kalır)."
   },
   "ld": {
     "emailThread": "E-posta yazismasi",

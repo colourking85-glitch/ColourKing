@@ -493,7 +493,8 @@
     "notes": "Notes",
     "notesPlaceholder": "Extra definitions, remarks, damage notes...",
     "plateOrigin": "Plate origin",
-    "plateOriginPlaceholder": "e.g. NL, DE, BE, TR"
+    "plateOriginPlaceholder": "e.g. NL, DE, BE, TR",
+    "deleteConfirm": "Delete vehicle {plate}? It is hidden from all lists (kept in the database)."
   },
   "ld": {
     "emailThread": "Email conversation",
