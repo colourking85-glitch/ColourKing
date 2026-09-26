@@ -1,5 +1,6 @@
 import { NextRequest, NextResponse } from 'next/server';
 import { createClient } from '@/lib/supabase/server';
+import { errorMessage } from '@/modules/inspectie/errors';
 import { FindingSchema } from '@/modules/inspectie/schema';
 
 export async function POST(
@@ -34,7 +35,7 @@ export async function POST(
 
     return NextResponse.json(finding, { status: 201 });
   } catch (err: unknown) {
-    const message = err instanceof Error ? err.message : 'Unknown error';
+    const message = errorMessage(err);
     return NextResponse.json({ error: message }, { status: 400 });
   }
 }

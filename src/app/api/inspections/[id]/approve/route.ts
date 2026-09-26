@@ -1,5 +1,6 @@
 import { NextRequest, NextResponse } from 'next/server';
 import { createClient } from '@/lib/supabase/server';
+import { errorMessage } from '@/modules/inspectie/errors';
 
 /**
  * Records an approval (signature) through the SQL function ins_approve()
@@ -66,7 +67,7 @@ export async function POST(
 
     return NextResponse.json({ approval, inspection }, { status: 201 });
   } catch (err: unknown) {
-    const message = err instanceof Error ? err.message : 'Unknown error';
+    const message = errorMessage(err);
     return NextResponse.json({ error: message }, { status: 400 });
   }
 }

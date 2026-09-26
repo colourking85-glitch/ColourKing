@@ -782,6 +782,10 @@ export function InspectionReportTemplate({ data, company: c }: { data: Inspectio
                         position: 'relative',
                         overflow: 'hidden',
                       }}>
+                        {p.url && (
+                          // eslint-disable-next-line @next/next/no-img-element
+                          <img src={p.url} alt={p.reference} style={{ position: 'absolute', inset: 0, width: '100%', height: '100%', objectFit: 'cover' }} />
+                        )}
                         <span style={{
                           position: 'absolute',
                           bottom: '3px',

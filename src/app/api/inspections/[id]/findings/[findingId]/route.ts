@@ -1,5 +1,6 @@
 import { NextRequest, NextResponse } from 'next/server';
 import { createClient } from '@/lib/supabase/server';
+import { errorMessage } from '@/modules/inspectie/errors';
 
 export async function DELETE(
   _req: NextRequest,
@@ -20,7 +21,7 @@ export async function DELETE(
 
     return NextResponse.json({ ok: true });
   } catch (err: unknown) {
-    const message = err instanceof Error ? err.message : 'Unknown error';
+    const message = errorMessage(err);
     return NextResponse.json({ error: message }, { status: 400 });
   }
 }

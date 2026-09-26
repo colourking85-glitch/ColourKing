@@ -1,5 +1,6 @@
 import { NextRequest, NextResponse } from 'next/server';
 import { createClient } from '@/lib/supabase/server';
+import { errorMessage } from '@/modules/inspectie/errors';
 import { getInspections } from '@/modules/inspectie/queries';
 import { InspectionSchema } from '@/modules/inspectie/schema';
 import type { InsStatus } from '@/modules/inspectie/machine';
@@ -19,7 +20,7 @@ export async function GET(req: NextRequest) {
     });
     return NextResponse.json(data);
   } catch (err: unknown) {
-    const message = err instanceof Error ? err.message : 'Unknown error';
+    const message = errorMessage(err);
     return NextResponse.json({ error: message }, { status: 500 });
   }
 }
@@ -54,7 +55,7 @@ export async function POST(req: NextRequest) {
 
     return NextResponse.json(inspection, { status: 201 });
   } catch (err: unknown) {
-    const message = err instanceof Error ? err.message : 'Unknown error';
+    const message = errorMessage(err);
     return NextResponse.json({ error: message }, { status: 400 });
   }
 }
