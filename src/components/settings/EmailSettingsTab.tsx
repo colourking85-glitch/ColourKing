@@ -3,14 +3,15 @@
 import { useState, useEffect, useCallback } from 'react';
 import { useTranslations } from 'next-intl';
 import Link from 'next/link';
-import { Mail, BellRing, Send, Play, FlaskConical, Check, Settings } from 'lucide-react';
+import { Mail, BellRing, Send, Play, FlaskConical, Check, Settings, Plus, X } from 'lucide-react';
 import { EMAIL_PURPOSES, type EmailPurpose, type EmailIdentities } from '@/lib/email-identity';
-import type { ReminderSettings } from '@/modules/email/schema';
+import type { ReminderSettings, ReminderMoment } from '@/modules/email/schema';
 
 type RunReport = { ok: boolean; dryRun: boolean; evaluated: number; sent: number; skipped: number; failed: number; error?: string };
 
 const inputClass = 'w-full rounded-lg border border-ck-dark-border bg-ck-dark-surface px-3 py-2 text-sm text-white focus:border-ck-red focus:outline-none';
 const numClass = 'w-20 rounded-lg border border-ck-dark-border bg-ck-dark-surface px-2 py-1.5 text-sm text-white focus:border-ck-red focus:outline-none';
+const selectClass = 'rounded-lg border border-ck-dark-border bg-ck-dark-surface px-2 py-1.5 text-sm text-white focus:border-ck-red focus:outline-none';
 
 function Toggle({ on, onChange }: { on: boolean; onChange: (v: boolean) => void }) {
   return (
@@ -187,47 +188,66 @@ export function EmailSettingsTab() {
         <p className="mb-4 text-xs text-ck-muted">{tSy('remindersDesc')}</p>
 
         <div className="divide-y divide-ck-dark-border">
-          <div className="flex flex-wrap items-center gap-3 py-3">
-            <Toggle on={reminders.invoice_due_soon.enabled} onChange={(v) => setRem('invoice_due_soon', { enabled: v })} />
-            <span className="w-64 text-sm text-white">{tSy('remInvoiceDueSoon')}</span>
-            <input type="number" min={0} max={60} className={numClass} value={reminders.invoice_due_soon.days_before} onChange={(e) => setRem('invoice_due_soon', { days_before: Number(e.target.value) })} />
-            <span className="text-xs text-ck-muted">{tSy('daysBefore')}</span>
-            {senderSelect(reminders.invoice_due_soon.sender, (v) => setRem('invoice_due_soon', { sender: v }))}
-          </div>
-
-          <div className="flex flex-wrap items-center gap-3 py-3">
-            <Toggle on={reminders.invoice_overdue.enabled} onChange={(v) => setRem('invoice_overdue', { enabled: v })} />
-            <span className="w-64 text-sm text-white">{tSy('remInvoiceOverdue')}</span>
-            <input type="number" min={0} max={60} className={numClass} value={reminders.invoice_overdue.days_after} onChange={(e) => setRem('invoice_overdue', { days_after: Number(e.target.value) })} />
-            <span className="text-xs text-ck-muted">{tSy('daysAfter')}</span>
-            {senderSelect(reminders.invoice_overdue.sender, (v) => setRem('invoice_overdue', { sender: v }))}
-            <label className="ml-auto flex items-center gap-2 text-xs text-ck-muted-light">
-              <input type="checkbox" checked={reminders.invoice_overdue.auto_mark_overdue} onChange={(e) => setRem('invoice_overdue', { auto_mark_overdue: e.target.checked })} />
-              {tSy('autoMarkOverdue')}
-            </label>
-          </div>
-
-          <div className="flex flex-wrap items-center gap-3 py-3">
-            <Toggle on={reminders.offer_expiring.enabled} onChange={(v) => setRem('offer_expiring', { enabled: v })} />
-            <span className="w-64 text-sm text-white">{tSy('remOfferExpiring')}</span>
-            <input type="number" min={0} max={60} className={numClass} value={reminders.offer_expiring.days_before} onChange={(e) => setRem('offer_expiring', { days_before: Number(e.target.value) })} />
-            <span className="text-xs text-ck-muted">{tSy('daysBefore')}</span>
-            {senderSelect(reminders.offer_expiring.sender, (v) => setRem('offer_expiring', { sender: v }))}
-          </div>
-
-          <div className="flex flex-wrap items-center gap-3 py-3">
-            <Toggle on={reminders.appointment_reminder.enabled} onChange={(v) => setRem('appointment_reminder', { enabled: v })} />
-            <span className="w-64 text-sm text-white">{tSy('remAppointment')}</span>
-            <input type="number" min={0} max={60} className={numClass} value={reminders.appointment_reminder.days_before} onChange={(e) => setRem('appointment_reminder', { days_before: Number(e.target.value) })} />
-            <span className="text-xs text-ck-muted">{tSy('daysBefore')}</span>
-            {senderSelect(reminders.appointment_reminder.sender, (v) => setRem('appointment_reminder', { sender: v }))}
-          </div>
+          {([
+            { key: 'invoice_due_soon', label: tSy('remInvoiceDueSoon'), direction: 'before' },
+            { key: 'invoice_overdue', label: tSy('remInvoiceOverdue'), direction: 'after' },
+            { key: 'offer_expiring', label: tSy('remOfferExpiring'), direction: 'before' },
+            { key: 'appointment_reminder', label: tSy('remAppointment'), direction: 'before' },
+          ] as const).map((rule) => {
+            const r = reminders[rule.key];
+            const setMoments = (m: ReminderMoment[]) => setRem(rule.key, { moments: m } as Partial<ReminderSettings[typeof rule.key]>);
+            return (
+              <div key={rule.key} className="flex flex-wrap items-start gap-3 py-3">
+                <Toggle on={r.enabled} onChange={(v) => setRem(rule.key, { enabled: v })} />
+                <span className="w-56 pt-1 text-sm text-white">{rule.label}</span>
+                <div className="flex flex-col gap-1.5">
+                  {r.moments.map((m, i) => (
+                    <div key={i} className="flex items-center gap-2">
+                      <input
+                        type="number" min={1} max={720} className={numClass} value={m.value}
+                        onChange={(e) => setMoments(r.moments.map((x, j) => (j === i ? { ...x, value: Math.max(1, Number(e.target.value)) } : x)))}
+                      />
+                      <select
+                        value={m.unit} className={selectClass}
+                        onChange={(e) => setMoments(r.moments.map((x, j) => (j === i ? { ...x, unit: e.target.value as ReminderMoment['unit'] } : x)))}
+                      >
+                        <option value="hours">{tSy('unitHours')}</option>
+                        <option value="days">{tSy('unitDays')}</option>
+                      </select>
+                      <span className="text-xs text-ck-muted">{rule.direction === 'before' ? tSy('momentBefore') : tSy('momentAfter')}</span>
+                      <button type="button" onClick={() => setMoments(r.moments.filter((_, j) => j !== i))} className="rounded p-1 text-ck-muted hover:text-red-400" title={tCommon('delete')}>
+                        <X size={12} />
+                      </button>
+                    </div>
+                  ))}
+                  {r.moments.length < 2 ? (
+                    <button type="button" onClick={() => setMoments([...r.moments, { value: r.moments.length ? 2 : 24, unit: 'hours' }])} className="flex items-center gap-1 self-start text-xs text-ck-muted-light hover:text-white">
+                      <Plus size={12} /> {tSy('addMoment')}
+                    </button>
+                  ) : (
+                    <span className="text-[10px] text-ck-muted">{tSy('maxMoments')}</span>
+                  )}
+                </div>
+                <div className="ml-auto flex flex-col items-end gap-2">
+                  {senderSelect(r.sender, (v) => setRem(rule.key, { sender: v }))}
+                  {rule.key === 'invoice_overdue' && (
+                    <label className="flex items-center gap-2 text-xs text-ck-muted-light">
+                      <input type="checkbox" checked={reminders.invoice_overdue.auto_mark_overdue} onChange={(e) => setRem('invoice_overdue', { auto_mark_overdue: e.target.checked })} />
+                      {tSy('autoMarkOverdue')}
+                    </label>
+                  )}
+                </div>
+              </div>
+            );
+          })}
 
           <div className="flex flex-wrap items-center gap-3 py-3">
             <Toggle on={reminders.vehicle_ready.enabled} onChange={(v) => setRem('vehicle_ready', { enabled: v })} />
             <span className="w-64 text-sm text-white">{tSy('remVehicleReady')}</span>
             {senderSelect(reminders.vehicle_ready.sender, (v) => setRem('vehicle_ready', { sender: v }))}
           </div>
+
+          <p className="py-3 text-[11px] text-ck-muted">{tSy('scheduleHint')}</p>
 
           <div className="flex items-center gap-3 py-3">
             <span className="text-xs text-ck-muted">{tSy('maxPerRun')}</span>

@@ -1790,7 +1790,7 @@
     "testSent": "Testmail verzonden vanaf {from}",
     "testFailed": "Testmail mislukt: {error}",
     "remindersSection": "Herinneringen",
-    "remindersDesc": "Automatische e-mails naar klanten. Draait dagelijks om 09:00. Elke herinnering wordt maximaal één keer per document verzonden.",
+    "remindersDesc": "Automatische e-mails naar klanten. Per gebeurtenis maximaal 2 momenten (uren of dagen). Elk moment wordt precies één keer per document verzonden; de taak mag daarom elk kwartier draaien.",
     "remInvoiceDueSoon": "Factuur vervalt binnenkort",
     "remInvoiceOverdue": "Factuur vervallen (betalingsherinnering)",
     "remOfferExpiring": "Offerte verloopt binnenkort",
@@ -1841,7 +1841,14 @@
     "offDayList": "Geplande sluitingsdagen",
     "offDayShowPast": "Ook verleden tonen",
     "offDayEmpty": "Geen sluitingsdagen gepland.",
-    "offDayDeleteConfirm": "Deze sluitingsdag verwijderen? De dag wordt daarna weer boekbaar."
+    "offDayDeleteConfirm": "Deze sluitingsdag verwijderen? De dag wordt daarna weer boekbaar.",
+    "momentBefore": "vooraf",
+    "momentAfter": "na vervaldatum",
+    "unitHours": "uur",
+    "unitDays": "dagen",
+    "addMoment": "Moment toevoegen",
+    "maxMoments": "max. 2",
+    "scheduleHint": "De verzendtaak moet vaak genoeg draaien voor de kleinste marge: bij uren elke 15 minuten (externe scheduler of Vercel Pro), bij alleen dagen volstaat de dagelijkse run om 09:00."
   },
   "signature": {
     "signHere": "Hier tekenen",

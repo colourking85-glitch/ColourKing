@@ -23,9 +23,9 @@ const CRON_JOBS: Array<{
   {
     id: 'reminders',
     name: 'Reminder emails',
-    description: 'Customer reminders: invoice due soon / overdue (auto-marks overdue), quote expiring, appointment tomorrow, vehicle ready catch-up. Rules in SY01 > E-mail, log in SY60.',
+    description: 'Customer reminders: invoice due soon / overdue (auto-marks overdue), quote expiring, appointment (e.g. 24 h + 2 h before), vehicle ready catch-up. Moments are set in SY01 > E-mail, log in SY60. Idempotent — safe to call every 15 min. Vercel Hobby only allows the daily run; for hour-based moments add an external scheduler (e.g. cron-job.org) that POSTs this endpoint every 15 min with header "Authorization: Bearer <CRON_SECRET>".',
     schedule: '0 7 * * *',
-    scheduleHuman: 'Daily 09:00 Europe/Amsterdam (07:00 UTC)',
+    scheduleHuman: 'Vercel: daily 09:00 Europe/Amsterdam (07:00 UTC) — plus external every 15 min for hour-based moments',
     category: 'notifications',
     endpoint: '/api/cron/reminders',
     timeout: 300,

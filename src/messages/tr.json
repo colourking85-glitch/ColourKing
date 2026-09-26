@@ -1790,7 +1790,7 @@
     "testSent": "Test e-postası {from} adresinden gönderildi",
     "testFailed": "Test e-postası başarısız: {error}",
     "remindersSection": "Hatırlatmalar",
-    "remindersDesc": "Müşterilere otomatik e-postalar. Her gün 09:00'da çalışır. Her hatırlatma belge başına en fazla bir kez gönderilir.",
+    "remindersDesc": "Müşterilere otomatik e-postalar. Olay başına en fazla 2 an (saat veya gün). Her an belge başına tam bir kez gönderilir; bu yüzden görev güvenle her 15 dakikada bir çalışabilir.",
     "remInvoiceDueSoon": "Fatura vadesi yaklaşıyor",
     "remInvoiceOverdue": "Fatura vadesi geçti (ödeme hatırlatması)",
     "remOfferExpiring": "Teklif süresi doluyor",
@@ -1841,7 +1841,14 @@
     "offDayList": "Planlanan kapalı günler",
     "offDayShowPast": "Geçmişi göster",
     "offDayEmpty": "Planlanmış kapalı gün yok.",
-    "offDayDeleteConfirm": "Bu kapalı gün silinsin mi? Gün yeniden rezerve edilebilir olur."
+    "offDayDeleteConfirm": "Bu kapalı gün silinsin mi? Gün yeniden rezerve edilebilir olur.",
+    "momentBefore": "önce",
+    "momentAfter": "vadeden sonra",
+    "unitHours": "saat",
+    "unitDays": "gün",
+    "addMoment": "An ekle",
+    "maxMoments": "en fazla 2",
+    "scheduleHint": "Görev en küçük marj için yeterince sık çalışmalı: saatlerde her 15 dakika (harici zamanlayıcı veya Vercel Pro); yalnızca günlerde günlük 09:00 çalışması yeterlidir."
   },
   "signature": {
     "signHere": "Buraya imza atın",

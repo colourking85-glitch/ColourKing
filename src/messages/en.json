@@ -1790,7 +1790,7 @@
     "testSent": "Test email sent from {from}",
     "testFailed": "Test email failed: {error}",
     "remindersSection": "Reminders",
-    "remindersDesc": "Automatic customer emails. Runs daily at 09:00. Each reminder is sent at most once per document.",
+    "remindersDesc": "Automatic customer emails. Up to 2 moments per event (hours or days). Each moment is sent exactly once per document, so the job can safely run every 15 minutes.",
     "remInvoiceDueSoon": "Invoice due soon",
     "remInvoiceOverdue": "Invoice overdue (payment reminder)",
     "remOfferExpiring": "Quote expiring soon",
@@ -1841,7 +1841,14 @@
     "offDayList": "Planned off days",
     "offDayShowPast": "Show past",
     "offDayEmpty": "No off days planned.",
-    "offDayDeleteConfirm": "Delete this off day? The day becomes bookable again."
+    "offDayDeleteConfirm": "Delete this off day? The day becomes bookable again.",
+    "momentBefore": "before",
+    "momentAfter": "after due date",
+    "unitHours": "hours",
+    "unitDays": "days",
+    "addMoment": "Add moment",
+    "maxMoments": "max. 2",
+    "scheduleHint": "The job must run often enough for the smallest margin: with hours every 15 minutes (external scheduler or Vercel Pro); with days only, the daily 09:00 run is enough."
   },
   "signature": {
     "signHere": "Sign here",

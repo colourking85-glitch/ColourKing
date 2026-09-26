@@ -5,7 +5,7 @@ import { sendEmail } from '@/modules/email/sender';
 import { renderTemplate, getSubject } from '@/modules/email/templates';
 import { logEmail } from '@/modules/email/log';
 import { sendVehicleReady } from '@/modules/email/triggers';
-import { ReminderSettingsSchema, REMINDER_DEFAULTS, type ReminderSettings, type EmailTemplateName, type TemplateDataMap } from '@/modules/email/schema';
+import { normalizeReminderSettings, type ReminderSettings, type EmailTemplateName, type TemplateDataMap } from '@/modules/email/schema';
 import { evaluateInvoices, evaluateOffers, evaluateAppointments, evaluateJobs, localToday, type InvoiceRow, type OfferRow, type AppointmentRow, type JobRow } from './evaluators';
 import type { Candidate, CandidateResult, ReminderKind, RunReport } from './schema';
 
@@ -20,19 +20,20 @@ const TEMPLATE_FOR: Record<Exclude<ReminderKind, 'vehicle_ready'>, EmailTemplate
 
 export async function getReminderSettings(): Promise<ReminderSettings> {
   const { data } = await admin.from('settings').select('value').eq('key', 'reminders').single();
-  const parsed = ReminderSettingsSchema.safeParse({ ...REMINDER_DEFAULTS, ...((data?.value as object) ?? {}) });
-  return parsed.success ? parsed.data : REMINDER_DEFAULTS;
+  return normalizeReminderSettings(data?.value);
 }
 
 type RunOptions = {
   dryRun?: boolean;
   kinds?: ReminderKind[];
-  today?: string;
+  now?: Date;
   sentBy?: string | null;
 };
 
 export async function runReminders(opts: RunOptions = {}): Promise<RunReport> {
-  const today = opts.today ?? localToday();
+  const now = opts.now ?? new Date();
+  const nowMs = now.getTime();
+  const today = localToday(now);
   const dryRun = !!opts.dryRun;
   const report: RunReport = { ok: true, dryRun, today, evaluated: 0, sent: 0, skipped: 0, failed: 0, markedOverdue: 0, results: [] };
 
@@ -56,7 +57,7 @@ export async function runReminders(opts: RunOptions = {}): Promise<RunReport> {
         .from('invoices')
         .select('id, invoice_number, status, due_date, total_cents, payment_token, locale, customers(name, email, locale, status)')
         .in('status', ['sent', 'overdue']);
-      const all = evaluateInvoices((invoices ?? []) as unknown as InvoiceRow[], today, cfg, APP_URL, company.iban);
+      const all = evaluateInvoices((invoices ?? []) as unknown as InvoiceRow[], nowMs, cfg, APP_URL, company.iban);
       candidates.push(...all.filter((c) => wanted.has(c.kind)));
     }
 
@@ -65,7 +66,7 @@ export async function runReminders(opts: RunOptions = {}): Promise<RunReport> {
         .from('offers')
         .select('id, offer_number, status, valid_until, total_cents, locale, customers(name, email, locale, status)')
         .eq('status', 'sent');
-      candidates.push(...evaluateOffers((offers ?? []) as unknown as OfferRow[], today, cfg, APP_URL));
+      candidates.push(...evaluateOffers((offers ?? []) as unknown as OfferRow[], nowMs, cfg, APP_URL));
     }
 
     if (wanted.has('appointment_reminder')) {
@@ -75,7 +76,7 @@ export async function runReminders(opts: RunOptions = {}): Promise<RunReport> {
         .eq('status', 'confirmed')
         .gte('scheduled_date', today);
       const address = `${company.address}, ${company.postcode} ${company.city}`;
-      candidates.push(...evaluateAppointments((apts ?? []) as unknown as AppointmentRow[], today, cfg, APP_URL, address));
+      candidates.push(...evaluateAppointments((apts ?? []) as unknown as AppointmentRow[], nowMs, cfg, APP_URL, address));
     }
 
     if (wanted.has('vehicle_ready')) {

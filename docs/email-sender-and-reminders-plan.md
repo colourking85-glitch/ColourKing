@@ -276,3 +276,6 @@ Phase 1 ships independently. Phase 2 needs the table decision. Phase 4 is the on
 Implemented (phases 1–3): sender identities + SY01 E-mail tab + test button; reminder engine (`src/modules/reminders/`), `/api/cron/reminders` (fail-closed auth), Vercel cron `0 7 * * *`; `reminder_log`; SY60 Herinneringen log; SY15 real job list; JB10 dialog; outbound emails now also written to `email_log`; admin guard on settings PUTs; dead approve/cancel links redirected to `/contact`.
 
 Still to do by hand (see §6): Zoho send-as aliases, `CRON_SECRET` in Vercel, run migration 0063, then send a test per identity from SY01.
+
+### Update 2026-09-26 (later): configurable moments
+Reminder offsets are no longer whole days with one value per rule. `settings.reminders` now holds per rule `moments: [{ value, unit: 'hours'|'days' }]` (max 2, e.g. appointment 24 h + 2 h before). The engine is time-based (`now ≥ event ∓ offset`, 48 h grace, DST-safe) and idempotent per (kind, entity, stage) so it can run every 15 minutes. Vercel Hobby cron stays daily; for hour-based moments add an external scheduler that POSTs `/api/cron/reminders` every 15 min with `Authorization: Bearer <CRON_SECRET>`, or move to Vercel Pro (`*/15 * * * *`).
