@@ -117,6 +117,11 @@ Last updated: 2026-09-26
 - Vehicle detail as hub with inspections, activity, parties, notes
 - PostgREST error improvements, finding photos in report
 
+### Sprint 25 — Agenda & Planning UX (done)
+- AP05 agenda starts from today (next 7 days) instead of beginning of the week
+- Red appointment count badges on day headers in week + month views
+- TS10 Planning: "Afspraken" toggle combines work hours and appointments in one view
+
 ## Next up
 
 ### Go-live configuration

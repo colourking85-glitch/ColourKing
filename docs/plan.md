@@ -36,6 +36,7 @@
 | 22 | Email Senders & Reminders | DONE | SY10/SY25 | 0052, 0063 |
 | 23 | Inspections Phase 1 Flow | DONE | IN10 (approve) | 0062 |
 | 24 | Vehicle Hub & Polish | DONE | VH10 | 0064 |
+| 25 | Agenda & Planning UX | DONE | AP05, TS10 | — |
 
 ---
 
@@ -294,6 +295,14 @@
 - Finding photos in inspection report
 - Sent-emails table status badge fix
 
+### Sprint 25: Agenda & Planning UX
+- AP05 agenda defaults to today (next 7 days) instead of snapping to Monday
+- Red appointment count badges on day headers (week + month views)
+- TS10 Planning: clickable "Afspraken" toggle overlays appointments as a row in the staff hours grid
+- Per-day appointment count badges on TS10 column headers when toggle active
+- Table renders with appointments even when no time entries exist
+- Schema test fix: customer types expanded from 4 to 11 (Customer 360 alignment)
+
 ---
 
 ## Tier 5 Gate — CRM & Inspections ✅
@@ -301,7 +310,7 @@
 - Inspections end-to-end: catalog → capture → approval → locked snapshot
 - Email system: per-process senders, manual send buttons, automated reminders
 - Vehicle detail hub with linked inspections and notes
-- 712 tests across 21 test files
+- 718 tests across 22 test files
 
 ---
 
@@ -437,4 +446,4 @@ Lead → Offer → Approval → Repair Order → Job → Parts → Tasks → Han
 | tests/booking-time.test.ts | 6 | 19 |
 | tests/lead-thread.test.ts | 7 | 19 |
 | tests/portfolio.test.ts | 17 | 19 |
-| **Total** | **712** | |
+| **Total** | **718** | |
