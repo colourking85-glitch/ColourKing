@@ -214,6 +214,81 @@ const STYLE_VARS: Record<string, Record<string, string>> = {
 
 const LIGHT_THEMES = new Set(['clean', 'daylight', 'arctic']);
 
+/** Tailwind palette: [700 shade for text, 500 shade for tinted badge backgrounds]. */
+const PALETTE: Record<string, [string, string]> = {
+  red: ['#b91c1c', '#ef4444'], amber: ['#b45309', '#f59e0b'], yellow: ['#a16207', '#eab308'],
+  green: ['#15803d', '#22c55e'], emerald: ['#047857', '#10b981'], teal: ['#0f766e', '#14b8a6'],
+  cyan: ['#0e7490', '#06b6d4'], sky: ['#0369a1', '#0ea5e9'], blue: ['#1d4ed8', '#3b82f6'],
+  indigo: ['#4338ca', '#6366f1'], violet: ['#6d28d9', '#8b5cf6'], purple: ['#7e22ce', '#a855f7'],
+  fuchsia: ['#a21caf', '#d946ef'], pink: ['#be185d', '#ec4899'], rose: ['#be123c', '#f43f5e'],
+  orange: ['#c2410c', '#f97316'], lime: ['#4d7c0f', '#84cc16'],
+  slate: ['#334155', '#64748b'], gray: ['#374151', '#6b7280'], zinc: ['#3f3f46', '#71717a'],
+};
+
+const esc = (cls: string) => cls.replace(/[/:.[\]#]/g, (c) => `\\${c}`);
+const rule = (classes: string[], decl: string, pseudo = '') =>
+  `${classes.map((c) => `.dark .${esc(c)}${pseudo}`).join(', ')} { ${decl} }`;
+const tint = (hex: string, a: number) => {
+  const n = parseInt(hex.slice(1), 16);
+  return `rgba(${(n >> 16) & 255}, ${(n >> 8) & 255}, ${n & 255}, ${a})`;
+};
+
+/**
+ * The admin UI was written dark-first with many literal Tailwind colours
+ * (text-white/60, text-red-400, bg-[#12121a] …). Light themes remap every
+ * such class to the theme tokens / darker palette shades in one place.
+ */
+function lightOverrides(v: Record<string, string>): string {
+  const text = v['--ck-text'], text2 = v['--ck-text-2'], text3 = v['--ck-text-3'];
+  const muted = v['--ck-text-muted'], faint = v['--ck-text-faint'];
+  const bg = v['--ck-bg'], surface = v['--ck-surface'], surface2 = v['--ck-surface-2'], surface3 = v['--ck-surface-3'];
+  const border = v['--ck-border'], border2 = v['--ck-border-2'];
+  const imp = (d: string) => `${d} !important`;
+
+  const out: string[] = [
+    // white text at various opacities → grey ramp
+    rule(['text-white'], imp(`color: ${text}`)),
+    rule(['text-white/90', 'text-white/80', 'text-white/70'], imp(`color: ${text2}`)),
+    rule(['text-white/60', 'text-white/50'], imp(`color: ${text3}`)),
+    rule(['text-white/40', 'text-white/30'], imp(`color: ${muted}`)),
+    rule(['text-white/25', 'text-white/20'], imp(`color: ${faint}`)),
+    rule(['hover:text-white', 'hover:text-white/80', 'hover:text-white/60'], imp(`color: ${text}`), ':hover'),
+    rule(['placeholder:text-white/30', 'placeholder:text-white/25'], imp(`color: ${muted}`), '::placeholder'),
+    // white/black surfaces
+    rule(['bg-white'], imp(`background-color: ${surface}`)),
+    rule(['bg-white/5', 'bg-white/10', 'bg-white/20', 'bg-white/[0.03]', 'bg-white/[0.06]'], imp(`background-color: ${surface2}`)),
+    rule(['hover:bg-white/5', 'hover:bg-white/10', 'hover:bg-white/20', 'hover:bg-white/[0.02]', 'hover:bg-white/[0.03]', 'hover:bg-white/[0.06]'], imp(`background-color: ${surface3}`), ':hover'),
+    rule(['bg-black', 'bg-black/50', 'bg-black/40'], imp(`background-color: ${bg}`)),
+    rule(['border-white/10', 'border-white/20', 'border-white/30', 'border-white/40'], imp(`border-color: ${border}`)),
+    rule(['hover:border-white/10', 'hover:border-white/50', 'hover:border-white/70'], imp(`border-color: ${border2}`), ':hover'),
+    rule(['ring-white/10', 'ring-white/[0.06]'], imp(`--tw-ring-color: ${border}`)),
+    rule(['hover:ring-white/20'], imp(`--tw-ring-color: ${border2}`), ':hover'),
+    `.dark .divide-white\\/10 > :not([hidden]) ~ :not([hidden]) { border-color: ${border} !important; }`,
+    // literal dark hex colours (manual, cron, AI screens)
+    rule(['text-[#6b6b80]'], imp(`color: ${text3}`)),
+    rule(['text-[#c0c0cc]'], imp(`color: ${text2}`)),
+    rule(['text-[#8b8ba0]', 'text-[#4a4a5a]', 'text-[#3a3a50]'], imp(`color: ${muted}`)),
+    rule(['bg-[#12121a]'], imp(`background-color: ${surface}`)),
+    rule(['bg-[#0a0a0f]', 'bg-[#1e1e2a]', 'bg-[#2e2e3a]'], imp(`background-color: ${surface2}`)),
+    rule(['hover:bg-[#1e1e2a]/30'], imp(`background-color: ${surface3}`), ':hover'),
+    rule(['border-[#1e1e2a]', 'border-[#1e1e2a]/50'], imp(`border-color: ${border}`)),
+    `.dark select option { background-color: ${surface}; color: ${text}; }`,
+  ];
+
+  // pastel -300/-400 text is unreadable on light surfaces → 700 shade; dark -900/x badge tints → light 500/12%
+  for (const [name, [dark, mid]] of Object.entries(PALETTE)) {
+    out.push(rule([`text-${name}-300`, `text-${name}-400`, `text-${name}-400/60`], imp(`color: ${dark}`)));
+    out.push(rule([`hover:text-${name}-400`, `hover:text-${name}-300`], imp(`color: ${dark}`), ':hover'));
+    out.push(rule(
+      [`bg-${name}-900/20`, `bg-${name}-900/30`, `bg-${name}-900/40`, `bg-${name}-900/50`, `bg-${name}-950/20`, `bg-${name}-950/10`, `bg-${name}-700/30`, `bg-${name}-700/50`],
+      imp(`background-color: ${tint(mid, 0.14)}`),
+    ));
+    out.push(rule([`border-${name}-900/30`, `border-${name}-700/40`], imp(`border-color: ${tint(mid, 0.35)}`)));
+  }
+
+  return '\n' + out.join('\n') + '\n';
+}
+
 function applySettings(settings: AppSettings) {
   const root = document.documentElement;
 
@@ -233,25 +308,7 @@ function applySettings(settings: AppSettings) {
   const cssVars = Object.entries(styleVars).map(([k, v]) => `${k}: ${v};`).join('\n  ');
   let css = `.dark {\n  ${cssVars}\n}`;
 
-  if (isLight) {
-    const textColor = styleVars['--ck-text'] ?? '#212529';
-    const text2 = styleVars['--ck-text-2'] ?? '#343a40';
-    const bgColor = styleVars['--ck-bg'] ?? '#f8f9fa';
-    const surfaceColor = styleVars['--ck-surface'] ?? '#ffffff';
-    const borderColor = styleVars['--ck-border'] ?? '#dee2e6';
-    css += `
-.dark .text-white { color: ${textColor} !important; }
-.dark .text-white\\/80 { color: ${text2} !important; }
-.dark .bg-white { background-color: ${surfaceColor} !important; }
-.dark .bg-white\\/5, .dark .bg-white\\/10 { background-color: ${surfaceColor} !important; }
-.dark .border-white\\/10, .dark .border-white\\/20 { border-color: ${borderColor} !important; }
-.dark .divide-white\\/10 > :not([hidden]) ~ :not([hidden]) { border-color: ${borderColor} !important; }
-.dark .bg-black, .dark .bg-black\\/50, .dark .bg-black\\/40 { background-color: ${bgColor} !important; }
-.dark .ring-white\\/10 { --tw-ring-color: ${borderColor} !important; }
-.dark .placeholder\\:text-white\\/30::placeholder { color: ${styleVars['--ck-text-muted'] ?? '#6c757d'} !important; }
-.dark select option { background-color: ${surfaceColor}; color: ${textColor}; }
-`;
-  }
+  if (isLight) css += lightOverrides(styleVars);
 
   styleEl.textContent = css;
 
