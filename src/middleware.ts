@@ -11,6 +11,8 @@ function isPublicRoute(pathname: string): boolean {
   if (pathname === '/login') return true;
   if (pathname.startsWith('/reset-password')) return true;
   if (pathname.startsWith('/api/public/')) return true;
+  // Token-gated customer pages (handover note, inspection signing): no locale prefix
+  if (pathname.startsWith('/s/')) return true;
   if (pathname.startsWith('/api/webhooks/')) return true;
   return false;
 }
