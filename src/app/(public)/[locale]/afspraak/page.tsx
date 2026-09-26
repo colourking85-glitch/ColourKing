@@ -6,6 +6,11 @@ import { Link } from '@/i18n/routing';
 import { Car, ClipboardCheck, PackageCheck, ChevronLeft, ChevronRight, Check, Clock, Calendar, User, Phone, Mail, FileText, Loader2, MapPin, Navigation, Search, Globe } from 'lucide-react';
 
 type Slot = { time: string; available: boolean };
+type Closure = { title: string; kind: string; start_date: string; end_date: string };
+
+function closureFor(closures: Closure[], ymd: string): Closure | undefined {
+  return closures.find(c => c.start_date <= ymd && c.end_date >= ymd);
+}
 
 type VehicleInfo = {
   kenteken: string;
@@ -51,9 +56,13 @@ function formatYMD(d: Date): string {
 function CalendarGrid({
   selectedDate,
   onSelect,
+  closures,
+  closedLabel,
 }: {
   selectedDate: string;
   onSelect: (d: string) => void;
+  closures: Closure[];
+  closedLabel: string;
 }) {
   const bcp = BCP[useLocale()] ?? 'nl-NL';
   const today = useMemo(() => {
@@ -152,19 +161,23 @@ function CalendarGrid({
           const isPast = day < today;
           const isTooFar = day > maxDate;
           const isSunday = day.getDay() === 0;
-          const disabled = !inMonth || isPast || isTooFar || isSunday;
+          const ymd = formatYMD(day);
+          const closure = inMonth && !isPast ? closureFor(closures, ymd) : undefined;
+          const disabled = !inMonth || isPast || isTooFar || isSunday || !!closure;
           const isToday = isSameDay(day, today);
           const isSelected = selectedObj && isSameDay(day, selectedObj);
-          const ymd = formatYMD(day);
 
           return (
             <button
               key={i}
               disabled={disabled}
               onClick={() => onSelect(ymd)}
+              title={closure ? `${closedLabel}: ${closure.title}` : undefined}
               className={`relative flex h-11 items-center justify-center text-sm font-medium transition-all ${
                 isSelected
                   ? 'rounded-lg bg-ck-red text-white shadow-lg shadow-ck-red/30'
+                  : closure
+                    ? 'text-red-400/70 line-through cursor-not-allowed'
                   : disabled
                     ? 'text-ck-text-faint opacity-30 cursor-not-allowed'
                     : isToday
@@ -213,6 +226,15 @@ export default function BookingPage() {
   const [submitting, setSubmitting] = useState(false);
   const [success, setSuccess] = useState(false);
   const [error, setError] = useState('');
+  const [closures, setClosures] = useState<Closure[]>([]);
+
+  useEffect(() => {
+    const from = new Date(); const to = new Date(); to.setDate(to.getDate() + 36);
+    fetch(`/api/public/closures?from=${formatYMD(from)}&to=${formatYMD(to)}`)
+      .then(r => r.ok ? r.json() : [])
+      .then((rows: Closure[]) => setClosures(rows))
+      .catch(() => {});
+  }, []);
 
   useEffect(() => {
     if (!date || !type) return;
@@ -276,7 +298,17 @@ export default function BookingPage() {
         setSuccess(true);
       } else {
         const data = await res.json();
-        setError(data.error || t('submitError'));
+        if (res.status === 409 && data.error === 'closed') {
+          const c = data.closure as Closure;
+          const fmtD = (d: string) => new Date(d + 'T00:00:00').toLocaleDateString(bcp, { day: 'numeric', month: 'long' });
+          const range = c.start_date === c.end_date ? fmtD(c.start_date) : `${fmtD(c.start_date)} – ${fmtD(c.end_date)}`;
+          setClosures(prev => prev.some(x => x.start_date === c.start_date) ? prev : [...prev, { ...c, kind: 'holiday' }]);
+          setDate('');
+          setStep(2);
+          setError(t('closedError', { title: c.title, range }));
+        } else {
+          setError(data.error || t('submitError'));
+        }
       }
     } catch {
       setError(t('submitError'));
@@ -530,7 +562,18 @@ export default function BookingPage() {
               </div>
 
               {/* Calendar */}
-              <CalendarGrid selectedDate={date} onSelect={setDate} />
+              <CalendarGrid selectedDate={date} onSelect={setDate} closures={closures} closedLabel={t('closedLabel')} />
+              {closures.length > 0 && (
+                <p className="text-center text-xs text-ck-text-muted">
+                  {t('closedDays')}: {closures.map(c => {
+                    const f = (d: string) => new Date(d + 'T00:00:00').toLocaleDateString(bcp, { day: 'numeric', month: 'short' });
+                    return `${f(c.start_date)}${c.end_date !== c.start_date ? ' – ' + f(c.end_date) : ''} (${c.title})`;
+                  }).join(' · ')}
+                </p>
+              )}
+              {error && (
+                <p className="rounded-lg border border-red-500/30 bg-red-500/10 px-4 py-2 text-center text-sm text-red-400">{error}</p>
+              )}
 
               {/* Selected date label */}
               {date && (

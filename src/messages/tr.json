@@ -97,7 +97,8 @@
     "labourRates": "Tarifeler",
     "envSecrets": "Ortam Sırları",
     "certifications": "Sertifikalar",
-    "reminders": "Hatırlatmalar"
+    "reminders": "Hatırlatmalar",
+    "offDays": "Kapalı günler"
   },
   "header": {
     "quickCreate": "Hızlı oluştur",
@@ -578,7 +579,8 @@
     "location_trunk": "Bagaj",
     "location_fender": "Çamurluk",
     "location_door": "Kapı",
-    "location_other": "Diğer"
+    "location_other": "Diğer",
+    "closedConfirm": "Şirket istenen tarihte kapalı ({title}). Yine de onaylı randevu oluşturulsun mu?"
   },
   "jb": {
     "title": "İşler",
@@ -1182,7 +1184,10 @@
     "save": "Kaydet",
     "saving": "Kaydediliyor...",
     "resendConfirmation": "Onayı e-postala",
-    "sendReminder": "Hatırlatma gönder"
+    "sendReminder": "Hatırlatma gönder",
+    "closedDay": "Kapalı",
+    "closedWarning": "Şirket bu tarihte kapalı ({title}). Müşteriler bu günü rezerve edemez.",
+    "closedForce": "Yine de planla (istisna)"
   },
   "doc": {
     "project_dossier": "Proje dosyasi",
@@ -1793,7 +1798,25 @@
     "statusFailed": "Başarısız",
     "cronNoteReminders": "Her gün 09:00 (Europe/Amsterdam), Vercel Cron ile.",
     "bcc": "BCC (kopya, isteğe bağlı)",
-    "bccHint": "Bu gönderenden çıkan her e-posta bu adrese de gizli kopya olarak gönderilir — gönderilen faturaları veya teklifleri kontrol etmek için kullanışlıdır."
+    "bccHint": "Bu gönderenden çıkan her e-posta bu adrese de gizli kopya olarak gönderilir — gönderilen faturaları veya teklifleri kontrol etmek için kullanışlıdır.",
+    "offDaysTitle": "Kapalı günler",
+    "offDaysDesc": "Şirketin kapalı olduğu günler (tatil, resmi tatil, bakım). Kapalı günler web sitesinden rezerve edilemez, ajandada kırmızı görünür ve o gün için gelen randevu talebi otomatik olarak \"kapalıyız\" yanıtı alır. Yalnızca o kapasiteyi kapatmak için belirli bir bay/kabin seçin.",
+    "offDayAdd": "Kapalı gün ekle",
+    "offDayTitle": "Açıklama",
+    "offDayTitlePlaceholder": "örn. Yaz tatili, Noel, Kabin bakımı",
+    "offDayFrom": "Başlangıç",
+    "offDayTo": "Bitiş (dahil)",
+    "offDayKind": "Tür",
+    "offDayKindHoliday": "Tatil",
+    "offDayKindMaintenance": "Bakım",
+    "offDayKindOther": "Diğer",
+    "offDayScope": "Geçerli",
+    "offDayScopeCompany": "Tüm şirket",
+    "offDayReason": "Not (dahili, isteğe bağlı)",
+    "offDayList": "Planlanan kapalı günler",
+    "offDayShowPast": "Geçmişi göster",
+    "offDayEmpty": "Planlanmış kapalı gün yok.",
+    "offDayDeleteConfirm": "Bu kapalı gün silinsin mi? Gün yeniden rezerve edilebilir olur."
   },
   "signature": {
     "signHere": "Buraya imza atın",
@@ -2469,7 +2492,10 @@
       "backToHome": "Ana sayfaya dön",
       "openingHours": "Pzt – Cum: 08:00 – 17:30 | Cmt: 09:00 – 13:00 · Rotterdam",
       "getDirections": "Yol Tarifi",
-      "openInMaps": "Haritada Aç"
+      "openInMaps": "Haritada Aç",
+      "closedLabel": "Kapalı",
+      "closedDays": "Kapalı",
+      "closedError": "{range} tarihinde kapalıyız ({title}). Lütfen başka bir tarih seçin."
     },
     "reviews": {
       "eyebrow": "MÜŞTERİ DEĞERLENDİRMELERİ",
@@ -2694,6 +2720,10 @@
       "ctaDesc": "Bizimle iletişime geçmekten çekinmeyin. Hasar onarımı hakkındaki tüm sorularınızda size kişisel olarak yardımcı olmaktan mutluluk duyarız.",
       "ctaQuote": "Teklif al",
       "ctaAppointment": "Randevu al"
+    },
+    "closure": {
+      "closedNow": "Kapalıyız: {range} ({title}). Sonrası için online randevu alınabilir.",
+      "closedSoon": "Not: {range} tarihlerinde kapalı olacağız ({title})."
     }
   },
   "em": {

@@ -114,7 +114,13 @@ export default function LeadsPage() {
     }
 
     if (newStatus === 'won' && lead?.channel === 'appointment_form' && lead?.appointment_type) {
-      const res = await fetch(`/api/leads/${leadId}/confirm-appointment`, { method: 'POST' });
+      let res = await fetch(`/api/leads/${leadId}/confirm-appointment`, { method: 'POST' });
+      if (res.status === 409) {
+        const data = await res.json();
+        if (data.error === 'closed' && window.confirm(t('closedConfirm', { title: data.closure?.title ?? '' }))) {
+          res = await fetch(`/api/leads/${leadId}/confirm-appointment?force=1`, { method: 'POST' });
+        }
+      }
       if (res.ok) {
         setLeads(prev => prev.map(l => l.id === leadId ? { ...l, status: 'won' } : l));
       }

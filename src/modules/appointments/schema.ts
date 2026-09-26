@@ -38,12 +38,14 @@ export const ResourceSchema = z.object({
 });
 
 export const BlackoutSchema = z.object({
-  title: z.string().min(1),
+  title: z.string().min(1).max(120),
   start_date: z.string().regex(/^\d{4}-\d{2}-\d{2}$/),
   end_date: z.string().regex(/^\d{4}-\d{2}-\d{2}$/),
   all_day: z.boolean().default(true),
   resource_id: z.string().uuid().nullable().optional(),
-});
+  kind: z.enum(['holiday', 'maintenance', 'other']).default('holiday'),
+  reason: z.string().max(500).nullable().optional(),
+}).refine((b) => b.end_date >= b.start_date, { message: 'end_date must be on or after start_date', path: ['end_date'] });
 
 export const OpeningHoursSchema = z.object({
   day_of_week: z.number().int().min(0).max(6),

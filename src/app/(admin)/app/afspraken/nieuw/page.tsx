@@ -47,6 +47,18 @@ export default function NewAppointmentPage() {
   const [slots, setSlots] = useState<SlotData[]>([]);
   const [resources, setResources] = useState<ResourceRow[]>([]);
   const [loadingSlots, setLoadingSlots] = useState(false);
+  const [closure, setClosure] = useState<{ title: string; start_date: string; end_date: string } | null>(null);
+  const [force, setForce] = useState(false);
+
+  useEffect(() => {
+    setClosure(null);
+    setForce(false);
+    if (!date) return;
+    fetch(`/api/public/closures?from=${date}&to=${date}`)
+      .then(r => r.ok ? r.json() : [])
+      .then((rows: Array<{ title: string; start_date: string; end_date: string }>) => setClosure(rows[0] ?? null))
+      .catch(() => {});
+  }, [date]);
 
   // Load resources on mount
   useEffect(() => {
@@ -86,6 +98,7 @@ export default function NewAppointmentPage() {
       customer_id: fd.get('customer_id') || null,
       vehicle_id: fd.get('vehicle_id') || null,
       notes: fd.get('notes') || null,
+      force,
     };
 
     const res = await fetch('/api/appointments', {
@@ -269,8 +282,18 @@ export default function NewAppointmentPage() {
           />
         </div>
 
+        {closure && (
+          <div className="rounded-[10px] border border-red-500/40 bg-red-500/10 px-4 py-3 text-sm text-red-300">
+            <p className="font-medium">{t('closedWarning', { title: closure.title })}</p>
+            <label className="mt-2 flex items-center gap-2 text-xs text-red-200">
+              <input type="checkbox" checked={force} onChange={e => setForce(e.target.checked)} />
+              {t('closedForce')}
+            </label>
+          </div>
+        )}
+
         {/* Available slots info */}
-        {date && !loadingSlots && (
+        {date && !loadingSlots && !closure && (
           <div className="rounded-[10px] border-[0.5px] border-ck-border bg-ck-surface-2 px-4 py-3">
             <p className="text-[11px] text-ck-text-muted">
               {availableSlots.length} {t('slotInfo')}{' '}

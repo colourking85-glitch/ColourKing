@@ -8,7 +8,8 @@
  */
 
 import { admin as supabase } from '@/lib/supabase/admin';
-import { renderTemplate, getSubject, renderAppointmentRequest } from './templates';
+import { renderTemplate, getSubject, renderAppointmentRequest, renderAppointmentClosed } from './templates';
+import { findClosure, nextOpenDay } from '@/lib/closures';
 import { sendEmail } from './sender';
 import { logEmail } from './log';
 import type { EmailLocale } from './schema';
@@ -371,19 +372,51 @@ export async function onLeadCreated(leadId: string): Promise<void> {
   if (lead.contact_email && lead.channel === 'appointment_form') {
     const customerLocale = validLocale(lead.locale);
 
-    const { html: custHtml, subject: custSubject } = renderAppointmentRequest(
-      {
-        contactName: lead.contact_name,
-        kenteken: lead.kenteken,
-        appointmentType: lead.appointment_type ?? 'inspection',
-        scheduledDate: lead.scheduled_date,
-        scheduledTime: lead.scheduled_time,
-        location: lead.location,
-        locationAddress: lead.location_address,
-      },
-      customerLocale,
-      company,
-    );
+    // Requested on an off day → automatic "we are closed" reply instead of the pending notice
+    const closure = lead.scheduled_date ? await findClosure(lead.scheduled_date) : null;
+
+    const { html: custHtml, subject: custSubject } = closure
+      ? renderAppointmentClosed(
+          {
+            contactName: lead.contact_name,
+            kenteken: lead.kenteken,
+            appointmentType: lead.appointment_type ?? 'inspection',
+            scheduledDate: lead.scheduled_date as string,
+            scheduledTime: lead.scheduled_time,
+            closureTitle: closure.title,
+            closureStart: closure.start_date,
+            closureEnd: closure.end_date,
+            nextOpen: await nextOpenDay(closure.end_date),
+            bookingUrl: `${APP_URL}/${customerLocale}/afspraak`,
+          },
+          customerLocale,
+          company,
+        )
+      : renderAppointmentRequest(
+          {
+            contactName: lead.contact_name,
+            kenteken: lead.kenteken,
+            appointmentType: lead.appointment_type ?? 'inspection',
+            scheduledDate: lead.scheduled_date,
+            scheduledTime: lead.scheduled_time,
+            location: lead.location,
+            locationAddress: lead.location_address,
+          },
+          customerLocale,
+          company,
+        );
+
+    if (closure) {
+      await supabase.from('notifications').insert({
+        type: 'new_lead',
+        title: `Afspraak aangevraagd op sluitingsdag (${closure.title})`,
+        body: `${lead.contact_name} vroeg ${lead.scheduled_date} ${String(lead.scheduled_time ?? '').slice(0, 5)} aan — klant kreeg automatisch een "gesloten" bericht.`,
+        link: `/app/leads/${leadId}`,
+        ref_type: 'lead',
+        ref_id: leadId,
+        staff_id: null,
+      });
+    }
 
     const custSender = await getSender('appointments');
     const custResult = await sendEmail(lead.contact_email, custSubject, custHtml, custSender);

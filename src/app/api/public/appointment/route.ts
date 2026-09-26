@@ -3,6 +3,7 @@ import { z } from 'zod';
 import { admin } from '@/lib/supabase/admin';
 import { onLeadCreated } from '@/modules/email/triggers';
 import { isSlotBookable } from '@/lib/booking-time';
+import { findClosure, nextOpenDay } from '@/lib/closures';
 
 const PublicAppointmentSchema = z.object({
   type: z.enum(['inspection', 'drop_off', 'collection']),
@@ -70,6 +71,18 @@ export async function POST(req: NextRequest) {
       return NextResponse.json(
         { error: 'This time slot is no longer available. Please choose a later time.' },
         { status: 400 }
+      );
+    }
+
+    const closure = await findClosure(scheduled_date);
+    if (closure) {
+      return NextResponse.json(
+        {
+          error: 'closed',
+          closure: { title: closure.title, start_date: closure.start_date, end_date: closure.end_date },
+          next_open: await nextOpenDay(closure.end_date),
+        },
+        { status: 409 }
       );
     }
 

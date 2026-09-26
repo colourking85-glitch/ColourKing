@@ -9,7 +9,7 @@ import {
   Package, Receipt, FolderOpen, CalendarDays, ClipboardList,
   BarChart3, Calculator, ShoppingCart, BookOpen, Settings, Bell,
   ChevronLeft, ChevronRight, ChevronDown, BookOpenCheck, Clock, Bot, Mail, HardDrive, Server,
-  Plug, Zap, CarFront, Coins, Shield, Activity, ClipboardCheck, Award, Images, BellRing,
+  Plug, Zap, CarFront, Coins, Shield, Activity, ClipboardCheck, Award, Images, BellRing, CalendarOff,
 } from 'lucide-react';
 import { ScreenBadge } from '@/components/ui/ScreenBadge';
 import { SCREEN_REGISTRY } from '@/lib/codes';
@@ -105,6 +105,7 @@ const NAV: NavSection[] = [
           { label: 'general', href: '/app/instellingen', icon: Settings, code: 'SY01' },
           { label: 'users', href: '/app/instellingen/gebruikers', icon: Users, code: 'SY02' },
           { label: 'numbering', href: '/app/instellingen/nummering', icon: Receipt, code: 'SY03' },
+          { label: 'offDays', href: '/app/instellingen/sluitingsdagen', icon: CalendarOff, code: 'SY06' },
           { label: 'brandModels', href: '/app/instellingen/merken', icon: CarFront, code: 'SY40' },
           { label: 'labourRates', href: '/app/instellingen/tarieven', icon: Coins, code: 'SY45' },
           { label: 'certifications', href: '/app/instellingen/certificeringen', icon: Award, code: 'SY55' },

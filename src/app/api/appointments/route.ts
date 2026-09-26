@@ -2,6 +2,7 @@ import { NextRequest, NextResponse } from 'next/server';
 import { getAppointments } from '@/modules/appointments/queries';
 import { createAppointment } from '@/modules/appointments/actions';
 import type { AppointmentType, AppointmentStatus } from '@/types/database';
+import { findClosure } from '@/lib/closures';
 
 export async function GET(req: NextRequest) {
   const sp = req.nextUrl.searchParams;
@@ -22,6 +23,17 @@ export async function GET(req: NextRequest) {
 export async function POST(req: NextRequest) {
   try {
     const body = await req.json();
+
+    if (typeof body?.scheduled_date === 'string' && !body.force) {
+      const closure = await findClosure(body.scheduled_date);
+      if (closure) {
+        return NextResponse.json(
+          { error: 'closed', closure: { title: closure.title, start_date: closure.start_date, end_date: closure.end_date } },
+          { status: 409 },
+        );
+      }
+    }
+
     const appointment = await createAppointment(body);
     return NextResponse.json(appointment, { status: 201 });
   } catch (e) {

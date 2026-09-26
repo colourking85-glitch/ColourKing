@@ -112,6 +112,9 @@ export const SCREEN_REGISTRY: Record<string, ScreenMeta> = {
   '/app/instellingen/gebruikers': { id: 'SY02', title: 'Staff Management', titleNl: 'Gebruikersbeheer', module: 'SY', route: '/app/instellingen/gebruikers' },
   '/app/instellingen/nummering': { id: 'SY03', title: 'Number Ranges', titleNl: 'Nummering', module: 'SY', route: '/app/instellingen/nummering' },
 
+  // Off days / closures
+  '/app/instellingen/sluitingsdagen': { id: 'SY06', title: 'Off Days', titleNl: 'Sluitingsdagen', module: 'SY', route: '/app/instellingen/sluitingsdagen' },
+
   // Monitoring
   '/app/monitoring': { id: 'SY05', title: 'Monitoring', titleNl: 'Monitoring', module: 'SY', route: '/app/monitoring' },
 

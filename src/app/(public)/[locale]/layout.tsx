@@ -6,6 +6,7 @@ import { ThemeProvider } from '@/components/ThemeProvider';
 import { Navbar } from '@/modules/public/Navbar';
 import { Footer } from '@/modules/public/Footer';
 import { SiteTracker } from '@/components/public/SiteTracker';
+import { ClosureBanner } from '@/components/public/ClosureBanner';
 
 export default async function PublicLayout({
   children,
@@ -28,6 +29,7 @@ export default async function PublicLayout({
       >
         <div className="flex min-h-screen flex-col bg-ck-bg font-barlow">
           <Navbar locale={locale} />
+          <ClosureBanner />
           <main className="flex-1">{children}</main>
           <Footer />
           <SiteTracker locale={locale} />

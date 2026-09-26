@@ -23,6 +23,7 @@ type AppointmentRow = {
 };
 
 type ResourceRow = { id: string; type: string; name: string };
+type BlackoutRow = { id: string; title: string; kind: string; start_date: string; end_date: string; resource_id: string | null; all_day: boolean };
 type ViewMode = 'day' | '3day' | 'week' | 'month';
 
 const TYPE_KEYS: Record<AppointmentType, string> = {
@@ -89,6 +90,7 @@ export default function AppointmentCalendarPage() {
   const [anchor, setAnchor] = useState(() => new Date());
   const [appointments, setAppointments] = useState<AppointmentRow[]>([]);
   const [resources, setResources] = useState<ResourceRow[]>([]);
+  const [blackouts, setBlackouts] = useState<BlackoutRow[]>([]);
   const [loading, setLoading] = useState(true);
   const [typeFilter, setTypeFilter] = useState('');
   const [resourceFilter, setResourceFilter] = useState('');
@@ -156,13 +158,18 @@ export default function AppointmentCalendarPage() {
     Promise.all([
       fetch(`/api/appointments?${params}`).then(r => r.ok ? r.json() : []),
       fetch('/api/resources').then(r => r.ok ? r.json() : []),
+      fetch(`/api/blackouts?from=${dateFrom}&to=${dateTo}`).then(r => r.ok ? r.json() : []),
     ])
-      .then(([appts, res]) => {
+      .then(([appts, res, bo]) => {
         setAppointments(appts);
         setResources(res);
+        setBlackouts(bo);
       })
       .finally(() => setLoading(false));
   }, [dateFrom, dateTo, typeFilter]);
+
+  const closureFor = (dateStr: string) =>
+    blackouts.find(b => !b.resource_id && b.all_day && b.start_date <= dateStr && b.end_date >= dateStr);
 
   const filtered = useMemo(() => {
     if (!resourceFilter) return appointments;
@@ -249,14 +256,21 @@ export default function AppointmentCalendarPage() {
                     const isToday = dateStr === todayStr;
                     const isCurrentMonth = day.getMonth() === monthNum;
                     const dayAppts = getApptsForDay(day);
+                    const closure = closureFor(dateStr);
 
                     return (
                       <div
                         key={di}
+                        title={closure ? `${t('closedDay')}: ${closure.title}` : undefined}
                         className={`min-h-[90px] border-r border-ck-divider last:border-r-0 p-1.5 ${
                           !isCurrentMonth ? 'opacity-40' : ''
-                        }`}
+                        } ${closure ? 'bg-red-500/[0.06] bg-[repeating-linear-gradient(135deg,transparent,transparent_6px,rgba(239,68,68,0.08)_6px,rgba(239,68,68,0.08)_12px)]' : ''}`}
                       >
+                        {closure && (
+                          <div className="mb-0.5 truncate rounded bg-red-500/15 px-1 py-0.5 text-[9px] font-semibold uppercase tracking-wide text-red-400">
+                            {t('closedDay')} · {closure.title}
+                          </div>
+                        )}
                         <div className={`mb-1 text-right text-[11px] font-medium ${
                           isToday ? 'text-ck-red' : 'text-ck-text-muted'
                         }`}>
@@ -345,14 +359,16 @@ export default function AppointmentCalendarPage() {
               const isToday = dateStr === todayStr;
               const dayAppts = getApptsForDay(day);
               const dayIdx = (day.getDay() + 6) % 7; // 0=Mon
+              const closure = closureFor(dateStr);
 
               return (
                 <div key={i} className="flex-1 min-w-0 border-r border-ck-divider last:border-r-0">
                   {/* Day header */}
                   <div
                     className={`flex h-10 items-center justify-center gap-1 border-b border-ck-border text-xs ${
-                      isToday ? 'bg-ck-red/10 text-ck-red font-medium' : 'text-ck-text-muted'
+                      closure ? 'bg-red-500/10 text-red-400 font-medium' : isToday ? 'bg-ck-red/10 text-ck-red font-medium' : 'text-ck-text-muted'
                     }`}
+                    title={closure ? `${t('closedDay')}: ${closure.title}` : undefined}
                   >
                     <span>{t(SHORT_DAYS[dayIdx])}</span>
                     <span className={isToday ? 'rounded-full bg-ck-red px-1.5 py-0.5 text-white text-[10px]' : ''}>
@@ -365,6 +381,11 @@ export default function AppointmentCalendarPage() {
                     {HOURS.map(h => (
                       <div key={h} className="h-[60px] border-b border-ck-divider" />
                     ))}
+                    {closure && (
+                      <div className="pointer-events-none absolute inset-0 z-[1] flex items-start justify-center bg-red-500/[0.06] bg-[repeating-linear-gradient(135deg,transparent,transparent_8px,rgba(239,68,68,0.07)_8px,rgba(239,68,68,0.07)_16px)] pt-3">
+                        <span className="rounded bg-red-500/15 px-2 py-0.5 text-[10px] font-semibold uppercase tracking-wide text-red-400">{t('closedDay')} · {closure.title}</span>
+                      </div>
+                    )}
 
                     {/* Appointment blocks */}
                     {dayAppts.map(appt => {

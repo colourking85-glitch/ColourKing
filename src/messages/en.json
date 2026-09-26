@@ -97,7 +97,8 @@
     "labourRates": "Labour Rates",
     "envSecrets": "Environment Secrets",
     "certifications": "Certifications",
-    "reminders": "Reminders"
+    "reminders": "Reminders",
+    "offDays": "Off days"
   },
   "header": {
     "quickCreate": "Quick create",
@@ -578,7 +579,8 @@
     "location_trunk": "Trunk",
     "location_fender": "Fender",
     "location_door": "Door",
-    "location_other": "Other"
+    "location_other": "Other",
+    "closedConfirm": "The company is closed on the requested date ({title}). Create a confirmed appointment anyway?"
   },
   "jb": {
     "title": "Jobs",
@@ -1182,7 +1184,10 @@
     "save": "Save",
     "saving": "Saving...",
     "resendConfirmation": "Email confirmation",
-    "sendReminder": "Send reminder"
+    "sendReminder": "Send reminder",
+    "closedDay": "Closed",
+    "closedWarning": "The company is closed on this date ({title}). Customers cannot book this day.",
+    "closedForce": "Schedule anyway (exception)"
   },
   "doc": {
     "project_dossier": "Project dossier",
@@ -1793,7 +1798,25 @@
     "statusFailed": "Failed",
     "cronNoteReminders": "Daily at 09:00 (Europe/Amsterdam) via Vercel Cron.",
     "bcc": "BCC (copy to, optional)",
-    "bccHint": "Every email from this sender is also blind-copied to this address — useful to check sent invoices or quotes."
+    "bccHint": "Every email from this sender is also blind-copied to this address — useful to check sent invoices or quotes.",
+    "offDaysTitle": "Off days",
+    "offDaysDesc": "Days the company is closed (holiday, public holiday, maintenance). Closed days cannot be booked on the website, show in red in the agenda, and an appointment request for such a day automatically gets a \"we are closed\" reply. Pick a specific bay/booth to close only that capacity.",
+    "offDayAdd": "Add off day",
+    "offDayTitle": "Description",
+    "offDayTitlePlaceholder": "e.g. Summer break, Christmas, Booth maintenance",
+    "offDayFrom": "From",
+    "offDayTo": "Until (incl.)",
+    "offDayKind": "Kind",
+    "offDayKindHoliday": "Holiday",
+    "offDayKindMaintenance": "Maintenance",
+    "offDayKindOther": "Other",
+    "offDayScope": "Applies to",
+    "offDayScopeCompany": "Whole company",
+    "offDayReason": "Note (internal, optional)",
+    "offDayList": "Planned off days",
+    "offDayShowPast": "Show past",
+    "offDayEmpty": "No off days planned.",
+    "offDayDeleteConfirm": "Delete this off day? The day becomes bookable again."
   },
   "signature": {
     "signHere": "Sign here",
@@ -2520,7 +2543,10 @@
       "backToHome": "Back to Home",
       "openingHours": "Mon – Fri: 08:00 – 17:30 | Sat: 09:00 – 13:00 · Rotterdam",
       "getDirections": "Get Directions",
-      "openInMaps": "Open in Maps"
+      "openInMaps": "Open in Maps",
+      "closedLabel": "Closed",
+      "closedDays": "Closed",
+      "closedError": "We are closed on {range} ({title}). Please choose another date."
     },
     "reviews": {
       "eyebrow": "CUSTOMER REVIEWS",
@@ -2745,6 +2771,10 @@
       "ctaDesc": "Feel free to contact us. We are happy to help you personally with all your questions about damage repair.",
       "ctaQuote": "Get a quote",
       "ctaAppointment": "Make an appointment"
+    },
+    "closure": {
+      "closedNow": "We are closed: {range} ({title}). Appointments can still be booked online for afterwards.",
+      "closedSoon": "Please note: we will be closed {range} ({title})."
     }
   },
   "bc": {

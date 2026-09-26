@@ -97,7 +97,8 @@
     "labourRates": "Tarieven",
     "envSecrets": "Omgevingsgeheimen",
     "certifications": "Certificeringen",
-    "reminders": "Herinneringen"
+    "reminders": "Herinneringen",
+    "offDays": "Sluitingsdagen"
   },
   "header": {
     "quickCreate": "Snel aanmaken",
@@ -578,7 +579,8 @@
     "location_trunk": "Kofferdeksel",
     "location_fender": "Spatbord",
     "location_door": "Portier",
-    "location_other": "Overig"
+    "location_other": "Overig",
+    "closedConfirm": "Het bedrijf is gesloten op de gevraagde datum ({title}). Toch een bevestigde afspraak aanmaken?"
   },
   "jb": {
     "title": "Opdrachten",
@@ -1182,7 +1184,10 @@
     "save": "Opslaan",
     "saving": "Opslaan...",
     "resendConfirmation": "Bevestiging mailen",
-    "sendReminder": "Herinnering sturen"
+    "sendReminder": "Herinnering sturen",
+    "closedDay": "Gesloten",
+    "closedWarning": "Het bedrijf is gesloten op deze datum ({title}). Klanten kunnen deze dag niet boeken.",
+    "closedForce": "Toch inplannen (uitzondering)"
   },
   "doc": {
     "project_dossier": "Projectdossier",
@@ -1793,7 +1798,25 @@
     "statusFailed": "Mislukt",
     "cronNoteReminders": "Dagelijks om 09:00 (Europe/Amsterdam) via Vercel Cron.",
     "bcc": "BCC (kopie naar, optioneel)",
-    "bccHint": "Elke e-mail van deze afzender wordt ook blind naar dit adres gestuurd — handig om verzonden facturen of offertes te controleren."
+    "bccHint": "Elke e-mail van deze afzender wordt ook blind naar dit adres gestuurd — handig om verzonden facturen of offertes te controleren.",
+    "offDaysTitle": "Sluitingsdagen",
+    "offDaysDesc": "Dagen waarop het bedrijf gesloten is (vakantie, feestdag, onderhoud). Gesloten dagen zijn niet boekbaar via de website, worden rood in de agenda getoond en een afspraakverzoek voor zo'n dag krijgt automatisch een \"wij zijn gesloten\"-antwoord. Kies een specifieke bay/cabine om alleen die capaciteit te sluiten.",
+    "offDayAdd": "Sluitingsdag toevoegen",
+    "offDayTitle": "Omschrijving",
+    "offDayTitlePlaceholder": "bijv. Bouwvak, Kerst, Onderhoud spuitcabine",
+    "offDayFrom": "Van",
+    "offDayTo": "Tot en met",
+    "offDayKind": "Soort",
+    "offDayKindHoliday": "Vakantie / feestdag",
+    "offDayKindMaintenance": "Onderhoud",
+    "offDayKindOther": "Overig",
+    "offDayScope": "Geldt voor",
+    "offDayScopeCompany": "Hele bedrijf",
+    "offDayReason": "Notitie (intern, optioneel)",
+    "offDayList": "Geplande sluitingsdagen",
+    "offDayShowPast": "Ook verleden tonen",
+    "offDayEmpty": "Geen sluitingsdagen gepland.",
+    "offDayDeleteConfirm": "Deze sluitingsdag verwijderen? De dag wordt daarna weer boekbaar."
   },
   "signature": {
     "signHere": "Hier tekenen",
@@ -2469,7 +2492,10 @@
       "backToHome": "Terug naar Home",
       "openingHours": "Ma – Vr: 08:00 – 17:30 | Za: 09:00 – 13:00 · Rotterdam",
       "getDirections": "Routebeschrijving",
-      "openInMaps": "Open in Maps"
+      "openInMaps": "Open in Maps",
+      "closedLabel": "Gesloten",
+      "closedDays": "Gesloten",
+      "closedError": "Wij zijn gesloten op {range} ({title}). Kies een andere datum."
     },
     "reviews": {
       "eyebrow": "KLANTBEOORDELINGEN",
@@ -2694,6 +2720,10 @@
       "ctaDesc": "Neem gerust contact met ons op. Wij helpen u graag persoonlijk verder met al uw vragen over schadeherstel.",
       "ctaQuote": "Offerte aanvragen",
       "ctaAppointment": "Afspraak maken"
+    },
+    "closure": {
+      "closedNow": "Wij zijn gesloten: {range} ({title}). Afspraken kunnen wel online worden ingepland voor daarna.",
+      "closedSoon": "Let op: wij zijn binnenkort gesloten van {range} ({title})."
     }
   },
   "em": {

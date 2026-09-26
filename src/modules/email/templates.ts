@@ -138,6 +138,15 @@ const STRINGS: Record<string, EmailStrings> = {
     invoiceIban: 'Rekeningnummer',
     invoiceAlreadyPaid: 'Heeft u inmiddels betaald? Dan kunt u deze herinnering als niet verzonden beschouwen.',
 
+    // Appointment requested on a closed day
+    closedSubject: 'Wij zijn gesloten op {date} — kies een andere datum',
+    closedBanner: 'GESLOTEN OP DE GEVRAAGDE DATUM',
+    closedIntro: 'Bedankt voor uw afspraakverzoek. Helaas zijn wij gesloten op de datum die u heeft gekozen.',
+    closedRange: 'Gesloten',
+    closedNextOpen: 'Eerstvolgende werkdag',
+    closedAction: 'Kies via onderstaande knop een nieuwe datum, of beantwoord deze e-mail met uw voorkeur. Wij nemen dan contact met u op.',
+    closedCta: 'Nieuwe datum kiezen',
+
     // Handover note share
     handoverSubject: 'Uw afleverbon {docNumber} - Colourking',
     handoverIntro: 'Uw voertuig is afgeleverd. Via onderstaande knop kunt u de afleverbon bekijken en digitaal ondertekenen.',
@@ -239,6 +248,14 @@ const STRINGS: Record<string, EmailStrings> = {
     invoiceIban: 'Bank account',
     invoiceAlreadyPaid: 'Already paid? Then please disregard this reminder.',
 
+    closedSubject: 'We are closed on {date} — please pick another date',
+    closedBanner: 'CLOSED ON THE REQUESTED DATE',
+    closedIntro: 'Thank you for your appointment request. Unfortunately we are closed on the date you chose.',
+    closedRange: 'Closed',
+    closedNextOpen: 'Next working day',
+    closedAction: 'Use the button below to pick a new date, or reply to this email with your preference and we will get back to you.',
+    closedCta: 'Choose a new date',
+
     handoverSubject: 'Your handover note {docNumber} - Colourking',
     handoverIntro: 'Your vehicle has been delivered. Use the button below to view and digitally sign the handover note.',
     handoverDoc: 'Document number',
@@ -338,6 +355,14 @@ const STRINGS: Record<string, EmailStrings> = {
     invoiceAmount: 'Odenmemis tutar',
     invoiceIban: 'Banka hesabi',
     invoiceAlreadyPaid: 'Odemeyi yaptiysaniz bu hatirlatmayi dikkate almayin.',
+
+    closedSubject: '{date} tarihinde kapaliyiz — lutfen baska bir tarih secin',
+    closedBanner: 'ISTENEN TARIHTE KAPALI',
+    closedIntro: 'Randevu talebiniz icin tesekkurler. Maalesef sectiginiz tarihte kapaliyiz.',
+    closedRange: 'Kapali',
+    closedNextOpen: 'Sonraki is gunu',
+    closedAction: 'Asagidaki dugmeyle yeni bir tarih secin veya tercihinizi bu e-postaya yanit olarak yazin; sizinle iletisime gececegiz.',
+    closedCta: 'Yeni tarih sec',
 
     handoverSubject: 'Teslim belgeniz {docNumber} - Colourking',
     handoverIntro: 'Araciniz teslim edildi. Asagidaki dugmeyle teslim belgesini goruntuleyebilir ve dijital olarak imzalayabilirsiniz.',
@@ -948,6 +973,50 @@ export function renderAppointmentRequest(
 
   const html = wrapLayout(locale, body, company);
   return { html, subject };
+}
+
+/**
+ * Automatic reply when an appointment was requested for a day the company is closed.
+ */
+export function renderAppointmentClosed(
+  data: {
+    contactName: string;
+    kenteken?: string | null;
+    appointmentType?: string | null;
+    scheduledDate: string;
+    scheduledTime?: string | null;
+    closureTitle: string;
+    closureStart: string;
+    closureEnd: string;
+    nextOpen?: string | null;
+    bookingUrl: string;
+  },
+  locale: EmailLocale = 'nl',
+  company?: CompanyInfo,
+): { html: string; subject: string } {
+  const subject = t(locale, 'closedSubject', { date: formatDate(data.scheduledDate, locale) });
+  const range = data.closureStart === data.closureEnd
+    ? formatDate(data.closureStart, locale)
+    : `${formatDate(data.closureStart, locale)} – ${formatDate(data.closureEnd, locale)}`;
+
+  const rows =
+    (data.kenteken ? detailRow(t(locale, 'leadPlate'), data.kenteken) : '') +
+    (data.appointmentType ? detailRow(t(locale, 'appointmentType'), t(locale, `apptType_${data.appointmentType}`)) : '') +
+    highlightedDetailRow(t(locale, 'appointmentDate'), `${formatDate(data.scheduledDate, locale)}${data.scheduledTime ? ` ${data.scheduledTime.slice(0, 5)}` : ''}`) +
+    detailRow(t(locale, 'closedRange'), `${range} (${data.closureTitle})`) +
+    (data.nextOpen ? detailRow(t(locale, 'closedNextOpen'), formatDate(data.nextOpen, locale)) : '');
+
+  const body = `
+    <table role="presentation" width="100%" cellpadding="0" cellspacing="0" border="0" style="margin:0 0 20px 0;border:2px solid #dc2626;border-radius:8px;overflow:hidden;">
+      <tr><td style="background-color:#fef2f2;padding:14px 20px;text-align:center;font-size:15px;font-weight:bold;color:#dc2626;font-family:Arial,Helvetica,sans-serif;">${t(locale, 'closedBanner')}</td></tr>
+    </table>
+    ${greeting(locale, data.contactName)}
+    ${paragraph(t(locale, 'closedIntro'))}
+    ${detailTable(rows)}
+    ${paragraph(t(locale, 'closedAction'))}
+    <div style="text-align:center;margin:24px 0;">${ctaButton(t(locale, 'closedCta'), data.bookingUrl)}</div>`;
+
+  return { html: wrapLayout(locale, body, company), subject };
 }
 
 /**

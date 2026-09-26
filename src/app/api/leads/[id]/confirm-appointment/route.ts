@@ -1,11 +1,13 @@
 import { NextRequest, NextResponse } from 'next/server';
 import { createServiceClient } from '@/lib/supabase/server';
+import { findClosure } from '@/lib/closures';
 
 export async function POST(
-  _req: NextRequest,
+  req: NextRequest,
   { params }: { params: { id: string } }
 ) {
   const supabase = createServiceClient();
+  const force = req.nextUrl.searchParams.get('force') === '1';
 
   const { data: lead, error: leadErr } = await supabase
     .from('leads')
@@ -19,6 +21,16 @@ export async function POST(
 
   if (!lead.appointment_type || !lead.scheduled_date || !lead.scheduled_time) {
     return NextResponse.json({ error: 'Lead has no appointment data' }, { status: 400 });
+  }
+
+  if (!force) {
+    const closure = await findClosure(lead.scheduled_date);
+    if (closure) {
+      return NextResponse.json(
+        { error: 'closed', closure: { title: closure.title, start_date: closure.start_date, end_date: closure.end_date } },
+        { status: 409 },
+      );
+    }
   }
 
   const { data: appointment, error: aptErr } = await supabase

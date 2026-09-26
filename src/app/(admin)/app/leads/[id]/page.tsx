@@ -143,7 +143,13 @@ export default function LeadDetailPage() {
     if (!lead?.appointment_type || !lead?.scheduled_date || !lead?.scheduled_time) return;
     setConfirming(true);
     try {
-      const res = await fetch(`/api/leads/${id}/confirm-appointment`, { method: 'POST' });
+      let res = await fetch(`/api/leads/${id}/confirm-appointment`, { method: 'POST' });
+      if (res.status === 409) {
+        const data = await res.json();
+        if (data.error === 'closed' && window.confirm(t('closedConfirm', { title: data.closure?.title ?? '' }))) {
+          res = await fetch(`/api/leads/${id}/confirm-appointment?force=1`, { method: 'POST' });
+        }
+      }
       if (res.ok) {
         const updated = await res.json();
         setLead(prev => prev ? { ...prev, status: updated.lead_status ?? prev.status } : prev);
