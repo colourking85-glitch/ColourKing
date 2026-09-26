@@ -2,7 +2,7 @@
 
 import { useState, useEffect, useMemo } from 'react';
 import {
-  ChevronLeft, ChevronRight, Calendar, Clock, Zap, Users,
+  ChevronLeft, ChevronRight, Calendar, Clock, Zap, Users, CalendarCheck,
 } from 'lucide-react';
 import { useTranslations } from 'next-intl';
 import { ScreenBadge } from '@/components/ui/ScreenBadge';
@@ -30,6 +30,17 @@ type StaffSummary = {
 
 type ViewMode = 'day' | '3day' | 'week' | 'month';
 type BlackoutRow = { title: string; start_date: string; end_date: string; resource_id: string | null; all_day: boolean };
+
+type AppointmentRow = {
+  id: string;
+  type: string;
+  status: string;
+  contact_name: string;
+  scheduled_date: string;
+  scheduled_time: string;
+  duration_minutes: number;
+  resources: { name: string } | null;
+};
 
 function startOfDay(d: Date): Date { const r = new Date(d); r.setHours(0, 0, 0, 0); return r; }
 function addDays(d: Date, n: number): Date { const r = new Date(d); r.setDate(r.getDate() + n); return r; }
@@ -80,6 +91,8 @@ export default function PlanningPage() {
   const [anchor, setAnchor] = useState(() => new Date());
   const [entries, setEntries] = useState<TimeEntryRow[]>([]);
   const [blackouts, setBlackouts] = useState<BlackoutRow[]>([]);
+  const [appointments, setAppointments] = useState<AppointmentRow[]>([]);
+  const [showAppointments, setShowAppointments] = useState(false);
   const [loading, setLoading] = useState(true);
   const [selectedCell, setSelectedCell] = useState<{ staffId: string; date: string } | null>(null);
 
@@ -102,13 +115,24 @@ export default function PlanningPage() {
     const params = new URLSearchParams();
     params.set('from', from.toISOString());
     params.set('to', to.toISOString());
-    Promise.all([
+    const fetches: Promise<unknown>[] = [
       fetch(`/api/time-entries?${params}`).then(r => r.ok ? r.json() : []),
       fetch(`/api/blackouts?from=${toISODate(from)}&to=${toISODate(to)}`).then(r => r.ok ? r.json() : []),
-    ])
-      .then(([rows, bo]) => { setEntries(rows); setBlackouts(bo); })
+    ];
+    if (showAppointments) {
+      fetches.push(
+        fetch(`/api/appointments?date_from=${toISODate(from)}&date_to=${toISODate(to)}`).then(r => r.ok ? r.json() : []),
+      );
+    }
+    Promise.all(fetches)
+      .then(([rows, bo, appts]) => {
+        setEntries(rows as TimeEntryRow[]);
+        setBlackouts(bo as BlackoutRow[]);
+        if (showAppointments) setAppointments(appts as AppointmentRow[]);
+        else setAppointments([]);
+      })
       .finally(() => setLoading(false));
-  }, [from, to]);
+  }, [from, to, showAppointments]);
 
   // Build staff summaries
   const staffSummaries = useMemo(() => {
@@ -144,6 +168,16 @@ export default function PlanningPage() {
     }
     return totals;
   }, [dates, staffSummaries]);
+
+  // Appointments grouped by day
+  const apptsByDay = useMemo(() => {
+    const byDay: Record<string, AppointmentRow[]> = {};
+    for (const a of appointments) {
+      if (!byDay[a.scheduled_date]) byDay[a.scheduled_date] = [];
+      byDay[a.scheduled_date].push(a);
+    }
+    return byDay;
+  }, [appointments]);
 
   // Cell detail entries
   const cellEntries = useMemo(() => {
@@ -207,18 +241,31 @@ export default function PlanningPage() {
           </button>
         </div>
         <span className="text-sm font-medium text-ck-text">{weekLabel}</span>
-        <div className="flex rounded-[10px] border-[0.5px] border-ck-border bg-ck-surface p-0.5">
-          {VIEWS.map(v => (
-            <button
-              key={v.id}
-              onClick={() => setView(v.id)}
-              className={`rounded-lg px-3 py-1.5 text-xs font-medium transition-colors ${
-                view === v.id ? 'bg-ck-red text-white' : 'text-ck-text-muted hover:text-ck-text'
-              }`}
-            >
-              {v.label}
-            </button>
-          ))}
+        <div className="flex items-center gap-2">
+          <button
+            onClick={() => setShowAppointments(v => !v)}
+            className={`flex items-center gap-1.5 rounded-[10px] border-[0.5px] px-3 py-1.5 text-xs font-medium transition-colors ${
+              showAppointments
+                ? 'border-ck-red bg-ck-red/10 text-ck-red'
+                : 'border-ck-border bg-ck-surface text-ck-text-muted hover:text-ck-text hover:bg-ck-surface-2'
+            }`}
+          >
+            <CalendarCheck size={14} />
+            {tAp('title')}
+          </button>
+          <div className="flex rounded-[10px] border-[0.5px] border-ck-border bg-ck-surface p-0.5">
+            {VIEWS.map(v => (
+              <button
+                key={v.id}
+                onClick={() => setView(v.id)}
+                className={`rounded-lg px-3 py-1.5 text-xs font-medium transition-colors ${
+                  view === v.id ? 'bg-ck-red text-white' : 'text-ck-text-muted hover:text-ck-text'
+                }`}
+              >
+                {v.label}
+              </button>
+            ))}
+          </div>
         </div>
       </div>
 
@@ -228,7 +275,7 @@ export default function PlanningPage() {
           <div className="flex h-48 items-center justify-center">
             <div className="h-8 w-8 animate-spin rounded-full border-2 border-ck-border border-t-ck-red" />
           </div>
-        ) : staffSummaries.length === 0 ? (
+        ) : staffSummaries.length === 0 && !(showAppointments && appointments.length > 0) ? (
           <div className="flex h-48 flex-col items-center justify-center gap-3">
             <Users size={32} className="text-ck-text-faint" />
             <p className="text-sm text-ck-text-muted">{view === 'week' ? t('noEntriesWeek') : t('noEntriesPeriod')}</p>
@@ -248,7 +295,14 @@ export default function PlanningPage() {
                       title={closure ? `${tAp('closedDay')}: ${closure.title}` : undefined}
                       className={`px-3 py-3 text-center font-medium ${closure ? 'bg-red-500/10 text-red-400' : isToday ? 'text-ck-red' : ''}`}
                     >
-                      <div>{DAY_NAMES[(d.getDay() + 6) % 7]}</div>
+                      <div className="flex items-center justify-center gap-1">
+                        <span>{DAY_NAMES[(d.getDay() + 6) % 7]}</span>
+                        {showAppointments && (apptsByDay[key]?.length ?? 0) > 0 && (
+                          <span className="inline-flex h-4 min-w-[16px] items-center justify-center rounded-full bg-ck-red px-1 text-[9px] font-bold text-white normal-case tracking-normal">
+                            {apptsByDay[key]!.length}
+                          </span>
+                        )}
+                      </div>
                       <div className="text-[10px] font-normal">
                         {d.toLocaleDateString('nl-NL', { day: 'numeric', month: 'short' })}
                       </div>
@@ -311,6 +365,44 @@ export default function PlanningPage() {
                   {formatHours(Object.values(dayTotals).reduce((a, b) => a + b, 0))}
                 </td>
               </tr>
+
+              {/* Appointments row */}
+              {showAppointments && appointments.length > 0 && (
+                <tr className="border-t border-ck-border bg-emerald-500/[0.04]">
+                  <td className="px-4 py-3 text-[11px] font-medium uppercase tracking-wider text-emerald-500">
+                    <span className="flex items-center gap-1.5">
+                      <CalendarCheck size={12} />
+                      {tAp('title')}
+                    </span>
+                  </td>
+                  {dates.map((d, i) => {
+                    const key = toISODate(d);
+                    const dayAppts = apptsByDay[key] ?? [];
+                    return (
+                      <td key={i} className="px-1 py-2 text-center align-top">
+                        {dayAppts.length > 0 ? (
+                          <div className="space-y-0.5">
+                            {dayAppts.map(a => (
+                              <a
+                                key={a.id}
+                                href={`/app/afspraken/${a.id}`}
+                                className="mx-auto block max-w-[120px] truncate rounded bg-emerald-400/15 px-1.5 py-0.5 text-[10px] text-emerald-400 hover:bg-emerald-400/25 transition-colors"
+                              >
+                                {a.scheduled_time.slice(0, 5)} {a.contact_name}
+                              </a>
+                            ))}
+                          </div>
+                        ) : (
+                          <span className="text-[10px] text-ck-text-faint">-</span>
+                        )}
+                      </td>
+                    );
+                  })}
+                  <td className="px-4 py-3 text-center font-mono text-xs tabular-nums text-emerald-500">
+                    {appointments.length}
+                  </td>
+                </tr>
+              )}
             </tbody>
           </table>
         )}

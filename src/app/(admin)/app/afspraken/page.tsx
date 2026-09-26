@@ -96,9 +96,6 @@ export default function AppointmentCalendarPage() {
   const [resourceFilter, setResourceFilter] = useState('');
 
   const { days, dateFrom, dateTo, rangeLabel } = useMemo(() => {
-    const today = new Date();
-    today.setHours(0, 0, 0, 0);
-
     if (view === 'day') {
       const d = new Date(anchor);
       d.setHours(0, 0, 0, 0);
@@ -124,9 +121,8 @@ export default function AppointmentCalendarPage() {
 
     if (view === 'month') {
       const first = getFirstOfMonth(anchor);
-      const last = new Date(first.getFullYear(), first.getMonth() + 1, 0);
       const startDay = getMonday(first);
-      const endDay = addDays(startDay, 41); // 6 weeks
+      const endDay = addDays(startDay, 41);
       const ds: Date[] = [];
       for (let d = new Date(startDay); d <= endDay; d = addDays(d, 1)) {
         ds.push(new Date(d));
@@ -139,9 +135,10 @@ export default function AppointmentCalendarPage() {
       };
     }
 
-    // week
-    const monday = getMonday(anchor);
-    const ds = Array.from({ length: 7 }, (_, i) => addDays(monday, i));
+    // week — start from today, show 7 days forward
+    const start = new Date(anchor);
+    start.setHours(0, 0, 0, 0);
+    const ds = Array.from({ length: 7 }, (_, i) => addDays(start, i));
     return {
       days: ds,
       dateFrom: fmt(ds[0]),
@@ -184,6 +181,14 @@ export default function AppointmentCalendarPage() {
     else d.setMonth(d.getMonth() + dir);
     setAnchor(d);
   }
+
+  const apptCountByDay = useMemo(() => {
+    const counts: Record<string, number> = {};
+    for (const a of filtered) {
+      counts[a.scheduled_date] = (counts[a.scheduled_date] ?? 0) + 1;
+    }
+    return counts;
+  }, [filtered]);
 
   function goToday() {
     setAnchor(new Date());
@@ -271,9 +276,14 @@ export default function AppointmentCalendarPage() {
                             {t('closedDay')} · {closure.title}
                           </div>
                         )}
-                        <div className={`mb-1 text-right text-[11px] font-medium ${
+                        <div className={`mb-1 flex items-center justify-end gap-1 text-[11px] font-medium ${
                           isToday ? 'text-ck-red' : 'text-ck-text-muted'
                         }`}>
+                          {dayAppts.length > 0 && (
+                            <span className="inline-flex h-4 min-w-[16px] items-center justify-center rounded-full bg-ck-red px-1 text-[9px] font-bold text-white">
+                              {dayAppts.length}
+                            </span>
+                          )}
                           {isToday ? (
                             <span className="inline-flex h-5 w-5 items-center justify-center rounded-full bg-ck-red text-[10px] text-white">
                               {day.getDate()}
@@ -361,11 +371,13 @@ export default function AppointmentCalendarPage() {
               const dayIdx = (day.getDay() + 6) % 7; // 0=Mon
               const closure = closureFor(dateStr);
 
+              const apptCount = apptCountByDay[dateStr] ?? 0;
+
               return (
                 <div key={i} className="flex-1 min-w-0 border-r border-ck-divider last:border-r-0">
                   {/* Day header */}
                   <div
-                    className={`flex h-10 items-center justify-center gap-1 border-b border-ck-border text-xs ${
+                    className={`flex h-10 items-center justify-center gap-1.5 border-b border-ck-border text-xs ${
                       closure ? 'bg-red-500/10 text-red-400 font-medium' : isToday ? 'bg-ck-red/10 text-ck-red font-medium' : 'text-ck-text-muted'
                     }`}
                     title={closure ? `${t('closedDay')}: ${closure.title}` : undefined}
@@ -374,6 +386,11 @@ export default function AppointmentCalendarPage() {
                     <span className={isToday ? 'rounded-full bg-ck-red px-1.5 py-0.5 text-white text-[10px]' : ''}>
                       {fmtDisplay(day)}
                     </span>
+                    {apptCount > 0 && (
+                      <span className="inline-flex h-4 min-w-[16px] items-center justify-center rounded-full bg-ck-red px-1 text-[9px] font-bold text-white">
+                        {apptCount}
+                      </span>
+                    )}
                   </div>
 
                   {/* Time slots */}
