@@ -719,21 +719,23 @@ export default function SettingsPage() {
             </>
           )}
 
-          {/* Save button */}
-          <div className="flex items-center gap-3">
-            <button
-              onClick={handleSave}
-              className="flex items-center gap-2 rounded-lg bg-ck-red px-6 py-2.5 text-sm font-semibold text-white transition-colors hover:bg-ck-red-hover"
-            >
-              <Settings size={14} />
-              {tCommon('save')}
-            </button>
-            {saved && (
-              <span className="flex items-center gap-1.5 text-sm text-green-400">
-                <Check size={14} /> {tSy('saved')}
-              </span>
-            )}
-          </div>
+          {/* Save button (not shown on company tab — it has its own) */}
+          {tab !== 'company' && (
+            <div className="flex items-center gap-3">
+              <button
+                onClick={handleSave}
+                className="flex items-center gap-2 rounded-lg bg-ck-red px-6 py-2.5 text-sm font-semibold text-white transition-colors hover:bg-ck-red-hover"
+              >
+                <Settings size={14} />
+                {tCommon('save')}
+              </button>
+              {saved && (
+                <span className="flex items-center gap-1.5 text-sm text-green-400">
+                  <Check size={14} /> {tSy('saved')}
+                </span>
+              )}
+            </div>
+          )}
         </div>
       </div>
     </div>
