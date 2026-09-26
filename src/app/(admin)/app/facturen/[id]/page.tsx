@@ -8,7 +8,7 @@ import {
   ArrowLeft, FileText, Send, CheckCircle, AlertCircle,
   File, Ban, CreditCard, Trash2, Hash, Calendar,
   User, Car, ExternalLink, Copy, Printer, Link2,
-  Clock, Banknote, Eye,
+  Clock, Banknote, Eye, Pencil, Check,
 } from 'lucide-react';
 import type { InvoiceStatus, OfferLineKind, TaxCode, PaymentMethod } from '@/types/database';
 import { InvoiceTemplate } from '@/modules/invoices/template';
@@ -149,6 +149,13 @@ export default function InvoiceDetailPage() {
   const [showInvoice, setShowInvoice] = useState(false);
   const [linkCopied, setLinkCopied] = useState(false);
   const [company, setCompany] = useState<CompanyInfo | undefined>();
+  const [editing, setEditing] = useState(false);
+  const [editDueDate, setEditDueDate] = useState('');
+  const [editNotes, setEditNotes] = useState('');
+  const [editTerms, setEditTerms] = useState('');
+  const [editLocale, setEditLocale] = useState('nl');
+  const [saving, setSaving] = useState(false);
+  const [saved, setSaved] = useState(false);
 
   const load = () => {
     setLoading(true);
@@ -221,6 +228,37 @@ export default function InvoiceDetailPage() {
     navigator.clipboard.writeText(url);
     setLinkCopied(true);
     setTimeout(() => setLinkCopied(false), 2000);
+  };
+
+  const startEdit = () => {
+    if (!invoice) return;
+    setEditDueDate(invoice.due_date ?? '');
+    setEditNotes(invoice.notes ?? '');
+    setEditTerms(invoice.terms ?? '');
+    setEditLocale(invoice.locale ?? 'nl');
+    setEditing(true);
+    setSaved(false);
+  };
+
+  const handleSaveEdit = async () => {
+    setSaving(true);
+    const res = await fetch(`/api/invoices/${id}`, {
+      method: 'PATCH',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({
+        due_date: editDueDate || null,
+        notes: editNotes || null,
+        terms: editTerms || null,
+        locale: editLocale,
+      }),
+    });
+    if (res.ok) {
+      setSaved(true);
+      setEditing(false);
+      load();
+      setTimeout(() => setSaved(false), 2000);
+    }
+    setSaving(false);
   };
 
   const handlePrint = () => {
@@ -298,6 +336,21 @@ export default function InvoiceDetailPage() {
         </div>
 
         <div className="flex gap-2">
+          {isDraft && (
+            <button
+              onClick={startEdit}
+              className="flex items-center gap-1.5 rounded-[10px] border-[0.5px] border-ck-border bg-ck-surface px-4 py-2 text-sm text-ck-text-3 hover:border-blue-500/50 hover:text-blue-400 transition-colors"
+            >
+              <Pencil size={14} />
+              {tc('edit')}
+            </button>
+          )}
+          {saved && (
+            <span className="flex items-center gap-1 px-3 py-2 text-sm text-emerald-400">
+              <Check size={14} />
+              {t('saved')}
+            </span>
+          )}
           <Link
             href={`/app/facturen/${id}/preview`}
             className="flex items-center gap-1.5 rounded-[10px] border-[0.5px] border-ck-border bg-ck-surface px-4 py-2 text-sm text-ck-text-3 hover:border-ck-red hover:text-ck-red transition-colors"
@@ -524,6 +577,72 @@ export default function InvoiceDetailPage() {
               {invoice.notes && <InfoRow icon={FileText} label={t('notes')} value={invoice.notes} />}
             </div>
           </div>
+
+          {/* Edit draft panel */}
+          {isDraft && editing && (
+            <div className="rounded-[10px] border-[0.5px] border-blue-500/30 bg-blue-500/5 p-5">
+              <h2 className="mb-1 text-xs font-medium uppercase tracking-wider text-blue-400">{t('editDraft')}</h2>
+              <p className="mb-4 text-[10px] text-ck-text-muted">{t('editDraftDesc')}</p>
+              <div className="space-y-3">
+                <div>
+                  <label className="mb-1 block text-[11px] text-ck-text-muted">{t('dueDate')}</label>
+                  <input
+                    type="date"
+                    value={editDueDate}
+                    onChange={e => setEditDueDate(e.target.value)}
+                    className="w-full rounded-[10px] border-[0.5px] border-ck-border bg-ck-surface px-3 py-2 text-sm text-ck-text focus:border-blue-500 focus:outline-none"
+                  />
+                </div>
+                <div>
+                  <label className="mb-1 block text-[11px] text-ck-text-muted">{t('locale')}</label>
+                  <select
+                    value={editLocale}
+                    onChange={e => setEditLocale(e.target.value)}
+                    className="w-full rounded-[10px] border-[0.5px] border-ck-border bg-ck-surface px-3 py-2 text-sm text-ck-text focus:border-blue-500 focus:outline-none"
+                  >
+                    <option value="nl">Nederlands</option>
+                    <option value="en">English</option>
+                    <option value="tr">Türkçe</option>
+                  </select>
+                </div>
+                <div>
+                  <label className="mb-1 block text-[11px] text-ck-text-muted">{t('notes')}</label>
+                  <textarea
+                    value={editNotes}
+                    onChange={e => setEditNotes(e.target.value)}
+                    rows={2}
+                    className="w-full rounded-[10px] border-[0.5px] border-ck-border bg-ck-surface px-3 py-2 text-sm text-ck-text placeholder:text-ck-text-muted focus:border-blue-500 focus:outline-none"
+                    placeholder={t('notesPlaceholder')}
+                  />
+                </div>
+                <div>
+                  <label className="mb-1 block text-[11px] text-ck-text-muted">{t('terms')}</label>
+                  <textarea
+                    value={editTerms}
+                    onChange={e => setEditTerms(e.target.value)}
+                    rows={2}
+                    className="w-full rounded-[10px] border-[0.5px] border-ck-border bg-ck-surface px-3 py-2 text-sm text-ck-text placeholder:text-ck-text-muted focus:border-blue-500 focus:outline-none"
+                    placeholder={t('paymentTermsPlaceholder')}
+                  />
+                </div>
+                <div className="flex gap-2 pt-1">
+                  <button
+                    onClick={handleSaveEdit}
+                    disabled={saving}
+                    className="rounded-[10px] bg-blue-600 px-4 py-1.5 text-sm font-medium text-white hover:bg-blue-700 disabled:opacity-50"
+                  >
+                    {tc('save')}
+                  </button>
+                  <button
+                    onClick={() => setEditing(false)}
+                    className="rounded-[10px] border-[0.5px] border-ck-border px-4 py-1.5 text-sm text-ck-text-3 hover:bg-ck-surface-2"
+                  >
+                    {tc('cancel')}
+                  </button>
+                </div>
+              </div>
+            </div>
+          )}
 
           {/* Links */}
           <div className="rounded-[10px] border-[0.5px] border-ck-border bg-ck-surface p-5">

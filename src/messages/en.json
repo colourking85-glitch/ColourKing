@@ -1572,7 +1572,11 @@
     "changeStatusTo": "Change status to...",
     "apply": "Apply",
     "confirmChange": "Confirm change",
-    "confirmWarning": "These invoices are already issued. Click again to confirm."
+    "confirmWarning": "These invoices are already issued. Click again to confirm.",
+    "editDraft": "Edit draft",
+    "editDraftDesc": "You can change these fields while the invoice is in draft status.",
+    "locale": "Language",
+    "saved": "Saved"
   },
   "sy": {
     "title": "Settings",

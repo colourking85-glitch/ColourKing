@@ -232,20 +232,20 @@ export function InvoiceTemplate({ invoice, company: c }: { invoice: InvoiceData;
         <div>
           {/* eslint-disable-next-line @next/next/no-img-element */}
           <img src="/images/logo-colourking.svg" alt="ColourKing" style={{ height: '64px', width: 'auto', marginBottom: '10px' }} />
-          <div style={{ marginTop: '10px', fontSize: '11.5px', lineHeight: '1.8', color: '#5a5a7a' }}>
+          <div style={{ marginTop: '10px', fontSize: '13.5px', lineHeight: '1.8', color: '#5a5a7a' }}>
             {c?.address ?? 'Satijnbloem 6'}<br />
             {c?.postcode ?? '3068 JP'} {c?.city ?? 'Rotterdam'}<br />
             {t.tel}: {c?.phone ?? '06 81 63 10 20'}<br />
             {c?.email ?? 'info@colourking.nl'}
           </div>
-          <div style={{ marginTop: '6px', fontSize: '10px', color: '#8a8aa0' }}>
-            {t.kvk}: {c?.kvk ?? '82199884'} &nbsp;·&nbsp; {t.btw}: {c?.vat_number ?? 'NL003653356B56'}
+          <div style={{ marginTop: '6px', fontSize: '12px', color: '#8a8aa0' }}>
+            {t.btw}: {c?.vat_number ?? 'NL003653356B56'}
           </div>
         </div>
 
         <div style={{ textAlign: 'right' }}>
           <div style={{
-            fontSize: '13px',
+            fontSize: '15px',
             fontWeight: 600,
             letterSpacing: '0.12em',
             color: isCreditNote ? '#b45309' : isDeposit ? '#92400e' : ACCENT,
@@ -253,7 +253,7 @@ export function InvoiceTemplate({ invoice, company: c }: { invoice: InvoiceData;
           }}>
             {title}
           </div>
-          <table style={{ fontSize: '12px', marginLeft: 'auto' }}>
+          <table style={{ fontSize: '14px', marginLeft: 'auto' }}>
             <tbody>
               <tr>
                 <td style={{ padding: '3px 16px 3px 0', color: '#8a8aa0', textAlign: 'left', whiteSpace: 'nowrap' }}>{t.invoiceNumber}</td>
@@ -286,30 +286,30 @@ export function InvoiceTemplate({ invoice, company: c }: { invoice: InvoiceData;
             borderLeft: `3px solid ${ACCENT}`,
             borderRadius: '0 6px 6px 0',
           }}>
-            <div style={{ fontSize: '9px', textTransform: 'uppercase', letterSpacing: '0.1em', color: '#8a8aa0', marginBottom: '8px', fontWeight: 600 }}>
+            <div style={{ fontSize: '11px', textTransform: 'uppercase', letterSpacing: '0.1em', color: '#8a8aa0', marginBottom: '8px', fontWeight: 600 }}>
               {t.billTo}
             </div>
-            <div style={{ fontSize: '14px', fontWeight: 600, color: '#1a1a2e' }}>{customer.name}</div>
-            {customer.address && <div style={{ fontSize: '12.5px', color: '#5a5a7a', marginTop: '3px' }}>{customer.address}</div>}
+            <div style={{ fontSize: '16px', fontWeight: 600, color: '#1a1a2e' }}>{customer.name}</div>
+            {customer.address && <div style={{ fontSize: '14.5px', color: '#5a5a7a', marginTop: '3px' }}>{customer.address}</div>}
             {(customer.postcode || customer.city) && (
-              <div style={{ fontSize: '12.5px', color: '#5a5a7a' }}>{customer.postcode} {customer.city}</div>
+              <div style={{ fontSize: '14.5px', color: '#5a5a7a' }}>{customer.postcode} {customer.city}</div>
             )}
             {customer.btw_number && (
-              <div style={{ fontSize: '11px', color: '#8a8aa0', marginTop: '6px' }}>{t.btw}: {customer.btw_number}</div>
+              <div style={{ fontSize: '13px', color: '#8a8aa0', marginTop: '6px' }}>{t.btw}: {customer.btw_number}</div>
             )}
             {customer.kvk_number && (
-              <div style={{ fontSize: '11px', color: '#8a8aa0' }}>{t.kvk}: {customer.kvk_number}</div>
+              <div style={{ fontSize: '13px', color: '#8a8aa0' }}>{t.kvk}: {customer.kvk_number}</div>
             )}
           </div>
           {invoice.vehicles && (
             <div style={{ padding: '16px 20px', backgroundColor: '#f7f7fb', borderRadius: '6px', minWidth: '160px' }}>
-              <div style={{ fontSize: '9px', textTransform: 'uppercase', letterSpacing: '0.1em', color: '#8a8aa0', marginBottom: '8px', fontWeight: 600 }}>
+              <div style={{ fontSize: '11px', textTransform: 'uppercase', letterSpacing: '0.1em', color: '#8a8aa0', marginBottom: '8px', fontWeight: 600 }}>
                 {t.vehicle}
               </div>
-              <div className="inv-mono" style={{ fontSize: '14px', fontWeight: 600, color: '#1a1a2e', letterSpacing: '0.02em' }}>
+              <div className="inv-mono" style={{ fontSize: '16px', fontWeight: 600, color: '#1a1a2e', letterSpacing: '0.02em' }}>
                 {invoice.vehicles.kenteken ?? '—'}
               </div>
-              <div style={{ fontSize: '12px', color: '#5a5a7a', marginTop: '2px' }}>
+              <div style={{ fontSize: '14px', color: '#5a5a7a', marginTop: '2px' }}>
                 {[invoice.vehicles.make, invoice.vehicles.model].filter(Boolean).join(' ')}
               </div>
             </div>
@@ -318,7 +318,7 @@ export function InvoiceTemplate({ invoice, company: c }: { invoice: InvoiceData;
       )}
 
       {/* Line items table */}
-      <table style={{ width: '100%', marginBottom: '20px', fontSize: '12.5px' }}>
+      <table style={{ width: '100%', marginBottom: '20px', fontSize: '14.5px' }}>
         <thead>
           <tr>
             {[
@@ -333,7 +333,7 @@ export function InvoiceTemplate({ invoice, company: c }: { invoice: InvoiceData;
               <th key={i} style={{
                 padding: '10px 8px',
                 textAlign: col.align,
-                fontSize: '9px',
+                fontSize: '11px',
                 textTransform: 'uppercase',
                 letterSpacing: '0.08em',
                 color: '#8a8aa0',
@@ -349,26 +349,26 @@ export function InvoiceTemplate({ invoice, company: c }: { invoice: InvoiceData;
         <tbody>
           {invoice.invoice_lines.map((line, idx) => (
             <tr key={line.id} style={{ borderBottom: '1px solid #f0f0f5' }}>
-              <td className="inv-mono" style={{ padding: '9px 8px', color: '#8a8aa0', fontSize: '10px' }}>{idx + 1}</td>
+              <td className="inv-mono" style={{ padding: '9px 8px', color: '#8a8aa0', fontSize: '12px' }}>{idx + 1}</td>
               <td style={{ padding: '9px 8px', color: '#2a2a4a' }}>
                 {line.description}
                 {line.part_number && (
-                  <span className="inv-mono" style={{ marginLeft: '8px', fontSize: '9px', color: '#8a8aa0' }}>{line.part_number}</span>
+                  <span className="inv-mono" style={{ marginLeft: '8px', fontSize: '11px', color: '#8a8aa0' }}>{line.part_number}</span>
                 )}
               </td>
-              <td className="inv-mono" style={{ padding: '9px 8px', textAlign: 'right', fontSize: '11px', color: '#4a4a6a' }}>
+              <td className="inv-mono" style={{ padding: '9px 8px', textAlign: 'right', fontSize: '13px', color: '#4a4a6a' }}>
                 {fmtNumber(Number(line.quantity), locale)} {line.unit}
               </td>
-              <td className="inv-mono" style={{ padding: '9px 8px', textAlign: 'right', fontSize: '11px', color: '#4a4a6a' }}>
+              <td className="inv-mono" style={{ padding: '9px 8px', textAlign: 'right', fontSize: '13px', color: '#4a4a6a' }}>
                 {fmtCurrency(line.unit_price_cents, locale)}
               </td>
-              <td className="inv-mono" style={{ padding: '9px 8px', textAlign: 'right', fontSize: '11px', color: '#8a8aa0' }}>
+              <td className="inv-mono" style={{ padding: '9px 8px', textAlign: 'right', fontSize: '13px', color: '#8a8aa0' }}>
                 {Number(line.discount_pct) > 0 ? `${fmtNumber(Number(line.discount_pct), locale)}%` : '—'}
               </td>
-              <td className="inv-mono" style={{ padding: '9px 8px', textAlign: 'right', fontSize: '11px', color: '#8a8aa0' }}>
+              <td className="inv-mono" style={{ padding: '9px 8px', textAlign: 'right', fontSize: '13px', color: '#8a8aa0' }}>
                 {fmtCurrency(line.vat_amount_cents, locale)}
               </td>
-              <td className="inv-mono" style={{ padding: '9px 8px', textAlign: 'right', fontSize: '11.5px', fontWeight: 600, color: '#2a2a4a' }}>
+              <td className="inv-mono" style={{ padding: '9px 8px', textAlign: 'right', fontSize: '13.5px', fontWeight: 600, color: '#2a2a4a' }}>
                 {fmtCurrency(line.line_total_cents, locale)}
               </td>
             </tr>
@@ -381,24 +381,24 @@ export function InvoiceTemplate({ invoice, company: c }: { invoice: InvoiceData;
         {/* VAT summary */}
         {invoice.tax_summary && Object.keys(invoice.tax_summary).length > 0 && (
           <div style={{ flex: 1 }}>
-            <div style={{ fontSize: '9px', textTransform: 'uppercase', letterSpacing: '0.08em', color: '#8a8aa0', marginBottom: '8px', fontWeight: 600 }}>
+            <div style={{ fontSize: '11px', textTransform: 'uppercase', letterSpacing: '0.08em', color: '#8a8aa0', marginBottom: '8px', fontWeight: 600 }}>
               {t.vatSummary}
             </div>
-            <table style={{ width: '100%', fontSize: '11px' }}>
+            <table style={{ width: '100%', fontSize: '13px' }}>
               <thead>
                 <tr style={{ borderBottom: '1px solid #e8e8f0' }}>
                   {[t.taxCode, t.taxRate, t.taxBase, t.taxAmount].map((h, i) => (
-                    <th key={i} style={{ padding: '5px 8px', textAlign: i === 0 ? 'left' : 'right', fontSize: '9px', color: '#8a8aa0', fontWeight: 500 }}>{h}</th>
+                    <th key={i} style={{ padding: '5px 8px', textAlign: i === 0 ? 'left' : 'right', fontSize: '11px', color: '#8a8aa0', fontWeight: 500 }}>{h}</th>
                   ))}
                 </tr>
               </thead>
               <tbody>
                 {Object.entries(invoice.tax_summary).map(([code, val]) => (
                   <tr key={code} style={{ borderBottom: '1px solid #f4f4f8' }}>
-                    <td className="inv-mono" style={{ padding: '5px 8px', fontSize: '10px', color: '#4a4a6a' }}>{code}</td>
-                    <td className="inv-mono" style={{ padding: '5px 8px', textAlign: 'right', fontSize: '10px', color: '#4a4a6a' }}>{val.rate}%</td>
-                    <td className="inv-mono" style={{ padding: '5px 8px', textAlign: 'right', fontSize: '10px', color: '#4a4a6a' }}>{fmtCurrency(val.base_cents, locale)}</td>
-                    <td className="inv-mono" style={{ padding: '5px 8px', textAlign: 'right', fontSize: '10px', color: '#4a4a6a' }}>{fmtCurrency(val.vat_cents, locale)}</td>
+                    <td className="inv-mono" style={{ padding: '5px 8px', fontSize: '12px', color: '#4a4a6a' }}>{code}</td>
+                    <td className="inv-mono" style={{ padding: '5px 8px', textAlign: 'right', fontSize: '12px', color: '#4a4a6a' }}>{val.rate}%</td>
+                    <td className="inv-mono" style={{ padding: '5px 8px', textAlign: 'right', fontSize: '12px', color: '#4a4a6a' }}>{fmtCurrency(val.base_cents, locale)}</td>
+                    <td className="inv-mono" style={{ padding: '5px 8px', textAlign: 'right', fontSize: '12px', color: '#4a4a6a' }}>{fmtCurrency(val.vat_cents, locale)}</td>
                   </tr>
                 ))}
               </tbody>
@@ -409,17 +409,17 @@ export function InvoiceTemplate({ invoice, company: c }: { invoice: InvoiceData;
         {/* Grand total */}
         <div style={{ width: '260px', marginLeft: 'auto' }}>
           <div style={{ borderTop: '1px solid #e8e8f0', paddingTop: '8px' }}>
-            <div style={{ display: 'flex', justifyContent: 'space-between', padding: '4px 0', fontSize: '12px' }}>
+            <div style={{ display: 'flex', justifyContent: 'space-between', padding: '4px 0', fontSize: '14px' }}>
               <span style={{ color: '#8a8aa0' }}>{t.subtotal}</span>
               <span className="inv-mono" style={{ color: '#4a4a6a' }}>{fmtCurrency(invoice.subtotal_cents, locale)}</span>
             </div>
             {invoice.discount_cents !== 0 && (
-              <div style={{ display: 'flex', justifyContent: 'space-between', padding: '4px 0', fontSize: '12px' }}>
+              <div style={{ display: 'flex', justifyContent: 'space-between', padding: '4px 0', fontSize: '14px' }}>
                 <span style={{ color: '#8a8aa0' }}>{t.discount}</span>
                 <span className="inv-mono" style={{ color: '#dc2626' }}>-{fmtCurrency(Math.abs(invoice.discount_cents), locale)}</span>
               </div>
             )}
-            <div style={{ display: 'flex', justifyContent: 'space-between', padding: '4px 0', fontSize: '12px' }}>
+            <div style={{ display: 'flex', justifyContent: 'space-between', padding: '4px 0', fontSize: '14px' }}>
               <span style={{ color: '#8a8aa0' }}>{t.vat}</span>
               <span className="inv-mono" style={{ color: '#4a4a6a' }}>{fmtCurrency(invoice.vat_cents, locale)}</span>
             </div>
@@ -431,7 +431,7 @@ export function InvoiceTemplate({ invoice, company: c }: { invoice: InvoiceData;
               background: isCreditNote ? '#fff7ed' : `linear-gradient(135deg, ${ACCENT}08, ${ACCENT}15)`,
               border: `1px solid ${isCreditNote ? '#fdba74' : ACCENT}30`,
               borderRadius: '8px',
-              fontSize: '15px',
+              fontSize: '17px',
               fontWeight: 700,
             }}>
               <span style={{ color: isCreditNote ? '#9a3412' : '#1a1a2e' }}>
@@ -454,42 +454,42 @@ export function InvoiceTemplate({ invoice, company: c }: { invoice: InvoiceData;
           borderRadius: '8px',
           backgroundColor: '#fcfcfe',
         }}>
-          <div style={{ fontSize: '9px', textTransform: 'uppercase', letterSpacing: '0.08em', color: '#8a8aa0', marginBottom: '14px', fontWeight: 600 }}>
+          <div style={{ fontSize: '11px', textTransform: 'uppercase', letterSpacing: '0.08em', color: '#8a8aa0', marginBottom: '14px', fontWeight: 600 }}>
             {t.paymentInfo}
           </div>
-          <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr 1fr', gap: '14px', fontSize: '12px' }}>
+          <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr 1fr', gap: '14px', fontSize: '14px' }}>
             <div>
-              <div style={{ color: '#8a8aa0', fontSize: '10px', marginBottom: '3px' }}>{t.iban}</div>
-              <div className="inv-mono" style={{ fontWeight: 600, color: '#1a1a2e', letterSpacing: '0.03em', fontSize: '12px' }}>
+              <div style={{ color: '#8a8aa0', fontSize: '12px', marginBottom: '3px' }}>{t.iban}</div>
+              <div className="inv-mono" style={{ fontWeight: 600, color: '#1a1a2e', letterSpacing: '0.03em', fontSize: '14px' }}>
                 {c?.iban ?? 'NL12 INGB 0675 6533 04'}
               </div>
             </div>
             <div>
-              <div style={{ color: '#8a8aa0', fontSize: '10px', marginBottom: '3px' }}>{t.bic}</div>
-              <div className="inv-mono" style={{ fontWeight: 500, color: '#3a3a5a', fontSize: '12px' }}>
+              <div style={{ color: '#8a8aa0', fontSize: '12px', marginBottom: '3px' }}>{t.bic}</div>
+              <div className="inv-mono" style={{ fontWeight: 500, color: '#3a3a5a', fontSize: '14px' }}>
                 {c?.bic ?? 'INGBNL2A'}
               </div>
             </div>
             <div>
-              <div style={{ color: '#8a8aa0', fontSize: '10px', marginBottom: '3px' }}>{t.accountHolder}</div>
+              <div style={{ color: '#8a8aa0', fontSize: '12px', marginBottom: '3px' }}>{t.accountHolder}</div>
               <div style={{ fontWeight: 500, color: '#1a1a2e' }}>{legalName}</div>
             </div>
             <div>
-              <div style={{ color: '#8a8aa0', fontSize: '10px', marginBottom: '3px' }}>{t.reference}</div>
+              <div style={{ color: '#8a8aa0', fontSize: '12px', marginBottom: '3px' }}>{t.reference}</div>
               <div className="inv-mono" style={{ fontWeight: 600, color: '#1a1a2e' }}>
                 {invoice.invoice_number ?? '—'}
               </div>
             </div>
             {invoice.due_date && (
               <div>
-                <div style={{ color: '#8a8aa0', fontSize: '10px', marginBottom: '3px' }}>{t.dueDate}</div>
+                <div style={{ color: '#8a8aa0', fontSize: '12px', marginBottom: '3px' }}>{t.dueDate}</div>
                 <div style={{ fontWeight: 500, color: '#1a1a2e' }}>{fmtDate(invoice.due_date, locale)}</div>
               </div>
             )}
           </div>
 
           {invoice.payment_token && invoice.status !== 'paid' && (
-            <div style={{ marginTop: '14px', paddingTop: '14px', borderTop: '1px solid #f0f0f5', fontSize: '11px', color: '#5a5a7a' }}>
+            <div style={{ marginTop: '14px', paddingTop: '14px', borderTop: '1px solid #f0f0f5', fontSize: '13px', color: '#5a5a7a' }}>
               {t.payOnlineDesc}
             </div>
           )}
@@ -499,10 +499,10 @@ export function InvoiceTemplate({ invoice, company: c }: { invoice: InvoiceData;
       {/* Terms */}
       {invoice.terms && (
         <div style={{ marginBottom: '20px' }}>
-          <div style={{ fontSize: '9px', textTransform: 'uppercase', letterSpacing: '0.08em', color: '#8a8aa0', marginBottom: '6px', fontWeight: 600 }}>
+          <div style={{ fontSize: '11px', textTransform: 'uppercase', letterSpacing: '0.08em', color: '#8a8aa0', marginBottom: '6px', fontWeight: 600 }}>
             {t.terms}
           </div>
-          <div style={{ fontSize: '10.5px', color: '#6a6a8a', lineHeight: '1.7', whiteSpace: 'pre-wrap' }}>
+          <div style={{ fontSize: '12.5px', color: '#6a6a8a', lineHeight: '1.7', whiteSpace: 'pre-wrap' }}>
             {invoice.terms}
           </div>
         </div>
@@ -511,7 +511,7 @@ export function InvoiceTemplate({ invoice, company: c }: { invoice: InvoiceData;
       {/* Notes */}
       {invoice.notes && (
         <div style={{ marginBottom: '20px', padding: '12px 16px', backgroundColor: '#fffbeb', borderRadius: '6px', border: '1px solid #fde68a40' }}>
-          <div style={{ fontSize: '10.5px', color: '#92400e', lineHeight: '1.6' }}>{invoice.notes}</div>
+          <div style={{ fontSize: '12.5px', color: '#92400e', lineHeight: '1.6' }}>{invoice.notes}</div>
         </div>
       )}
 
@@ -522,7 +522,7 @@ export function InvoiceTemplate({ invoice, company: c }: { invoice: InvoiceData;
       <div style={{
         paddingTop: '16px',
         borderTop: `1px solid #e8e8f0`,
-        fontSize: '9px',
+        fontSize: '11px',
         color: '#a0a0b8',
         textAlign: 'center',
         lineHeight: '1.8',
@@ -531,7 +531,7 @@ export function InvoiceTemplate({ invoice, company: c }: { invoice: InvoiceData;
           {legalName} &nbsp;·&nbsp; {c?.address ?? 'Satijnbloem 6'}, {c?.postcode ?? '3068 JP'} {c?.city ?? 'Rotterdam'}
         </div>
         <div>
-          {t.kvk}: {c?.kvk ?? '82199884'} &nbsp;·&nbsp; {t.btw}: {c?.vat_number ?? 'NL003653356B56'} &nbsp;·&nbsp; IBAN: {c?.iban ?? 'NL12 INGB 0675 6533 04'} &nbsp;·&nbsp; {t.bic}: {c?.bic ?? 'INGBNL2A'}
+          {t.btw}: {c?.vat_number ?? 'NL003653356B56'} &nbsp;·&nbsp; IBAN: {c?.iban ?? 'NL12 INGB 0675 6533 04'} &nbsp;·&nbsp; {t.bic}: {c?.bic ?? 'INGBNL2A'}
         </div>
         <div>{c?.email ?? 'info@colourking.nl'} &nbsp;·&nbsp; {c?.phone ?? '06 81 63 10 20'}</div>
       </div>

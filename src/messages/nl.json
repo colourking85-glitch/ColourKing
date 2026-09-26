@@ -1572,7 +1572,11 @@
     "changeStatusTo": "Status wijzigen naar...",
     "apply": "Toepassen",
     "confirmChange": "Wijziging bevestigen",
-    "confirmWarning": "Deze facturen zijn al uitgegeven. Klik nogmaals om te bevestigen."
+    "confirmWarning": "Deze facturen zijn al uitgegeven. Klik nogmaals om te bevestigen.",
+    "editDraft": "Concept bewerken",
+    "editDraftDesc": "U kunt deze velden wijzigen zolang de factuur in concept is.",
+    "locale": "Taal",
+    "saved": "Opgeslagen"
   },
   "sy": {
     "title": "Instellingen",

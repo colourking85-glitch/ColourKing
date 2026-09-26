@@ -1572,7 +1572,11 @@
     "changeStatusTo": "Durumu değiştir...",
     "apply": "Uygula",
     "confirmChange": "Değişikliği onayla",
-    "confirmWarning": "Bu faturalar zaten düzenlendi. Onaylamak için tekrar tıklayın."
+    "confirmWarning": "Bu faturalar zaten düzenlendi. Onaylamak için tekrar tıklayın.",
+    "editDraft": "Taslağı düzenle",
+    "editDraftDesc": "Fatura taslak durumundayken bu alanları değiştirebilirsiniz.",
+    "locale": "Dil",
+    "saved": "Kaydedildi"
   },
   "sy": {
     "title": "Ayarlar",
