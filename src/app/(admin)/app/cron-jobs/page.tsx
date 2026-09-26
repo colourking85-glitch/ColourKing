@@ -70,11 +70,18 @@ export default function CronJobsPage() {
   const [results, setResults] = useState<Record<string, LastRun>>({});
 
   const loadReminderLast = useCallback(async () => {
-    const res = await fetch('/api/reminders?limit=1');
+    const res = await fetch('/api/reminders/state');
     if (!res.ok) return;
-    const rows = await res.json();
-    if (rows[0]) {
-      setResults((prev) => ({ ...prev, reminders: { at: rows[0].created_at, ok: rows[0].status !== 'failed', summary: `last entry: ${rows[0].kind} → ${rows[0].status}` } }));
+    const s = await res.json();
+    if (s?.last_run_at) {
+      setResults((prev) => ({
+        ...prev,
+        reminders: {
+          at: s.last_run_at,
+          ok: s.ok !== false,
+          summary: `${s.trigger === 'cron' ? 'scheduler' : 'manual'} · ${s.evaluated ?? 0} evaluated, ${s.sent ?? 0} sent, ${s.skipped ?? 0} skipped, ${s.failed ?? 0} failed${s.error ? ` — ${s.error}` : ''}`,
+        },
+      }));
     }
   }, []);
 

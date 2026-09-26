@@ -135,6 +135,23 @@ export async function runReminders(opts: RunOptions = {}): Promise<RunReport> {
     report.error = err instanceof Error ? err.message : String(err);
   }
 
+  if (!dryRun) {
+    await admin.from('settings').upsert({
+      key: 'reminders_state',
+      value: {
+        last_run_at: now.toISOString(),
+        trigger: opts.sentBy ? 'admin' : 'cron',
+        ok: report.ok,
+        evaluated: report.evaluated,
+        sent: report.sent,
+        skipped: report.skipped,
+        failed: report.failed,
+        marked_overdue: report.markedOverdue,
+        error: report.error ?? null,
+      },
+    }, { onConflict: 'key' });
+  }
+
   return report;
 }
 
