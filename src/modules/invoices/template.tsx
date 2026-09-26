@@ -201,7 +201,6 @@ export function InvoiceTemplate({ invoice, company: c }: { invoice: InvoiceData;
   const title = isCreditNote ? t.creditNoteTitle : isDeposit ? t.depositTitle : t.title;
   const customer = invoice.customers;
 
-  const companyName = c?.name ?? 'Colourking';
   const legalName = c?.legal_name ?? 'Autospuitbedrijf Colour King';
 
   return (
@@ -231,9 +230,8 @@ export function InvoiceTemplate({ invoice, company: c }: { invoice: InvoiceData;
       {/* Header */}
       <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'flex-start', marginBottom: '36px', paddingTop: '8px' }}>
         <div>
-          <div style={{ fontSize: '24px', fontWeight: 700, letterSpacing: '-0.03em', color: '#1a1a2e' }}>
-            {companyName}
-          </div>
+          {/* eslint-disable-next-line @next/next/no-img-element */}
+          <img src="/images/logo-colourking.svg" alt="ColourKing" style={{ height: '64px', width: 'auto', marginBottom: '10px' }} />
           <div style={{ marginTop: '10px', fontSize: '11.5px', lineHeight: '1.8', color: '#5a5a7a' }}>
             {c?.address ?? 'Satijnbloem 6'}<br />
             {c?.postcode ?? '3068 JP'} {c?.city ?? 'Rotterdam'}<br />

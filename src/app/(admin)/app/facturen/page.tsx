@@ -6,7 +6,7 @@ import { useTranslations } from 'next-intl';
 import {
   Search, FileText, Plus, Send, CheckCircle, AlertCircle,
   File, Clock, Ban, CreditCard, ChevronUp, ChevronDown, ChevronsUpDown,
-  Settings2, Eye, EyeOff,
+  Settings2, Eye, EyeOff, X,
 } from 'lucide-react';
 import type { InvoiceStatus } from '@/types/database';
 import { formatCurrency } from '@/lib/format';
@@ -72,11 +72,12 @@ function loadVisibleColumns(): Set<SortKey> {
   return new Set(ALL_COLUMNS.filter(c => c.defaultVisible).map(c => c.key));
 }
 
+const ALLOWED_BULK_TARGETS: InvoiceStatus[] = ['sent', 'cancelled', 'overdue', 'paid'];
+
 export default function InvoiceListPage() {
   const t = useTranslations('fa');
   const { locale } = useAppLocale();
   const formatCents = (c: number) => formatCurrency(c, locale);
-  const tDoc = useTranslations('doc');
   const [invoices, setInvoices] = useState<InvoiceRow[]>([]);
   const [search, setSearch] = useState('');
   const [statusFilter, setStatusFilter] = useState('');
@@ -86,6 +87,11 @@ export default function InvoiceListPage() {
   const [visibleCols, setVisibleCols] = useState<Set<SortKey>>(loadVisibleColumns);
   const [showColPicker, setShowColPicker] = useState(false);
 
+  const [selected, setSelected] = useState<Set<string>>(new Set());
+  const [bulkStatus, setBulkStatus] = useState<InvoiceStatus | ''>('');
+  const [bulkConfirmStep, setBulkConfirmStep] = useState(0);
+  const [bulkProcessing, setBulkProcessing] = useState(false);
+
   const statusLabel = (s: InvoiceStatus): string => {
     const map: Record<InvoiceStatus, string> = { draft: t('draft'), sent: t('sent'), paid: t('paid'), overdue: t('overdue'), cancelled: t('cancelled'), credited: t('credited') };
     return map[s];
@@ -93,16 +99,21 @@ export default function InvoiceListPage() {
 
   const allStatuses: InvoiceStatus[] = ['draft', 'sent', 'paid', 'overdue', 'cancelled', 'credited'];
 
-  useEffect(() => {
+  const fetchInvoices = useCallback(() => {
     setLoading(true);
     const params = new URLSearchParams();
     if (search) params.set('search', search);
     if (statusFilter) params.set('status', statusFilter);
     fetch(`/api/invoices?${params}`)
       .then(r => r.ok ? r.json() : [])
-      .then(setInvoices)
+      .then((data) => {
+        setInvoices(data);
+        setSelected(new Set());
+      })
       .finally(() => setLoading(false));
   }, [search, statusFilter]);
+
+  useEffect(() => { fetchInvoices(); }, [fetchInvoices]);
 
   const toggleColumn = useCallback((key: SortKey) => {
     setVisibleCols(prev => {
@@ -116,6 +127,52 @@ export default function InvoiceListPage() {
   function handleSort(key: SortKey) {
     if (sortKey === key) setSortDir(d => d === 'asc' ? 'desc' : 'asc');
     else { setSortKey(key); setSortDir('asc'); }
+  }
+
+  const toggleSelect = useCallback((id: string) => {
+    setSelected(prev => {
+      const next = new Set(prev);
+      if (next.has(id)) next.delete(id); else next.add(id);
+      return next;
+    });
+  }, []);
+
+  const toggleSelectAll = useCallback(() => {
+    setSelected(prev => prev.size === sorted.length ? new Set() : new Set(sorted.map(i => i.id)));
+  }, []);
+
+  const selectedInvoices = useMemo(() => invoices.filter(i => selected.has(i.id)), [invoices, selected]);
+  const hasNonDraft = useMemo(() => selectedInvoices.some(i => i.status !== 'draft'), [selectedInvoices]);
+
+  async function handleBulkStatusChange() {
+    if (!bulkStatus || selected.size === 0) return;
+
+    if (hasNonDraft && bulkConfirmStep < 2) {
+      setBulkConfirmStep(prev => prev + 1);
+      return;
+    }
+
+    setBulkProcessing(true);
+    try {
+      const res = await fetch('/api/invoices/bulk-status', {
+        method: 'PATCH',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ ids: Array.from(selected), status: bulkStatus }),
+      });
+      if (res.ok) {
+        fetchInvoices();
+        setBulkStatus('');
+        setBulkConfirmStep(0);
+      }
+    } finally {
+      setBulkProcessing(false);
+    }
+  }
+
+  function cancelBulk() {
+    setSelected(new Set());
+    setBulkStatus('');
+    setBulkConfirmStep(0);
   }
 
   const sorted = useMemo(() => {
@@ -284,6 +341,56 @@ export default function InvoiceListPage() {
         </div>
       </div>
 
+      {/* Bulk action bar */}
+      {selected.size > 0 && (
+        <div className="flex items-center gap-3 rounded-[10px] border-[0.5px] border-ck-red/30 bg-ck-red/5 px-4 py-2.5">
+          <span className="text-sm font-medium text-ck-text">
+            {selected.size} {t('selected')}
+          </span>
+          <div className="mx-2 h-4 w-px bg-ck-border" />
+          <select
+            value={bulkStatus}
+            onChange={e => { setBulkStatus(e.target.value as InvoiceStatus); setBulkConfirmStep(0); }}
+            className="rounded-lg border-[0.5px] border-ck-border bg-ck-surface px-2 py-1 text-sm text-ck-text focus:border-ck-red focus:outline-none"
+          >
+            <option value="">{t('changeStatusTo')}</option>
+            {ALLOWED_BULK_TARGETS.map(s => (
+              <option key={s} value={s}>{statusLabel(s)}</option>
+            ))}
+          </select>
+          {bulkStatus && (
+            <button
+              onClick={handleBulkStatusChange}
+              disabled={bulkProcessing}
+              className={`rounded-lg px-3 py-1 text-sm font-medium transition-colors ${
+                hasNonDraft && bulkConfirmStep === 1
+                  ? 'bg-amber-500 text-white hover:bg-amber-600'
+                  : hasNonDraft && bulkConfirmStep === 0
+                    ? 'bg-ck-red text-white hover:bg-ck-red-hover'
+                    : 'bg-ck-red text-white hover:bg-ck-red-hover'
+              } disabled:opacity-50`}
+            >
+              {bulkProcessing
+                ? '...'
+                : hasNonDraft && bulkConfirmStep === 0
+                  ? t('apply')
+                  : hasNonDraft && bulkConfirmStep === 1
+                    ? t('confirmChange')
+                    : t('apply')
+              }
+            </button>
+          )}
+          {hasNonDraft && bulkConfirmStep > 0 && (
+            <span className="text-xs text-amber-500 font-medium">
+              {bulkConfirmStep === 1 ? t('confirmWarning') : ''}
+            </span>
+          )}
+          <button onClick={cancelBulk} className="ml-auto text-ck-text-muted hover:text-ck-text transition-colors">
+            <X size={16} />
+          </button>
+        </div>
+      )}
+
       {/* Invoices table */}
       <div className="rounded-[10px] border-[0.5px] border-ck-border bg-ck-surface overflow-x-auto">
         {loading ? (
@@ -301,6 +408,14 @@ export default function InvoiceListPage() {
           <table className="w-full">
             <thead>
               <tr className="border-b border-ck-border text-left text-[11px] uppercase tracking-wider text-ck-text-muted">
+                <th className="w-10 px-3 py-3">
+                  <input
+                    type="checkbox"
+                    checked={selected.size === sorted.length && sorted.length > 0}
+                    onChange={toggleSelectAll}
+                    className="h-3.5 w-3.5 rounded border-ck-border text-ck-red focus:ring-ck-red accent-[#c41e3a]"
+                  />
+                </th>
                 {activeCols.map(col => (
                   <th
                     key={col.key}
@@ -313,16 +428,39 @@ export default function InvoiceListPage() {
                     </span>
                   </th>
                 ))}
+                <th className="w-10 px-2 py-3" />
               </tr>
             </thead>
             <tbody>
               {sorted.map(inv => (
-                <tr key={inv.id} className="border-b border-ck-divider last:border-0 hover:bg-ck-surface-2/50 transition-colors">
+                <tr
+                  key={inv.id}
+                  className={`border-b border-ck-divider last:border-0 transition-colors ${
+                    selected.has(inv.id) ? 'bg-ck-red/5' : 'hover:bg-ck-surface-2/50'
+                  }`}
+                >
+                  <td className="px-3 py-3">
+                    <input
+                      type="checkbox"
+                      checked={selected.has(inv.id)}
+                      onChange={() => toggleSelect(inv.id)}
+                      className="h-3.5 w-3.5 rounded border-ck-border text-ck-red focus:ring-ck-red accent-[#c41e3a]"
+                    />
+                  </td>
                   {activeCols.map(col => (
                     <td key={col.key} className={`px-4 py-3 ${col.align === 'right' ? 'text-right' : ''}`}>
                       {renderCell(inv, col)}
                     </td>
                   ))}
+                  <td className="px-2 py-3">
+                    <Link
+                      href={`/app/facturen/${inv.id}/preview`}
+                      className="inline-flex items-center justify-center rounded-md p-1.5 text-ck-text-muted hover:text-ck-red hover:bg-ck-surface-2 transition-colors"
+                      title={t('preview')}
+                    >
+                      <Eye size={15} />
+                    </Link>
+                  </td>
                 </tr>
               ))}
             </tbody>

@@ -1554,7 +1554,12 @@
     "createdDate": "Aangemaakt",
     "issuedDate": "Uitgegeven",
     "language": "Taal",
-    "configureColumns": "Kolommen"
+    "configureColumns": "Kolommen",
+    "selected": "geselecteerd",
+    "changeStatusTo": "Status wijzigen naar...",
+    "apply": "Toepassen",
+    "confirmChange": "Wijziging bevestigen",
+    "confirmWarning": "Deze facturen zijn al uitgegeven. Klik nogmaals om te bevestigen."
   },
   "sy": {
     "title": "Instellingen",

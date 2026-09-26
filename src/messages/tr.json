@@ -1554,7 +1554,12 @@
     "createdDate": "Oluşturulma",
     "issuedDate": "Düzenleme",
     "language": "Dil",
-    "configureColumns": "Sütunlar"
+    "configureColumns": "Sütunlar",
+    "selected": "seçili",
+    "changeStatusTo": "Durumu değiştir...",
+    "apply": "Uygula",
+    "confirmChange": "Değişikliği onayla",
+    "confirmWarning": "Bu faturalar zaten düzenlendi. Onaylamak için tekrar tıklayın."
   },
   "sy": {
     "title": "Ayarlar",

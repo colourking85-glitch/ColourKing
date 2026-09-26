@@ -1554,7 +1554,12 @@
     "createdDate": "Created",
     "issuedDate": "Issued",
     "language": "Language",
-    "configureColumns": "Columns"
+    "configureColumns": "Columns",
+    "selected": "selected",
+    "changeStatusTo": "Change status to...",
+    "apply": "Apply",
+    "confirmChange": "Confirm change",
+    "confirmWarning": "These invoices are already issued. Click again to confirm."
   },
   "sy": {
     "title": "Settings",
