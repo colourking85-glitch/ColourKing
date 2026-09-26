@@ -1,0 +1,104 @@
+<!doctype html>
+<html lang="nl">
+<head>
+<meta charset="utf-8">
+<title>Colour King Marktplaats Cover</title>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Montserrat:wght@600;700;800;900&display=swap">
+<script src="https://cdnjs.cloudflare.com/ajax/libs/qrcode-generator/1.4.4/qrcode.min.js"></script>
+<style>
+  :root{ --ink:#14160F; --gold:#C1974F; --gold-hi:#D9B372; --white:#FFFFFF; }
+  *{box-sizing:border-box;margin:0;padding:0}
+  html,body{width:1600px;height:1200px;overflow:hidden;background:var(--ink)}
+  body{font-family:"Montserrat","Segoe UI",Arial,sans-serif;color:var(--white);position:relative}
+
+  /* photo triptych — gold shows through the gaps like the logo's shield lines */
+  .photos{position:absolute;inset:0 0 auto 0;height:760px;background:var(--gold)}
+  .p{position:absolute;inset:0;background-size:cover;background-repeat:no-repeat}
+  .p0{background-image:url(4.webp);background-position:-60px 45%;background-size:auto 800px;
+      clip-path:polygon(0 0,820px 0,700px 760px,0 760px);filter:grayscale(1) contrast(1.12) brightness(.92)}
+  .p3{background-image:url(3.jpg);background-position:740px 50%;background-size:auto 760px;
+      clip-path:polygon(836px 0,1600px 0,1600px 760px,716px 760px);filter:saturate(1.15) contrast(1.05)}
+  /* darken the bottom of the photos so the logo card sits on shadow */
+  .shade{position:absolute;inset:0 0 auto 0;height:760px;
+      background:linear-gradient(to bottom,rgba(20,22,15,0) 55%,rgba(20,22,15,.75) 100%)}
+  .claim{position:absolute;right:56px;top:48px;text-align:right;
+      font-weight:800;font-size:26px;letter-spacing:.14em;text-transform:uppercase;
+      text-shadow:0 2px 14px rgba(0,0,0,.6)}
+  .claim span{display:block;font-size:17px;font-weight:600;letter-spacing:.22em;color:var(--gold-hi);margin-top:6px}
+
+  .band{position:absolute;left:0;right:0;top:760px;height:14px;background:var(--gold)}
+
+  /* bottom panel */
+  .logo-card{position:absolute;left:56px;top:600px;width:370px;height:300px;background:var(--white);
+      border:6px solid var(--gold);display:flex;align-items:center;justify-content:center;
+      box-shadow:0 18px 40px rgba(0,0,0,.45)}
+  .logo-card img{width:320px;height:auto;display:block}
+
+  .copy{position:absolute;left:470px;top:806px;width:760px}
+  .copy h1{font-weight:900;font-size:66px;line-height:1.02;text-transform:uppercase;letter-spacing:-.005em}
+  .copy h1 em{font-style:normal;color:var(--gold)}
+  .copy .tag{font-weight:700;font-size:28px;margin-top:16px;color:var(--gold-hi)}
+  .chips{display:flex;flex-wrap:wrap;gap:8px;margin-top:22px}
+  .chips span{font-weight:700;font-size:16px;letter-spacing:.02em;border:2px solid var(--gold);padding:7px 11px;color:var(--white)}
+
+  .contact{position:absolute;left:56px;top:938px;width:370px;font-weight:600;font-size:19px;line-height:1.5;color:#D8D3C6}
+  .contact b{display:block;font-weight:900;font-size:36px;color:var(--white);letter-spacing:.01em;margin-bottom:4px}
+
+  .qr{position:absolute;right:56px;top:806px;width:290px;text-align:center}
+  .qr .box{background:var(--white);padding:16px;border:6px solid var(--gold)}
+  .qr .box svg{display:block;width:100%;height:auto}
+  .qr p{font-weight:800;font-size:20px;letter-spacing:.12em;text-transform:uppercase;margin-top:14px}
+  .qr small{display:block;font-weight:700;font-size:22px;color:var(--gold-hi);margin-top:4px;letter-spacing:.02em}
+
+  /* variant without QR: big phone block instead */
+  .noqr .qr{display:none}
+  .noqr .copy{width:1060px}
+  .phone-big{display:none}
+  .noqr .phone-big{display:block;position:absolute;right:56px;top:1080px;text-align:right;font-weight:900;font-size:40px}
+  .noqr .phone-big span{display:block;font-size:18px;font-weight:700;letter-spacing:.16em;text-transform:uppercase;color:var(--gold-hi)}
+</style>
+</head>
+<body>
+  <div class="photos">
+    <div class="p p0"></div>
+    <div class="p p3"></div>
+  </div>
+  <div class="shade"></div>
+  <div class="claim">Kleur gemeten, niet gegokt<span>Autospuitbedrijf · sinds 2010</span></div>
+  <div class="band"></div>
+
+  <div class="logo-card"><img src="logo.jpg" alt="Colour King Autoschadeherstel"></div>
+
+  <div class="copy">
+    <h1>Schadeherstel &amp;<br>Spuitwerk <em>Rotterdam</em></h1>
+    <p class="tag">Schade weg. Kleur exact. Garantie op papier.</p>
+    <div class="chips">
+      <span>Gratis offerte</span>
+      <span>2 jaar garantie</span>
+      <span>Alle verzekeraars</span>
+      <span>Vervangend vervoer</span>
+    </div>
+  </div>
+
+  <div class="contact">
+    <b>06 – 81 63 10 20</b>
+    Satijnbloem 6 · 3068 JP Rotterdam<br>
+    info@colourking.nl
+  </div>
+
+  <div class="qr">
+    <div class="box" id="qr"></div>
+    <p>Scan voor gratis offerte</p>
+    <small>colourking.nl</small>
+  </div>
+  <div class="phone-big"><span>Gratis offerte aanvragen</span>colourking.nl</div>
+
+<script>
+  if (location.search.includes("noqr")) document.body.classList.add("noqr");
+  const url = "https://colourking.nl/nl/offerte?utm_source=marktplaats";
+  const q = qrcode(0, "M"); q.addData(url); q.make();
+  document.getElementById("qr").innerHTML = q.createSvgTag({cellSize: 8, margin: 0, scalable: true});
+  document.querySelectorAll("#qr svg rect, #qr svg path").forEach(n => { if (n.getAttribute("fill") === "black" || n.getAttribute("fill") === "#000000") n.setAttribute("fill", "#14160F"); });
+</script>
+</body>
+</html>

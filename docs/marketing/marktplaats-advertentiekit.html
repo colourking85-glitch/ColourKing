@@ -1,0 +1,530 @@
+<title>Colour King Advertentiekit</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Montserrat:wght@600;800;900&family=Source+Sans+3:ital,wght@0,400;0,600;0,700;1,400&family=JetBrains+Mono:wght@500&display=swap">
+<style>
+:root{
+  --gold:#B8883F; --gold-soft:#F3E9D6; --ink:#14160F; --ground:#FBFAF7; --panel:#FFFFFF;
+  --line:#E4DED2; --muted:#5E5A50; --ok:#2F7A4A; --warn:#A0561A; --warn-bg:#FBEEDF;
+  --code-bg:#F6F2EA;
+  --display:"Montserrat",system-ui,-apple-system,"Segoe UI",sans-serif;
+  --body:"Source Sans 3",system-ui,-apple-system,"Segoe UI",sans-serif;
+  --mono:"JetBrains Mono",ui-monospace,Consolas,monospace;
+}
+@media (prefers-color-scheme:dark){
+  :root:not([data-theme="light"]){
+    color-scheme:dark;
+    --gold:#D4A85E; --gold-soft:#2C2517; --ink:#EEEAE0; --ground:#121310; --panel:#1B1C18;
+    --line:#302E27; --muted:#A8A293; --ok:#6CC08C; --warn:#E9A15F; --warn-bg:#2E2216; --code-bg:#171814;
+  }
+}
+:root[data-theme="dark"]{
+  color-scheme:dark;
+  --gold:#D4A85E; --gold-soft:#2C2517; --ink:#EEEAE0; --ground:#121310; --panel:#1B1C18;
+  --line:#302E27; --muted:#A8A293; --ok:#6CC08C; --warn:#E9A15F; --warn-bg:#2E2216; --code-bg:#171814;
+}
+*{box-sizing:border-box}
+body{background:var(--ground);color:var(--ink);font-family:var(--body);font-size:17px;line-height:1.55;padding-inline:16px;padding-block:0 64px}
+.wrap{max-width:980px;margin:0 auto}
+h1,h2,h3{font-family:var(--display);text-wrap:balance;margin:0;line-height:1.15}
+a{color:var(--gold)}
+.eyebrow{font-family:var(--display);font-weight:800;font-size:12px;letter-spacing:.16em;text-transform:uppercase;color:var(--gold)}
+
+/* masthead: the shield band from the logo */
+header.mast{padding-block:40px 28px;border-bottom:6px solid var(--gold);display:grid;gap:14px}
+header.mast h1{font-weight:900;font-size:clamp(34px,6vw,58px);letter-spacing:-.01em;text-transform:uppercase}
+header.mast h1 span{color:var(--gold)}
+header.mast p{margin:0;max-width:64ch;color:var(--muted)}
+.facts{display:flex;flex-wrap:wrap;gap:8px 18px;font-size:14px;color:var(--muted)}
+.facts b{color:var(--ink);font-weight:600}
+
+nav.toc{display:flex;flex-wrap:wrap;gap:8px;padding-block:18px}
+nav.toc a{font-family:var(--display);font-weight:600;font-size:13px;text-decoration:none;color:var(--ink);border:1px solid var(--line);padding:6px 12px;border-radius:999px;background:var(--panel)}
+nav.toc a:hover,nav.toc a:focus-visible{border-color:var(--gold);outline:none}
+
+section{padding-block:36px 8px;display:grid;gap:18px}
+section > h2{font-weight:800;font-size:clamp(24px,3.4vw,32px)}
+section > p.lede{margin:0;max-width:68ch;color:var(--muted)}
+
+/* research */
+.findings{display:grid;grid-template-columns:repeat(auto-fit,minmax(260px,1fr));gap:18px}
+.finding h3{font-size:16px;font-weight:800;margin-bottom:6px}
+.finding p{margin:0;color:var(--muted);font-size:15.5px}
+.finding{border-top:2px solid var(--ink);padding-top:12px}
+.gap{border-top-color:var(--gold)}
+
+/* ad block */
+.ad{background:var(--panel);border:1px solid var(--line);border-radius:6px;overflow:hidden}
+.ad-head{display:flex;flex-wrap:wrap;align-items:center;justify-content:space-between;gap:10px;padding:14px 18px;border-bottom:1px solid var(--line)}
+.ad-head .tag{font-family:var(--display);font-weight:800;font-size:13px;letter-spacing:.08em;text-transform:uppercase}
+.ad-head .meta{font-size:13.5px;color:var(--muted)}
+.field{padding:14px 18px;display:grid;gap:8px;border-bottom:1px solid var(--line)}
+.field:last-child{border-bottom:0}
+.field-top{display:flex;flex-wrap:wrap;align-items:center;gap:10px;justify-content:space-between}
+.label{font-family:var(--display);font-weight:600;font-size:12px;letter-spacing:.12em;text-transform:uppercase;color:var(--muted)}
+.count{font-family:var(--mono);font-size:12px;padding:2px 8px;border-radius:999px;font-variant-numeric:tabular-nums}
+.count.ok{color:var(--ok);background:color-mix(in srgb,var(--ok) 12%,transparent)}
+.count.over{color:var(--warn);background:var(--warn-bg)}
+.copy{font-family:var(--display);font-weight:600;font-size:12.5px;cursor:pointer;border:1px solid var(--ink);background:var(--ink);color:var(--ground);padding:6px 12px;border-radius:4px}
+.copy:hover{background:var(--gold);border-color:var(--gold);color:#14160F}
+.copy:focus-visible{outline:2px solid var(--gold);outline-offset:2px}
+.copy.done{background:var(--ok);border-color:var(--ok);color:#fff}
+.title-text{font-family:var(--display);font-weight:800;font-size:clamp(18px,2.4vw,22px);line-height:1.3;margin:0}
+pre.body{margin:0;white-space:pre-wrap;word-wrap:break-word;font-family:var(--body);font-size:16px;line-height:1.6;background:var(--code-bg);padding:16px;border-radius:4px;max-height:520px;overflow:auto}
+.preview160{font-size:14px;color:var(--muted);margin:0}
+.preview160 mark{background:var(--gold-soft);color:var(--ink);padding:0 2px}
+
+/* tabs for variants */
+.tabs{display:flex;flex-wrap:wrap;gap:6px}
+.tabs button{font-family:var(--display);font-weight:600;font-size:13px;cursor:pointer;border:1px solid var(--line);background:var(--panel);color:var(--ink);padding:8px 14px;border-radius:4px}
+.tabs button[aria-selected="true"]{background:var(--ink);color:var(--ground);border-color:var(--ink)}
+.tabs button:focus-visible{outline:2px solid var(--gold);outline-offset:2px}
+
+/* tables & lists */
+.tablewrap{overflow-x:auto;border:1px solid var(--line);border-radius:6px;background:var(--panel)}
+table{border-collapse:collapse;width:100%;font-size:15px}
+th,td{text-align:left;padding:10px 14px;border-bottom:1px solid var(--line);vertical-align:top}
+th{font-family:var(--display);font-size:12px;letter-spacing:.1em;text-transform:uppercase;color:var(--muted);font-weight:600}
+tr:last-child td{border-bottom:0}
+.shots{display:grid;grid-template-columns:repeat(auto-fit,minmax(220px,1fr));gap:12px;counter-reset:shot}
+.shot{border:1px solid var(--line);background:var(--panel);padding:14px;border-radius:6px;font-size:15px}
+.shot b{display:block;font-family:var(--display);font-size:14px;margin-bottom:4px}
+.shot b::before{counter-increment:shot;content:"Foto " counter(shot) " · ";color:var(--gold)}
+.slogans{display:grid;gap:10px}
+.slogan{display:flex;flex-wrap:wrap;justify-content:space-between;gap:10px;align-items:center;border-bottom:1px solid var(--line);padding-block:10px}
+.slogan q{font-family:var(--display);font-weight:800;font-size:clamp(17px,2.4vw,21px);quotes:none}
+.slogan small{color:var(--muted);font-size:13.5px}
+
+.verify{background:var(--warn-bg);border:1px solid color-mix(in srgb,var(--warn) 40%,transparent);border-radius:6px;padding:18px 20px}
+.verify h3{font-size:17px;font-weight:800;color:var(--warn);margin-bottom:8px}
+.verify ul{margin:0;padding-left:20px;display:grid;gap:6px}
+.sources{font-size:14px;color:var(--muted)}
+.sources ul{padding-left:18px;margin:6px 0 0}
+@media (prefers-reduced-motion:reduce){*{transition:none!important}}
+</style>
+
+<div class="wrap">
+<header class="mast">
+  <div class="eyebrow">Autoschadeherstel · Rotterdam · Marktplaats-kit</div>
+  <h1>Colour <span>King</span> Advertentiekit</h1>
+  <p>Ready-to-post Marktplaats ads for Colour King's bodywork, repair and paint services, based on the Schadeherstellers &amp; Spuiterijen category and the positioning of the big chains (ABS, Schadegarant/FOCWA shops). The ad copy is in Dutch. Every title stays within Marktplaats's 60-character limit. Use the copy buttons to paste each ad.</p>
+  <div class="facts">
+    <span><b>Satijnbloem 6</b>, 3068 JP Rotterdam</span>
+    <span><b>06 – 81 63 10 20</b></span>
+    <span><b>info@colourking.nl</b></span>
+    <span>KvK <b>82199884</b></span>
+    <span>Since <b>2010</b></span>
+  </div>
+</header>
+
+<nav class="toc" aria-label="Sections">
+  <a href="#research">Market research</a>
+  <a href="#main">Main ad</a>
+  <a href="#variants">Service ads</a>
+  <a href="#photos">Photo plan</a>
+  <a href="#promo">Posting &amp; promotion</a>
+  <a href="#replies">Reply templates</a>
+  <a href="#slogans">Slogans</a>
+  <a href="#verify">Check before posting</a>
+</nav>
+
+<section id="research">
+  <div class="eyebrow">What we found</div>
+  <h2>How the category looks today</h2>
+  <p class="lede">Most ads in the Rotterdam results come from single-person shops. They sound alike: "snel en vakkundig", "scherpe prijzen", "gratis prijsopgave". Almost none show proof of quality. The national chains sell something different: certainty. They promise guarantees, direct handling with the insurer, replacement transport and measurable quality. Colour King can combine both: local and personal, with the proof of a chain.</p>
+  <div class="findings">
+    <div class="finding"><h3>Titles are keyword lists</h3><p>Examples: "schadeherstel, Auto spuiten, Lakschade, Blikschade, Taxatie". Ads like this are easy to find but look cheap, and none of them names a benefit for the customer.</p></div>
+    <div class="finding"><h3>A price hook works</h3><p>The top ad in the category opens with "Auto spuiten vanaf €250 gratis prijsopgave". A "from" price earns clicks, but only use one if you can honour it.</p></div>
+    <div class="finding"><h3>Chains sell certainty</h3><p>ABS promotes a mobility guarantee, a BOVAG/brand guarantee, direct handling with insurers and lease companies, and a customer rating. Schadegarant promotes a lower excess, free replacement transport and pick-up and delivery.</p></div>
+    <div class="finding gap"><h3>Gap: proof</h3><p>No local ad mentions a colour-match measurement, a straightening-bench report, a paint-thickness measurement or a written guarantee. Colour King already has all of these on its website. The ads below build on them.</p></div>
+    <div class="finding gap"><h3>Gap: the first 160 characters</h3><p>Marktplaats shows about 160 characters of the description in search results. Most competitors spend them on filler. Every ad below puts the promise, the proof and the location in that first stretch.</p></div>
+    <div class="finding gap"><h3>Gap: one ad per service</h3><p>Customers search for "spot repair", "uitdeuken" or "hagelschade", not for a company name. Separate ads per service, all linking back to Colour King, win more searches than one general ad.</p></div>
+  </div>
+</section>
+
+<section id="main">
+  <div class="eyebrow">Flagship listing · run as Topadvertentie</div>
+  <h2>Main ad: schadeherstel &amp; spuitwerk</h2>
+  <div id="main-ad"></div>
+</section>
+
+<section id="variants">
+  <div class="eyebrow">One ad per search term · run as Dagtopper in rotation</div>
+  <h2>Service ads</h2>
+  <p class="lede">Post each ad separately in <b>Diensten en Vakmensen › Auto en Motor | Schadeherstellers en Spuiterijen</b>. Use a different first photo for each ad so they don't look like duplicates.</p>
+  <div class="tabs" role="tablist" id="tabs"></div>
+  <div id="variant-ad"></div>
+</section>
+
+<section id="photos">
+  <div class="eyebrow">People buy with their eyes</div>
+  <h2>Photo plan (up to 24 per ad)</h2>
+  <p class="lede">Photos decide whether someone clicks. Take them in daylight or in the spray booth under the lights, with the car's number plate blurred. Keep the order below, because Marktplaats uses the first photo as the thumbnail.</p>
+  <div class="shots">
+    <div class="shot"><b>Thumbnail</b>Before and after side by side in one image, with the Colour King logo small in a corner. This is the strongest thumbnail in the category.</div>
+    <div class="shot"><b>Finished car</b>A glossy panel at an angle with a reflection of the booth lighting, to show the depth of the finish.</div>
+    <div class="shot"><b>Spray booth</b>An empty, clean booth. It signals professionalism immediately.</div>
+    <div class="shot"><b>Spectrophotometer</b>The device against the panel, with the measured colour code on screen.</div>
+    <div class="shot"><b>Straightening bench</b>A car on the bench with the measuring system attached.</div>
+    <div class="shot"><b>Paint-thickness gauge</b>Close-up of the reading on the panel ("118 μm").</div>
+    <div class="shot"><b>Team</b>2–3 people in workwear in front of the shop. A face builds trust.</div>
+    <div class="shot"><b>Storefront</b>The building with the sign and the address visible, so customers can see it's a real business.</div>
+    <div class="shot"><b>Google reviews</b>Screenshot of the review score. Only post it if the score is strong.</div>
+  </div>
+</section>
+
+<section id="promo">
+  <div class="eyebrow">Posting &amp; promotion</div>
+  <h2>How to post it</h2>
+  <div class="tablewrap"><table>
+    <thead><tr><th>Setting</th><th>Recommendation</th><th>Why</th></tr></thead>
+    <tbody>
+      <tr><td>Account</td><td>Marktplaats Zakelijk (business account) in the name of Autospuitbedrijf Colour King</td><td>A business profile shows your company name, KvK number and website. Private-looking accounts get less trust.</td></tr>
+      <tr><td>Category</td><td>Diensten en Vakmensen › Auto en Motor | Schadeherstellers en Spuiterijen</td><td>This is where every search for schadeherstel, spuiten and uitdeuken lands.</td></tr>
+      <tr><td>Location</td><td>3068 JP Rotterdam</td><td>Buyers filter by distance. A Rotterdam-Oost postcode also covers Capelle, Krimpen and Nieuwerkerk.</td></tr>
+      <tr><td>Price field</td><td>"Zie omschrijving", or "Vanaf €…" once the owner confirms a real price</td><td>"Bieden" looks like a private seller. A real "from" price increases clicks.</td></tr>
+      <tr><td>Main ad</td><td>Topadvertentie</td><td>Rotates at the top of the category, where the chain-style ads compete.</td></tr>
+      <tr><td>Service ads</td><td>Dagtopper, rotating 2–3 per week</td><td>Keeps you above the regular listings without paying for every ad every day.</td></tr>
+      <tr><td>Opvalsticker</td><td>"Gratis offerte" or "2 jaar garantie"</td><td>Short, concrete and true. Never use "Actie" without an actual offer behind it.</td></tr>
+      <tr><td>Refresh</td><td>Move an ad up (Omhoogplaatsen) on Monday morning and Thursday evening</td><td>Damage gets reported after the weekend and plans get made at the end of the week.</td></tr>
+      <tr><td>Response time</td><td>Reply within 1 hour during opening hours</td><td>Marktplaats shows response speed. The first shop to reply usually wins the job.</td></tr>
+    </tbody>
+  </table></div>
+</section>
+
+<section id="replies">
+  <div class="eyebrow">Ready-made messages</div>
+  <h2>Reply templates</h2>
+  <div id="replies-list"></div>
+</section>
+
+<section id="slogans">
+  <div class="eyebrow">Brand lines</div>
+  <h2>Slogans &amp; sticker texts</h2>
+  <div class="slogans">
+    <div class="slogan"><q>Schade weg. Kleur exact. Garantie op papier.</q><small>Main tagline: promise, proof, certainty</small></div>
+    <div class="slogan"><q>Wij meten de kleur. U ziet het verschil niet.</q><small>For paintwork and spot repair</small></div>
+    <div class="slogan"><q>Van schade tot showroom.</q><small>Already used on the website, so it keeps the brand consistent</small></div>
+    <div class="slogan"><q>Uw verzekeraar. Onze zorg.</q><small>For insurance claims</small></div>
+    <div class="slogan"><q>Rotterdams vakmanschap sinds 2010.</q><small>Local and established</small></div>
+  </div>
+</section>
+
+<section id="verify">
+  <div class="verify">
+    <h3>Check before posting</h3>
+    <p style="margin:0 0 10px">These ads only use claims from Colour King's own website. A few of those claims contradict each other or may be placeholders. Misleading advertising is fined by ACM and hurts your reviews, so confirm these first:</p>
+    <ul>
+      <li><b>BOVAG / RDW / Erkend Leerbedrijf</b>: the trust section of the website lists them, but they may be placeholders. They are left out of the ads. Add them only if they are real.</li>
+      <li><b>2-year guarantee</b>: the website promises this on paint and structural work. The ads rely on it.</li>
+      <li><b>Opening hours</b>: the footer says Sat 09:00–13:00, the FAQ says "Saturday by appointment", and another page says closing time is 17:00. The ads use <i>Ma–Vr 08:00–17:30, za op afspraak</i>.</li>
+      <li><b>Volume</b>: the website says both "4,800 vehicles" and "5,000th repair (2024)". The ads say <i>ruim 4.800</i>, the safest of the two.</li>
+      <li><b>Replacement transport</b>: the ads say "beschikbaar" (available), not "gratis" (free), unless it is always free.</li>
+      <li><b>Spot repair turnaround</b>: the website says "binnen enkele uren" (within a few hours). The ad says "vaak dezelfde dag klaar" (often ready the same day).</li>
+    </ul>
+  </div>
+  <div class="sources">
+    Research sources:
+    <ul>
+      <li><a href="https://www.marktplaats.nl/l/diensten-en-vakmensen/auto-en-motor-schadeherstellers-en-spuiterijen/q/rotterdam/">Marktplaats: Schadeherstellers &amp; Spuiterijen, Rotterdam</a></li>
+      <li><a href="https://www.marktplaats.nl/l/diensten-en-vakmensen/auto-en-motor-schadeherstellers-en-spuiterijen/q/schadeherstel/">Marktplaats: schadeherstel, national</a></li>
+      <li><a href="https://www.marktplaatszakelijk.nl/ondernemers/kenniscentrum/praktische-tips/schrijven-van-een-advertentietitel/">Marktplaats Zakelijk: writing an ad title (60 characters / first 160 characters)</a></li>
+      <li><a href="https://www.marktplaats.nl/m/opvallen/">Marktplaats: Opvalmogelijkheden</a></li>
+      <li><a href="https://www.absautoherstel.nl/over-abs/service-en-garantie/">ABS Autoherstel: service &amp; guarantee</a></li>
+      <li><a href="https://www.kiwa.com/nl/nl/diensten/certificering/branchenorm-erkend-schadeherstel/">Kiwa: Branchenorm Erkend Schadeherstel</a></li>
+      <li><a href="https://www.ambting.nl/schadeherstel/schadegarant-werkwijze/">Schadegarant: how it works</a></li>
+    </ul>
+  </div>
+</section>
+</div>
+
+<script>
+const FOOTER = `━━━━━━━━━━━━━━━━━━━━
+AUTOSPUITBEDRIJF COLOUR KING
+📍 Satijnbloem 6, 3068 JP Rotterdam (gratis parkeren voor de deur)
+📞 06 – 81 63 10 20
+✉️ info@colourking.nl
+🕗 Ma–Vr 08:00–17:30 · Za op afspraak
+KvK 82199884`;
+
+const MAIN = {
+  tag:"Hoofdadvertentie", meta:"Topadvertentie · Opvalsticker: Gratis offerte",
+  title:"Schadeherstel & Autospuiterij Rotterdam | Gratis Offerte",
+  body:`Schade aan uw auto? Colour King herstelt hem onzichtbaar: kleur gemeten met spectrofotometer, gespoten in stofvrije cabine, 2 jaar garantie. Rotterdam, sinds 2010.
+
+Iedere schadehersteller belooft kwaliteit. Wij maken het meetbaar. Bij elke opdracht krijgt u zwart-op-wit terug wat er aan uw auto is gedaan.
+
+✅ WAT WIJ DOEN
+• Schadeherstel na aanrijding – klein tot groot
+• Spuitwerk per onderdeel of complete overspuiting
+• Spot repair voor krassen, steenslag en bumperschade
+• Uitdeuken zonder spuiten (PDR) & hagelschade
+• Carrosserie- en richtwerk op de meetbank
+• Roest- en corrosieherstel
+• Verzekeringsschade – directe afhandeling met uw verzekeraar
+
+🎯 WAAROM COLOUR KING
+• Kleur exact – de spectrofotometer leest de wérkelijke kleur van uw auto, inclusief veroudering door zon en wasstraat. Geen gok op de kleurcode.
+• Stofvrije spuitcabine met gecontroleerde uitharding – een strakke, duurzame lak.
+• Richtbank met meetrapport – uw carrosserie terug binnen fabrieksmaten, aantoonbaar.
+• Gespecificeerde offerte – uren, onderdelen en lakmateriaal apart zichtbaar. Geen verrassingen achteraf.
+• Digitaal schaderapport met foto's en lakdiktemeting, vóór wij beginnen.
+• 2 jaar garantie op lak en constructie.
+
+🚗 ZORGELOOS
+• Werken met alle verzekeraars – wij regelen het papierwerk
+• Vervangend vervoer beschikbaar
+• Haal- en brengservice, thuis of op het werk
+• Auto gewassen en gereinigd terug
+
+📸 GRATIS OFFERTE IN 3 STAPPEN
+1. Stuur via Marktplaats 3–4 foto's van de schade + uw kenteken
+2. Binnen enkele uren ontvangt u een vrijblijvende prijsindicatie
+3. U plant zelf een moment dat u uitkomt
+
+Ruim 4.800 auto's gingen u voor. Stuur ons vandaag een bericht.
+
+${FOOTER}`
+};
+
+const VARIANTS = [
+ {id:"verz", name:"Insurance claims", tag:"Verzekeringsschade", meta:"Dagtopper · Sticker: Wij regelen alles",
+  title:"Verzekeringsschade? Wij Regelen Alles | Rotterdam",
+  body:`Aanrijding gehad? Colour King handelt uw schade rechtstreeks af met uw verzekeraar – u regelt alleen het eigen risico. Vervangend vervoer beschikbaar. Rotterdam.
+
+Na een schade wilt u maar één ding: dat het goed komt, zonder gedoe. Daar zorgen wij voor.
+
+✅ ZO WERKT HET
+1. U stuurt ons foto's van de schade en uw polisgegevens
+2. Wij maken een digitaal schaderapport en stemmen af met de verzekeraar of expert
+3. Wij herstellen, u blijft mobiel
+4. U haalt uw auto gewassen op – of wij brengen hem terug
+
+🛡️ UW ZEKERHEID
+• Wij werken met alle verzekeraars
+• Volledig papierwerk uit handen
+• Vervangend vervoer beschikbaar
+• Haal- en brengservice
+• 2 jaar garantie op lak en constructie
+• Uw recht: u mag zelf uw schadehersteller kiezen
+
+Ook bij WA-schade door een ander (tegenpartij aansprakelijk) helpen wij u op weg.
+
+${FOOTER}`},
+ {id:"spuit", name:"Paintwork", tag:"Spuitwerk", meta:"Dagtopper · Sticker: Exacte kleur",
+  title:"Auto Spuiten Rotterdam | Exacte Kleurmatch | 2 Jr Garantie",
+  body:`Een nieuw gespoten deel dat u níét terugziet. Colour King meet de kleur met een spectrofotometer en spuit in een stofvrije cabine. 2 jaar garantie. Rotterdam.
+
+De kleurcode van uw auto is een startpunt, geen eindpunt. Zon, wasstraat en leeftijd veranderen elke lak. Daarom meten wij de werkelijke kleur en kiezen we de variant die naast uw paneel onzichtbaar is.
+
+🎨 SPUITWERK
+• Spuiten per onderdeel: bumper, portier, spatbord, motorkap
+• Complete overspuiting of kleurwissel
+• Metallic, parelmoer en matte lakken
+• Velgen en kunststof delen
+
+🔬 ZO BEREIKEN WIJ HET
+• Spectrofotometer – kleurmeting op uw eigen auto
+• Stofvrije spuitcabine met gecontroleerde uitharding
+• Lakdiktemeting per paneel
+• Glans en structuur beoordeeld naast het originele paneel
+• Kleurmatchrapport in uw dossier
+
+Stuur ons een foto + kenteken voor een vrijblijvende offerte.
+
+${FOOTER}`},
+ {id:"spot", name:"Spot repair", tag:"Spot repair", meta:"Dagtopper · Sticker: Vaak zelfde dag",
+  title:"Spot Repair Krassen & Steenslag | Vaak Zelfde Dag Klaar",
+  body:`Kras, schaafplek of steenslag? Met spot repair herstellen wij alleen de schade – niet het hele paneel. Sneller, voordeliger en vaak dezelfde dag klaar. Rotterdam.
+
+Niet iedere schade vraagt om een volledige spuitbeurt. Bij spot repair behandelen wij alleen de beschadigde plek en werken wij die onzichtbaar in.
+
+✅ IDEAAL VOOR
+• Krassen en schaafplekken op bumpers
+• Parkeerschade en kleine deukjes met lakschade
+• Steenslag op motorkap en voorkant
+• Beschadigde spiegelkappen en hoeken
+
+💡 VOORDELEN
+• Goedkoper dan een compleet onderdeel spuiten
+• Minder werk, dus vaak dezelfde dag klaar
+• Kleur gemeten met spectrofotometer
+• Nauwelijks tot niet zichtbaar resultaat
+• 2 jaar garantie op het lakwerk
+
+Twijfelt u of spot repair mogelijk is? Stuur een foto, wij geven eerlijk advies – ook als volledig spuiten beter is.
+
+${FOOTER}`},
+ {id:"pdr", name:"Dent removal", tag:"Uitdeuken / hagelschade", meta:"Dagtopper · Sticker: Zonder spuiten",
+  title:"Uitdeuken Zonder Spuiten (PDR) | Deuken & Hagelschade",
+  body:`Deuk zonder lakschade? Met PDR drukken wij hem er van binnenuit uit – uw originele fabriekslak blijft behouden. Snel, betaalbaar, ook voor hagelschade. Rotterdam.
+
+Paintless Dent Repair (PDR) is de slimste manier om deuken te herstellen zolang de lak nog heel is. Geen plamuur, geen spuitwerk, geen kleurverschil.
+
+✅ GESCHIKT VOOR
+• Parkeer- en deurdeuken
+• Hagelschade (ook grote oppervlakken)
+• Deukjes in motorkap, dak en portieren
+
+💡 WAAROM PDR
+• Originele fabriekslak blijft behouden – goed voor de restwaarde
+• Veel sneller dan traditioneel herstel
+• Voordeliger dan uitdeuken + spuiten
+• Hagelschade vaak via uw casco-verzekering – wij regelen de afhandeling
+
+Stuur een foto onder schuine lichtinval, dan zien wij direct of PDR mogelijk is.
+
+${FOOTER}`},
+ {id:"carr", name:"Bodywork", tag:"Carrosserie & richtwerk", meta:"Dagtopper · Sticker: Meetrapport",
+  title:"Carrosserieherstel & Richtbank | Frontschade Rotterdam",
+  body:`Zware schade? Colour King richt uw carrosserie op de meetbank terug binnen fabrieksmaten – met meetrapport vóór en ná. Vervangend vervoer beschikbaar. Rotterdam.
+
+Bij een flinke aanrijding gaat het om meer dan het uiterlijk. Een scheve carrosserie beïnvloedt rijgedrag, bandenslijtage en veiligheid. Daarom meten wij, in plaats van op het oog te werken.
+
+🔧 WAT WIJ HERSTELLEN
+• Front-, zij- en achterschade
+• Richtwerk op de meet- en richtbank
+• Vervangen van panelen, langsliggers en steunen
+• Controle op verborgen schade achter bumper en steunen
+• Paneelnaden, deuren en kleppen nagesteld
+
+📋 U KRIJGT
+• Meetrapport van de richtbank (vóór en ná)
+• Digitaal schaderapport met foto's
+• Gespecificeerde offerte per onderdeel
+• 2 jaar garantie op constructie en lak
+• Eerlijk advies bij twijfel over total loss
+
+${FOOTER}`},
+ {id:"roest", name:"Rust repair", tag:"Roestherstel", meta:"Dagtopper · Sticker: Voor de APK",
+  title:"Roestherstel Wielkast & Dorpel | Voor de APK | Rotterdam",
+  body:`Roest in wielkast of dorpel? Colour King verwijdert de corrosie, last of zet nieuw plaatwerk in en spuit het strak af. Met garantie. Rotterdam.
+
+Roest verdwijnt niet vanzelf – het wordt alleen erger, en kan u de APK kosten. Wij pakken het bij de bron aan.
+
+✅ WAT WIJ DOEN
+• Roestherstel wielkasten, dorpels en portieronderkanten
+• Uitsnijden en inlassen van nieuw plaatwerk
+• Corrosiebehandeling en conservering
+• Afspuiten in de originele kleur (spectrofotometer)
+
+💡 WAAROM NU
+• Vroeg herstellen is goedkoper dan wachten
+• Voorkomt afkeur bij de APK
+• Houdt de restwaarde van uw auto op peil
+
+Stuur foto's van de roestplekken voor een vrijblijvende offerte.
+
+${FOOTER}`}
+];
+
+const REPLIES = [
+ {tag:"First reply", meta:"Within 1 hour", title:"Eerste reactie op een vraag",
+  body:`Goedendag,
+
+Bedankt voor uw bericht! Om u snel een goede prijsindicatie te geven, hebben wij het volgende nodig:
+
+1. 3–4 foto's van de schade (van dichtbij én op 2–3 meter afstand)
+2. Uw kenteken
+3. Gaat het via uw verzekering of betaalt u zelf?
+
+Dan ontvangt u binnen enkele uren een vrijblijvende offerte.
+
+Met vriendelijke groet,
+Team Colour King
+06 – 81 63 10 20`},
+ {tag:"Quote sent", meta:"With the quote", title:"Offerte verstuurd",
+  body:`Goedendag,
+
+Hierbij de prijsindicatie voor het herstel van uw [merk/model]:
+
+• Werkzaamheden: [omschrijving]
+• Prijs: € [bedrag] incl. btw
+• Doorlooptijd: [x] werkdagen
+• Garantie: 2 jaar op lak en herstel
+
+De definitieve prijs bevestigen wij na inspectie in onze werkplaats – zo weet u vooraf precies waar u aan toe bent.
+
+Wanneer komt het u uit? U kunt ook direct een afspraak plannen via onze website.
+
+Met vriendelijke groet,
+Team Colour King`},
+ {tag:"Follow-up", meta:"After 2 days without a reply", title:"Opvolging",
+  body:`Goedendag,
+
+Wij stuurden u eerder een offerte voor het herstel van uw auto. Heeft u nog vragen, of wilt u een moment inplannen?
+
+Wij denken graag mee – ook over vervangend vervoer of het ophalen van uw auto.
+
+Met vriendelijke groet,
+Team Colour King
+06 – 81 63 10 20`}
+];
+
+function esc(s){return s.replace(/[&<>"]/g,c=>({"&":"&amp;","<":"&lt;",">":"&gt;",'"':"&quot;"}[c]))}
+function len(s){return [...s].length}
+
+function adHTML(a, isReply){
+  const tl = len(a.title);
+  const first = a.body.slice(0,160);
+  const rest = a.body.slice(160, 200);
+  return `<article class="ad">
+    <div class="ad-head"><span class="tag">${esc(a.tag)}</span><span class="meta">${esc(a.meta)}</span></div>
+    <div class="field">
+      <div class="field-top"><span class="label">${isReply?"Purpose":"Title"}</span>
+        ${isReply?"":`<span class="count ${tl<=60?"ok":"over"}">${tl}/60 characters</span>`}
+        ${isReply?"":`<button class="copy" data-copy="title">Copy title</button>`}</div>
+      <p class="title-text">${esc(a.title)}</p>
+    </div>
+    <div class="field">
+      <div class="field-top"><span class="label">${isReply?"Message":"Description"}</span>
+        <button class="copy" data-copy="body">Copy ${isReply?"message":"description"}</button></div>
+      ${isReply?"":`<p class="preview160">Shown in search results (first 160 characters): <mark>${esc(first)}</mark>${esc(rest)}…</p>`}
+      <pre class="body">${esc(a.body)}</pre>
+    </div>
+  </article>`;
+}
+
+function bindCopy(root, a){
+  root.querySelectorAll(".copy").forEach(btn=>{
+    btn.addEventListener("click",()=>{
+      const text = btn.dataset.copy==="title"?a.title:a.body;
+      const label = btn.textContent;
+      const ok=()=>{btn.textContent="Copied";btn.classList.add("done");setTimeout(()=>{btn.textContent=label;btn.classList.remove("done")},1600)};
+      try{
+        navigator.clipboard.writeText(text).then(ok).catch(()=>fallback(btn));
+      }catch(e){fallback(btn)}
+    });
+  });
+}
+function fallback(btn){
+  const pre = btn.closest(".field").querySelector("pre, .title-text");
+  const r=document.createRange(); r.selectNodeContents(pre);
+  const s=getSelection(); s.removeAllRanges(); s.addRange(r);
+  btn.textContent="Selected, press Ctrl+C";
+}
+
+function mount(el,a,isReply){el.innerHTML=adHTML(a,isReply);bindCopy(el,a)}
+
+mount(document.getElementById("main-ad"),MAIN);
+
+const tabs=document.getElementById("tabs"), vbox=document.getElementById("variant-ad");
+let saved; try{saved=localStorage.getItem("ck-tab")}catch(e){}
+function show(id){
+  const v=VARIANTS.find(x=>x.id===id)||VARIANTS[0];
+  tabs.querySelectorAll("button").forEach(b=>b.setAttribute("aria-selected",b.dataset.id===v.id));
+  mount(vbox,v);
+  try{localStorage.setItem("ck-tab",v.id)}catch(e){}
+}
+VARIANTS.forEach(v=>{
+  const b=document.createElement("button");
+  b.type="button";b.role="tab";b.dataset.id=v.id;b.textContent=v.name;
+  b.addEventListener("click",()=>show(v.id));
+  tabs.appendChild(b);
+});
+show(saved);
+
+const rl=document.getElementById("replies-list");
+rl.style.display="grid";rl.style.gap="16px";
+REPLIES.forEach(r=>{const d=document.createElement("div");rl.appendChild(d);mount(d,r,true)});
+</script>
