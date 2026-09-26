@@ -9,7 +9,7 @@ export async function GET(
   const supabase = createClient();
   const { data, error } = await supabase
     .from('vehicles')
-    .select('*, customers(id, name, email, phone)')
+    .select('*, customers!vehicles_customer_id_fkey(id, name, email, phone)')
     .eq('id', params.id)
     .is('deleted_at', null)
     .single();

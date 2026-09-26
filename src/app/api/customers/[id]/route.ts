@@ -1,6 +1,6 @@
 import { NextRequest, NextResponse } from 'next/server';
 import { createClient } from '@/lib/supabase/server';
-import { CustomerSchema } from '@/modules/customers/schema';
+import { CustomerSchema, CUSTOMER_STATUSES } from '@/modules/customers/schema';
 
 export async function GET(
   _req: NextRequest,
@@ -9,7 +9,7 @@ export async function GET(
   const supabase = createClient();
   const { data, error } = await supabase
     .from('customers')
-    .select('*, vehicles(id, kenteken, make, model, colour, year)')
+    .select('*, vehicles!vehicles_customer_id_fkey(id, kenteken, make, model, colour, year)')
     .eq('id', params.id)
     .is('deleted_at', null)
     .single();
@@ -28,8 +28,7 @@ export async function PATCH(
   const updateData: Record<string, unknown> = {};
 
   if (body.status) {
-    const validStatuses = ['active', 'inactive', 'blocked'];
-    if (!validStatuses.includes(body.status)) {
+    if (!CUSTOMER_STATUSES.includes(body.status)) {
       return NextResponse.json({ error: 'Invalid status' }, { status: 400 });
     }
     updateData.status = body.status;

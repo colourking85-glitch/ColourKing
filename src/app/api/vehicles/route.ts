@@ -13,7 +13,7 @@ export async function GET(req: NextRequest) {
 
   let query = supabase
     .from('vehicles')
-    .select('id, kenteken, make, model, colour, year, wok, status, customer_id, customers(id, name), created_at')
+    .select('id, kenteken, make, model, colour, year, wok, status, customer_id, customers!vehicles_customer_id_fkey(id, name), created_at')
     .is('deleted_at', null)
     .order(sortBy, { ascending: sortDir });
 
