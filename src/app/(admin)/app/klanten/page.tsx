@@ -204,7 +204,9 @@ export default function CustomersPage() {
                 const hasCreditHold = c.customer_billing?.some(b => b.credit_hold);
                 return (
                   <tr key={c.id} className="border-b border-ck-dark-border/50 hover:bg-ck-dark-surface">
-                    <td className="px-4 py-3 text-xs text-ck-muted font-mono">{c.customer_no ?? '—'}</td>
+                    <td className="px-4 py-3 text-xs font-mono">
+                      <Link href={`/app/klanten/${c.id}`} className="text-ck-muted hover:text-ck-red hover:underline">{c.customer_no ?? '—'}</Link>
+                    </td>
                     <td className="px-4 py-3">
                       <span className="flex items-center gap-2 text-xs text-ck-muted">
                         <Icon size={14} />

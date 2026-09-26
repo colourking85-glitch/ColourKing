@@ -10,6 +10,7 @@ import {
 } from 'lucide-react';
 import { useTranslations } from 'next-intl';
 import { ScreenBadge } from '@/components/ui/ScreenBadge';
+import { AssignVehicle } from '@/components/customers/AssignVehicle';
 
 type Vehicle = { id: string; kenteken?: string; make?: string; model?: string; colour?: string; year?: number; status?: string };
 type Contact = { id: string; first_name: string; last_name: string; role?: string; phone?: string; mobile?: string; whatsapp?: string; email?: string; is_primary?: boolean; notes?: string; active?: boolean };
@@ -216,7 +217,7 @@ export default function CustomerDetailPage() {
       </div>
 
       {/* Tab Content */}
-      {activeTab === 'overview' && <OverviewTab data={data} t={t} tCommon={tCommon} />}
+      {activeTab === 'overview' && <OverviewTab data={data} t={t} tCommon={tCommon} onReload={load} />}
       {activeTab === 'contacts' && <ContactsTab contacts={data.contacts} t={t} id={id} onReload={load} />}
       {activeTab === 'addresses' && <AddressesTab addresses={data.addresses} t={t} id={id} onReload={load} />}
       {activeTab === 'billing' && <BillingTab billing={data.billing} t={t} id={id} onReload={load} />}
@@ -224,7 +225,7 @@ export default function CustomerDetailPage() {
       {activeTab === 'consents' && <ConsentsTab consents={data.consents} t={t} />}
       {activeTab === 'notes' && <NotesTab notesList={data.notes} t={t} id={id} onReload={load} />}
       {activeTab === 'activities' && <ActivitiesTab activities={data.activities} t={t} />}
-      {activeTab === 'vehicles' && <VehiclesTab vehicles={data.customer.vehicles ?? []} t={t} tCommon={tCommon} id={id} />}
+      {activeTab === 'vehicles' && <VehiclesTab vehicles={data.customer.vehicles ?? []} t={t} tCommon={tCommon} id={id} onReload={load} />}
     </div>
   );
 }
@@ -254,7 +255,7 @@ function Card({ title, children, action }: { title: string; children: React.Reac
 
 /* ─── Overview Tab ─── */
 
-function OverviewTab({ data, t, tCommon }: { data: Customer360; t: ReturnType<typeof useTranslations<'kl'>>; tCommon: ReturnType<typeof useTranslations<'common'>> }) {
+function OverviewTab({ data, t, tCommon, onReload }: { data: Customer360; t: ReturnType<typeof useTranslations<'kl'>>; tCommon: ReturnType<typeof useTranslations<'common'>>; onReload: () => void }) {
   const c = data.customer;
   return (
     <div className="grid grid-cols-1 gap-6 lg:grid-cols-2">
@@ -310,9 +311,12 @@ function OverviewTab({ data, t, tCommon }: { data: Customer360; t: ReturnType<ty
       </Card>
 
       <Card title={t('tab_vehicles')} action={
-        <Link href={`/app/voertuigen/nieuw?customer=${c.id}`} className="text-xs text-ck-red hover:text-ck-red-hover">
-          {t('addVehicle')}
-        </Link>
+        <div className="flex items-center gap-4">
+          <AssignVehicle customerId={c.id} onAssigned={onReload} />
+          <Link href={`/app/voertuigen/nieuw?customer=${c.id}`} className="text-xs text-ck-red hover:text-ck-red-hover">
+            {t('addVehicle')}
+          </Link>
+        </div>
       }>
         {!c.vehicles?.length ? (
           <p className="text-sm text-ck-muted">{t('noVehicles')}</p>
@@ -658,12 +662,15 @@ function ActivitiesTab({ activities, t }: { activities: ActivityRecord[]; t: Ret
 
 /* ─── Vehicles Tab ─── */
 
-function VehiclesTab({ vehicles, t, tCommon, id }: { vehicles: Vehicle[]; t: ReturnType<typeof useTranslations<'kl'>>; tCommon: ReturnType<typeof useTranslations<'common'>>; id: string }) {
+function VehiclesTab({ vehicles, t, tCommon, id, onReload }: { vehicles: Vehicle[]; t: ReturnType<typeof useTranslations<'kl'>>; tCommon: ReturnType<typeof useTranslations<'common'>>; id: string; onReload: () => void }) {
   return (
     <Card title={t('tab_vehicles')} action={
-      <Link href={`/app/voertuigen/nieuw?customer=${id}`} className="text-xs text-ck-red hover:text-ck-red-hover">
-        {t('addVehicle')}
-      </Link>
+      <div className="flex items-center gap-4">
+        <AssignVehicle customerId={id} onAssigned={onReload} />
+        <Link href={`/app/voertuigen/nieuw?customer=${id}`} className="text-xs text-ck-red hover:text-ck-red-hover">
+          {t('addVehicle')}
+        </Link>
+      </div>
     }>
       {!vehicles.length ? (
         <p className="text-sm text-ck-muted">{t('noVehicles')}</p>

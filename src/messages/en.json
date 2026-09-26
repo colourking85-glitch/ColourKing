@@ -394,7 +394,12 @@
     "fleet_profile": "Fleet Profile",
     "typical_damage": "Typical Damage Profile",
     "relationship_score": "Relationship Score",
-    "createdAt": "Created"
+    "createdAt": "Created",
+    "assignVehicle": "Link existing vehicle",
+    "assignVehiclePlaceholder": "Choose a vehicle…",
+    "assignVehicleSearch": "Search plate or make…",
+    "assignVehicleOwnedBy": "currently {name}",
+    "assignVehicleConfirm": "{plate} currently belongs to {name}. Move it to this customer?"
   },
   "vh": {
     "advanced": "Advanced definitions",

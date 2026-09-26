@@ -394,7 +394,12 @@
     "fleet_profile": "Wagenpark profiel",
     "typical_damage": "Typische schadeprofielen",
     "relationship_score": "Relatiescore",
-    "createdAt": "Aangemaakt"
+    "createdAt": "Aangemaakt",
+    "assignVehicle": "Bestaand voertuig koppelen",
+    "assignVehiclePlaceholder": "Kies een voertuig…",
+    "assignVehicleSearch": "Zoek op kenteken of merk…",
+    "assignVehicleOwnedBy": "nu van {name}",
+    "assignVehicleConfirm": "{plate} staat nu op naam van {name}. Overzetten naar deze klant?"
   },
   "vh": {
     "advanced": "Uitgebreide definities",

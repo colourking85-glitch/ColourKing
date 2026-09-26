@@ -394,7 +394,12 @@
     "fleet_profile": "Filo Profili",
     "typical_damage": "Tipik Hasar Profili",
     "relationship_score": "İlişki Puanı",
-    "createdAt": "Oluşturuldu"
+    "createdAt": "Oluşturuldu",
+    "assignVehicle": "Mevcut aracı bağla",
+    "assignVehiclePlaceholder": "Bir araç seçin…",
+    "assignVehicleSearch": "Plaka veya marka ara…",
+    "assignVehicleOwnedBy": "şu an {name}",
+    "assignVehicleConfirm": "{plate} şu anda {name} adına kayıtlı. Bu müşteriye aktarılsın mı?"
   },
   "vh": {
     "advanced": "Gelişmiş tanımlar",
