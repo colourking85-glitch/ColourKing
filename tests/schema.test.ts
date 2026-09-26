@@ -21,7 +21,11 @@ describe('CustomerSchema', () => {
   });
 
   it('accepts all customer types', () => {
-    for (const type of ['private', 'company', 'fleet', 'dealer']) {
+    for (const type of [
+      'private','sme','corporate_fleet','lease_company','rental',
+      'taxi_transport','dealer','bodyshop_partner','insurer',
+      'insurance_intermediary','government',
+    ]) {
       const result = CustomerSchema.safeParse({ name: 'Test', type });
       expect(result.success).toBe(true);
     }

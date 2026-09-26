@@ -1,5 +1,7 @@
 # ColourKing End-to-End Test Scenarios
 
+Last updated: 2026-09-26
+
 Production URLs:
 - Public site: https://colourking.nl
 - Admin panel: https://admin.colourking.nl
@@ -371,3 +373,153 @@ Production URLs:
 - Verify the event audit trail records the correct user (staff member) for each action
 - Test the Cmd-K palette search to find a job by its job number
 - Verify that a completed job's documents appear in the Document Archive (/app/documenten, DO05)
+
+---
+
+## Scenario 7: Customer 360 — Full CRM Flow
+
+**Description:** Test the Customer 360 module: create customers of various types, verify dynamic business fields, use all 9 detail tabs, and test notes with timestamps.
+
+**Preconditions:**
+- Logged into admin.colourking.nl with admin or office role
+- At least one vehicle exists in the system
+
+**Steps:**
+
+1. Navigate to Customers → New (/app/klanten/nieuw).
+   - **Expected:** Form loads with customer type selector showing all 11 types: private, SME, corporate fleet, lease company, rental, taxi/transport, dealer, bodyshop partner, insurer, insurance intermediary, government.
+
+2. Select type **Private**, fill name, email, phone, address, postcode, city. Set preferred language to Turkish, preferred channel to WhatsApp.
+   - **Expected:** No business fields (KVK, BTW, legal form) appear for private type. Submit succeeds, redirects to detail page.
+
+3. Edit the customer, change type to **SME**.
+   - **Expected:** Business fields appear: legal_name, trade_name, KVK, BTW-id, legal_form. Fill KVK = 12345678, legal_form = BV. Save succeeds.
+
+4. Edit again, change type to **Corporate Fleet**.
+   - **Expected:** Fleet-specific fields appear: fleet_size, fleet_profile. Fill fleet_size = 25. Save succeeds.
+
+5. Open the customer detail page and click through all 9 tabs:
+   - Overview, Contacts, Addresses, Billing, Insurance, Consents, Notes, Activities, Vehicles
+   - **Expected:** Each tab loads without errors. Tabs with no data show appropriate empty states. No console errors.
+
+6. On the **Notes** tab, add a note: "Test notitie voor CRM".
+   - **Expected:** Note appears immediately with Dutch timestamp (e.g., 26-9-2026, 14:30:00). POST /api/customers/:id/notes returns 201.
+
+7. Add a second note: "Tweede notitie". Verify ordering.
+   - **Expected:** Most recent note appears first (ordered by created_at DESC). Both show distinct timestamps.
+
+8. Try submitting an empty note (click + with empty input).
+   - **Expected:** No API call is made. NoteSchema requires body.min(1).
+
+9. Change customer status: Prospect → Active → Suspended → Blocked.
+   - **Expected:** Each status change persists on reload. Status badge color changes appropriately.
+
+10. Navigate to Vehicles tab. Link the existing vehicle to this customer.
+    - **Expected:** Vehicle appears in the customer's Vehicles tab. Full-profile API returns the vehicle data.
+
+11. Soft-delete the customer.
+    - **Expected:** Customer disappears from list. deleted_at is set. Data preserved in DB.
+
+**Edge cases:**
+- Create each of the 11 customer types and verify the correct dynamic fields appear
+- Verify full-profile endpoint returns 200 with vehicles (FK disambiguation via vehicles_customer_id_fkey)
+- Switch locale to EN and TR, verify all kl.* translation keys render
+- Test customer search/filter from the list page
+
+---
+
+## Scenario 8: Inspection Lifecycle (Capture → Approve → Lock)
+
+**Description:** Test the complete inspection workflow: create an inspection with RDW lookup, add findings and photos, progress through the state machine, approve with signatures, and verify the snapshot lock.
+
+**Preconditions:**
+- Logged into admin.colourking.nl with admin or office role
+- A customer and vehicle exist in the system
+- Inspection catalog tables are seeded (components, damage types, severity levels, dispositions)
+
+**Steps:**
+
+1. Navigate to Inspections → New (/app/inspecties/nieuw).
+   - **Expected:** New inspection wizard (IN05) loads with kenteken (plate) input, customer selector, and inspection type selector.
+
+2. Enter a Dutch license plate and trigger RDW lookup.
+   - **Expected:** Vehicle data populates from RDW (make, model, year, color). plate_country defaults to 'NL'.
+
+3. Select a customer, fill required fields, and submit.
+   - **Expected:** POST /api/inspections returns 201. Inspection created in **CONCEPT** status. Redirects to detail page.
+
+4. Add a damage finding to the inspection:
+   - Select component (e.g., "Motorkap"), damage type (e.g., "Deuk"), severity level
+   - Set repair_hours = 2.0, paint_hours = 1.5, disposition
+   - **Expected:** POST /api/inspections/:id/findings returns 201. Finding appears in list. finding_count and total_hours update via ins_recount trigger (finding_count = 1, total_hours = 3.5).
+
+5. Upload a photo to the inspection.
+   - **Expected:** POST /api/inspections/:id/photos returns 201. Photo stored in Supabase Storage. photo_count increments.
+
+6. Transition from **CONCEPT** → **BEZIG**.
+   - **Expected:** Status badge changes. ins_event logged as status_bezig.
+
+7. Transition from **BEZIG** → **TER_AKKOORD**.
+   - **Expected:** Guard passes (at least 1 schade finding exists). submitted_at is set. Status changes to TER_AKKOORD.
+
+8. **Guard test:** Create a new inspection with only a non-damage finding (origin ≠ 'schade'). Attempt BEZIG → TER_AKKOORD.
+   - **Expected:** Blocked with error: "minstens één schadebevinding is vereist".
+
+9. Back on the first inspection (TER_AKKOORD), approve as inspector:
+   - POST /api/inspections/:id/approve with role = 'inspecteur', signer_name = staff name
+   - **Expected:** Returns 201. ins_approvals row created with document_hash (SHA-256). ins_event logged as approval_inspecteur.
+
+10. **Guard test:** Try to approve again with role = 'inspecteur'.
+    - **Expected:** Error: "rol inspecteur heeft al getekend" (unique_violation).
+
+11. **Guard test:** Attempt direct transition to AKKOORD without inspector approval (on a different inspection in TER_AKKOORD).
+    - **Expected:** Blocked: "akkoord van de inspecteur is vereist".
+
+12. Call approve with **lock: true** (inspector already approved):
+    - **Expected:** Transition TER_AKKOORD → AKKOORD triggers ins_build_snapshot(). ins_snapshots row created with full JSON + snapshot_hash. Auto-chains to VERGRENDELD. locked_at is set.
+
+13. Verify the locked inspection:
+    - **Expected:** Status is VERGRENDELD. No further edits possible. Snapshot contains inspection, findings, parts, photos, and approvals as frozen JSON.
+
+14. **Cancel test:** Create another CONCEPT inspection, transition to GEANNULEERD.
+    - **Expected:** Transition is valid from CONCEPT, BEZIG, or TER_AKKOORD. Status changes to GEANNULEERD.
+
+**Edge cases:**
+- Try invalid transitions (e.g., CONCEPT → AKKOORD directly) and verify rejection
+- Verify counters (finding_count, photo_count, total_hours) update correctly when findings/photos are added or deleted
+- Test with plate_country = 'BE' (Belgian plate) and verify the constraint accepts it
+- Verify ins_events table records every state transition and approval
+- Check that the document_hash changes when findings are modified between approvals
+- Verify RLS: unauthenticated requests return empty arrays for SELECT, fail with RLS violation for INSERT
+
+---
+
+## Scenario 9: Email Senders & Manual Send
+
+**Description:** Verify per-process email sender configuration and manual email sending from document screens.
+
+**Preconditions:**
+- Logged into admin.colourking.nl with admin role
+- Zoho SMTP is configured (or dry-run mode active)
+- At least one offer, invoice, and appointment exist
+
+**Steps:**
+
+1. Navigate to Settings → E-mail tab (SY10).
+   - **Expected:** Email sender configuration page loads. Shows sender identities per process type (offers, invoices, appointments, etc.).
+
+2. Configure a sender identity for invoices: from = "facturatie@colourking.nl", reply_to = "info@colourking.nl", optional BCC.
+   - **Expected:** Sender identity saved. Used when invoice emails are sent.
+
+3. Navigate to an invoice detail page (FA10). Click "Send email to customer".
+   - **Expected:** Email is composed using the invoice sender identity. Customer email is pre-filled. Email is sent (or logged in dry-run).
+
+4. Navigate to an offer detail page (ES10). Click "Send email to customer".
+   - **Expected:** Email uses the offer sender identity.
+
+5. Navigate to Settings → Verzonden e-mails tab (SY25).
+   - **Expected:** SY25 loads showing a table of all sent emails with columns: date, recipient, subject, status, type. The emails from steps 3-4 appear in the list.
+
+**Edge cases:**
+- Send email without BCC configured, then with BCC, and verify BCC delivery
+- Verify status badge styling in the sent-emails table (single line, no wrapping)

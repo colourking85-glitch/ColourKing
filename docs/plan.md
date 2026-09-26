@@ -1,6 +1,6 @@
 # ColourKing — Implementation Plan
 
-**Last updated:** 2026-08-25
+**Last updated:** 2026-09-26
 **Tech stack:** Next.js 14 App Router + Supabase (eu-west-1) + Vercel + Tailwind
 **Repo:** github.com/colourking85-glitch/ColourKing
 
@@ -30,6 +30,12 @@
 | 16 | Bookkeeping Export | DONE | BK10 | — |
 | 17 | BTW Calculator | DONE | BW40 | — |
 | 18 | Production Auth & Cleanup | DONE | SY02/SY03, login | — |
+| 19 | Enhancements & Fixes | DONE | VH05, LD, JB | 0019–0042 |
+| 20 | Inspections Catalog | DONE | IN05/IN10 | 0043–0048 |
+| 21 | Customer 360 | DONE | KL01/02/03/05 (9 tabs) | 0058–0059 |
+| 22 | Email Senders & Reminders | DONE | SY10/SY25 | 0052, 0063 |
+| 23 | Inspections Phase 1 Flow | DONE | IN10 (approve) | 0062 |
+| 24 | Vehicle Hub & Polish | DONE | VH10 | 0064 |
 
 ---
 
@@ -210,6 +216,95 @@
 
 ---
 
+## Tier 5 Sprints (Complete — CRM & Inspections)
+
+### Sprint 19: Enhancements & Fixes
+- Internal notes on vehicles + customers (migration 0019)
+- Staff RLS fix with `is_active_staff()` security definer (0020)
+- Email logging with thread support (0021, 0052)
+- Vehicle body_type, brand/model catalog, status enums (0022–0026)
+- Customer status enum (prospect/active/suspended/blocked/ended) (0027)
+- Vehicle notes + plate_origin (0028–0029)
+- Job type, priority, payer fields (0030)
+- Labour rates + offer payer (0031)
+- Lead photos bucket, appointment fields, lead numbering (0032–0033, 0050)
+- Lead soft delete (0051)
+- Handover share token (0034)
+- Leads web origin + offerte fields (0035, 0037–0038)
+- Jobs estimated delivery (0036)
+- Offers estimated delivery (0039)
+- AI settings + provider settings (0040–0041)
+- Site analytics + IP hash (0042, 0055)
+- Certifications settings (0043)
+- Job tracking (0049)
+- Portfolio (0054)
+- Saturday opening hours (0056)
+- Invoice type (0057)
+- Company assets bucket (0061)
+- Company settings seed (0060)
+- 3 light themes (Clean, Daylight, Arctic)
+- Logo upload with auto-create storage bucket
+- Agenda day/3-day/week/month view modes
+- Lead ID clickable + auto-create appointment on Won
+
+### Sprint 20: Inspections Catalog
+- 6 new tables: ins_components, ins_damage_types, ins_severity_levels, ins_dispositions, ins_shot_templates, ins_checklist_items (0043)
+- ins_inspections table with full vehicle + customer links (0044)
+- ins_findings, ins_finding_parts, ins_photos tables
+- ins_approvals + ins_events + ins_snapshots (0045)
+- Transition guards (0046)
+- RLS policies on all ins_ tables (0047)
+- Seed data for catalog tables (0048)
+- Screen: IN05 new inspection wizard with RDW lookup
+
+### Sprint 21: Customer 360
+- 11 customer types (private, SME, corporate fleet, lease company, rental, taxi/transport, dealer, bodyshop partner, insurer, insurance intermediary, government)
+- 5 statuses (prospect, active, suspended, blocked, ended)
+- Dynamic business fields per type (KVK, BTW, legal form, fleet size, fleet profile, partnership type)
+- 10 new CUS tables with RLS: customer_contacts, customer_addresses, customer_billing, customer_insurance, customer_consents, customer_activities, customer_notes, customer_tags, customer_relationships, customer_documents (0058–0059)
+- Customer 360 detail page with 9 tabs: overview, contacts, addresses, billing, insurance, consents, notes, activities, vehicles
+- Full-profile API with FK disambiguation for vehicles
+- Customer soft-delete support
+- Migrations 0058–0059 applied
+
+### Sprint 22: Email Senders & Reminders
+- Per-process email sender identities (configurable from/reply-to per document type)
+- SY10 E-mail settings tab for managing senders
+- SY25 "Verzonden e-mails" tab listing all outbound emails
+- Optional BCC address per sender identity
+- Manual "send email to customer" buttons on ES10, FA10, AP10, DO21
+- Automated customer reminder system with reminder_log table (0063)
+- Email thread tracking (0052)
+
+### Sprint 23: Inspections Phase 1 Flow
+- plate_country column on ins_inspections
+- ins_recount() trigger for finding_count/photo_count/total_hours
+- ins_build_snapshot() for document integrity (SHA-256)
+- ins_transition() state machine: CONCEPT → BEZIG → TER_AKKOORD → AKKOORD → VERGRENDELD (+ GEANNULEERD)
+- Guards: damage finding required for TER_AKKOORD, inspector approval for AKKOORD
+- ins_approve() with document hash, role validation, duplicate check
+- AKKOORD auto-chains to VERGRENDELD after snapshot freeze
+- Approve API route with lock support
+- Migration 0062 applied
+
+### Sprint 24: Vehicle Hub & Polish
+- Vehicle detail page as hub: inspections, activity, parties, timestamped notes
+- Internal notes repair migration (0064)
+- Readable PostgREST errors in inspection routes
+- Finding photos in inspection report
+- Sent-emails table status badge fix
+
+---
+
+## Tier 5 Gate — CRM & Inspections ✅
+- Customer 360 with 11 types, 9 detail tabs, full lifecycle
+- Inspections end-to-end: catalog → capture → approval → locked snapshot
+- Email system: per-process senders, manual send buttons, automated reminders
+- Vehicle detail hub with linked inspections and notes
+- 712 tests across 21 test files
+
+---
+
 ## Dependency Map
 
 ```
@@ -278,6 +373,25 @@ Lead → Offer → Approval → Repair Order → Job → Parts → Tasks → Han
 | 0016 | invoices | invoices, invoice_lines, payments | Yes |
 | 0017 | vat_returns | vat_returns | Yes |
 | 0018 | purchases | purchases | Yes |
+| 0019 | internal_notes | internal_notes | Yes |
+| 0020 | fix_staff_rls | is_active_staff() function | Yes |
+| 0021 | email_log | email_log | Yes |
+| 0022–0026 | vehicles_fixes | body_type, brands, models, RLS | Yes |
+| 0027 | customer_status | status enum expansion | Yes |
+| 0028–0029 | vehicle_notes | vehicle_notes, plate_origin | Yes |
+| 0030–0031 | job_offer_fields | job type/priority/payer, labour rates | Yes |
+| 0032–0039 | leads_offers_enhancements | photos bucket, appointment, web fields, delivery | Yes |
+| 0040–0042 | ai_analytics | AI settings, site analytics | Yes |
+| 0043 | ins_catalog + certifications | ins_components, damage_types, severity, dispositions, shots, checklist | Yes |
+| 0044–0048 | ins_inspections | inspections, findings, photos, approvals, events, snapshots, RLS, seed | Yes |
+| 0049–0051 | job_lead_tracking | job tracking, lead numbering, lead soft delete | Yes |
+| 0052–0053 | email_threads_docs | email_log threads, project dossier doc type | Yes |
+| 0054–0057 | portfolio_misc | portfolio, analytics IP hash, Saturday hours, invoice type | Yes |
+| 0058–0059 | customer360 | 10 CUS tables, enum expansion, backfill | Yes |
+| 0060–0061 | company_settings | company settings seed, company assets bucket | Yes |
+| 0062 | ins_phase1_flow | plate_country, counters, transition, approve, snapshot | Yes |
+| 0063 | reminder_log | reminder_log | Yes |
+| 0064 | internal_notes_repair | notes FK fix | Yes |
 
 ---
 
@@ -292,8 +406,9 @@ Lead → Offer → Approval → Repair Order → Job → Parts → Tasks → Han
 | admin.colourking.nl | Live |
 | monitor.colourking.nl | Configured |
 | Cloudflare DNS | Active (proxy OFF for Vercel SSL) |
+| Zoho SMTP (email transport) | Active |
 | Mollie (payments) | Pending setup |
-| Resend (email) | Pending API key |
+| Resend (email) | Not used (Zoho SMTP instead) |
 
 ---
 
@@ -319,4 +434,7 @@ Lead → Offer → Approval → Repair Order → Job → Parts → Tasks → Han
 | tests/bookkeeping.test.ts | 45 | 16 |
 | tests/btw-calculator.test.ts | 31 | 17 |
 | tests/auth.test.ts | 56 | 18 |
-| **Total** | **667** | |
+| tests/booking-time.test.ts | 6 | 19 |
+| tests/lead-thread.test.ts | 7 | 19 |
+| tests/portfolio.test.ts | 17 | 19 |
+| **Total** | **712** | |
