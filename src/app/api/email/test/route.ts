@@ -1,6 +1,7 @@
 import { NextRequest, NextResponse } from 'next/server';
 import { admin } from '@/lib/supabase/admin';
 import { sendEmail } from '@/modules/email/sender';
+import { logEmail } from '@/modules/email/log';
 
 export const dynamic = 'force-dynamic';
 
@@ -44,6 +45,18 @@ export async function GET(req: NextRequest) {
   );
 
   diagnostics.sendResult = result;
+
+  await logEmail({
+    to: targetEmail,
+    subject: 'Colourking Email Test',
+    template: 'test',
+    locale: 'nl',
+    ref_type: 'test',
+    ref_id: null,
+    status: result.success ? 'sent' : 'failed',
+    error: result.error,
+    messageId: result.messageId,
+  });
 
   return NextResponse.json({ ok: result.success, diagnostics });
 }

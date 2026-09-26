@@ -214,7 +214,7 @@ export type SendEmailRequest = z.infer<typeof SendEmailRequestSchema>;
 export const EmailLogSchema = z.object({
   to: z.string().email(),
   subject: z.string(),
-  template: EmailTemplateName,
+  template: EmailTemplateName.or(z.literal('test')),
   locale: EmailLocale,
   ref_type: z.string().nullable().optional(),
   ref_id: z.string().uuid().nullable().optional(),

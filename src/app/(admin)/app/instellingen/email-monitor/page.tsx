@@ -3,6 +3,7 @@
 import { useState, useEffect, useCallback } from 'react';
 import { useTranslations, useLocale } from 'next-intl';
 import { ScreenBadge } from '@/components/ui/ScreenBadge';
+import { SentEmailsTable } from '@/components/email/SentEmailsTable';
 
 interface ImapConfig {
   name: string;
@@ -66,6 +67,7 @@ export default function EmailMonitorPage() {
   const [pollResult, setPollResult] = useState<PollResult | null>(null);
   const [pollLogs, setPollLogs] = useState<string[]>([]);
   const [lastRefreshed, setLastRefreshed] = useState<Date | null>(null);
+  const [tab, setTab] = useState<'inbox' | 'sent'>('inbox');
   const countdown = useCountdown();
 
   const fetchData = useCallback(async () => {
@@ -151,6 +153,29 @@ export default function EmailMonitorPage() {
         </div>
       </div>
 
+      {/* Tabs */}
+      <div className="flex gap-2">
+        {(['inbox', 'sent'] as const).map((k) => (
+          <button
+            key={k}
+            onClick={() => setTab(k)}
+            className={`rounded-lg px-4 py-2 text-sm font-medium transition-colors ${
+              tab === k ? 'bg-ck-red text-white' : 'border border-ck-dark-border bg-ck-dark-card text-ck-muted-light hover:text-white'
+            }`}
+          >
+            {k === 'inbox' ? t('tabInbox') : t('tabSent')}
+          </button>
+        ))}
+      </div>
+
+      {tab === 'sent' && (
+        <div className="space-y-2">
+          <p className="text-xs text-ck-muted-light">{t('sentDesc')}</p>
+          <SentEmailsTable />
+        </div>
+      )}
+
+      {tab === 'inbox' && (<>
       {/* Cron Job Info Card */}
       <div className="rounded-lg border border-ck-dark-border bg-ck-dark-card">
         <div className="flex items-center gap-2 border-b border-ck-dark-border px-5 py-3">
@@ -329,6 +354,7 @@ export default function EmailMonitorPage() {
           </div>
         </div>
       </div>
+      </>)}
     </div>
   );
 }

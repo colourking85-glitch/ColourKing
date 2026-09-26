@@ -5,6 +5,7 @@ import { getSender, EMAIL_PURPOSES } from '@/lib/email-identity';
 import { sendEmail } from '@/modules/email/sender';
 import { renderMessage } from '@/modules/email/templates';
 import { getCompanyInfo } from '@/lib/company';
+import { logEmail } from '@/modules/email/log';
 
 export const dynamic = 'force-dynamic';
 
@@ -24,7 +25,21 @@ export async function POST(req: NextRequest) {
   const sender = await getSender(parsed.data.purpose);
   const company = await getCompanyInfo();
   const html = renderMessage(`Testbericht voor afzender "${parsed.data.purpose}".\n\nVerzonden vanaf: ${sender.from ?? '(standaard)'}`, 'nl', company);
-  const result = await sendEmail(parsed.data.to, `[TEST] Colourking afzender: ${parsed.data.purpose}`, html, sender);
+  const subject = `[TEST] Colourking afzender: ${parsed.data.purpose}`;
+  const result = await sendEmail(parsed.data.to, subject, html, sender);
+
+  await logEmail({
+    to: parsed.data.to,
+    subject,
+    template: 'test',
+    locale: 'nl',
+    ref_type: 'test',
+    ref_id: null,
+    status: result.success ? 'sent' : 'failed',
+    error: result.error,
+    from: sender.from,
+    messageId: result.messageId,
+  });
 
   return NextResponse.json({ ...result, from: sender.from ?? null }, { status: result.success ? 200 : 502 });
 }
