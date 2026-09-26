@@ -14,7 +14,7 @@ export async function GET(req: NextRequest) {
     .from('customers')
     .select(`
       id, customer_no, type, name, legal_name, trade_name, email, phone, city,
-      status, tags, strategic_value, account_manager_id, created_at,
+      status, tags, strategic_value, account_manager_id, locale, created_at,
       customer_billing(credit_hold)
     `)
     .is('deleted_at', null)

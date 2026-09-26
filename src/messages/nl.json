@@ -1519,6 +1519,7 @@
     "creating": "Aanmaken...",
     "noApprovedOffers": "Geen goedgekeurde offertes beschikbaar",
     "selectOfferPlaceholder": "Selecteer een offerte...",
+    "searchOfferPlaceholder": "Zoek op offertenr. of klant...",
     "paymentTerms": "Betalingsvoorwaarden",
     "paymentTermsPlaceholder": "Betaling binnen 30 dagen na factuurdatum...",
     "copied": "Gekopieerd!",
@@ -1532,6 +1533,10 @@
     "standardInvoice": "Standaard",
     "depositInvoice": "Voorschot",
     "selectCustomer": "Selecteer een klant",
+    "searchCustomer": "Zoek klant op naam...",
+    "searchByPlate": "Zoek op kenteken",
+    "searchPlate": "Zoek op kenteken...",
+    "searchPlatePlaceholder": "Typ kenteken of merk...",
     "addLine": "Regel toevoegen",
     "addAtLeastOneLine": "Voeg minimaal één regel toe",
     "noLinesYet": "Nog geen regels toegevoegd",
@@ -1544,7 +1549,12 @@
     "kind_material": "Materiaal",
     "kind_other": "Overig",
     "resendInvoice": "Factuur mailen",
-    "sendPaymentReminder": "Betalingsherinnering sturen"
+    "sendPaymentReminder": "Betalingsherinnering sturen",
+    "plate": "Kenteken",
+    "createdDate": "Aangemaakt",
+    "issuedDate": "Uitgegeven",
+    "language": "Taal",
+    "configureColumns": "Kolommen"
   },
   "sy": {
     "title": "Instellingen",

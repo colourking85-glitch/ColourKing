@@ -7,10 +7,11 @@ import { useTranslations } from 'next-intl';
 import { ArrowLeft, Save, FileText, Plus, Trash2 } from 'lucide-react';
 import { formatCurrency } from '@/lib/format';
 import { useAppLocale } from '@/components/AdminIntlProvider';
+import { SearchableSelect } from '@/components/ui/SearchableSelect';
 import type { OfferLineKind, TaxCode } from '@/types/database';
 
-type CustomerOption = { id: string; name: string };
-type VehicleOption = { id: string; kenteken: string | null; make: string | null; model: string | null; customer_id: string };
+type CustomerOption = { id: string; name: string; locale?: string };
+type VehicleOption = { id: string; kenteken: string | null; make: string | null; model: string | null; customer_id: string; customers?: { id: string; name: string } | null };
 type OfferOption = {
   id: string;
   offer_number: string | null;
@@ -61,6 +62,7 @@ export default function CreateInvoicePage() {
 
   const [mode, setMode] = useState<CreateMode>('standalone');
   const [invoiceType, setInvoiceType] = useState<InvoiceType>('standard');
+  const [invoiceLocale, setInvoiceLocale] = useState<string>(locale);
   const [dueDate, setDueDate] = useState('');
   const [terms, setTerms] = useState('');
   const [notes, setNotes] = useState('');
@@ -76,6 +78,7 @@ export default function CreateInvoicePage() {
   // Standalone mode
   const [customers, setCustomers] = useState<CustomerOption[]>([]);
   const [vehicles, setVehicles] = useState<VehicleOption[]>([]);
+  const [allVehicles, setAllVehicles] = useState<VehicleOption[]>([]);
   const [customerId, setCustomerId] = useState('');
   const [vehicleId, setVehicleId] = useState('');
   const [lines, setLines] = useState<LineItem[]>([]);
@@ -102,11 +105,15 @@ export default function CreateInvoicePage() {
   }, []);
 
   useEffect(() => {
+    fetch('/api/vehicles')
+      .then(r => r.ok ? r.json() : [])
+      .then(setAllVehicles);
+  }, []);
+
+  useEffect(() => {
     if (!customerId) { setVehicles([]); return; }
-    fetch(`/api/customers/${customerId}`)
-      .then(r => r.ok ? r.json() : null)
-      .then(data => setVehicles(data?.vehicles ?? []));
-  }, [customerId]);
+    setVehicles(allVehicles.filter(v => v.customer_id === customerId));
+  }, [customerId, allVehicles]);
 
   useEffect(() => {
     if (!selectedOfferId) { setSelectedOffer(null); return; }
@@ -187,7 +194,7 @@ export default function CreateInvoicePage() {
           body: JSON.stringify({
             customer_id: customerId,
             vehicle_id: vehicleId || null,
-            locale,
+            locale: invoiceLocale,
             due_date: dueDate || null,
             terms: terms || null,
             notes: notes || null,
@@ -324,18 +331,16 @@ export default function CreateInvoicePage() {
               <p className="text-sm text-ck-text-muted">{t('noApprovedOffers')}</p>
             </div>
           ) : (
-            <select
+            <SearchableSelect
+              options={offers.map(o => ({
+                value: o.id,
+                label: `${o.offer_number ?? t('draft')} — ${o.customers?.name ?? tc('unknown')} — ${formatCents(o.total_cents)}`,
+              }))}
               value={selectedOfferId}
-              onChange={e => setSelectedOfferId(e.target.value)}
-              className="w-full rounded-[10px] border-[0.5px] border-ck-border bg-ck-surface px-3 py-2 text-sm text-ck-text focus:border-ck-red focus:outline-none"
-            >
-              <option value="">{t('selectOfferPlaceholder')}</option>
-              {offers.map(o => (
-                <option key={o.id} value={o.id}>
-                  {o.offer_number ?? t('draft')} — {o.customers?.name ?? tc('unknown')} — {formatCents(o.total_cents)}
-                </option>
-              ))}
-            </select>
+              onChange={(val) => setSelectedOfferId(val)}
+              placeholder={t('selectOfferPlaceholder')}
+              searchPlaceholder={t('searchOfferPlaceholder')}
+            />
           )}
         </div>
       )}
@@ -390,35 +395,56 @@ export default function CreateInvoicePage() {
               <div className="h-6 w-6 animate-spin rounded-full border-2 border-ck-border border-t-ck-red" />
             </div>
           ) : (
-            <div className="grid gap-4 sm:grid-cols-2">
+            <div className="grid gap-4 sm:grid-cols-3">
               <div>
                 <label className="mb-1 block text-[11px] text-ck-text-muted">{t('customer')}</label>
-                <select
+                <SearchableSelect
+                  options={customers.map(c => ({ value: c.id, label: c.name }))}
                   value={customerId}
-                  onChange={e => { setCustomerId(e.target.value); setVehicleId(''); }}
-                  className="w-full rounded-[10px] border-[0.5px] border-ck-border bg-ck-surface px-3 py-2 text-sm text-ck-text focus:border-ck-red focus:outline-none"
-                >
-                  <option value="">{t('selectCustomer')}</option>
-                  {customers.map(c => (
-                    <option key={c.id} value={c.id}>{c.name}</option>
-                  ))}
-                </select>
+                  onChange={(val) => {
+                    setCustomerId(val);
+                    setVehicleId('');
+                    const c = customers.find(x => x.id === val);
+                    if (c?.locale) setInvoiceLocale(c.locale);
+                  }}
+                  placeholder={t('selectCustomer')}
+                  searchPlaceholder={t('searchCustomer')}
+                />
+              </div>
+              <div>
+                <label className="mb-1 block text-[11px] text-ck-text-muted">{t('searchByPlate')}</label>
+                <SearchableSelect
+                  options={allVehicles.map(v => ({
+                    value: v.id,
+                    label: `${v.kenteken ?? '—'} · ${[v.make, v.model].filter(Boolean).join(' ')}${v.customers ? ` (${v.customers.name})` : ''}`,
+                  }))}
+                  value={vehicleId}
+                  onChange={(val) => {
+                    setVehicleId(val);
+                    const v = allVehicles.find(x => x.id === val);
+                    if (v?.customer_id) {
+                      setCustomerId(v.customer_id);
+                      const c = customers.find(x => x.id === v.customer_id);
+                      if (c?.locale) setInvoiceLocale(c.locale);
+                    }
+                  }}
+                  placeholder={t('searchPlate')}
+                  searchPlaceholder={t('searchPlatePlaceholder')}
+                />
               </div>
               {vehicles.length > 0 && (
                 <div>
                   <label className="mb-1 block text-[11px] text-ck-text-muted">{t('vehicle')}</label>
-                  <select
+                  <SearchableSelect
+                    options={vehicles.map(v => ({
+                      value: v.id,
+                      label: v.kenteken ?? `${v.make ?? ''} ${v.model ?? ''}`,
+                    }))}
                     value={vehicleId}
-                    onChange={e => setVehicleId(e.target.value)}
-                    className="w-full rounded-[10px] border-[0.5px] border-ck-border bg-ck-surface px-3 py-2 text-sm text-ck-text focus:border-ck-red focus:outline-none"
-                  >
-                    <option value="">{tc('optional')}</option>
-                    {vehicles.map(v => (
-                      <option key={v.id} value={v.id}>
-                        {v.kenteken ?? `${v.make ?? ''} ${v.model ?? ''}`}
-                      </option>
-                    ))}
-                  </select>
+                    onChange={(val) => setVehicleId(val)}
+                    placeholder={tc('optional')}
+                    searchPlaceholder={t('searchPlatePlaceholder')}
+                  />
                 </div>
               )}
             </div>
@@ -553,7 +579,7 @@ export default function CreateInvoicePage() {
       {/* Invoice settings */}
       <div className="rounded-[10px] border-[0.5px] border-ck-border bg-ck-surface p-5">
         <h2 className="mb-4 text-xs font-medium uppercase tracking-wider text-ck-text-muted">{t('invoiceSettings')}</h2>
-        <div className="grid gap-4 sm:grid-cols-2">
+        <div className="grid gap-4 sm:grid-cols-3">
           <div>
             <label className="mb-1 block text-[11px] text-ck-text-muted">{t('dueDate')}</label>
             <input
@@ -562,6 +588,25 @@ export default function CreateInvoicePage() {
               onChange={e => setDueDate(e.target.value)}
               className="w-full rounded-[10px] border-[0.5px] border-ck-border bg-ck-surface px-3 py-2 text-sm text-ck-text focus:border-ck-red focus:outline-none"
             />
+          </div>
+          <div>
+            <label className="mb-1 block text-[11px] text-ck-text-muted">{t('language')}</label>
+            <div className="flex gap-1">
+              {(['nl', 'en', 'tr'] as const).map(lang => (
+                <button
+                  key={lang}
+                  type="button"
+                  onClick={() => setInvoiceLocale(lang)}
+                  className={`flex-1 rounded-[10px] border-[0.5px] px-3 py-2 text-sm font-mono uppercase transition-colors ${
+                    invoiceLocale === lang
+                      ? 'border-ck-red bg-ck-red/10 text-ck-red font-medium'
+                      : 'border-ck-border text-ck-text-3 hover:border-ck-text-muted'
+                  }`}
+                >
+                  {lang}
+                </button>
+              ))}
+            </div>
           </div>
           <div>
             <label className="mb-1 block text-[11px] text-ck-text-muted">{t('notes')}</label>
@@ -573,7 +618,7 @@ export default function CreateInvoicePage() {
               placeholder={invoiceType === 'deposit' ? t('depositNotesPlaceholder') : t('notesPlaceholder')}
             />
           </div>
-          <div className="sm:col-span-2">
+          <div className="sm:col-span-3">
             <label className="mb-1 block text-[11px] text-ck-text-muted">{t('paymentTerms')}</label>
             <textarea
               value={terms}

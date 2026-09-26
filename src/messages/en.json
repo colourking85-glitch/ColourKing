@@ -1519,6 +1519,7 @@
     "creating": "Creating...",
     "noApprovedOffers": "No approved offers available",
     "selectOfferPlaceholder": "Select an offer...",
+    "searchOfferPlaceholder": "Search by offer no. or customer...",
     "paymentTerms": "Payment terms",
     "paymentTermsPlaceholder": "Payment within 30 days of invoice date...",
     "copied": "Copied!",
@@ -1532,6 +1533,10 @@
     "standardInvoice": "Standard",
     "depositInvoice": "Deposit",
     "selectCustomer": "Select a customer",
+    "searchCustomer": "Search customer by name...",
+    "searchByPlate": "Search by plate",
+    "searchPlate": "Search by licence plate...",
+    "searchPlatePlaceholder": "Type plate or make...",
     "addLine": "Add line",
     "addAtLeastOneLine": "Add at least one line item",
     "noLinesYet": "No line items added yet",
@@ -1544,7 +1549,12 @@
     "kind_material": "Material",
     "kind_other": "Other",
     "resendInvoice": "Email invoice",
-    "sendPaymentReminder": "Send payment reminder"
+    "sendPaymentReminder": "Send payment reminder",
+    "plate": "Plate",
+    "createdDate": "Created",
+    "issuedDate": "Issued",
+    "language": "Language",
+    "configureColumns": "Columns"
   },
   "sy": {
     "title": "Settings",

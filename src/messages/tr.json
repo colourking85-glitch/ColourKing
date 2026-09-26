@@ -1519,6 +1519,7 @@
     "creating": "Oluşturuluyor...",
     "noApprovedOffers": "Onaylı teklif bulunmuyor",
     "selectOfferPlaceholder": "Teklif seçin...",
+    "searchOfferPlaceholder": "Teklif no. veya müşteri ara...",
     "paymentTerms": "Ödeme koşulları",
     "paymentTermsPlaceholder": "Fatura tarihinden itibaren 30 gün içinde ödeme...",
     "copied": "Kopyalandı!",
@@ -1532,6 +1533,10 @@
     "standardInvoice": "Standart",
     "depositInvoice": "Depozito",
     "selectCustomer": "Müşteri seçin",
+    "searchCustomer": "Müşteri adına göre ara...",
+    "searchByPlate": "Plakaya göre ara",
+    "searchPlate": "Plaka ile arayın...",
+    "searchPlatePlaceholder": "Plaka veya marka yazın...",
     "addLine": "Satır ekle",
     "addAtLeastOneLine": "En az bir satır ekleyin",
     "noLinesYet": "Henüz satır eklenmedi",
@@ -1544,7 +1549,12 @@
     "kind_material": "Malzeme",
     "kind_other": "Diğer",
     "resendInvoice": "Faturayı e-postala",
-    "sendPaymentReminder": "Ödeme hatırlatması gönder"
+    "sendPaymentReminder": "Ödeme hatırlatması gönder",
+    "plate": "Plaka",
+    "createdDate": "Oluşturulma",
+    "issuedDate": "Düzenleme",
+    "language": "Dil",
+    "configureColumns": "Sütunlar"
   },
   "sy": {
     "title": "Ayarlar",
