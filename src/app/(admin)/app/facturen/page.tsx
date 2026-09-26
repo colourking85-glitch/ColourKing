@@ -174,7 +174,12 @@ export default function InvoiceListPage() {
           </span>
         );
       case 'created_at':
-        return <span className="font-mono text-xs tabular-nums text-ck-text-muted">{fmtDate(inv.created_at)}</span>;
+        return (
+          <span className="whitespace-nowrap font-mono text-xs tabular-nums text-ck-text-muted" title={new Date(inv.created_at).toLocaleString('nl-NL')}>
+            {fmtDate(inv.created_at)}{' '}
+            <span className="text-ck-text-muted/60">{new Date(inv.created_at).toLocaleTimeString('nl-NL', { hour: '2-digit', minute: '2-digit' })}</span>
+          </span>
+        );
       case 'issued_at':
         return <span className="font-mono text-xs tabular-nums text-ck-text-muted">{fmtDate(inv.issued_at ?? null)}</span>;
       case 'due_date':
