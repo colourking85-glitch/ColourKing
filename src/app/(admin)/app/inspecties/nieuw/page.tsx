@@ -8,6 +8,9 @@ import { PhotoCapture } from '@/components/ui/PhotoCapture';
 import { STATUS_LABELS, type InsStatus } from '@/modules/inspectie/machine';
 import { GUIDED_SHOTS, getShotProgress, type ShotKey } from '@/modules/inspectie/checklist';
 import { suggestHours } from '@/modules/inspectie/suggest-hours';
+import type { rdwToVehicleFields } from '@/lib/rdw';
+
+type RdwFields = ReturnType<typeof rdwToVehicleFields>;
 
 // -------- types --------
 
@@ -90,6 +93,7 @@ type Photo = {
   kind: string;
   finding_id: string | null;
   caption: string | null;
+  url?: string | null;
 };
 
 type Inspection = {
@@ -141,21 +145,20 @@ const DISP_LABEL_KEYS: Record<string, string> = {
   onderzoeken: 'wizard.dispInvestigate', geen_actie: 'wizard.dispNoAction',
 };
 
+// Values mirror the check constraints on ins_findings (migration 0044).
 const TECHNIQUES = [
   { value: 'uitdeuken', labelKey: 'wizard.techDent' },
   { value: 'uitdeuken_plamuren', labelKey: 'wizard.techDentFill' },
   { value: 'richten', labelKey: 'wizard.techAlign' },
-  { value: 'demontage_montage', labelKey: 'wizard.techDismount' },
-  { value: 'polijsten', labelKey: 'wizard.techPolish' },
-  { value: 'nader_onderzoeken', labelKey: 'wizard.techFurtherInv' },
+  { value: 'vervangen', labelKey: 'wizard.techReplace' },
 ];
 
 const PAINT_OPS = [
   { value: '', labelKey: 'wizard.paintNone' },
   { value: 'spot', labelKey: 'wizard.paintSpot' },
   { value: 'paneel', labelKey: 'wizard.paintPanel' },
-  { value: 'paneel_inspuiten', labelKey: 'wizard.paintPanelBlend' },
-  { value: 'polijsten_lak', labelKey: 'wizard.paintPolish' },
+  { value: 'inspuiten', labelKey: 'wizard.paintPanelBlend' },
+  { value: 'polijsten', labelKey: 'wizard.paintPolish' },
 ];
 
 const ZONES = ['voor', 'achter', 'links', 'rechts', 'dak', 'glas', 'wielen', 'interieur'] as const;
@@ -238,12 +241,13 @@ export default function InspectieNieuwPage() {
   const [showCountryPicker, setShowCountryPicker] = useState(false);
   const [isForeignPlate, setIsForeignPlate] = useState(false);
   const [rdwLoading, setRdwLoading] = useState(false);
-  const [rdwData, setRdwData] = useState<Record<string, string> | null>(null);
+  const [rdwData, setRdwData] = useState<RdwFields | null>(null);
   const [vehicleSearch, setVehicleSearch] = useState('');
   const [vehicles, setVehicles] = useState<Vehicle[]>([]);
   const [selectedVehicle, setSelectedVehicle] = useState<Vehicle | null>(null);
   const [customers, setCustomers] = useState<Customer[]>([]);
   const [selectedCustomer, setSelectedCustomer] = useState<Customer | null>(null);
+  const [customerSearch, setCustomerSearch] = useState('');
   const [purpose, setPurpose] = useState<typeof PURPOSES[number]>('particulier');
   const [odometer, setOdometer] = useState('');
   const [eventDate, setEventDate] = useState('');
@@ -264,6 +268,7 @@ export default function InspectieNieuwPage() {
   // step 2: photos
   const [activeShot, setActiveShot] = useState(0);
   const [showPhotoCapture, setShowPhotoCapture] = useState(false);
+  const [photoForFindingId, setPhotoForFindingId] = useState<string | null>(null);
 
   // step 3+4: findings
   const [components, setComponents] = useState<Component[]>([]);
@@ -390,33 +395,68 @@ export default function InspectieNieuwPage() {
 
   // ---- create inspection ----
 
+  // A vehicle row is required (ins_inspections.vehicle_id is NOT NULL). When the
+  // plate is unknown (new RDW lookup or foreign plate) we create it here via the
+  // same API the VH01 screen uses, owned by the selected customer.
+  const needsNewVehicle = !selectedVehicle && (isForeignPlate || !!rdwData);
+
   const createInspection = useCallback(async () => {
     if (!isForeignPlate && !selectedVehicle && !rdwData) { setError(t('wizard.errorSelectVehicle')); return false; }
     if (isForeignPlate && !manualMake) { setError(t('wizard.errorSelectVehicle')); return false; }
+    if (needsNewVehicle && !selectedCustomer) { setError(t('wizard.errorSelectCustomer')); return false; }
     setSaving(true); setError('');
     try {
       const selectedBrand = brands.find(b => b.id === selectedBrandId);
       const selectedMdl = models.find(m => m.id === selectedModelId);
+      const licencePlate = plate.trim().toUpperCase() || selectedVehicle?.kenteken || '';
+      const make = isForeignPlate ? (selectedBrand?.name || manualMake) : (rdwData?.make || selectedVehicle?.make || null);
+      const model = isForeignPlate ? (selectedMdl?.name || manualModel) : (rdwData?.model || selectedVehicle?.model || null);
+      const parsedYear = isForeignPlate ? (manualYear ? parseInt(manualYear, 10) : null) : (rdwData?.year ?? selectedVehicle?.year ?? null);
+      const year = parsedYear && Number.isFinite(parsedYear) ? parsedYear : null;
+
+      let vehicleId = selectedVehicle?.id ?? null;
+      if (!vehicleId) {
+        if (!selectedCustomer) throw new Error(t('wizard.errorSelectCustomer'));
+        const vehicleBody = {
+          customer_id: selectedCustomer.id,
+          kenteken: licencePlate || null,
+          plate_origin: plateCountry,
+          vin: vin || null,
+          make: make || null,
+          model: model || null,
+          year,
+          colour: isForeignPlate ? manualColour || null : (rdwData?.colour || null),
+          paint_code: isForeignPlate ? manualPaintCode || null : null,
+          fuel: isForeignPlate ? null : (rdwData?.fuel || null),
+          body_type: isForeignPlate ? null : (rdwData?.body_type || null),
+          wok: !isForeignPlate && !!rdwData?.wok,
+          rdw_snapshot: isForeignPlate ? null : (rdwData?.rdw_snapshot ?? null),
+        };
+        const vRes = await fetch('/api/vehicles', { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify(vehicleBody) });
+        if (!vRes.ok) { const data = await vRes.json(); throw new Error(data.error || t('wizard.errorCreateFailed')); }
+        const created = await vRes.json();
+        vehicleId = created.id as string;
+        setSelectedVehicle({ ...created, customers: { id: selectedCustomer.id, name: selectedCustomer.name } });
+      }
+
       const body = {
-        vehicle_id: selectedVehicle?.id || null,
+        vehicle_id: vehicleId,
         customer_id: selectedCustomer?.id || selectedVehicle?.customer_id || null,
         purpose,
-        licence_plate: plate.trim().toUpperCase() || selectedVehicle?.kenteken || '',
+        licence_plate: licencePlate,
         vin: vin || null,
-        make: isForeignPlate ? (selectedBrand?.name || manualMake) : (rdwData?.make || selectedVehicle?.make || null),
-        model: isForeignPlate ? (selectedMdl?.name || manualModel) : (rdwData?.model || selectedVehicle?.model || null),
-        first_reg_date: isForeignPlate ? (manualYear ? `${manualYear}-01-01` : null) : (rdwData?.year ? `${rdwData.year}-01-01` : (selectedVehicle?.year ? `${selectedVehicle.year}-01-01` : null)),
+        make,
+        model,
+        first_reg_date: year ? `${year}-01-01` : null,
         fuel: rdwData?.fuel || null,
         odometer_km: odometer ? parseInt(odometer, 10) : null,
         rdw_verified: !isForeignPlate && !!rdwData,
-        rdw_payload: isForeignPlate ? null : (rdwData || null),
+        rdw_payload: isForeignPlate ? null : (rdwData?.rdw_snapshot ?? null),
         event_date: eventDate || null,
         event_description: eventDesc || null,
         insurer_name: purpose === 'verzekering' ? insurerName || null : null,
         claim_number: purpose === 'verzekering' ? claimNumber || null : null,
         plate_country: plateCountry,
-        colour: isForeignPlate ? manualColour || null : (rdwData?.colour || selectedVehicle?.colour || null),
-        paint_code: isForeignPlate ? manualPaintCode || null : null,
       };
       const res = await fetch('/api/inspections', { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify(body) });
       if (!res.ok) { const data = await res.json(); throw new Error(data.error || t('wizard.errorCreateFailed')); }
@@ -425,7 +465,7 @@ export default function InspectieNieuwPage() {
       return true;
     } catch (err) { setError(err instanceof Error ? err.message : t('wizard.errorCreateFailed')); return false; }
     finally { setSaving(false); }
-  }, [selectedVehicle, selectedCustomer, purpose, plate, vin, rdwData, odometer, eventDate, eventDesc, insurerName, claimNumber, reloadInspection, isForeignPlate, manualMake, manualModel, manualYear, manualColour, manualPaintCode, plateCountry, brands, selectedBrandId, models, selectedModelId, t]);
+  }, [selectedVehicle, selectedCustomer, needsNewVehicle, purpose, plate, vin, rdwData, odometer, eventDate, eventDesc, insurerName, claimNumber, reloadInspection, isForeignPlate, manualMake, manualModel, manualYear, manualColour, manualPaintCode, plateCountry, brands, selectedBrandId, models, selectedModelId, t]);
 
   // ---- finding CRUD ----
 
@@ -457,36 +497,49 @@ export default function InspectieNieuwPage() {
 
   // ---- submit ----
 
-  const submitForApproval = useCallback(async () => {
+  const submitForApproval = useCallback(async (opts: { signAndLock: boolean }) => {
     if (!inspection) return;
     setSaving(true); setError('');
     try {
-      const res = await fetch(`/api/inspections/${inspection.id}/transition`, { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify({ to: 'TER_AKKOORD' }) });
-      if (!res.ok) { const data = await res.json(); throw new Error(data.error || t('wizard.errorSubmitFailed')); }
+      if (inspection.status === 'BEZIG' || inspection.status === 'CONCEPT') {
+        const res = await fetch(`/api/inspections/${inspection.id}/transition`, { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify({ to: 'TER_AKKOORD' }) });
+        if (!res.ok) { const data = await res.json(); throw new Error(data.error || t('wizard.errorSubmitFailed')); }
+      }
+      if (opts.signAndLock) {
+        // Inspector signs off on the tablet: approval + AKKOORD -> snapshot -> VERGRENDELD
+        const res = await fetch(`/api/inspections/${inspection.id}/approve`, {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({ role: 'inspecteur', signer_name: signName.trim(), statement_text: t('wizard.declarationText'), lock: true }),
+        });
+        if (!res.ok) { const data = await res.json(); throw new Error(data.error || t('wizard.errorSubmitFailed')); }
+      }
       router.push(`/app/inspecties/${inspection.id}`);
     } catch (err) { setError(err instanceof Error ? err.message : t('wizard.errorSubmitFailed')); }
     finally { setSaving(false); }
-  }, [inspection, router, t]);
+  }, [inspection, router, signName, t]);
 
   // ---- navigation ----
 
   const canGoNext = useCallback(() => {
     if (step === 0) {
+      if (inspection) return true;
+      if (needsNewVehicle && !selectedCustomer) return false;
       if (isForeignPlate) return !!manualMake && !!plate.trim();
       return (!!selectedVehicle || !!rdwData) && !!plate.trim();
     }
     return true;
-  }, [step, selectedVehicle, plate, isForeignPlate, manualMake, rdwData]);
+  }, [step, inspection, selectedVehicle, selectedCustomer, needsNewVehicle, plate, isForeignPlate, manualMake, rdwData]);
 
   const goNext = useCallback(async () => {
     if (step === 0 && !inspection) {
       const ok = await createInspection();
       if (!ok) return;
     }
-    if (step === 6) { await submitForApproval(); return; }
+    if (step === 6) { await submitForApproval({ signAndLock: signMode === 'tablet' && !!signName.trim() }); return; }
     setStep(s => Math.min(s + 1, 6));
     setError('');
-  }, [step, inspection, createInspection, submitForApproval]);
+  }, [step, inspection, createInspection, submitForApproval, signMode, signName]);
 
   const goPrev = useCallback(() => { setStep(s => Math.max(s - 1, 0)); setError(''); }, []);
 
@@ -499,6 +552,14 @@ export default function InspectieNieuwPage() {
       v.kenteken?.toLowerCase().includes(q) || v.make?.toLowerCase().includes(q) || v.model?.toLowerCase().includes(q)
     ).slice(0, 10);
   }, [vehicles, vehicleSearch]);
+
+  const filteredCustomers = useMemo(() => {
+    if (!customerSearch.trim()) return customers.slice(0, 10);
+    const q = customerSearch.toLowerCase();
+    return customers.filter(c =>
+      c.name?.toLowerCase().includes(q) || c.email?.toLowerCase().includes(q) || c.phone?.toLowerCase().includes(q)
+    ).slice(0, 10);
+  }, [customers, customerSearch]);
 
   // ---- grouped components for picker modal ----
 
@@ -949,6 +1010,53 @@ export default function InspectieNieuwPage() {
                   </div>
                 )}
 
+                {/* Owner (required when a new vehicle record will be created) */}
+                {needsNewVehicle && (
+                  <div className="mt-6 rounded-lg border border-ck-dark-border bg-ck-dark-card p-4">
+                    <p className="text-[12px] text-ck-muted mb-3">
+                      {t('wizard.newVehicleNotice', { plate: plate.trim().toUpperCase() || '-' })}
+                    </p>
+                    <label className="block text-[12px] text-ck-muted mb-1.5">{t('wizard.labelSelectCustomer')} *</label>
+                    {selectedCustomer ? (
+                      <div className="flex items-center justify-between rounded-lg border border-ck-red/30 bg-ck-red/10 px-3 py-2.5">
+                        <span className="text-sm text-white">{selectedCustomer.name}</span>
+                        <button
+                          onClick={() => setSelectedCustomer(null)}
+                          className="text-[12px] text-ck-muted hover:text-white bg-transparent border-0 cursor-pointer"
+                        >
+                          {t('wizard.changeCustomer')}
+                        </button>
+                      </div>
+                    ) : (
+                      <>
+                        <input
+                          type="text"
+                          value={customerSearch}
+                          onChange={e => setCustomerSearch(e.target.value)}
+                          placeholder={t('wizard.placeholderSearchCustomer')}
+                          className="w-full rounded-lg border border-ck-dark-border bg-ck-dark-surface px-3 py-2.5 text-sm text-white placeholder:text-ck-muted focus:outline-none focus:border-ck-red mb-2"
+                          style={{ minHeight: 48 }}
+                        />
+                        <div className="max-h-[200px] overflow-auto">
+                          {filteredCustomers.map(c => (
+                            <button
+                              key={c.id}
+                              onClick={() => setSelectedCustomer(c)}
+                              className="flex w-full items-center gap-3 rounded-lg px-3 py-2.5 text-left text-sm hover:bg-ck-dark-surface border border-transparent"
+                            >
+                              <span className="text-white">{c.name}</span>
+                              <span className="ml-auto text-xs text-ck-muted">{[c.email, c.phone].filter(Boolean).join(' / ')}</span>
+                            </button>
+                          ))}
+                          {filteredCustomers.length === 0 && (
+                            <p className="px-3 py-2 text-[12px] text-ck-muted">{t('wizard.noCustomersFound')}</p>
+                          )}
+                        </div>
+                      </>
+                    )}
+                  </div>
+                )}
+
                 {/* Details grid */}
                 <div className="grid gap-4 mt-6 grid-cols-1 sm:grid-cols-2">
                   <div>
@@ -1166,12 +1274,16 @@ export default function InspectieNieuwPage() {
                       <div className="flex gap-2 mt-3 items-stretch">
                         {photos.filter(p => p.finding_id === selFinding.id).slice(0, 3).map(p => (
                           <div key={p.id} className="w-[88px] rounded bg-ck-dark-surface overflow-hidden relative flex items-end p-1" style={{ aspectRatio: '4/3' }}>
+                            {p.url && (
+                              // eslint-disable-next-line @next/next/no-img-element
+                              <img src={p.url} alt={p.reference} className="absolute inset-0 h-full w-full object-cover" />
+                            )}
                             <span className="relative font-mono text-[9px] bg-ck-dark-card rounded px-1 py-0.5 text-ck-muted">{p.reference}</span>
                           </div>
                         ))}
                         <button
-                          onClick={() => setEditingFinding(selFinding)}
-                          className="rounded-lg border border-ck-dark-border bg-ck-dark-card px-3 flex flex-col items-center justify-center gap-0.5 text-[12px] text-ck-muted-light hover:text-white"
+                          onClick={() => setPhotoForFindingId(prev => prev === selFinding.id ? null : selFinding.id)}
+                          className={`rounded-lg border px-3 flex flex-col items-center justify-center gap-0.5 text-[12px] hover:text-white ${photoForFindingId === selFinding.id ? 'border-ck-red text-ck-red bg-ck-red/10' : 'border-ck-dark-border bg-ck-dark-card text-ck-muted-light'}`}
                           style={{ minHeight: 48, width: 88 }}
                         >
                           {t('wizard.photoButton')}
@@ -1186,6 +1298,18 @@ export default function InspectieNieuwPage() {
                         </button>
                       </div>
                     </div>
+
+                    {photoForFindingId === selFinding.id && (
+                      <div className="mt-3 rounded-lg border border-ck-dark-border bg-ck-dark-card p-4">
+                        <PhotoCapture
+                          inspectionId={inspection.id}
+                          findingId={selFinding.id}
+                          kind={selFinding.origin === 'pre_existent' ? 'pre_existent' : 'schade'}
+                          onUploaded={() => { reloadInspection(inspection.id); setPhotoForFindingId(null); }}
+                          onClose={() => setPhotoForFindingId(null)}
+                        />
+                      </div>
+                    )}
 
                     {/* Right: finding detail card */}
                     <div className="rounded-xl border border-ck-dark-border bg-ck-dark-card p-4">
@@ -1549,7 +1673,7 @@ export default function InspectieNieuwPage() {
                       </div>
 
                       <button
-                        onClick={submitForApproval}
+                        onClick={() => submitForApproval({ signAndLock: true })}
                         disabled={saving || !signName.trim() || blockingIssues > 0}
                         className="w-full rounded-lg bg-ck-red px-5 text-sm font-semibold text-white mt-4 hover:bg-red-600 disabled:opacity-50"
                         style={{ minHeight: 52 }}
@@ -1588,7 +1712,7 @@ export default function InspectieNieuwPage() {
                       </div>
 
                       <button
-                        onClick={submitForApproval}
+                        onClick={() => submitForApproval({ signAndLock: false })}
                         disabled={saving || !signRecipient.trim() || blockingIssues > 0}
                         className="w-full rounded-lg bg-ck-red px-5 text-sm font-semibold text-white mt-4 hover:bg-red-600 disabled:opacity-50"
                         style={{ minHeight: 52 }}

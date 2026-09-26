@@ -1,5 +1,5 @@
 import { NextRequest, NextResponse } from 'next/server';
-import { createClient, createServiceClient } from '@/lib/supabase/server';
+import { createClient } from '@/lib/supabase/server';
 import { getInspections } from '@/modules/inspectie/queries';
 import { InspectionSchema } from '@/modules/inspectie/schema';
 import type { InsStatus } from '@/modules/inspectie/machine';
@@ -25,12 +25,11 @@ export async function GET(req: NextRequest) {
 }
 
 export async function POST(req: NextRequest) {
+  const supabase = createClient();
+  const { data: { user } } = await supabase.auth.getUser();
+  if (!user) return NextResponse.json({ error: 'Unauthorized' }, { status: 401 });
+
   try {
-    const supabase = createClient();
-    const { data: { user } } = await supabase.auth.getUser();
-
-    const db = user ? supabase : createServiceClient();
-
     const body = await req.json();
     const data = InspectionSchema.parse(body);
 
@@ -38,12 +37,15 @@ export async function POST(req: NextRequest) {
       Object.entries(data).filter(([, v]) => v != null)
     );
 
-    const { data: inspection, error } = await db
+    const { data: inspection, error } = await supabase
       .from('ins_inspections')
       .insert({
         ...clean,
+        vehicle_id: data.vehicle_id,
+        licence_plate: data.licence_plate,
         status: 'CONCEPT',
-        ...(user ? { inspector_id: user.id, created_by: user.id } : {}),
+        inspector_id: user.id,
+        created_by: user.id,
       })
       .select()
       .single();

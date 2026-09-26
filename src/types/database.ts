@@ -1517,6 +1517,7 @@ export type Database = {
           odometer_km: number | null
           parent_inspection_id: string | null
           photo_count: number
+          plate_country: string
           purpose: string
           rdw_payload: Json | null
           rdw_verified: boolean
@@ -1552,6 +1553,7 @@ export type Database = {
           odometer_km?: number | null
           parent_inspection_id?: string | null
           photo_count?: number
+          plate_country?: string
           purpose?: string
           rdw_payload?: Json | null
           rdw_verified?: boolean
@@ -1587,6 +1589,7 @@ export type Database = {
           odometer_km?: number | null
           parent_inspection_id?: string | null
           photo_count?: number
+          plate_country?: string
           purpose?: string
           rdw_payload?: Json | null
           rdw_verified?: boolean

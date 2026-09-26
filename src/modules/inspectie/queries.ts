@@ -1,5 +1,6 @@
 import { createClient } from '@/lib/supabase/server';
 import type { InsStatus } from './machine';
+import { signInsPhotoUrls } from './photos';
 
 const INSPECTION_SELECT = `
   id, reference, status, purpose,
@@ -96,13 +97,16 @@ export async function getInspection(id: string) {
       a.sequence_no - b.sequence_no
     );
   }
+
+  // Photos live in a private bucket; hand out short-lived signed URLs.
+  const photosWithUrls = await signInsPhotoUrls(supabase, data.ins_photos ?? []);
   if (data.ins_events) {
     data.ins_events.sort((a: { created_at: string }, b: { created_at: string }) =>
       new Date(a.created_at).getTime() - new Date(b.created_at).getTime()
     );
   }
 
-  return data;
+  return { ...data, ins_photos: photosWithUrls };
 }
 
 export async function getComponents() {

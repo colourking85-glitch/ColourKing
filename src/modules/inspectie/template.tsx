@@ -42,6 +42,7 @@ type Photo = {
   kind: string;
   sha256: string | null;
   caption: string | null;
+  url?: string | null;
 };
 
 type Approval = {
@@ -475,9 +476,9 @@ export function InspectionReportTemplate({ data, company: c }: { data: Inspectio
   const dispCounts: Record<string, number> = { herstellen: 0, vervangen: 0, onderzoeken: 0 };
   inScope.forEach(f => { if (dispCounts[f.disposition] !== undefined) dispCounts[f.disposition]++; });
 
-  const inspectorApproval = approvals.find(a => a.role === 'inspector');
-  const customerApproval = approvals.find(a => a.role === 'customer');
-  const guidedPhotos = photos.filter(p => p.kind === 'guided');
+  const inspectorApproval = approvals.find(a => a.role === 'inspecteur');
+  const customerApproval = approvals.find(a => a.role === 'klant');
+  const guidedPhotos = photos.filter(p => p.kind === 'shot');
 
   return (
     <div className="inspection-report" style={{ background: C.raised }}>
@@ -700,6 +701,10 @@ export function InspectionReportTemplate({ data, company: c }: { data: Inspectio
                   position: 'relative',
                   overflow: 'hidden',
                 }}>
+                  {p.url && (
+                    // eslint-disable-next-line @next/next/no-img-element
+                    <img src={p.url} alt={p.reference} style={{ position: 'absolute', inset: 0, width: '100%', height: '100%', objectFit: 'cover' }} />
+                  )}
                   <span style={{
                     position: 'absolute',
                     bottom: '6px',
@@ -934,7 +939,7 @@ export function InspectionReportTemplate({ data, company: c }: { data: Inspectio
             {approvals.map(a => (
               <div key={a.id} style={{ marginBottom: '24px' }}>
                 {([
-                  ['Rol', a.role === 'customer' ? 'Klant' : 'Opnemer'],
+                  ['Rol', a.role === 'klant' ? 'Klant' : 'Opnemer'],
                   ['Naam', a.signer_name],
                   ['Identificatie', a.identification || 'Ingelogd'],
                   ['Verklaring', a.statement_text || 'Opname ingezien en akkoord'],

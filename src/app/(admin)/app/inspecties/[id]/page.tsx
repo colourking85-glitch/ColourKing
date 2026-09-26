@@ -1,10 +1,11 @@
 'use client';
 
-import { useState, useEffect, useRef, useMemo } from 'react';
+import { useState, useEffect, useRef, useMemo, useCallback } from 'react';
 import { useParams } from 'next/navigation';
 import Link from 'next/link';
 import { useTranslations } from 'next-intl';
-import { ArrowLeft, Printer, Link2, FileDown, Camera } from 'lucide-react';
+import { ArrowLeft, Printer, Link2, FileDown, Camera, Send, Undo2, CheckCircle2, XCircle, X, Lock } from 'lucide-react';
+import { getSession } from '@/lib/auth';
 import { ScreenBadge } from '@/components/ui/ScreenBadge';
 import { PhotoCapture } from '@/components/ui/PhotoCapture';
 import {
@@ -57,6 +58,7 @@ type Photo = {
   sha256: string | null;
   captured_at: string | null;
   caption: string | null;
+  url?: string | null;
 };
 
 type Approval = {
@@ -158,8 +160,13 @@ export default function InspectieDetailPage() {
   const { id } = useParams<{ id: string }>();
   const t = useTranslations('in');
   const tCommon = useTranslations('common');
+  const tIn = useTranslations('in');
 
   const [ins, setIns] = useState<Inspection | null>(null);
+  const [busy, setBusy] = useState(false);
+  const [actionError, setActionError] = useState('');
+  const [showApprove, setShowApprove] = useState(false);
+  const [signerName, setSignerName] = useState('');
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState('');
 
@@ -182,9 +189,46 @@ export default function InspectieDetailPage() {
       .finally(() => setLoading(false));
   }, [id]);
 
+  useEffect(() => {
+    getSession().then(s => { if (s?.name) setSignerName(s.name); }).catch(() => {});
+  }, []);
+
+  const reload = useCallback(async () => {
+    const r = await fetch(`/api/inspections/${id}`);
+    if (r.ok) setIns(await r.json());
+  }, [id]);
+
+  const doTransition = useCallback(async (to: InsStatus) => {
+    if (to === 'GEANNULEERD' && !confirm(tIn('detail.confirmCancel'))) return;
+    setBusy(true); setActionError('');
+    try {
+      const r = await fetch(`/api/inspections/${id}/transition`, {
+        method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify({ to }),
+      });
+      if (!r.ok) { const d = await r.json().catch(() => ({})); throw new Error(d.error || r.statusText); }
+      await reload();
+    } catch (e) { setActionError(e instanceof Error ? e.message : String(e)); }
+    finally { setBusy(false); }
+  }, [id, reload, tIn]);
+
+  const approveAndLock = useCallback(async () => {
+    if (!signerName.trim()) return;
+    setBusy(true); setActionError('');
+    try {
+      const r = await fetch(`/api/inspections/${id}/approve`, {
+        method: 'POST', headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ role: 'inspecteur', signer_name: signerName.trim(), statement_text: tIn('detail.approvalStatement'), lock: true }),
+      });
+      if (!r.ok) { const d = await r.json().catch(() => ({})); throw new Error(d.error || r.statusText); }
+      setShowApprove(false);
+      await reload();
+    } catch (e) { setActionError(e instanceof Error ? e.message : String(e)); }
+    finally { setBusy(false); }
+  }, [id, reload, signerName, tIn]);
+
   const findings = ins?.ins_findings || [];
   const photos = ins?.ins_photos || [];
-  const guidedPhotos = photos.filter(p => p.kind === 'guided');
+  const guidedPhotos = photos.filter(p => p.kind === 'shot');
   const approvals = ins?.ins_approvals || [];
   const snapshots = ins?.ins_snapshots || [];
   const events = ins?.ins_events || [];
@@ -243,8 +287,8 @@ export default function InspectieDetailPage() {
 
   const locked = isTerminal(ins.status);
   const snapshot = snapshots[0];
-  const inspectorApproval = approvals.find(a => a.role === 'inspector');
-  const customerApproval = approvals.find(a => a.role === 'customer');
+  const inspectorApproval = approvals.find(a => a.role === 'inspecteur');
+  const customerApproval = approvals.find(a => a.role === 'klant');
 
   return (
     <div className="-m-6 flex h-[calc(100vh-48px)] flex-col overflow-hidden bg-ck-dark">
@@ -271,6 +315,76 @@ export default function InspectieDetailPage() {
             )}
           </div>
 
+          {!locked && (
+            <div className="flex items-center gap-2 border-l border-ck-dark-border pl-4 ml-1">
+              {(ins.status === 'CONCEPT' || ins.status === 'BEZIG') && (
+                <button
+                  onClick={() => doTransition('TER_AKKOORD')}
+                  disabled={busy}
+                  className="flex items-center gap-1.5 rounded-lg bg-ck-red px-3 py-1.5 text-xs font-semibold text-white hover:bg-ck-red-hover disabled:opacity-50"
+                >
+                  <Send size={14} /> {tIn('detail.submit')}
+                </button>
+              )}
+              {ins.status === 'TER_AKKOORD' && !inspectorApproval && !showApprove && (
+                <button
+                  onClick={() => setShowApprove(true)}
+                  disabled={busy}
+                  className="flex items-center gap-1.5 rounded-lg bg-green-600 px-3 py-1.5 text-xs font-semibold text-white hover:bg-green-500 disabled:opacity-50"
+                >
+                  <CheckCircle2 size={14} /> {tIn('detail.approveAndLock')}
+                </button>
+              )}
+              {ins.status === 'TER_AKKOORD' && !inspectorApproval && showApprove && (
+                <span className="flex items-center gap-1.5">
+                  <input
+                    value={signerName}
+                    onChange={e => setSignerName(e.target.value)}
+                    placeholder={tIn('detail.signerNamePlaceholder')}
+                    className="w-40 rounded-lg border border-ck-dark-border bg-ck-dark-surface px-2 py-1.5 text-xs text-white focus:border-ck-red focus:outline-none"
+                  />
+                  <button
+                    onClick={approveAndLock}
+                    disabled={busy || !signerName.trim()}
+                    className="flex items-center gap-1.5 rounded-lg bg-green-600 px-3 py-1.5 text-xs font-semibold text-white hover:bg-green-500 disabled:opacity-50"
+                  >
+                    <CheckCircle2 size={14} /> {tIn('detail.confirm')}
+                  </button>
+                  <button onClick={() => setShowApprove(false)} className="p-1 text-ck-muted hover:text-white" aria-label={tCommon('cancel')}>
+                    <X size={14} />
+                  </button>
+                </span>
+              )}
+              {(ins.status === 'AKKOORD' || (ins.status === 'TER_AKKOORD' && inspectorApproval)) && (
+                <button
+                  onClick={() => doTransition(ins.status === 'AKKOORD' ? 'VERGRENDELD' : 'AKKOORD')}
+                  disabled={busy}
+                  className="flex items-center gap-1.5 rounded-lg bg-green-600 px-3 py-1.5 text-xs font-semibold text-white hover:bg-green-500 disabled:opacity-50"
+                >
+                  <Lock size={14} /> {tIn('detail.lock')}
+                </button>
+              )}
+              {ins.status === 'TER_AKKOORD' && (
+                <button
+                  onClick={() => doTransition('BEZIG')}
+                  disabled={busy}
+                  className="flex items-center gap-1.5 rounded-lg border border-ck-dark-border px-3 py-1.5 text-xs font-medium text-ck-muted-light hover:bg-ck-dark-surface hover:text-white disabled:opacity-50"
+                >
+                  <Undo2 size={14} /> {tIn('detail.backToProgress')}
+                </button>
+              )}
+              {ins.status !== 'AKKOORD' && (
+                <button
+                  onClick={() => doTransition('GEANNULEERD')}
+                  disabled={busy}
+                  className="flex items-center gap-1.5 rounded-lg border border-red-500/30 px-3 py-1.5 text-xs font-medium text-red-400 hover:bg-red-500/10 disabled:opacity-50"
+                >
+                  <XCircle size={14} /> {tIn('detail.cancel')}
+                </button>
+              )}
+            </div>
+          )}
+          {actionError && <span className="ml-3 text-xs text-red-400">{actionError}</span>}
           <div className="flex-1" />
 
           <div className="flex items-center gap-2">
@@ -618,9 +732,12 @@ export default function InspectieDetailPage() {
                       {guidedPhotos.map(p => (
                         <div key={p.id}>
                           <div className="relative aspect-[4/3] overflow-hidden rounded bg-ck-dark-surface">
-                            <div className="absolute inset-0" style={{
-                              backgroundImage: 'repeating-linear-gradient(45deg, transparent, transparent 9px, rgba(255,255,255,0.05) 9px, rgba(255,255,255,0.05) 10px)'
-                            }} />
+                            {p.url ? (
+                              // eslint-disable-next-line @next/next/no-img-element
+                              <img src={p.url} alt={p.reference} className="absolute inset-0 h-full w-full object-cover" />
+                            ) : (
+                              <div className="absolute inset-0" style={{ backgroundImage: 'repeating-linear-gradient(45deg, transparent, transparent 9px, rgba(255,255,255,0.05) 9px, rgba(255,255,255,0.05) 10px)' }} />
+                            )}
                             <span className="absolute bottom-1.5 left-1.5 rounded bg-ck-dark-card px-1 py-0.5 font-mono text-[10px] text-ck-muted">
                               {p.reference}
                             </span>
@@ -669,9 +786,12 @@ export default function InspectieDetailPage() {
                             <div className="grid grid-cols-2 gap-1.5">
                               {findingPhotos.slice(0, 4).map(p => (
                                 <div key={p.id} className="relative aspect-[4/3] overflow-hidden rounded bg-ck-dark-surface">
-                                  <div className="absolute inset-0" style={{
-                                    backgroundImage: 'repeating-linear-gradient(45deg, transparent, transparent 9px, rgba(255,255,255,0.05) 9px, rgba(255,255,255,0.05) 10px)'
-                                  }} />
+                                  {p.url ? (
+                                    // eslint-disable-next-line @next/next/no-img-element
+                                    <img src={p.url} alt={p.reference} className="absolute inset-0 h-full w-full object-cover" />
+                                  ) : (
+                                    <div className="absolute inset-0" style={{ backgroundImage: 'repeating-linear-gradient(45deg, transparent, transparent 9px, rgba(255,255,255,0.05) 9px, rgba(255,255,255,0.05) 10px)' }} />
+                                  )}
                                   <span className="absolute bottom-1 left-1 rounded bg-ck-dark-card px-1 py-0.5 font-mono text-[9px] text-ck-muted">
                                     {p.reference}
                                   </span>
@@ -720,9 +840,12 @@ export default function InspectieDetailPage() {
                           <div className="flex gap-1.5">
                             {findingPhotos.slice(0, 1).map(p => (
                               <div key={p.id} className="relative h-10 w-14 overflow-hidden rounded bg-ck-dark-surface">
-                                <div className="absolute inset-0" style={{
-                                  backgroundImage: 'repeating-linear-gradient(45deg, transparent, transparent 9px, rgba(255,255,255,0.05) 9px, rgba(255,255,255,0.05) 10px)'
-                                }} />
+                                {p.url ? (
+                                  // eslint-disable-next-line @next/next/no-img-element
+                                  <img src={p.url} alt={p.reference} className="absolute inset-0 h-full w-full object-cover" />
+                                ) : (
+                                  <div className="absolute inset-0" style={{ backgroundImage: 'repeating-linear-gradient(45deg, transparent, transparent 9px, rgba(255,255,255,0.05) 9px, rgba(255,255,255,0.05) 10px)' }} />
+                                )}
                               </div>
                             ))}
                           </div>
@@ -904,7 +1027,7 @@ export default function InspectieDetailPage() {
                     {approvals.map(a => (
                       <div key={a.id}>
                         {[
-                          ['Rol', a.role === 'customer' ? 'Klant' : 'Opnemer'],
+                          ['Rol', a.role === 'klant' ? tIn('detail.roleCustomer') : tIn('detail.roleInspector')],
                           ['Naam', a.signer_name],
                           ['Identificatie', a.identification || 'Ingelogd'],
                           ['Verklaring', a.statement_text || 'Opname ingezien en akkoord'],
@@ -977,9 +1100,12 @@ export default function InspectieDetailPage() {
                 <div className="mt-4 grid grid-cols-2 gap-1.5">
                   {selectedPhotos.slice(0, 4).map(p => (
                     <div key={p.id} className="relative aspect-[4/3] overflow-hidden rounded bg-ck-dark-surface">
-                      <div className="absolute inset-0" style={{
-                        backgroundImage: 'repeating-linear-gradient(45deg, transparent, transparent 9px, rgba(255,255,255,0.05) 9px, rgba(255,255,255,0.05) 10px)'
-                      }} />
+                      {p.url ? (
+                        // eslint-disable-next-line @next/next/no-img-element
+                        <img src={p.url} alt={p.reference} className="absolute inset-0 h-full w-full object-cover" />
+                      ) : (
+                        <div className="absolute inset-0" style={{ backgroundImage: 'repeating-linear-gradient(45deg, transparent, transparent 9px, rgba(255,255,255,0.05) 9px, rgba(255,255,255,0.05) 10px)' }} />
+                      )}
                       <span className="absolute bottom-1 left-1 rounded bg-ck-dark-card px-1 py-0.5 font-mono text-[10px] text-ck-muted">
                         {p.reference}
                       </span>
