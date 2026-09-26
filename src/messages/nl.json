@@ -1749,7 +1749,9 @@
     "statusSent": "Verzonden",
     "statusSkipped": "Overgeslagen",
     "statusFailed": "Mislukt",
-    "cronNoteReminders": "Dagelijks om 09:00 (Europe/Amsterdam) via Vercel Cron."
+    "cronNoteReminders": "Dagelijks om 09:00 (Europe/Amsterdam) via Vercel Cron.",
+    "bcc": "BCC (kopie naar, optioneel)",
+    "bccHint": "Elke e-mail van deze afzender wordt ook blind naar dit adres gestuurd — handig om verzonden facturen of offertes te controleren."
   },
   "signature": {
     "signHere": "Hier tekenen",

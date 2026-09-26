@@ -154,6 +154,11 @@ export function EmailSettingsTab() {
                     <label className="mb-1 block text-xs text-ck-muted">{tSy('replyTo')}</label>
                     <input className={inputClass} type="email" value={id.reply_to} onChange={(e) => setIdentity(p, { reply_to: e.target.value })} />
                   </div>
+                  <div>
+                    <label className="mb-1 block text-xs text-ck-muted">{tSy('bcc')}</label>
+                    <input className={inputClass} type="email" placeholder="archief@colourking.nl" value={id.bcc ?? ''} onChange={(e) => setIdentity(p, { bcc: e.target.value })} />
+                    <p className="mt-1 text-[11px] text-ck-muted">{tSy('bccHint')}</p>
+                  </div>
                 </div>
                 <div className="mt-3 flex items-center gap-3">
                   <button

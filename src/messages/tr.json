@@ -1749,7 +1749,9 @@
     "statusSent": "Gönderildi",
     "statusSkipped": "Atlandı",
     "statusFailed": "Başarısız",
-    "cronNoteReminders": "Her gün 09:00 (Europe/Amsterdam), Vercel Cron ile."
+    "cronNoteReminders": "Her gün 09:00 (Europe/Amsterdam), Vercel Cron ile.",
+    "bcc": "BCC (kopya, isteğe bağlı)",
+    "bccHint": "Bu gönderenden çıkan her e-posta bu adrese de gizli kopya olarak gönderilir — gönderilen faturaları veya teklifleri kontrol etmek için kullanışlıdır."
   },
   "signature": {
     "signHere": "Buraya imza atın",

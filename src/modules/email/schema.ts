@@ -163,6 +163,7 @@ export const EmailIdentitySchema = z.object({
   from_name: z.string().max(80).default(''),
   from_email: z.string().email().or(z.literal('')).default(''),
   reply_to: z.string().email().or(z.literal('')).default(''),
+  bcc: z.string().email().or(z.literal('')).default(''),
   enabled: z.boolean().default(true),
 });
 

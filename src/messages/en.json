@@ -1749,7 +1749,9 @@
     "statusSent": "Sent",
     "statusSkipped": "Skipped",
     "statusFailed": "Failed",
-    "cronNoteReminders": "Daily at 09:00 (Europe/Amsterdam) via Vercel Cron."
+    "cronNoteReminders": "Daily at 09:00 (Europe/Amsterdam) via Vercel Cron.",
+    "bcc": "BCC (copy to, optional)",
+    "bccHint": "Every email from this sender is also blind-copied to this address — useful to check sent invoices or quotes."
   },
   "signature": {
     "signHere": "Sign here",
