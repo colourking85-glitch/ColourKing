@@ -523,7 +523,7 @@ export default function InspectieNieuwPage() {
 
   // ---- submit ----
 
-  const submitForApproval = useCallback(async (opts: { signAndLock: boolean }) => {
+  const submitForApproval = useCallback(async (opts: { signAndLock: boolean; shareWith?: string }) => {
     if (!inspection) return;
     setSaving(true); setError('');
     try {
@@ -537,6 +537,14 @@ export default function InspectieNieuwPage() {
           method: 'POST',
           headers: { 'Content-Type': 'application/json' },
           body: JSON.stringify({ role: 'inspecteur', signer_name: signName.trim(), statement_text: t('wizard.declarationText'), lock: true }),
+        });
+        if (!res.ok) { const data = await res.json(); throw new Error(data.error || t('wizard.errorSubmitFailed')); }
+      }
+      if (!opts.signAndLock && opts.shareWith !== undefined) {
+        // Remote signing: create the customer link (emailed when the recipient is an address)
+        const email = opts.shareWith.includes('@') ? opts.shareWith : null;
+        const res = await fetch(`/api/inspections/${inspection.id}/share`, {
+          method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify({ email }),
         });
         if (!res.ok) { const data = await res.json(); throw new Error(data.error || t('wizard.errorSubmitFailed')); }
       }
@@ -562,10 +570,10 @@ export default function InspectieNieuwPage() {
       const ok = await createInspection();
       if (!ok) return;
     }
-    if (step === 6) { await submitForApproval({ signAndLock: signMode === 'tablet' && !!signName.trim() }); return; }
+    if (step === 6) { await submitForApproval({ signAndLock: signMode === 'tablet' && !!signName.trim(), shareWith: signMode === 'remote' ? signRecipient.trim() : undefined }); return; }
     setStep(s => Math.min(s + 1, 6));
     setError('');
-  }, [step, inspection, createInspection, submitForApproval, signMode, signName]);
+  }, [step, inspection, createInspection, submitForApproval, signMode, signName, signRecipient]);
 
   const goPrev = useCallback(() => { setStep(s => Math.max(s - 1, 0)); setError(''); }, []);
 
@@ -1763,13 +1771,13 @@ export default function InspectieNieuwPage() {
                       <div className="mt-4 rounded-md bg-ck-dark-surface px-4 py-3">
                         <span className="text-[10px] font-semibold uppercase tracking-widest text-ck-muted">{t('wizard.linkHeader')}</span>
                         <span className="block font-mono text-[13px] text-white mt-1 break-all">
-                          colourking.nl/opname/{inspection.id.substring(0, 4)}…{inspection.id.substring(inspection.id.length - 4)}
+                          {t('wizard.linkPending')}
                         </span>
                         <span className="block text-[11px] text-ck-muted mt-1.5">{t('wizard.linkDisclaimer')}</span>
                       </div>
 
                       <button
-                        onClick={() => submitForApproval({ signAndLock: false })}
+                        onClick={() => submitForApproval({ signAndLock: false, shareWith: signRecipient.trim() })}
                         disabled={saving || !signRecipient.trim() || blockingIssues > 0}
                         className="w-full rounded-lg bg-ck-red px-5 text-sm font-semibold text-white mt-4 hover:bg-red-600 disabled:opacity-50"
                         style={{ minHeight: 52 }}

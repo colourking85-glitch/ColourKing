@@ -3950,6 +3950,19 @@ export type Database = {
       }
       ins_build_snapshot: { Args: { p_id: string }; Returns: Json }
       ins_recount: { Args: { p_id: string }; Returns: undefined }
+      ins_share_view: { Args: { p_token_hash: string }; Returns: Json }
+      ins_approve_by_token: {
+        Args: {
+          p_token_hash: string
+          p_signer_name: string
+          p_signer_email: string | null
+          p_statement_text: string
+          p_signature_path: string
+          p_ip_address?: unknown
+          p_user_agent?: string | null
+        }
+        Returns: Database["public"]["Tables"]["ins_approvals"]["Row"]
+      }
       ins_transition: {
         Args: { p_id: string; p_to: string; p_payload?: Json }
         Returns: Database["public"]["Tables"]["ins_inspections"]["Row"]

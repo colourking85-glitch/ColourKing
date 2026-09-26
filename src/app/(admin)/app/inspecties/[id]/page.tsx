@@ -4,7 +4,7 @@ import { useState, useEffect, useRef, useMemo, useCallback } from 'react';
 import { useParams } from 'next/navigation';
 import Link from 'next/link';
 import { useTranslations, useLocale } from 'next-intl';
-import { ArrowLeft, Printer, Link2, FileDown, Camera, Send, Undo2, CheckCircle2, XCircle, X, Lock } from 'lucide-react';
+import { ArrowLeft, Printer, Link2, FileDown, Camera, Send, Undo2, CheckCircle2, XCircle, X, Lock, Copy, Mail } from 'lucide-react';
 import { getSession } from '@/lib/auth';
 import { ScreenBadge } from '@/components/ui/ScreenBadge';
 import { PhotoCapture } from '@/components/ui/PhotoCapture';
@@ -171,6 +171,12 @@ export default function InspectieDetailPage() {
   const [actionError, setActionError] = useState('');
   const [showApprove, setShowApprove] = useState(false);
   const [signerName, setSignerName] = useState('');
+  const [showShare, setShowShare] = useState(false);
+  const [shareEmail, setShareEmail] = useState('');
+  const [shareUrl, setShareUrl] = useState('');
+  const [shareBusy, setShareBusy] = useState(false);
+  const [shareMsg, setShareMsg] = useState('');
+  const [shareLinks, setShareLinks] = useState<{ id: string; recipient_email: string | null; expires_at: string; used_at: string | null; revoked_at: string | null; created_at: string }[]>([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState('');
 
@@ -223,6 +229,29 @@ export default function InspectieDetailPage() {
     } catch (e) { setActionError(e instanceof Error ? e.message : String(e)); }
     finally { setBusy(false); }
   }, [id, reload, tIn]);
+
+  const loadShareLinks = useCallback(async () => {
+    const r = await fetch(`/api/inspections/${id}/share`);
+    if (r.ok) setShareLinks(await r.json());
+  }, [id]);
+
+  useEffect(() => { if (showShare) loadShareLinks(); }, [showShare, loadShareLinks]);
+
+  const createShare = useCallback(async (send: boolean) => {
+    setShareBusy(true); setShareMsg(''); setActionError('');
+    try {
+      const r = await fetch(`/api/inspections/${id}/share`, {
+        method: 'POST', headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ email: send ? shareEmail.trim() : null }),
+      });
+      const d = await r.json().catch(() => ({}));
+      if (!r.ok) throw new Error(d.error || r.statusText);
+      setShareUrl(d.url);
+      if (d.emailed) setShareMsg(tIn('detail.shareSent'));
+      await loadShareLinks();
+    } catch (e) { setActionError(e instanceof Error ? e.message : String(e)); }
+    finally { setShareBusy(false); }
+  }, [id, shareEmail, loadShareLinks, tIn]);
 
   const approveAndLock = useCallback(async () => {
     if (!signerName.trim()) return;
@@ -404,7 +433,10 @@ export default function InspectieDetailPage() {
             <button className="flex items-center gap-1.5 rounded-lg border border-ck-dark-border px-3 py-1.5 text-xs font-medium text-ck-muted-light hover:bg-ck-dark-surface hover:text-white">
               <Printer size={14} /> Printen
             </button>
-            <button className="flex items-center gap-1.5 rounded-lg border border-ck-dark-border px-3 py-1.5 text-xs font-medium text-ck-muted-light hover:bg-ck-dark-surface hover:text-white">
+            <button
+              onClick={() => { setShowShare(v => !v); if (!shareEmail && ins.customers?.email) setShareEmail(ins.customers.email); }}
+              className={`flex items-center gap-1.5 rounded-lg border px-3 py-1.5 text-xs font-medium hover:bg-ck-dark-surface hover:text-white ${showShare ? 'border-ck-red text-white' : 'border-ck-dark-border text-ck-muted-light'}`}
+            >
               <Link2 size={14} /> Deellink
             </button>
             {!locked && (
@@ -436,6 +468,54 @@ export default function InspectieDetailPage() {
           {ins.staff && <span>Opnemer {ins.staff.name}</span>}
           {customerApproval && <span>Akkoord {customerApproval.signer_name} · elektronisch ondertekend</span>}
         </div>
+        {showShare && (
+          <div className="border-t border-ck-dark-border bg-ck-dark-surface/40 px-5 py-3">
+            <div className="flex flex-wrap items-center gap-2">
+              <span className="text-[10px] font-semibold uppercase tracking-widest text-ck-muted">{tIn('detail.shareTitle')}</span>
+              {ins.status !== 'TER_AKKOORD' ? (
+                <span className="text-xs text-ck-muted">{tIn('detail.shareOnlyPending')}</span>
+              ) : (
+                <>
+                  <input
+                    value={shareEmail}
+                    onChange={e => setShareEmail(e.target.value)}
+                    placeholder={tIn('detail.shareEmail')}
+                    type="email"
+                    className="w-64 rounded-lg border border-ck-dark-border bg-ck-dark-surface px-2 py-1.5 text-xs text-white focus:border-ck-red focus:outline-none"
+                  />
+                  <button onClick={() => createShare(false)} disabled={shareBusy} className="rounded-lg border border-ck-dark-border px-3 py-1.5 text-xs text-ck-muted-light hover:text-white disabled:opacity-50">
+                    {tIn('detail.shareCreate')}
+                  </button>
+                  <button onClick={() => createShare(true)} disabled={shareBusy || !shareEmail.trim()} className="flex items-center gap-1.5 rounded-lg bg-ck-red px-3 py-1.5 text-xs font-semibold text-white hover:bg-ck-red-hover disabled:opacity-50">
+                    <Mail size={12} /> {tIn('detail.shareSend')}
+                  </button>
+                </>
+              )}
+              {shareUrl && (
+                <span className="flex items-center gap-1.5">
+                  <code className="max-w-[360px] truncate rounded bg-ck-dark-card px-2 py-1 font-mono text-[11px] text-white">{shareUrl}</code>
+                  <button
+                    onClick={() => { navigator.clipboard?.writeText(shareUrl); setShareMsg(tIn('detail.shareCopied')); }}
+                    className="flex items-center gap-1 rounded border border-ck-dark-border px-2 py-1 text-[11px] text-ck-muted-light hover:text-white"
+                  >
+                    <Copy size={11} /> {tIn('detail.shareCopy')}
+                  </button>
+                </span>
+              )}
+              {shareMsg && <span className="text-xs text-green-400">{shareMsg}</span>}
+            </div>
+            {shareLinks.length > 0 && (
+              <div className="mt-2 flex flex-wrap gap-x-4 gap-y-1 text-[11px] text-ck-muted">
+                <span className="uppercase tracking-widest">{tIn('detail.shareExisting')}:</span>
+                {shareLinks.map(l => (
+                  <span key={l.id}>
+                    {l.recipient_email ?? '—'} · {l.used_at ? tIn('detail.shareUsed') : `${tIn('detail.shareExpires')} ${fmtDateTime(l.expires_at)}`}
+                  </span>
+                ))}
+              </div>
+            )}
+          </div>
+        )}
       </header>
 
       {/* ─── Body: 3-panel layout ─── */}
