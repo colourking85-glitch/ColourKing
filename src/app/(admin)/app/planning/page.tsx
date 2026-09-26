@@ -28,24 +28,29 @@ type StaffSummary = {
   total: number;
 };
 
-function getWeekDates(offset: number): { from: Date; to: Date; dates: Date[] } {
-  const now = new Date();
-  const day = now.getDay();
-  const monday = new Date(now);
-  monday.setDate(now.getDate() - (day === 0 ? 6 : day - 1) + offset * 7);
-  monday.setHours(0, 0, 0, 0);
+type ViewMode = 'day' | '3day' | 'week' | 'month';
+type BlackoutRow = { title: string; start_date: string; end_date: string; resource_id: string | null; all_day: boolean };
 
-  const dates: Date[] = [];
-  for (let i = 0; i < 7; i++) {
-    const d = new Date(monday);
-    d.setDate(monday.getDate() + i);
-    dates.push(d);
+function startOfDay(d: Date): Date { const r = new Date(d); r.setHours(0, 0, 0, 0); return r; }
+function addDays(d: Date, n: number): Date { const r = new Date(d); r.setDate(r.getDate() + n); return r; }
+function mondayOf(d: Date): Date { const day = d.getDay(); return startOfDay(addDays(d, -(day === 0 ? 6 : day - 1))); }
+
+/** Date columns for the chosen view around the anchor date. */
+function getRange(view: ViewMode, anchor: Date): { from: Date; to: Date; dates: Date[] } {
+  let start: Date;
+  let count: number;
+  if (view === 'day') { start = startOfDay(anchor); count = 1; }
+  else if (view === '3day') { start = startOfDay(anchor); count = 3; }
+  else if (view === 'week') { start = mondayOf(anchor); count = 7; }
+  else {
+    start = new Date(anchor.getFullYear(), anchor.getMonth(), 1);
+    count = new Date(anchor.getFullYear(), anchor.getMonth() + 1, 0).getDate();
   }
-
-  const to = new Date(dates[6]);
+  const dates: Date[] = [];
+  for (let i = 0; i < count; i++) dates.push(addDays(start, i));
+  const to = new Date(dates[dates.length - 1]);
   to.setHours(23, 59, 59, 999);
-
-  return { from: monday, to, dates };
+  return { from: start, to, dates };
 }
 
 function toISODate(d: Date): string {
@@ -71,12 +76,23 @@ export default function PlanningPage() {
   const t = useTranslations('te');
   const tAp = useTranslations('ap');
   const DAY_NAMES = [tAp('dayMo'), tAp('dayTu'), tAp('dayWe'), tAp('dayTh'), tAp('dayFr'), tAp('daySa'), tAp('daySu')];
-  const [weekOffset, setWeekOffset] = useState(0);
+  const [view, setView] = useState<ViewMode>('week');
+  const [anchor, setAnchor] = useState(() => new Date());
   const [entries, setEntries] = useState<TimeEntryRow[]>([]);
+  const [blackouts, setBlackouts] = useState<BlackoutRow[]>([]);
   const [loading, setLoading] = useState(true);
   const [selectedCell, setSelectedCell] = useState<{ staffId: string; date: string } | null>(null);
 
-  const { from, to, dates } = useMemo(() => getWeekDates(weekOffset), [weekOffset]);
+  const { from, to, dates } = useMemo(() => getRange(view, anchor), [view, anchor]);
+
+  function navigate(dir: -1 | 1) {
+    setAnchor(a => {
+      if (view === 'month') return new Date(a.getFullYear(), a.getMonth() + dir, 1);
+      return addDays(a, dir * (view === 'day' ? 1 : view === '3day' ? 3 : 7));
+    });
+  }
+
+  const closureFor = (key: string) => blackouts.find(b => !b.resource_id && b.all_day && b.start_date <= key && b.end_date >= key);
 
   // Target: 8 hours per day
   const TARGET_MINUTES = 8 * 60;
@@ -86,9 +102,11 @@ export default function PlanningPage() {
     const params = new URLSearchParams();
     params.set('from', from.toISOString());
     params.set('to', to.toISOString());
-    fetch(`/api/time-entries?${params}`)
-      .then(r => r.ok ? r.json() : [])
-      .then(setEntries)
+    Promise.all([
+      fetch(`/api/time-entries?${params}`).then(r => r.ok ? r.json() : []),
+      fetch(`/api/blackouts?from=${toISODate(from)}&to=${toISODate(to)}`).then(r => r.ok ? r.json() : []),
+    ])
+      .then(([rows, bo]) => { setEntries(rows); setBlackouts(bo); })
       .finally(() => setLoading(false));
   }, [from, to]);
 
@@ -137,7 +155,19 @@ export default function PlanningPage() {
     });
   }, [selectedCell, entries]);
 
-  const weekLabel = `${dates[0].toLocaleDateString('nl-NL', { day: 'numeric', month: 'short' })} - ${dates[6].toLocaleDateString('nl-NL', { day: 'numeric', month: 'short', year: 'numeric' })}`;
+  const last = dates[dates.length - 1];
+  const weekLabel = view === 'month'
+    ? anchor.toLocaleDateString('nl-NL', { month: 'long', year: 'numeric' })
+    : view === 'day'
+      ? dates[0].toLocaleDateString('nl-NL', { weekday: 'long', day: 'numeric', month: 'long', year: 'numeric' })
+      : `${dates[0].toLocaleDateString('nl-NL', { day: 'numeric', month: 'short' })} - ${last.toLocaleDateString('nl-NL', { day: 'numeric', month: 'short', year: 'numeric' })}`;
+
+  const VIEWS: { id: ViewMode; label: string }[] = [
+    { id: 'day', label: tAp('viewDay') },
+    { id: '3day', label: tAp('view3Day') },
+    { id: 'week', label: tAp('viewWeek') },
+    { id: 'month', label: tAp('viewMonth') },
+  ];
 
   return (
     <div className="space-y-6">
@@ -157,26 +187,39 @@ export default function PlanningPage() {
       <div className="flex items-center justify-between">
         <div className="flex items-center gap-2">
           <button
-            onClick={() => setWeekOffset(w => w - 1)}
+            onClick={() => navigate(-1)}
             className="rounded-[10px] border-[0.5px] border-ck-border bg-ck-surface p-2 hover:bg-ck-surface-2 transition-colors"
           >
             <ChevronLeft size={16} className="text-ck-text-muted" />
           </button>
           <button
-            onClick={() => setWeekOffset(0)}
+            onClick={() => setAnchor(new Date())}
             className="rounded-[10px] border-[0.5px] border-ck-border bg-ck-surface px-3 py-2 text-sm text-ck-text hover:bg-ck-surface-2 transition-colors"
           >
             <Calendar size={14} className="inline mr-1.5" />
             {t('today')}
           </button>
           <button
-            onClick={() => setWeekOffset(w => w + 1)}
+            onClick={() => navigate(1)}
             className="rounded-[10px] border-[0.5px] border-ck-border bg-ck-surface p-2 hover:bg-ck-surface-2 transition-colors"
           >
             <ChevronRight size={16} className="text-ck-text-muted" />
           </button>
         </div>
         <span className="text-sm font-medium text-ck-text">{weekLabel}</span>
+        <div className="flex rounded-[10px] border-[0.5px] border-ck-border bg-ck-surface p-0.5">
+          {VIEWS.map(v => (
+            <button
+              key={v.id}
+              onClick={() => setView(v.id)}
+              className={`rounded-lg px-3 py-1.5 text-xs font-medium transition-colors ${
+                view === v.id ? 'bg-ck-red text-white' : 'text-ck-text-muted hover:text-ck-text'
+              }`}
+            >
+              {v.label}
+            </button>
+          ))}
+        </div>
       </div>
 
       {/* Grid */}
@@ -188,21 +231,24 @@ export default function PlanningPage() {
         ) : staffSummaries.length === 0 ? (
           <div className="flex h-48 flex-col items-center justify-center gap-3">
             <Users size={32} className="text-ck-text-faint" />
-            <p className="text-sm text-ck-text-muted">{t('noEntriesWeek')}</p>
+            <p className="text-sm text-ck-text-muted">{view === 'week' ? t('noEntriesWeek') : t('noEntriesPeriod')}</p>
           </div>
         ) : (
-          <table className="w-full min-w-[700px]">
+          <table className={`w-full ${view === 'month' ? 'min-w-[1600px]' : 'min-w-[700px]'}`}>
             <thead>
               <tr className="border-b border-ck-border text-[11px] uppercase tracking-wider text-ck-text-muted">
                 <th className="px-4 py-3 text-left font-medium">{t('staffMember')}</th>
                 {dates.map((d, i) => {
-                  const isToday = toISODate(d) === toISODate(new Date());
+                  const key = toISODate(d);
+                  const isToday = key === toISODate(new Date());
+                  const closure = closureFor(key);
                   return (
                     <th
                       key={i}
-                      className={`px-3 py-3 text-center font-medium ${isToday ? 'text-ck-red' : ''}`}
+                      title={closure ? `${tAp('closedDay')}: ${closure.title}` : undefined}
+                      className={`px-3 py-3 text-center font-medium ${closure ? 'bg-red-500/10 text-red-400' : isToday ? 'text-ck-red' : ''}`}
                     >
-                      <div>{DAY_NAMES[i]}</div>
+                      <div>{DAY_NAMES[(d.getDay() + 6) % 7]}</div>
                       <div className="text-[10px] font-normal">
                         {d.toLocaleDateString('nl-NL', { day: 'numeric', month: 'short' })}
                       </div>
@@ -219,12 +265,12 @@ export default function PlanningPage() {
                   {dates.map((d, i) => {
                     const key = toISODate(d);
                     const mins = staff.days[key] ?? 0;
-                    const isWeekend = i >= 5;
-                    const colorClass = isWeekend ? '' : utilizationColor(mins, TARGET_MINUTES);
+                    const isWeekend = d.getDay() === 0 || d.getDay() === 6;
+                    const colorClass = isWeekend || closureFor(key) ? '' : utilizationColor(mins, TARGET_MINUTES);
                     const isSelected = selectedCell?.staffId === staff.id && selectedCell?.date === key;
 
                     return (
-                      <td key={i} className="px-1 py-2 text-center">
+                      <td key={i} className={`px-1 py-2 text-center ${closureFor(key) ? 'bg-red-500/[0.06]' : ''}`}>
                         <button
                           onClick={() => setSelectedCell(
                             isSelected ? null : { staffId: staff.id, date: key }

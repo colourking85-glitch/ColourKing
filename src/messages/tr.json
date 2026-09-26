@@ -1424,7 +1424,8 @@
     "general": "Genel",
     "active": "aktif",
     "breakLabel": "mola",
-    "occupancy": "Doluluk:"
+    "occupancy": "Doluluk:",
+    "noEntriesPeriod": "Bu dönemde kayıtlı saat yok"
   },
   "fa": {
     "title": "Faturalar",

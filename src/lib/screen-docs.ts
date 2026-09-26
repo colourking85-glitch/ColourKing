@@ -404,9 +404,9 @@ export const MODULES: ModuleDoc[] = [
     screens: [
       {
         code: 'TS10',
-        agentNotes: 'GET /api/planning — returns time entries grouped by staff and day. Week view with totals.',
-        userFlow: 'Week-view grid showing all staff hours. Rows are staff members, columns are days (Mon-Sun). Each cell shows logged hours from clock in/out on tasks. Navigate between weeks. Totals are shown per staff member (row) and per day (column).',
-        inputs: 'Week navigation.',
+        agentNotes: 'GET /api/time-entries?from&to — time entries with staff/job/task joins, grouped client-side by staff and day. View modes day / 3day / week (default) / month around an anchor date; GET /api/blackouts for the range marks closed days.',
+        userFlow: 'Hours grid: rows are staff members, columns are days. Switch the view with Dag / 3 Dagen / Week / Maand (month shows every day of the month, scroll horizontally). Navigate with the arrows (1 day, 3 days, 1 week or 1 month at a time) or jump to today. Each cell shows logged hours from clock in/out on tasks, coloured by utilisation against 8 h (green ≥80%, amber 50–80%, red <50%); weekends and closed days (SY06, hatched red) are not scored. Click a cell to see the individual entries with job/task, times and breaks. Totals per staff member (row) and per day (column).',
+        inputs: 'View mode, date navigation, cell selection.',
         outputs: 'Time entry grid with duration, linked job and task for each entry.',
         crossScreen: 'Time data comes from Task clock in/out (TS05). Hours feed into Reports (RP10) for workload and labour cost analysis.',
       },

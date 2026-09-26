@@ -1424,7 +1424,8 @@
     "general": "General",
     "active": "active",
     "breakLabel": "break",
-    "occupancy": "Occupancy:"
+    "occupancy": "Occupancy:",
+    "noEntriesPeriod": "No hours recorded in this period"
   },
   "fa": {
     "title": "Invoices",

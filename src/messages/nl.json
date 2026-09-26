@@ -1424,7 +1424,8 @@
     "general": "Algemeen",
     "active": "actief",
     "breakLabel": "pauze",
-    "occupancy": "Bezetting:"
+    "occupancy": "Bezetting:",
+    "noEntriesPeriod": "Geen uren geregistreerd in deze periode"
   },
   "fa": {
     "title": "Facturen",
