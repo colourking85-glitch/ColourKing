@@ -41,7 +41,14 @@
     "total": "Toplam",
     "notLinked": "Henüz bağlanmadı",
     "noRegistration": "Plaka yok",
-    "settings": "Ayarlar"
+    "settings": "Ayarlar",
+    "emailConfirmSendTo": "Bu e-posta şu adrese gönderilecek:",
+    "emailYesSend": "Evet, gönder",
+    "emailNotNow": "İptal",
+    "emailSending": "Gönderiliyor…",
+    "emailFailed": "Gönderim başarısız",
+    "emailNoAddress": "Kayıtlı e-posta adresi yok",
+    "emailLastSent": "Son gönderim"
   },
   "nav": {
     "portfolio": "Proje portfoyu",
@@ -1022,7 +1029,8 @@
     "preview": "Önizleme",
     "print": "Yazdır",
     "backToDetail": "Detaya dön",
-    "notFound": "Teklif bulunamadı"
+    "notFound": "Teklif bulunamadı",
+    "resendEmail": "Teklifi e-postala"
   },
   "pt": {
     "title": "Parçalar",
@@ -1143,7 +1151,9 @@
     "edit": "Düzenle",
     "delete": "Sil",
     "save": "Kaydet",
-    "saving": "Kaydediliyor..."
+    "saving": "Kaydediliyor...",
+    "resendConfirmation": "Onayı e-postala",
+    "sendReminder": "Hatırlatma gönder"
   },
   "doc": {
     "project_dossier": "Proje dosyasi",
@@ -1279,7 +1289,8 @@
     "issued": "Düzenle",
     "draft": "Taslak",
     "linkedJob": "Bağlı iş",
-    "selectJob": "Bir iş seçin..."
+    "selectJob": "Bir iş seçin...",
+    "emailLink": "Teslim belgesini e-postala"
   },
   "tk": {
     "title": "Görevler",
@@ -1465,7 +1476,9 @@
     "kind_labour": "İşçilik",
     "kind_part": "Parça",
     "kind_material": "Malzeme",
-    "kind_other": "Diğer"
+    "kind_other": "Diğer",
+    "resendInvoice": "Faturayı e-postala",
+    "sendPaymentReminder": "Ödeme hatırlatması gönder"
   },
   "sy": {
     "title": "Ayarlar",

@@ -41,7 +41,14 @@
     "total": "Totaal",
     "notLinked": "Nog niet gekoppeld",
     "noRegistration": "Geen kenteken",
-    "settings": "Instellingen"
+    "settings": "Instellingen",
+    "emailConfirmSendTo": "Deze e-mail wordt verstuurd naar:",
+    "emailYesSend": "Ja, versturen",
+    "emailNotNow": "Annuleren",
+    "emailSending": "Versturen…",
+    "emailFailed": "E-mail versturen mislukt",
+    "emailNoAddress": "Geen e-mailadres bekend",
+    "emailLastSent": "Laatst verzonden"
   },
   "nav": {
     "portfolio": "Projectportfolio",
@@ -1022,7 +1029,8 @@
     "preview": "Voorbeeld",
     "print": "Afdrukken",
     "backToDetail": "Terug naar detail",
-    "notFound": "Offerte niet gevonden"
+    "notFound": "Offerte niet gevonden",
+    "resendEmail": "Offerte mailen"
   },
   "pt": {
     "title": "Onderdelen",
@@ -1143,7 +1151,9 @@
     "edit": "Bewerken",
     "delete": "Verwijderen",
     "save": "Opslaan",
-    "saving": "Opslaan..."
+    "saving": "Opslaan...",
+    "resendConfirmation": "Bevestiging mailen",
+    "sendReminder": "Herinnering sturen"
   },
   "doc": {
     "project_dossier": "Projectdossier",
@@ -1279,7 +1289,8 @@
     "issued": "Uitgeven",
     "draft": "Concept",
     "linkedJob": "Gekoppelde opdracht",
-    "selectJob": "Selecteer een opdracht..."
+    "selectJob": "Selecteer een opdracht...",
+    "emailLink": "Afleverbon mailen"
   },
   "tk": {
     "title": "Taken",
@@ -1465,7 +1476,9 @@
     "kind_labour": "Arbeid",
     "kind_part": "Onderdeel",
     "kind_material": "Materiaal",
-    "kind_other": "Overig"
+    "kind_other": "Overig",
+    "resendInvoice": "Factuur mailen",
+    "sendPaymentReminder": "Betalingsherinnering sturen"
   },
   "sy": {
     "title": "Instellingen",

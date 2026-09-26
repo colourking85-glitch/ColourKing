@@ -14,6 +14,7 @@ import type { InvoiceStatus, OfferLineKind, TaxCode, PaymentMethod } from '@/typ
 import { InvoiceTemplate } from '@/modules/invoices/template';
 import { formatCurrency } from '@/lib/format';
 import { useAppLocale } from '@/components/AdminIntlProvider';
+import { SendEmailButton } from '@/components/ui/SendEmailButton';
 import type { CompanyInfo } from '@/lib/company';
 
 type InvoiceLine = {
@@ -313,6 +314,28 @@ export default function InvoiceDetailPage() {
               <Send size={14} />
               {t('issue')}
             </button>
+          )}
+          {!isDraft && invoice.status !== 'cancelled' && (
+            <SendEmailButton
+              label={t('resendInvoice')}
+              endpoint={`/api/invoices/${id}/send-email`}
+              body={{ template: 'invoiceSent' }}
+              recipient={invoice.customers?.email}
+              entityType="invoice"
+              entityId={id}
+              template="invoiceSent"
+            />
+          )}
+          {canPay && (
+            <SendEmailButton
+              label={t('sendPaymentReminder')}
+              endpoint={`/api/invoices/${id}/send-email`}
+              body={{ template: 'invoiceReminder' }}
+              recipient={invoice.customers?.email}
+              entityType="invoice"
+              entityId={id}
+              template={isOverdue ? 'invoiceOverdue' : 'invoiceDueSoon'}
+            />
           )}
           {canPay && (
             <button

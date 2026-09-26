@@ -9,6 +9,7 @@ import {
 } from 'lucide-react';
 import { useTranslations } from 'next-intl';
 import { ScreenBadge } from '@/components/ui/ScreenBadge';
+import { SendEmailButton } from '@/components/ui/SendEmailButton';
 import type { AppointmentType, AppointmentStatus } from '@/types/database';
 
 type Appointment = {
@@ -168,6 +169,28 @@ export default function AppointmentDetailPage() {
         <span className={`rounded-full border px-3 py-1 text-xs font-medium ${typeColor.bg} ${typeColor.text} ${typeColor.border}`}>
           {t(appt.type)}
         </span>
+        {appt.status === 'confirmed' && (
+          <div className="ml-auto flex items-start gap-2">
+            <SendEmailButton
+              label={t('resendConfirmation')}
+              endpoint={`/api/appointments/${id}/send-email`}
+              body={{ template: 'appointmentConfirmed' }}
+              recipient={appt.contact_email ?? appt.customers?.email}
+              entityType="appointment"
+              entityId={id}
+              template="appointmentConfirmed"
+            />
+            <SendEmailButton
+              label={t('sendReminder')}
+              endpoint={`/api/appointments/${id}/send-email`}
+              body={{ template: 'appointmentReminder' }}
+              recipient={appt.contact_email ?? appt.customers?.email}
+              entityType="appointment"
+              entityId={id}
+              template="appointmentReminder"
+            />
+          </div>
+        )}
       </div>
 
       {/* Main info card */}

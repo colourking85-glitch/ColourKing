@@ -17,6 +17,8 @@ import { getSender } from '@/lib/email-identity';
 
 const APP_URL = process.env.NEXT_PUBLIC_APP_URL ?? 'https://colourking.nl';
 
+export type SendOutcome = { success: boolean; to?: string; locale?: EmailLocale; messageId?: string; error?: string };
+
 function validLocale(locale: string | null | undefined): EmailLocale {
   if (locale === 'en' || locale === 'tr') return locale;
   return 'nl';
@@ -25,7 +27,7 @@ function validLocale(locale: string | null | undefined): EmailLocale {
 /**
  * Send offer email to customer when an offer is sent.
  */
-export async function onOfferSent(offerId: string): Promise<void> {
+export async function onOfferSent(offerId: string): Promise<SendOutcome> {
 
   const { data: offer, error } = await supabase
     .from('offers')
@@ -35,13 +37,13 @@ export async function onOfferSent(offerId: string): Promise<void> {
 
   if (error || !offer) {
     console.error('[EMAIL TRIGGER] onOfferSent: offer not found', offerId);
-    return;
+    return { success: false, error: 'not_found' };
   }
 
   const customer = offer.customers as Record<string, unknown> | null;
   if (!customer?.email) {
     console.warn('[EMAIL TRIGGER] onOfferSent: customer has no email');
-    return;
+    return { success: false, error: 'no_email' };
   }
 
   const locale = validLocale(customer.locale as string);
@@ -84,12 +86,14 @@ export async function onOfferSent(offerId: string): Promise<void> {
     from: sender.from,
     messageId: result.messageId,
   });
+
+  return { success: result.success, to, locale, messageId: result.messageId, error: result.error };
 }
 
 /**
  * Send invoice email with payment link when an invoice is issued.
  */
-export async function onInvoiceIssued(invoiceId: string): Promise<void> {
+export async function onInvoiceIssued(invoiceId: string): Promise<SendOutcome> {
 
   // invoices is stored via documents + offers — query the relevant data
   const { data: doc, error } = await supabase
@@ -103,13 +107,13 @@ export async function onInvoiceIssued(invoiceId: string): Promise<void> {
 
   if (error || !doc) {
     console.error('[EMAIL TRIGGER] onInvoiceIssued: document not found', invoiceId);
-    return;
+    return { success: false, error: 'not_found' };
   }
 
   const customer = doc.customers as Record<string, unknown> | null;
   if (!customer?.email) {
     console.warn('[EMAIL TRIGGER] onInvoiceIssued: customer has no email');
-    return;
+    return { success: false, error: 'no_email' };
   }
 
   const locale = validLocale(customer.locale as string);
@@ -148,12 +152,14 @@ export async function onInvoiceIssued(invoiceId: string): Promise<void> {
     from: sender.from,
     messageId: result.messageId,
   });
+
+  return { success: result.success, to, locale, messageId: result.messageId, error: result.error };
 }
 
 /**
  * Send appointment confirmation email.
  */
-export async function onAppointmentConfirmed(appointmentId: string): Promise<void> {
+export async function onAppointmentConfirmed(appointmentId: string): Promise<SendOutcome> {
 
   const { data: apt, error } = await supabase
     .from('appointments')
@@ -163,7 +169,7 @@ export async function onAppointmentConfirmed(appointmentId: string): Promise<voi
 
   if (error || !apt) {
     console.error('[EMAIL TRIGGER] onAppointmentConfirmed: not found', appointmentId);
-    return;
+    return { success: false, error: 'not_found' };
   }
 
   const email = apt.contact_email;
@@ -173,7 +179,7 @@ export async function onAppointmentConfirmed(appointmentId: string): Promise<voi
 
   if (!to) {
     console.warn('[EMAIL TRIGGER] onAppointmentConfirmed: no email address');
-    return;
+    return { success: false, error: 'no_email' };
   }
 
   const locale = validLocale(customer?.locale as string);
@@ -212,6 +218,8 @@ export async function onAppointmentConfirmed(appointmentId: string): Promise<voi
     from: sender.from,
     messageId: result.messageId,
   });
+
+  return { success: result.success, to, locale, messageId: result.messageId, error: result.error };
 }
 
 /**
@@ -454,5 +462,138 @@ export async function sendVehicleReady(jobId: string): Promise<{
     messageId: result.messageId,
   });
 
+  return { success: result.success, to, locale, messageId: result.messageId, error: result.error };
+}
+
+/**
+ * Payment reminder for a sent/overdue invoice, sent on request from FA10.
+ */
+export async function sendInvoiceReminder(invoiceId: string): Promise<SendOutcome> {
+  const { data: inv } = await supabase
+    .from('invoices')
+    .select('id, invoice_number, status, due_date, total_cents, payment_token, locale, customers(name, email, locale)')
+    .eq('id', invoiceId)
+    .single();
+  if (!inv) return { success: false, error: 'not_found' };
+
+  const customer = (Array.isArray(inv.customers) ? inv.customers[0] : inv.customers) as Record<string, unknown> | null;
+  if (!customer?.email) return { success: false, error: 'no_email' };
+
+  const locale = validLocale((customer.locale as string) ?? inv.locale);
+  const company = await getCompanyInfo();
+  const today = new Date().toISOString().slice(0, 10);
+  const dueDate = inv.due_date ?? today;
+  const daysOverdue = Math.max(0, Math.round((Date.parse(today) - Date.parse(dueDate)) / 86_400_000));
+  const overdue = daysOverdue > 0;
+  const template = overdue ? 'invoiceOverdue' : 'invoiceDueSoon';
+  const data = {
+    customerName: String(customer.name ?? ''),
+    invoiceNumber: inv.invoice_number ?? invoiceId.slice(0, 8),
+    dueDate,
+    totalCents: inv.total_cents,
+    payUrl: inv.payment_token ? `${APP_URL}/s/${inv.payment_token}` : null,
+    iban: company.iban,
+    daysOverdue,
+  };
+  const html = renderTemplate(template, data, locale, company);
+  const subject = `${getSubject(template, data, locale)} [${data.invoiceNumber}]`;
+  const to = String(customer.email);
+  const sender = await getSender('invoices');
+  const result = await sendEmail(to, subject, html, sender);
+
+  await logEmail({
+    to, subject, template, locale, ref_type: 'invoice', ref_id: invoiceId,
+    status: result.success ? 'sent' : 'failed', error: result.error, from: sender.from, messageId: result.messageId,
+  });
+  return { success: result.success, to, locale, messageId: result.messageId, error: result.error };
+}
+
+/**
+ * Appointment reminder, sent on request from AP10 (the cron uses the same template).
+ */
+export async function sendAppointmentReminder(appointmentId: string): Promise<SendOutcome> {
+  const { data: apt } = await supabase
+    .from('appointments')
+    .select('*, customers(name, email, locale), vehicles(kenteken, make, model)')
+    .eq('id', appointmentId)
+    .single();
+  if (!apt) return { success: false, error: 'not_found' };
+
+  const customer = apt.customers as Record<string, unknown> | null;
+  const vehicle = apt.vehicles as Record<string, unknown> | null;
+  const to = apt.contact_email ?? (customer?.email as string | undefined) ?? null;
+  if (!to) return { success: false, error: 'no_email' };
+
+  const locale = validLocale(customer?.locale as string);
+  const company = await getCompanyInfo();
+  const data = {
+    customerName: apt.contact_name ?? String(customer?.name ?? ''),
+    appointmentType: apt.type,
+    scheduledDate: apt.scheduled_date,
+    scheduledTime: String(apt.scheduled_time).slice(0, 5),
+    address: `${company.address}, ${company.postcode} ${company.city}`,
+    vehicleInfo: vehicle ? `${vehicle.kenteken ?? ''} (${vehicle.make ?? ''} ${vehicle.model ?? ''})`.trim() : null,
+    cancelUrl: `${APP_URL}/contact?ref=AP-${appointmentId.slice(0, 8)}&action=cancel`,
+  };
+  const html = renderTemplate('appointmentReminder', data, locale, company);
+  const subject = getSubject('appointmentReminder', data, locale);
+  const sender = await getSender('appointments');
+  const result = await sendEmail(to, subject, html, sender);
+
+  await logEmail({
+    to, subject, template: 'appointmentReminder', locale, ref_type: 'appointment', ref_id: appointmentId,
+    status: result.success ? 'sent' : 'failed', error: result.error, from: sender.from, messageId: result.messageId,
+  });
+  return { success: result.success, to, locale, messageId: result.messageId, error: result.error };
+}
+
+/**
+ * Emails the customer the public handover-note link (to view and sign).
+ * Creates a share token when the document has none or it has expired.
+ */
+export async function onHandoverShared(documentId: string): Promise<SendOutcome> {
+  const { data: doc } = await supabase
+    .from('documents')
+    .select('id, doc_number, doc_type, status, locale, share_token, share_expires_at, customers(name, email, locale), vehicles(kenteken, make, model)')
+    .eq('id', documentId)
+    .single();
+  if (!doc || doc.doc_type !== 'handover_note') return { success: false, error: 'not_found' };
+  if (doc.status === 'draft') return { success: false, error: 'draft' };
+
+  const customer = (Array.isArray(doc.customers) ? doc.customers[0] : doc.customers) as Record<string, unknown> | null;
+  const vehicle = (Array.isArray(doc.vehicles) ? doc.vehicles[0] : doc.vehicles) as Record<string, unknown> | null;
+  if (!customer?.email) return { success: false, error: 'no_email' };
+
+  let token = doc.share_token;
+  const expired = !doc.share_expires_at || Date.parse(doc.share_expires_at) < Date.now() + 86_400_000;
+  if (!token || expired) {
+    token = crypto.randomUUID().replace(/-/g, '');
+    const expiresAt = new Date();
+    expiresAt.setDate(expiresAt.getDate() + 30);
+    const { error } = await supabase
+      .from('documents')
+      .update({ share_token: token, share_expires_at: expiresAt.toISOString() })
+      .eq('id', documentId);
+    if (error) return { success: false, error: error.message };
+  }
+
+  const locale = validLocale((customer.locale as string) ?? doc.locale);
+  const company = await getCompanyInfo();
+  const data = {
+    customerName: String(customer.name ?? ''),
+    docNumber: doc.doc_number ?? documentId.slice(0, 8),
+    vehicleInfo: vehicle ? `${vehicle.kenteken ?? ''} (${vehicle.make ?? ''} ${vehicle.model ?? ''})`.trim() : null,
+    signUrl: `${APP_URL}/s/handover/${token}`,
+  };
+  const html = renderTemplate('handoverShare', data, locale, company);
+  const subject = `${getSubject('handoverShare', data, locale)} [${data.docNumber}]`;
+  const to = String(customer.email);
+  const sender = await getSender('workshop');
+  const result = await sendEmail(to, subject, html, sender);
+
+  await logEmail({
+    to, subject, template: 'handoverShare', locale, ref_type: 'document', ref_id: documentId,
+    status: result.success ? 'sent' : 'failed', error: result.error, from: sender.from, messageId: result.messageId,
+  });
   return { success: result.success, to, locale, messageId: result.messageId, error: result.error };
 }

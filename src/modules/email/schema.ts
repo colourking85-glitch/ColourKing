@@ -11,6 +11,7 @@ export const EmailTemplateName = z.enum([
   'paymentReceived',
   'leadReceived',
   'vehicleReady',
+  'handoverShare',
 ]);
 
 export type EmailTemplateName = z.infer<typeof EmailTemplateName>;
@@ -126,6 +127,13 @@ export const InvoiceOverdueData = InvoiceDueSoonData.extend({
   daysOverdue: z.number().int(),
 });
 
+export const HandoverShareData = z.object({
+  customerName: z.string(),
+  docNumber: z.string(),
+  vehicleInfo: z.string().nullable().optional(),
+  signUrl: z.string().url(),
+});
+
 /* ── Template data union ──────────────────────────────────── */
 
 export const TemplateDataMap = {
@@ -139,6 +147,7 @@ export const TemplateDataMap = {
   paymentReceived: PaymentReceivedData,
   leadReceived: LeadReceivedData,
   vehicleReady: VehicleReadyData,
+  handoverShare: HandoverShareData,
 } as const;
 
 export type TemplateDataMap = {

@@ -10,6 +10,7 @@ import {
 } from 'lucide-react';
 import { useTranslations } from 'next-intl';
 import SignatureCanvas from '@/components/SignatureCanvas';
+import { SendEmailButton } from '@/components/ui/SendEmailButton';
 import type { DocStatus } from '@/types/database';
 
 type Signature = {
@@ -213,6 +214,17 @@ export default function HandoverNotePage() {
               <Send size={14} />
               {t('issued')}
             </button>
+          )}
+          {!isDraft && (
+            <SendEmailButton
+              label={t('emailLink')}
+              endpoint={`/api/handover-notes/${id}/send-email`}
+              recipient={doc.customers?.email}
+              entityType="document"
+              entityId={id}
+              template="handoverShare"
+              onSent={load}
+            />
           )}
           {!isDraft && (
             <button

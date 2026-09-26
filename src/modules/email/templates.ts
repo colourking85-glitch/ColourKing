@@ -137,6 +137,13 @@ const STRINGS: Record<string, EmailStrings> = {
     invoiceAmount: 'Openstaand bedrag',
     invoiceIban: 'Rekeningnummer',
     invoiceAlreadyPaid: 'Heeft u inmiddels betaald? Dan kunt u deze herinnering als niet verzonden beschouwen.',
+
+    // Handover note share
+    handoverSubject: 'Uw afleverbon {docNumber} - Colourking',
+    handoverIntro: 'Uw voertuig is afgeleverd. Via onderstaande knop kunt u de afleverbon bekijken en digitaal ondertekenen.',
+    handoverDoc: 'Documentnummer',
+    handoverView: 'Afleverbon bekijken en ondertekenen',
+    handoverExpiry: 'De link is 30 dagen geldig.',
   },
 
   en: {
@@ -231,6 +238,12 @@ const STRINGS: Record<string, EmailStrings> = {
     invoiceAmount: 'Outstanding amount',
     invoiceIban: 'Bank account',
     invoiceAlreadyPaid: 'Already paid? Then please disregard this reminder.',
+
+    handoverSubject: 'Your handover note {docNumber} - Colourking',
+    handoverIntro: 'Your vehicle has been delivered. Use the button below to view and digitally sign the handover note.',
+    handoverDoc: 'Document number',
+    handoverView: 'View and sign handover note',
+    handoverExpiry: 'The link is valid for 30 days.',
   },
 
   tr: {
@@ -325,6 +338,12 @@ const STRINGS: Record<string, EmailStrings> = {
     invoiceAmount: 'Odenmemis tutar',
     invoiceIban: 'Banka hesabi',
     invoiceAlreadyPaid: 'Odemeyi yaptiysaniz bu hatirlatmayi dikkate almayin.',
+
+    handoverSubject: 'Teslim belgeniz {docNumber} - Colourking',
+    handoverIntro: 'Araciniz teslim edildi. Asagidaki dugmeyle teslim belgesini goruntuleyebilir ve dijital olarak imzalayabilirsiniz.',
+    handoverDoc: 'Belge numarasi',
+    handoverView: 'Teslim belgesini goruntule ve imzala',
+    handoverExpiry: 'Baglanti 30 gun gecerlidir.',
   },
 };
 
@@ -672,9 +691,22 @@ function renderInvoiceReminder(
     ${paragraph(`<span style="color:#6b7280;font-size:12px;">${t(locale, 'invoiceAlreadyPaid')}</span>`)}`;
 }
 
+function renderHandoverShare(data: TemplateDataMap['handoverShare'], locale: EmailLocale): string {
+  return `
+    ${greeting(locale, data.customerName)}
+    ${paragraph(t(locale, 'handoverIntro'))}
+    ${detailTable(
+      detailRow(t(locale, 'handoverDoc'), data.docNumber) +
+      (data.vehicleInfo ? detailRow(t(locale, 'readyVehicle'), data.vehicleInfo) : '')
+    )}
+    <div style="text-align:center;margin:24px 0;">${ctaButton(t(locale, 'handoverView'), data.signUrl)}</div>
+    ${paragraph(`<span style="color:#6b7280;font-size:12px;">${t(locale, 'handoverExpiry')}</span>`)}`;
+}
+
 /* ── Public API ────────────────────────────────────────────── */
 
 const RENDERERS: Record<string, (data: unknown, locale: EmailLocale) => string> = {
+  handoverShare: (d, l) => renderHandoverShare(d as TemplateDataMap['handoverShare'], l),
   offerSent: (d, l) => renderOfferSent(d as TemplateDataMap['offerSent'], l),
   offerExpiring: (d, l) => renderOfferExpiring(d as TemplateDataMap['offerExpiring'], l),
   invoiceSent: (d, l) => renderInvoiceSent(d as TemplateDataMap['invoiceSent'], l),
@@ -721,6 +753,7 @@ export function getSubject<T extends keyof TemplateDataMap>(
     paymentReceived: 'paymentSubject',
     leadReceived: 'leadSubject',
     vehicleReady: 'readySubject',
+    handoverShare: 'handoverSubject',
   };
   const key = subjectKeys[template];
   if (!key) return 'Colourking';
@@ -731,6 +764,7 @@ export function getSubject<T extends keyof TemplateDataMap>(
   if (d.offerNumber) vars.offerNumber = String(d.offerNumber);
   if (d.invoiceNumber) vars.invoiceNumber = String(d.invoiceNumber);
   if (d.contactName) vars.contactName = String(d.contactName);
+  if (d.docNumber) vars.docNumber = String(d.docNumber);
 
   let subject = t(locale, key, vars);
 
@@ -848,6 +882,12 @@ export function getSampleData(template: string): Record<string, unknown> {
       totalCents: 115555,
       payUrl: 'https://colourking.nl/s/sample',
       iban: 'NL12 INGB 0675 6533 04',
+    },
+    handoverShare: {
+      customerName: 'Jan de Vries',
+      docNumber: 'AB-2026-0007',
+      vehicleInfo: 'AB-123-CD (BMW 3 Serie)',
+      signUrl: 'https://colourking.nl/s/handover/sample',
     },
   };
 

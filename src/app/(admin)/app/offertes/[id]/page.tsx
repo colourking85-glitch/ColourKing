@@ -12,6 +12,7 @@ import {
 import type { OfferType, OfferStatus, OfferLineKind, TaxCode } from '@/types/database';
 import { formatCurrency } from '@/lib/format';
 import { useAppLocale } from '@/components/AdminIntlProvider';
+import { SendEmailButton } from '@/components/ui/SendEmailButton';
 
 type OfferLine = {
   id: string;
@@ -275,6 +276,16 @@ export default function OfferDetailPage() {
             <Eye size={14} />
             {t('preview')}
           </Link>
+          {(isSent || offer.status === 'approved') && (
+            <SendEmailButton
+              label={t('resendEmail')}
+              endpoint={`/api/offers/${id}/send-email`}
+              recipient={offer.customers?.email}
+              entityType="offer"
+              entityId={id}
+              template="offerSent"
+            />
+          )}
           {isDraft && (
             <button
               onClick={handleSend}

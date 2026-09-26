@@ -360,7 +360,7 @@ describe('Email schemas', () => {
     expect(templates).toContain('paymentReceived');
     expect(templates).toContain('leadReceived');
     expect(templates).toContain('vehicleReady');
-    expect(templates).toHaveLength(10);
+    expect(templates).toHaveLength(11);
   });
 
   it('validates EmailLocale enum options', () => {

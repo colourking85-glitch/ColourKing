@@ -41,7 +41,14 @@
     "total": "Total",
     "notLinked": "Not linked yet",
     "noRegistration": "No registration",
-    "settings": "Settings"
+    "settings": "Settings",
+    "emailConfirmSendTo": "This email will be sent to:",
+    "emailYesSend": "Yes, send",
+    "emailNotNow": "Cancel",
+    "emailSending": "Sending…",
+    "emailFailed": "Sending failed",
+    "emailNoAddress": "No email address on record",
+    "emailLastSent": "Last sent"
   },
   "nav": {
     "portfolio": "Project portfolio",
@@ -1022,7 +1029,8 @@
     "preview": "Preview",
     "print": "Print",
     "backToDetail": "Back to detail",
-    "notFound": "Quote not found"
+    "notFound": "Quote not found",
+    "resendEmail": "Email quote"
   },
   "pt": {
     "title": "Parts",
@@ -1143,7 +1151,9 @@
     "edit": "Edit",
     "delete": "Delete",
     "save": "Save",
-    "saving": "Saving..."
+    "saving": "Saving...",
+    "resendConfirmation": "Email confirmation",
+    "sendReminder": "Send reminder"
   },
   "doc": {
     "project_dossier": "Project dossier",
@@ -1279,7 +1289,8 @@
     "issued": "Issue",
     "draft": "Draft",
     "linkedJob": "Linked job",
-    "selectJob": "Select a job..."
+    "selectJob": "Select a job...",
+    "emailLink": "Email handover note"
   },
   "tk": {
     "title": "Tasks",
@@ -1465,7 +1476,9 @@
     "kind_labour": "Labour",
     "kind_part": "Part",
     "kind_material": "Material",
-    "kind_other": "Other"
+    "kind_other": "Other",
+    "resendInvoice": "Email invoice",
+    "sendPaymentReminder": "Send payment reminder"
   },
   "sy": {
     "title": "Settings",
