@@ -24,7 +24,7 @@ type Customer = {
   created_at: string;
 };
 
-type SortKey = 'type' | 'name' | 'email' | 'phone' | 'city' | 'status' | 'customer_no';
+type SortKey = 'type' | 'name' | 'email' | 'phone' | 'city' | 'status' | 'customer_no' | 'created_at';
 type SortDir = 'asc' | 'desc';
 
 const STATUS_COLORS: Record<string, string> = {
@@ -118,6 +118,7 @@ export default function CustomersPage() {
     { key: 'phone', label: t('phone') },
     { key: 'city', label: t('city') },
     { key: 'status', label: t('status') },
+    { key: 'created_at', label: t('createdAt') },
   ];
 
   return (
@@ -215,6 +216,10 @@ export default function CustomersPage() {
                       <span className={`rounded-full px-2 py-0.5 text-xs ${STATUS_COLORS[c.status] ?? 'text-ck-muted'}`}>
                         {t(`status_${c.status}` as Parameters<typeof t>[0]) || c.status}
                       </span>
+                    </td>
+                    <td className="whitespace-nowrap px-4 py-3 text-xs text-ck-muted-light tabular-nums" title={new Date(c.created_at).toLocaleString('nl-NL')}>
+                      {new Date(c.created_at).toLocaleDateString('nl-NL', { day: '2-digit', month: '2-digit', year: 'numeric' })}{' '}
+                      <span className="text-ck-muted">{new Date(c.created_at).toLocaleTimeString('nl-NL', { hour: '2-digit', minute: '2-digit' })}</span>
                     </td>
                   </tr>
                 );

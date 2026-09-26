@@ -393,7 +393,8 @@
     "other": "Overig",
     "fleet_profile": "Wagenpark profiel",
     "typical_damage": "Typische schadeprofielen",
-    "relationship_score": "Relatiescore"
+    "relationship_score": "Relatiescore",
+    "createdAt": "Aangemaakt"
   },
   "vh": {
     "advanced": "Uitgebreide definities",

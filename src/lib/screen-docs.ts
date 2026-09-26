@@ -89,7 +89,7 @@ export const MODULES: ModuleDoc[] = [
       {
         code: 'KL05',
         agentNotes: 'GET /api/customers — returns array. Searchable by name/email/phone/customer_no. 11 customer types: private, company, fleet, dealer, insurance_company, broker, lease_company, body_shop, garage, government, other. Statuses: active, inactive, blocked, prospect, archived. Credit hold flag shown as warning icon. Sortable columns.',
-        userFlow: 'Browse all customers in a searchable, sortable table. Five status filter tabs at the top: All, Active, Prospect, Blocked, Archived. Columns show customer number, type icon, name, email, phone, city, and status badge. Customers with a credit hold show an amber warning icon. Click column headers to sort. Search by name, email, phone, or customer number. Click a row to open the Customer 360 detail view.',
+        userFlow: 'Browse all customers in a searchable, sortable table. Five status filter tabs at the top: All, Active, Prospect, Blocked, Archived. Columns show customer number, type icon, name, email, phone, city, status badge and created date/time (hover for seconds). Customers with a credit hold show an amber warning icon. Click column headers to sort. Search by name, email, phone, or customer number. Click a row to open the Customer 360 detail view.',
         inputs: 'Search query, status filter tabs, column sort.',
         outputs: 'Filtered and sorted customer list with status badges and credit hold indicators.',
         crossScreen: 'Customer records are linked to Vehicles (VH05), Offers (ES05), Jobs (JB05), and Invoices (FA05). Deleting a customer requires no linked active jobs or unpaid invoices.',

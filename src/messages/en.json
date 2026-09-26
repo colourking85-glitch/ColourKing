@@ -393,7 +393,8 @@
     "other": "Other",
     "fleet_profile": "Fleet Profile",
     "typical_damage": "Typical Damage Profile",
-    "relationship_score": "Relationship Score"
+    "relationship_score": "Relationship Score",
+    "createdAt": "Created"
   },
   "vh": {
     "advanced": "Advanced definitions",

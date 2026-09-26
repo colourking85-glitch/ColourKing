@@ -393,7 +393,8 @@
     "other": "Diğer",
     "fleet_profile": "Filo Profili",
     "typical_damage": "Tipik Hasar Profili",
-    "relationship_score": "İlişki Puanı"
+    "relationship_score": "İlişki Puanı",
+    "createdAt": "Oluşturuldu"
   },
   "vh": {
     "advanced": "Gelişmiş tanımlar",
