@@ -122,11 +122,15 @@ export default function SettingsPage() {
       const form = new FormData();
       form.append('file', file);
       const res = await fetch('/api/settings/logo', { method: 'POST', body: form });
-      if (res.ok) {
-        const data = await res.json();
+      const data = await res.json();
+      if (res.ok && data.url) {
         setLogoUrl(data.url);
+      } else {
+        alert(data.error ?? 'Upload failed');
       }
-    } catch { /* ignore */ }
+    } catch {
+      alert('Upload failed — check connection');
+    }
     setLogoUploading(false);
   }
 

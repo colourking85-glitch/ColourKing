@@ -5,6 +5,13 @@ import { invalidateCompanyCache } from '@/lib/company';
 const BUCKET = 'company-assets';
 const MAX_SIZE = 5 * 1024 * 1024; // 5 MB
 
+async function ensureBucket() {
+  const { data } = await admin.storage.getBucket(BUCKET);
+  if (!data) {
+    await admin.storage.createBucket(BUCKET, { public: true });
+  }
+}
+
 export async function POST(req: NextRequest) {
   try {
     const formData = await req.formData();
@@ -22,6 +29,8 @@ export async function POST(req: NextRequest) {
     if (!['jpg', 'jpeg', 'png', 'webp', 'svg'].includes(ext)) {
       return NextResponse.json({ error: 'Invalid file type' }, { status: 400 });
     }
+
+    await ensureBucket();
 
     const storagePath = `logo.${ext}`;
     const buffer = Buffer.from(await file.arrayBuffer());
@@ -59,13 +68,16 @@ export async function POST(req: NextRequest) {
     invalidateCompanyCache();
 
     return NextResponse.json({ url: urlData.publicUrl });
-  } catch {
-    return NextResponse.json({ error: 'Upload failed' }, { status: 500 });
+  } catch (err) {
+    const msg = err instanceof Error ? err.message : 'Upload failed';
+    return NextResponse.json({ error: msg }, { status: 500 });
   }
 }
 
 export async function DELETE() {
   try {
+    await ensureBucket();
+
     const { data: existing } = await admin.storage.from(BUCKET).list('', { limit: 20 });
     const logos = (existing ?? []).filter(f => f.name.startsWith('logo.'));
     if (logos.length > 0) {
@@ -88,7 +100,8 @@ export async function DELETE() {
 
     invalidateCompanyCache();
     return NextResponse.json({ ok: true });
-  } catch {
-    return NextResponse.json({ error: 'Delete failed' }, { status: 500 });
+  } catch (err) {
+    const msg = err instanceof Error ? err.message : 'Delete failed';
+    return NextResponse.json({ error: msg }, { status: 500 });
   }
 }
