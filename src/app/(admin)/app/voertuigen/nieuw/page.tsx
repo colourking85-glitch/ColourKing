@@ -2,7 +2,7 @@
 
 import { useState, useEffect } from 'react';
 import { useRouter, useSearchParams } from 'next/navigation';
-import { Search, AlertTriangle } from 'lucide-react';
+import { Search, AlertTriangle, ChevronDown, ChevronRight } from 'lucide-react';
 import { useTranslations } from 'next-intl';
 import { ScreenBadge } from '@/components/ui/ScreenBadge';
 import { SearchableSelect } from '@/components/ui/SearchableSelect';
@@ -34,6 +34,7 @@ export default function NewVehiclePage() {
 
   const [kentekenWarning, setKentekenWarning] = useState('');
   const [formKenteken, setFormKenteken] = useState('');
+  const [showAdvanced, setShowAdvanced] = useState(false);
 
   useEffect(() => {
     fetch('/api/customers').then(r => r.ok ? r.json() : []).then(setCustomers);
@@ -118,6 +119,13 @@ export default function NewVehiclePage() {
       rdw_snapshot: rdwData?.rdw_snapshot ?? null,
       plate_origin: fd.get('plate_origin') || null,
       notes: fd.get('notes') || null,
+      // advanced definitions (optional)
+      paint_type: fd.get('paint_type') || null,
+      transmission: fd.get('transmission') || null,
+      adas_present: fd.get('adas_present') === 'on',
+      adas_note: fd.get('adas_note') || null,
+      key_tag: fd.get('key_tag') || null,
+      tyre_size: fd.get('tyre_size') || null,
     };
 
     if (!body.customer_id) {
@@ -339,6 +347,58 @@ export default function NewVehiclePage() {
               />
               {t('wok')}
             </label>
+          </div>
+        </div>
+
+        {/* Advanced definitions (collapsed by default to keep VH01 fast) */}
+        <div className="rounded-lg border border-ck-dark-border">
+          <button
+            type="button"
+            onClick={() => setShowAdvanced(v => !v)}
+            className="flex w-full items-center gap-2 px-4 py-3 text-left text-xs font-semibold uppercase text-ck-muted hover:text-white"
+          >
+            {showAdvanced ? <ChevronDown size={14} /> : <ChevronRight size={14} />}
+            {t('advanced')}
+          </button>
+          <div className={showAdvanced ? 'space-y-4 border-t border-ck-dark-border p-4' : 'hidden'}>
+            <div className="grid grid-cols-2 gap-4 sm:grid-cols-3">
+              <div>
+                <label className="mb-1 block text-xs text-ck-muted">{t('paintType')}</label>
+                <select name="paint_type" defaultValue="" className={inputClass}>
+                  <option value="">—</option>
+                  {['solid', 'metallic', 'pearl', 'matte', 'unknown'].map(v => (
+                    <option key={v} value={v}>{t(`paintType_${v}`)}</option>
+                  ))}
+                </select>
+              </div>
+              <div>
+                <label className="mb-1 block text-xs text-ck-muted">{t('transmission')}</label>
+                <select name="transmission" defaultValue="" className={inputClass}>
+                  <option value="">—</option>
+                  {['manual', 'automatic', 'unknown'].map(v => (
+                    <option key={v} value={v}>{t(`transmission_${v}`)}</option>
+                  ))}
+                </select>
+              </div>
+              <div>
+                <label className="mb-1 block text-xs text-ck-muted">{t('tyreSize')}</label>
+                <input name="tyre_size" placeholder={t('tyreSizePlaceholder')} className={inputClass} />
+              </div>
+              <div>
+                <label className="mb-1 block text-xs text-ck-muted">{t('keyTag')}</label>
+                <input name="key_tag" className={inputClass} />
+              </div>
+              <div className="flex items-end">
+                <label className="flex items-center gap-2 text-sm text-ck-muted-light">
+                  <input name="adas_present" type="checkbox" className="rounded border-ck-dark-border bg-ck-dark-surface" />
+                  {t('adasPresent')}
+                </label>
+              </div>
+            </div>
+            <div>
+              <label className="mb-1 block text-xs text-ck-muted">{t('adasNote')}</label>
+              <input name="adas_note" placeholder={t('adasNotePlaceholder')} className={inputClass} />
+            </div>
           </div>
         </div>
 

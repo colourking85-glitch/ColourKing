@@ -20,6 +20,13 @@ export const VehicleSchema = z.object({
   lease_company_id: z.string().uuid().nullable().optional(),
   insurer_id: z.string().uuid().nullable().optional(),
   driver_contact_id: z.string().uuid().nullable().optional(),
+  // Extra bodyshop definitions (migration 0065)
+  paint_type: z.enum(['solid', 'metallic', 'pearl', 'matte', 'unknown']).nullable().optional(),
+  transmission: z.enum(['manual', 'automatic', 'unknown']).nullable().optional(),
+  adas_present: z.boolean().optional(),
+  adas_note: z.string().nullable().optional(),
+  key_tag: z.string().nullable().optional(),
+  tyre_size: z.string().nullable().optional(),
 });
 
 export type VehicleInput = z.infer<typeof VehicleSchema>;

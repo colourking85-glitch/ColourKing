@@ -3806,6 +3806,12 @@ export type Database = {
           updated_at: string
           vin: string | null
           wok: boolean
+          paint_type: string | null
+          transmission: string | null
+          adas_present: boolean
+          adas_note: string | null
+          key_tag: string | null
+          tyre_size: string | null
           wok_date: string | null
           year: number | null
         }
@@ -3837,6 +3843,12 @@ export type Database = {
           updated_at?: string
           vin?: string | null
           wok?: boolean
+          paint_type?: string | null
+          transmission?: string | null
+          adas_present?: boolean
+          adas_note?: string | null
+          key_tag?: string | null
+          tyre_size?: string | null
           wok_date?: string | null
           year?: number | null
         }
@@ -3868,6 +3880,12 @@ export type Database = {
           updated_at?: string
           vin?: string | null
           wok?: boolean
+          paint_type?: string | null
+          transmission?: string | null
+          adas_present?: boolean
+          adas_note?: string | null
+          key_tag?: string | null
+          tyre_size?: string | null
           wok_date?: string | null
           year?: number | null
         }

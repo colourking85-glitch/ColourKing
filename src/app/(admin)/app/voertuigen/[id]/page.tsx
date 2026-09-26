@@ -102,6 +102,12 @@ type Vehicle = {
   rdw_snapshot: Record<string, string> | null;
   created_at: string;
   ownership: string | null;
+  paint_type: string | null;
+  transmission: string | null;
+  adas_present: boolean;
+  adas_note: string | null;
+  key_tag: string | null;
+  tyre_size: string | null;
   lease_company_id: string | null;
   insurer_id: string | null;
   driver_contact_id: string | null;
@@ -388,6 +394,13 @@ export default function VehicleDetailPage() {
     { key: 'wok', label: t('wok'), type: 'toggle' },
   ];
 
+  const advancedFields: EditableField[] = [
+    { key: 'tyre_size', label: t('tyreSize') },
+    { key: 'key_tag', label: t('keyTag') },
+    { key: 'adas_present', label: t('adasPresent'), type: 'toggle' },
+    { key: 'adas_note', label: t('adasNote') },
+  ];
+
   const KIND_ICON = {
     inspection: <ClipboardCheck size={14} className="text-emerald-400" />,
     job: <Wrench size={14} className="text-amber-400" />,
@@ -485,7 +498,34 @@ export default function VehicleDetailPage() {
                   onSave={saveField}
                 />
               ))}
-              <div className="flex justify-between">
+              <div className="border-t border-ck-dark-border pt-3">
+                <span className="text-[10px] font-semibold uppercase tracking-widest text-ck-muted">{t('advanced')}</span>
+              </div>
+              <SelectRow
+                label={t('paintType')}
+                value={vehicle.paint_type ?? ''}
+                placeholder="—"
+                options={['solid', 'metallic', 'pearl', 'matte', 'unknown'].map(v => ({ value: v, label: t(`paintType_${v}`) }))}
+                onChange={v => saveField('paint_type', v || null)}
+              />
+              <SelectRow
+                label={t('transmission')}
+                value={vehicle.transmission ?? ''}
+                placeholder="—"
+                options={['manual', 'automatic', 'unknown'].map(v => ({ value: v, label: t(`transmission_${v}`) }))}
+                onChange={v => saveField('transmission', v || null)}
+              />
+              {advancedFields.map(f => (
+                <EditableRow
+                  key={f.key}
+                  label={f.label}
+                  value={vehicle[f.key] as string | number | boolean | null}
+                  field={f.key}
+                  type={f.type}
+                  onSave={saveField}
+                />
+              ))}
+              <div className="flex justify-between border-t border-ck-dark-border pt-3">
                 <dt className="text-sm text-ck-muted">{t('lastOdometer')}</dt>
                 <dd className="text-sm text-ck-muted-light">
                   {activity?.odometer
