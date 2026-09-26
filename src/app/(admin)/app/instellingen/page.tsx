@@ -176,12 +176,15 @@ export default function SettingsPage() {
   }
 
   const STYLES = [
-    { id: 'midnight', label: tSy('styleMidnight'), desc: tSy('styleMidnightDesc'), bg: '#101114', surface: '#16171b', surface2: '#1c1e23', border: '#26272c', accent: '#e11d48' },
-    { id: 'flat', label: tSy('styleFlat'), desc: tSy('styleFlatDesc'), bg: '#111827', surface: '#1f2937', surface2: '#283548', border: '#374151', accent: '#3b82f6' },
-    { id: 'corporate', label: tSy('styleCorporate'), desc: tSy('styleCorporateDesc'), bg: '#0c1222', surface: '#162032', surface2: '#1e2d42', border: '#1e3a5f', accent: '#0ea5e9' },
-    { id: 'soft', label: tSy('styleSoft'), desc: tSy('styleSoftDesc'), bg: '#18181b', surface: '#27272a', surface2: '#303035', border: '#3f3f46', accent: '#a78bfa' },
-    { id: 'polaris', label: tSy('stylePolaris'), desc: tSy('stylePolarisDesc'), bg: '#1a1f36', surface: '#2d3250', surface2: '#363c5e', border: '#3d4470', accent: '#6366f1' },
-    { id: 'glossy', label: tSy('styleGlossy'), desc: tSy('styleGlossyDesc'), bg: '#0a0a0f', surface: '#15151e', surface2: '#1c1c28', border: '#2a2a3a', accent: '#f43f5e' },
+    { id: 'midnight', label: tSy('styleMidnight'), desc: tSy('styleMidnightDesc'), bg: '#101114', surface: '#16171b', surface2: '#1c1e23', border: '#26272c', accent: '#e11d48', textColor: '#e4e4e7' },
+    { id: 'flat', label: tSy('styleFlat'), desc: tSy('styleFlatDesc'), bg: '#111827', surface: '#1f2937', surface2: '#283548', border: '#374151', accent: '#3b82f6', textColor: '#e5e7eb' },
+    { id: 'corporate', label: tSy('styleCorporate'), desc: tSy('styleCorporateDesc'), bg: '#0c1222', surface: '#162032', surface2: '#1e2d42', border: '#1e3a5f', accent: '#0ea5e9', textColor: '#e0f2fe' },
+    { id: 'soft', label: tSy('styleSoft'), desc: tSy('styleSoftDesc'), bg: '#18181b', surface: '#27272a', surface2: '#303035', border: '#3f3f46', accent: '#a78bfa', textColor: '#e4e4e7' },
+    { id: 'polaris', label: tSy('stylePolaris'), desc: tSy('stylePolarisDesc'), bg: '#1a1f36', surface: '#2d3250', surface2: '#363c5e', border: '#3d4470', accent: '#6366f1', textColor: '#c7d2fe' },
+    { id: 'glossy', label: tSy('styleGlossy'), desc: tSy('styleGlossyDesc'), bg: '#0a0a0f', surface: '#15151e', surface2: '#1c1c28', border: '#2a2a3a', accent: '#f43f5e', textColor: '#e4e4e7' },
+    { id: 'clean', label: tSy('styleClean'), desc: tSy('styleCleanDesc'), bg: '#f8f9fa', surface: '#ffffff', surface2: '#f1f3f5', border: '#dee2e6', accent: '#e11d48', textColor: '#343a40' },
+    { id: 'daylight', label: tSy('styleDaylight'), desc: tSy('styleDaylightDesc'), bg: '#faf8f5', surface: '#ffffff', surface2: '#f5f0ea', border: '#e0d5c7', accent: '#b45309', textColor: '#292524' },
+    { id: 'arctic', label: tSy('styleArctic'), desc: tSy('styleArcticDesc'), bg: '#f0f4f8', surface: '#ffffff', surface2: '#e8eef4', border: '#c8d5e2', accent: '#1d4ed8', textColor: '#1e293b' },
   ];
 
   const TEXT_SIZES = [
@@ -394,7 +397,7 @@ export default function SettingsPage() {
                   {STYLES.map(s => (
                     <button
                       key={s.id}
-                      onClick={() => setStyle(s.id)}
+                      onClick={() => { setStyle(s.id); updateSettings({ ...settings, style: s.id }); }}
                       className={`group relative rounded-xl border-2 p-3 transition-all ${
                         style === s.id
                           ? 'border-ck-red'

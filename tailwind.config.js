@@ -21,7 +21,7 @@ module.exports = {
           'surface-3': 'var(--ck-surface-3, #232830)',
           border: 'var(--ck-border, #26272c)',
           'border-2': 'var(--ck-border-2, #2b2d33)',
-          divider: '#202127',
+          divider: 'var(--ck-border, #202127)',
           text: 'var(--ck-text, #f4f4f5)',
           'text-2': 'var(--ck-text-2, #e4e4e7)',
           'text-3': 'var(--ck-text-3, #a1a1aa)',

@@ -158,7 +158,61 @@ const STYLE_VARS: Record<string, Record<string, string>> = {
     '--ck-icon-bg': '#ffffff',
     '--ck-icon-fg': '#0a0a0f',
   },
+  // Light themes
+  clean: {
+    '--ck-bg': '#f8f9fa',
+    '--ck-surface': '#ffffff',
+    '--ck-surface-2': '#f1f3f5',
+    '--ck-surface-3': '#e9ecef',
+    '--ck-border': '#dee2e6',
+    '--ck-border-2': '#ced4da',
+    '--ck-accent': '#e11d48',
+    '--ck-accent-hover': '#be123c',
+    '--ck-text': '#212529',
+    '--ck-text-2': '#343a40',
+    '--ck-text-3': '#495057',
+    '--ck-text-muted': '#6c757d',
+    '--ck-text-faint': '#adb5bd',
+    '--ck-icon-bg': '#212529',
+    '--ck-icon-fg': '#ffffff',
+  },
+  daylight: {
+    '--ck-bg': '#faf8f5',
+    '--ck-surface': '#ffffff',
+    '--ck-surface-2': '#f5f0ea',
+    '--ck-surface-3': '#ede5da',
+    '--ck-border': '#e0d5c7',
+    '--ck-border-2': '#cfc0ad',
+    '--ck-accent': '#b45309',
+    '--ck-accent-hover': '#92400e',
+    '--ck-text': '#1c1917',
+    '--ck-text-2': '#292524',
+    '--ck-text-3': '#44403c',
+    '--ck-text-muted': '#78716c',
+    '--ck-text-faint': '#a8a29e',
+    '--ck-icon-bg': '#292524',
+    '--ck-icon-fg': '#ffffff',
+  },
+  arctic: {
+    '--ck-bg': '#f0f4f8',
+    '--ck-surface': '#ffffff',
+    '--ck-surface-2': '#e8eef4',
+    '--ck-surface-3': '#dce4ed',
+    '--ck-border': '#c8d5e2',
+    '--ck-border-2': '#b0c2d4',
+    '--ck-accent': '#1d4ed8',
+    '--ck-accent-hover': '#1e40af',
+    '--ck-text': '#0f172a',
+    '--ck-text-2': '#1e293b',
+    '--ck-text-3': '#334155',
+    '--ck-text-muted': '#64748b',
+    '--ck-text-faint': '#94a3b8',
+    '--ck-icon-bg': '#1e293b',
+    '--ck-icon-fg': '#ffffff',
+  },
 };
+
+const LIGHT_THEMES = new Set(['clean', 'daylight', 'arctic']);
 
 function applySettings(settings: AppSettings) {
   const root = document.documentElement;
@@ -167,14 +221,39 @@ function applySettings(settings: AppSettings) {
   root.style.setProperty('--ck-density', DENSITY_MAP[settings.density] ?? '1');
 
   const styleVars = STYLE_VARS[settings.style] ?? STYLE_VARS.midnight;
-  let styleId = document.getElementById('ck-theme-vars') as HTMLStyleElement | null;
-  if (!styleId) {
-    styleId = document.createElement('style');
-    styleId.id = 'ck-theme-vars';
-    document.head.appendChild(styleId);
+  const isLight = LIGHT_THEMES.has(settings.style);
+
+  let styleEl = document.getElementById('ck-theme-vars') as HTMLStyleElement | null;
+  if (!styleEl) {
+    styleEl = document.createElement('style');
+    styleEl.id = 'ck-theme-vars';
+    document.head.appendChild(styleEl);
   }
+
   const cssVars = Object.entries(styleVars).map(([k, v]) => `${k}: ${v};`).join('\n  ');
-  styleId.textContent = `.dark {\n  ${cssVars}\n}`;
+  let css = `.dark {\n  ${cssVars}\n}`;
+
+  if (isLight) {
+    const textColor = styleVars['--ck-text'] ?? '#212529';
+    const text2 = styleVars['--ck-text-2'] ?? '#343a40';
+    const bgColor = styleVars['--ck-bg'] ?? '#f8f9fa';
+    const surfaceColor = styleVars['--ck-surface'] ?? '#ffffff';
+    const borderColor = styleVars['--ck-border'] ?? '#dee2e6';
+    css += `
+.dark .text-white { color: ${textColor} !important; }
+.dark .text-white\\/80 { color: ${text2} !important; }
+.dark .bg-white { background-color: ${surfaceColor} !important; }
+.dark .bg-white\\/5, .dark .bg-white\\/10 { background-color: ${surfaceColor} !important; }
+.dark .border-white\\/10, .dark .border-white\\/20 { border-color: ${borderColor} !important; }
+.dark .divide-white\\/10 > :not([hidden]) ~ :not([hidden]) { border-color: ${borderColor} !important; }
+.dark .bg-black, .dark .bg-black\\/50, .dark .bg-black\\/40 { background-color: ${bgColor} !important; }
+.dark .ring-white\\/10 { --tw-ring-color: ${borderColor} !important; }
+.dark .placeholder\\:text-white\\/30::placeholder { color: ${styleVars['--ck-text-muted'] ?? '#6c757d'} !important; }
+.dark select option { background-color: ${surfaceColor}; color: ${textColor}; }
+`;
+  }
+
+  styleEl.textContent = css;
 
   if (settings.highContrast) {
     root.classList.add('ck-high-contrast');
