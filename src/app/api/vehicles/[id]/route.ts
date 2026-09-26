@@ -9,7 +9,11 @@ export async function GET(
   const supabase = createClient();
   const { data, error } = await supabase
     .from('vehicles')
-    .select('*, customers!vehicles_customer_id_fkey(id, name, email, phone)')
+    .select(`*,
+      customers!vehicles_customer_id_fkey(id, name, email, phone),
+      lease_company:customers!vehicles_lease_company_id_fkey(id, name),
+      insurer:customers!vehicles_insurer_id_fkey(id, name),
+      driver_contact:customer_contacts!vehicles_driver_contact_id_fkey(id, first_name, last_name, phone, mobile, email)`)
     .eq('id', params.id)
     .is('deleted_at', null)
     .single();

@@ -1,6 +1,6 @@
 'use client';
 
-import { useState, useEffect, useCallback, useRef } from 'react';
+import { useState, useEffect, useCallback } from 'react';
 import { useTranslations } from 'next-intl';
 import { Send, MessageCircle } from 'lucide-react';
 import type { NoteEntityType } from '@/types/database';
@@ -12,6 +12,7 @@ type Note = {
   author_id: string | null;
   body: string;
   created_at: string;
+  author?: { name: string } | null;
 };
 
 export function NotesPanel({
@@ -25,7 +26,6 @@ export function NotesPanel({
   const [notes, setNotes] = useState<Note[]>([]);
   const [input, setInput] = useState('');
   const [sending, setSending] = useState(false);
-  const scrollRef = useRef<HTMLDivElement>(null);
 
   const load = useCallback(async () => {
     try {
@@ -35,12 +35,6 @@ export function NotesPanel({
   }, [entityType, entityId]);
 
   useEffect(() => { load(); }, [load]);
-
-  useEffect(() => {
-    if (scrollRef.current) {
-      scrollRef.current.scrollTop = scrollRef.current.scrollHeight;
-    }
-  }, [notes]);
 
   async function handleSend() {
     if (!input.trim() || sending) return;
@@ -82,7 +76,7 @@ export function NotesPanel({
         </h3>
         <span className="ml-auto text-[10px] text-ck-text-faint">{notes.length}</span>
       </div>
-      <div ref={scrollRef} className="max-h-64 overflow-y-auto">
+      <div className="max-h-64 overflow-y-auto">
         {notes.length === 0 ? (
           <div className="px-4 py-6 text-center text-xs text-ck-text-faint">{t('noNotes')}</div>
         ) : (
@@ -93,9 +87,11 @@ export function NotesPanel({
             >
               <div className="flex items-center justify-between">
                 <span className="text-[10px] font-medium text-ck-text-muted">
-                  {t('internalNote')}
+                  {note.author?.name ?? t('internalNote')}
                 </span>
-                <span className="text-[10px] text-ck-text-faint">{timeAgo(note.created_at)}</span>
+                <span className="text-[10px] text-ck-text-faint" title={new Date(note.created_at).toLocaleString('nl-NL')}>
+                  {new Date(note.created_at).toLocaleString('nl-NL', { day: '2-digit', month: '2-digit', year: 'numeric', hour: '2-digit', minute: '2-digit' })} · {timeAgo(note.created_at)}
+                </span>
               </div>
               <p className="mt-1 text-[13px] leading-relaxed text-ck-text-3">{note.body}</p>
             </div>

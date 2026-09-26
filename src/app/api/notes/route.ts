@@ -12,10 +12,10 @@ export async function GET(req: NextRequest) {
   const supabase = createClient();
   const { data, error } = await supabase
     .from('internal_notes')
-    .select('id, entity_type, entity_id, author_id, body, created_at')
+    .select('id, entity_type, entity_id, author_id, body, created_at, author:staff(name)')
     .eq('entity_type', entityType)
     .eq('entity_id', entityId)
-    .order('created_at', { ascending: true });
+    .order('created_at', { ascending: false });
 
   if (error) {
     return NextResponse.json({ error: error.message }, { status: 500 });

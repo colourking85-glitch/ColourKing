@@ -1,11 +1,16 @@
 'use client';
 
-import { useState, useEffect, useCallback } from 'react';
+import { useState, useEffect, useCallback, useMemo } from 'react';
 import { useParams, useRouter } from 'next/navigation';
 import Link from 'next/link';
-import { ArrowLeft, Trash2, User, Pencil, Check, X } from 'lucide-react';
-import { useTranslations } from 'next-intl';
+import {
+  ArrowLeft, Trash2, User, Pencil, Check, X, ClipboardCheck, Plus, Gauge,
+  Wrench, FileText, Receipt, Calendar, Inbox, FileDown,
+} from 'lucide-react';
+import { useTranslations, useLocale } from 'next-intl';
 import { ScreenBadge } from '@/components/ui/ScreenBadge';
+import { NotesPanel } from '@/components/shared/NotesPanel';
+import { STATUS_LABELS as INS_STATUS_LABELS, STATUS_COLORS as INS_STATUS_COLORS, type InsStatus } from '@/modules/inspectie/machine';
 
 const RDW_LABELS: Record<string, string> = {
   merk: 'Merk',
@@ -65,6 +70,17 @@ const STATUS_COLORS: Record<string, string> = {
 };
 
 const STATUSES = ['created', 'in_progress', 'done', 'archived'] as const;
+const OWNERSHIPS = ['owned', 'leased', 'rental', 'unknown'] as const;
+
+type Party = { id: string; name: string } | null;
+type Contact = {
+  id: string;
+  first_name: string;
+  last_name: string;
+  phone: string | null;
+  mobile: string | null;
+  email: string | null;
+};
 
 type Vehicle = {
   id: string;
@@ -84,12 +100,43 @@ type Vehicle = {
   plate_origin: string | null;
   rdw_snapshot: Record<string, string> | null;
   created_at: string;
+  ownership: string | null;
+  lease_company_id: string | null;
+  insurer_id: string | null;
+  driver_contact_id: string | null;
   customers?: {
     id: string;
     name: string;
     email: string | null;
     phone: string | null;
   };
+  lease_company?: Party;
+  insurer?: Party;
+  driver_contact?: Contact | null;
+};
+
+type Inspection = {
+  id: string;
+  reference: string;
+  status: InsStatus;
+  purpose: string;
+  finding_count: number;
+  photo_count: number;
+  total_hours: number;
+  odometer_km: number | null;
+  locked_at: string | null;
+  created_at: string;
+  staff: { id: string; name: string } | null;
+};
+
+type Activity = {
+  inspections: Inspection[];
+  jobs: { id: string; number: number; stage: string; intake_km: number | null; outtake_km: number | null; created_at: string; closed_at: string | null }[];
+  offers: { id: string; offer_number: string | null; status: string; total_cents: number; created_at: string }[];
+  invoices: { id: string; invoice_number: string | null; status: string; total_cents: number; created_at: string }[];
+  appointments: { id: string; type: string; status: string; scheduled_date: string; scheduled_time: string; created_at: string }[];
+  leads: { id: string; number: number; status: string; created_at: string }[];
+  odometer: { km: number; at: string; source: 'job_out' | 'job_in' | 'inspection'; ref: string } | null;
 };
 
 type EditableField = {
@@ -97,6 +144,9 @@ type EditableField = {
   label: string;
   type?: 'text' | 'number' | 'toggle';
 };
+
+const eur = (cents: number) => (cents / 100).toLocaleString('nl-NL', { style: 'currency', currency: 'EUR' });
+const fmtDate = (d: string) => new Date(d).toLocaleDateString('nl-NL');
 
 function EditableRow({
   label,
@@ -186,26 +236,71 @@ function EditableRow({
   );
 }
 
+function SelectRow({
+  label,
+  value,
+  options,
+  placeholder,
+  onChange,
+}: {
+  label: string;
+  value: string;
+  options: { value: string; label: string }[];
+  placeholder: string;
+  onChange: (v: string) => void;
+}) {
+  return (
+    <div className="flex items-center justify-between gap-3">
+      <dt className="text-sm text-ck-muted shrink-0">{label}</dt>
+      <dd>
+        <select
+          value={value}
+          onChange={e => onChange(e.target.value)}
+          className="w-52 rounded border border-ck-dark-border bg-ck-dark-surface px-2 py-1 text-sm text-white focus:border-ck-red focus:outline-none"
+        >
+          <option value="">{placeholder}</option>
+          {options.map(o => <option key={o.value} value={o.value}>{o.label}</option>)}
+        </select>
+      </dd>
+    </div>
+  );
+}
+
 export default function VehicleDetailPage() {
   const t = useTranslations('vh');
   const tCommon = useTranslations('common');
+  const locale = useLocale() as 'nl' | 'en' | 'tr';
   const { id } = useParams<{ id: string }>();
   const router = useRouter();
   const [vehicle, setVehicle] = useState<Vehicle | null>(null);
+  const [activity, setActivity] = useState<Activity | null>(null);
+  const [customers, setCustomers] = useState<{ id: string; name: string }[]>([]);
+  const [contacts, setContacts] = useState<Contact[]>([]);
   const [loading, setLoading] = useState(true);
   const [saving, setSaving] = useState(false);
-  const [notes, setNotes] = useState('');
-  const [notesDirty, setNotesDirty] = useState(false);
+
+  const loadVehicle = useCallback(async () => {
+    const r = await fetch(`/api/vehicles/${id}`);
+    const v = r.ok ? await r.json() : null;
+    setVehicle(v);
+    return v as Vehicle | null;
+  }, [id]);
 
   useEffect(() => {
-    fetch(`/api/vehicles/${id}`)
-      .then(r => r.ok ? r.json() : null)
-      .then(v => {
-        setVehicle(v);
-        setNotes(v?.notes ?? '');
-      })
-      .finally(() => setLoading(false));
-  }, [id]);
+    loadVehicle().finally(() => setLoading(false));
+    fetch(`/api/vehicles/${id}/activity`).then(r => r.ok ? r.json() : null).then(setActivity).catch(() => {});
+    fetch('/api/customers').then(r => r.ok ? r.json() : []).then((rows: { id: string; name: string }[]) =>
+      setCustomers(rows.map(c => ({ id: c.id, name: c.name })))
+    ).catch(() => {});
+  }, [id, loadVehicle]);
+
+  useEffect(() => {
+    if (!vehicle?.customer_id) return;
+    fetch(`/api/customers/${vehicle.customer_id}/contacts`)
+      .then(r => r.ok ? r.json() : [])
+      .then(setContacts)
+      .catch(() => {});
+  }, [vehicle?.customer_id]);
 
   const saveField = useCallback(async (field: string, value: string | number | boolean | null) => {
     setSaving(true);
@@ -215,26 +310,11 @@ export default function VehicleDetailPage() {
       body: JSON.stringify({ [field]: value }),
     });
     if (res.ok) {
-      const updated = await res.json();
-      setVehicle(prev => prev ? { ...prev, ...updated } : prev);
+      // PATCH returns the bare row; re-fetch to refresh the joined parties.
+      await loadVehicle();
     }
     setSaving(false);
-  }, [id]);
-
-  async function saveNotes() {
-    setSaving(true);
-    const res = await fetch(`/api/vehicles/${id}`, {
-      method: 'PATCH',
-      headers: { 'Content-Type': 'application/json' },
-      body: JSON.stringify({ notes: notes || null }),
-    });
-    if (res.ok) {
-      const updated = await res.json();
-      setVehicle(prev => prev ? { ...prev, ...updated } : prev);
-      setNotesDirty(false);
-    }
-    setSaving(false);
-  }
+  }, [id, loadVehicle]);
 
   async function handleDelete() {
     if (!confirm(tCommon('confirm') + '?')) return;
@@ -252,6 +332,20 @@ export default function VehicleDetailPage() {
       setVehicle(prev => prev ? { ...prev, status: newStatus } : prev);
     }
   }
+
+  // Unified activity timeline, newest first.
+  const timeline = useMemo(() => {
+    if (!activity) return [];
+    type Item = { key: string; kind: 'inspection' | 'job' | 'offer' | 'invoice' | 'appointment' | 'lead'; at: string; title: string; status: string; href: string };
+    const items: Item[] = [];
+    activity.inspections.forEach(i => items.push({ key: 'i' + i.id, kind: 'inspection', at: i.created_at, title: i.reference, status: INS_STATUS_LABELS[i.status]?.[locale] ?? i.status, href: `/app/inspecties/${i.id}` }));
+    activity.jobs.forEach(j => items.push({ key: 'j' + j.id, kind: 'job', at: j.created_at, title: `#${j.number}`, status: j.stage, href: `/app/jobs/${j.id}` }));
+    activity.offers.forEach(o => items.push({ key: 'o' + o.id, kind: 'offer', at: o.created_at, title: `${o.offer_number ?? ''} · ${eur(o.total_cents)}`, status: o.status, href: `/app/offertes/${o.id}` }));
+    activity.invoices.forEach(f => items.push({ key: 'f' + f.id, kind: 'invoice', at: f.created_at, title: `${f.invoice_number ?? ''} · ${eur(f.total_cents)}`, status: f.status, href: `/app/facturen/${f.id}` }));
+    activity.appointments.forEach(a => items.push({ key: 'a' + a.id, kind: 'appointment', at: `${a.scheduled_date}T${a.scheduled_time}`, title: `${fmtDate(a.scheduled_date)} ${a.scheduled_time.slice(0, 5)} · ${a.type}`, status: a.status, href: `/app/afspraken/${a.id}` }));
+    activity.leads.forEach(l => items.push({ key: 'l' + l.id, kind: 'lead', at: l.created_at, title: `#${l.number}`, status: l.status, href: `/app/leads/${l.id}` }));
+    return items.sort((a, b) => new Date(b.at).getTime() - new Date(a.at).getTime());
+  }, [activity, locale]);
 
   if (loading) return <div className="p-8 text-center text-ck-muted">{tCommon('loading')}</div>;
   if (!vehicle) return <div className="p-8 text-center text-ck-muted">{tCommon('notFound')}</div>;
@@ -272,6 +366,17 @@ export default function VehicleDetailPage() {
     { key: 'wok', label: t('wok'), type: 'toggle' },
   ];
 
+  const KIND_ICON = {
+    inspection: <ClipboardCheck size={14} className="text-emerald-400" />,
+    job: <Wrench size={14} className="text-amber-400" />,
+    offer: <FileText size={14} className="text-green-400" />,
+    invoice: <Receipt size={14} className="text-blue-400" />,
+    appointment: <Calendar size={14} className="text-purple-400" />,
+    lead: <Inbox size={14} className="text-orange-400" />,
+  };
+
+  const newInspectionHref = `/app/inspecties/nieuw?vehicle=${vehicle.id}&customer=${vehicle.customer_id}`;
+
   return (
     <div className="space-y-6">
       <div className="flex items-center justify-between">
@@ -291,11 +396,22 @@ export default function VehicleDetailPage() {
               WOK
             </span>
           )}
+          {activity?.odometer && (
+            <span className="flex items-center gap-1 rounded bg-ck-dark-surface px-2 py-0.5 text-xs text-ck-muted-light" title={`${t(`odometerSource_${activity.odometer.source}`)} ${activity.odometer.ref} · ${fmtDate(activity.odometer.at)}`}>
+              <Gauge size={12} /> {activity.odometer.km.toLocaleString('nl-NL')} km
+            </span>
+          )}
           {saving && (
             <span className="text-xs text-ck-muted animate-pulse">Saving...</span>
           )}
         </div>
         <div className="flex gap-2">
+          <Link
+            href={newInspectionHref}
+            className="flex items-center gap-2 rounded-lg bg-ck-red px-3 py-2 text-sm font-semibold text-white hover:bg-ck-red-hover"
+          >
+            <Plus size={14} /> {t('newInspection')}
+          </Link>
           <button
             onClick={handleDelete}
             className="flex items-center gap-2 rounded-lg border border-red-500/30 px-3 py-2 text-sm text-red-400 hover:bg-red-500/10"
@@ -326,34 +442,108 @@ export default function VehicleDetailPage() {
       </div>
 
       <div className="grid grid-cols-1 gap-6 lg:grid-cols-2">
-        {/* Editable vehicle details */}
-        <div className="rounded-lg border border-ck-dark-border bg-ck-dark-card p-6">
-          <h2 className="mb-4 flex items-center gap-2 text-sm font-semibold uppercase text-ck-muted">
-            {tCommon('details')}
-            <span className="text-[10px] font-normal normal-case text-ck-muted/60">
-              (hover to edit)
-            </span>
-          </h2>
-          <dl className="space-y-3">
-            {fields.map(f => (
-              <EditableRow
-                key={f.key}
-                label={f.label}
-                value={vehicle[f.key] as string | number | boolean | null}
-                field={f.key}
-                type={f.type}
-                onSave={saveField}
-              />
-            ))}
-            <div className="flex justify-between">
-              <dt className="text-sm text-ck-muted">{tCommon('create')}</dt>
-              <dd className="text-sm text-ck-muted-light">{new Date(vehicle.created_at).toLocaleDateString('nl-NL')}</dd>
+        {/* Left column */}
+        <div className="space-y-6">
+          {/* Editable vehicle details */}
+          <div className="rounded-lg border border-ck-dark-border bg-ck-dark-card p-6">
+            <h2 className="mb-4 flex items-center gap-2 text-sm font-semibold uppercase text-ck-muted">
+              {tCommon('details')}
+              <span className="text-[10px] font-normal normal-case text-ck-muted/60">
+                (hover to edit)
+              </span>
+            </h2>
+            <dl className="space-y-3">
+              {fields.map(f => (
+                <EditableRow
+                  key={f.key}
+                  label={f.label}
+                  value={vehicle[f.key] as string | number | boolean | null}
+                  field={f.key}
+                  type={f.type}
+                  onSave={saveField}
+                />
+              ))}
+              <div className="flex justify-between">
+                <dt className="text-sm text-ck-muted">{t('lastOdometer')}</dt>
+                <dd className="text-sm text-ck-muted-light">
+                  {activity?.odometer
+                    ? `${activity.odometer.km.toLocaleString('nl-NL')} km · ${t(`odometerSource_${activity.odometer.source}`)} ${activity.odometer.ref} · ${fmtDate(activity.odometer.at)}`
+                    : '—'}
+                </dd>
+              </div>
+              <div className="flex justify-between">
+                <dt className="text-sm text-ck-muted">{tCommon('create')}</dt>
+                <dd className="text-sm text-ck-muted-light">{fmtDate(vehicle.created_at)}</dd>
+              </div>
+            </dl>
+          </div>
+
+          {/* Inspections */}
+          <div className="rounded-lg border border-ck-dark-border bg-ck-dark-card p-6">
+            <div className="mb-4 flex items-center justify-between">
+              <h2 className="flex items-center gap-2 text-sm font-semibold uppercase text-ck-muted">
+                <ClipboardCheck size={14} /> {t('inspections')}
+                {activity && <span className="text-[10px] font-normal text-ck-muted/60">({activity.inspections.length})</span>}
+              </h2>
+              <Link href={newInspectionHref} className="flex items-center gap-1 text-xs font-medium text-ck-red hover:underline">
+                <Plus size={12} /> {t('newInspection')}
+              </Link>
             </div>
-          </dl>
+            {!activity ? (
+              <p className="text-sm text-ck-muted">{tCommon('loading')}</p>
+            ) : activity.inspections.length === 0 ? (
+              <p className="text-sm text-ck-muted">{t('noInspections')}</p>
+            ) : (
+              <div className="divide-y divide-ck-dark-border">
+                {activity.inspections.map(i => (
+                  <div key={i.id} className="flex items-center gap-3 py-2.5">
+                    <Link href={`/app/inspecties/${i.id}`} className="font-mono text-sm text-white hover:text-ck-red">
+                      {i.reference}
+                    </Link>
+                    <span className={`rounded-full px-2 py-0.5 text-[11px] font-semibold ${INS_STATUS_COLORS[i.status] ?? ''}`}>
+                      {INS_STATUS_LABELS[i.status]?.[locale] ?? i.status}
+                    </span>
+                    <span className="text-xs text-ck-muted">
+                      {t('findings')}: {i.finding_count} · {i.photo_count} {t('photos')} · {Number(i.total_hours).toFixed(1)} u
+                    </span>
+                    <span className="ml-auto text-xs text-ck-muted">
+                      {i.staff?.name ? `${i.staff.name} · ` : ''}{fmtDate(i.created_at)}
+                    </span>
+                    {i.status === 'VERGRENDELD' && (
+                      <Link href={`/app/inspecties/${i.id}/rapport`} className="text-ck-muted hover:text-white" title={t('viewReport')}>
+                        <FileDown size={14} />
+                      </Link>
+                    )}
+                  </div>
+                ))}
+              </div>
+            )}
+          </div>
+
+          {/* Activity */}
+          <div className="rounded-lg border border-ck-dark-border bg-ck-dark-card p-6">
+            <h2 className="mb-4 text-sm font-semibold uppercase text-ck-muted">{t('activity')}</h2>
+            {timeline.length === 0 ? (
+              <p className="text-sm text-ck-muted">{t('noActivity')}</p>
+            ) : (
+              <div className="divide-y divide-ck-dark-border">
+                {timeline.map(item => (
+                  <Link key={item.key} href={item.href} className="flex items-center gap-3 py-2 hover:bg-ck-dark-surface/50 -mx-2 px-2 rounded">
+                    {KIND_ICON[item.kind]}
+                    <span className="text-xs uppercase text-ck-muted w-24 shrink-0">{t(`act_${item.kind}`)}</span>
+                    <span className="text-sm text-white truncate">{item.title}</span>
+                    <span className="text-xs text-ck-muted">{item.status}</span>
+                    <span className="ml-auto text-xs text-ck-muted shrink-0">{fmtDate(item.at)}</span>
+                  </Link>
+                ))}
+              </div>
+            )}
+          </div>
         </div>
 
+        {/* Right column */}
         <div className="space-y-6">
-          {/* Owner */}
+          {/* Owner & parties */}
           <div className="rounded-lg border border-ck-dark-border bg-ck-dark-card p-6">
             <h2 className="mb-4 text-sm font-semibold uppercase text-ck-muted">{t('owner')}</h2>
             {vehicle.customers ? (
@@ -374,30 +564,55 @@ export default function VehicleDetailPage() {
             ) : (
               <p className="text-sm text-ck-muted">{tCommon('notLinked')}</p>
             )}
+
+            <h3 className="mt-5 mb-3 text-xs font-semibold uppercase text-ck-muted">{t('parties')}</h3>
+            <dl className="space-y-3">
+              <SelectRow
+                label={t('ownership')}
+                value={vehicle.ownership ?? ''}
+                placeholder={t('ownership_unknown')}
+                options={OWNERSHIPS.map(o => ({ value: o, label: t(`ownership_${o}`) }))}
+                onChange={v => saveField('ownership', v || null)}
+              />
+              <SelectRow
+                label={t('leaseCompany')}
+                value={vehicle.lease_company_id ?? ''}
+                placeholder={t('none')}
+                options={customers.map(c => ({ value: c.id, label: c.name }))}
+                onChange={v => saveField('lease_company_id', v || null)}
+              />
+              <SelectRow
+                label={t('insurer')}
+                value={vehicle.insurer_id ?? ''}
+                placeholder={t('none')}
+                options={customers.map(c => ({ value: c.id, label: c.name }))}
+                onChange={v => saveField('insurer_id', v || null)}
+              />
+              <SelectRow
+                label={t('driverContact')}
+                value={vehicle.driver_contact_id ?? ''}
+                placeholder={t('none')}
+                options={contacts.map(c => ({ value: c.id, label: `${c.first_name} ${c.last_name}` }))}
+                onChange={v => saveField('driver_contact_id', v || null)}
+              />
+              {vehicle.driver_contact && (
+                <p className="text-xs text-ck-muted text-right">
+                  {[vehicle.driver_contact.mobile ?? vehicle.driver_contact.phone, vehicle.driver_contact.email].filter(Boolean).join(' · ')}
+                </p>
+              )}
+            </dl>
           </div>
 
-          {/* Notes / extra definition */}
-          <div className="rounded-lg border border-ck-dark-border bg-ck-dark-card p-6">
-            <h2 className="mb-4 text-sm font-semibold uppercase text-ck-muted">{t('notes')}</h2>
-            <textarea
-              value={notes}
-              onChange={e => { setNotes(e.target.value); setNotesDirty(true); }}
-              placeholder={t('notesPlaceholder')}
-              rows={5}
-              className="w-full rounded-lg border border-ck-dark-border bg-ck-dark-surface px-3 py-2 text-sm text-white placeholder:text-ck-muted/50 focus:border-ck-red focus:outline-none resize-y"
-            />
-            {notesDirty && (
-              <div className="mt-2 flex justify-end">
-                <button
-                  onClick={saveNotes}
-                  disabled={saving}
-                  className="flex items-center gap-1.5 rounded-lg bg-ck-red px-4 py-1.5 text-xs font-semibold text-white hover:bg-ck-red-hover disabled:opacity-50"
-                >
-                  <Check size={12} /> {tCommon('save')}
-                </button>
-              </div>
-            )}
-          </div>
+          {/* Notes: timestamped, newest first */}
+          <NotesPanel entityType="vehicle" entityId={vehicle.id} />
+
+          {/* Legacy free-text description */}
+          {vehicle.notes && (
+            <div className="rounded-lg border border-ck-dark-border bg-ck-dark-card p-6">
+              <h2 className="mb-2 text-sm font-semibold uppercase text-ck-muted">{t('legacyNotes')}</h2>
+              <p className="whitespace-pre-wrap text-sm text-ck-muted-light">{vehicle.notes}</p>
+            </div>
+          )}
         </div>
       </div>
 

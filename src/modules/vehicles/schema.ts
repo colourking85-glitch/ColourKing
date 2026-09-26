@@ -15,6 +15,11 @@ export const VehicleSchema = z.object({
   wok: z.boolean().default(false),
   notes: z.string().nullable().optional(),
   plate_origin: z.string().nullable().optional(),
+  // Customer 360 ownership fields (migration 0059)
+  ownership: z.enum(['owned', 'leased', 'rental', 'unknown']).nullable().optional(),
+  lease_company_id: z.string().uuid().nullable().optional(),
+  insurer_id: z.string().uuid().nullable().optional(),
+  driver_contact_id: z.string().uuid().nullable().optional(),
 });
 
 export type VehicleInput = z.infer<typeof VehicleSchema>;

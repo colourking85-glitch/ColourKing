@@ -1,7 +1,7 @@
 'use client';
 
 import { useState, useEffect, useCallback, useMemo } from 'react';
-import { useRouter } from 'next/navigation';
+import { useRouter, useSearchParams } from 'next/navigation';
 import { useTranslations } from 'next-intl';
 import { Loader2 } from 'lucide-react';
 import { PhotoCapture } from '@/components/ui/PhotoCapture';
@@ -227,6 +227,9 @@ const chipStyle = (on: boolean, extra: React.CSSProperties = {}): React.CSSPrope
 
 export default function InspectieNieuwPage() {
   const router = useRouter();
+  const searchParams = useSearchParams();
+  const presetVehicleId = searchParams.get('vehicle');
+  const presetCustomerId = searchParams.get('customer');
   const t = useTranslations('in');
 
   // wizard state
@@ -290,6 +293,25 @@ export default function InspectieNieuwPage() {
     fetch('/api/inspections/catalog/components').then(r => r.json()).then(setComponents).catch(() => {});
     fetch('/api/inspections/catalog/damage-types').then(r => r.json()).then(setDamageTypes).catch(() => {});
   }, []);
+
+  // Prefill from VH10 "New inspection" (?vehicle=&customer=), like VH01 does.
+  useEffect(() => {
+    if (presetVehicleId && !selectedVehicle && vehicles.length > 0) {
+      const v = vehicles.find(x => x.id === presetVehicleId);
+      if (v) {
+        setSelectedVehicle(v);
+        if (v.kenteken) setPlate(v.kenteken);
+        if (v.customers) setSelectedCustomer({ ...v.customers, email: null, phone: null });
+      }
+    }
+  }, [presetVehicleId, vehicles, selectedVehicle]);
+
+  useEffect(() => {
+    if (presetCustomerId && !selectedCustomer && customers.length > 0) {
+      const c = customers.find(x => x.id === presetCustomerId);
+      if (c) setSelectedCustomer(c);
+    }
+  }, [presetCustomerId, customers, selectedCustomer]);
 
   useEffect(() => {
     if (isForeignPlate && brands.length === 0) {

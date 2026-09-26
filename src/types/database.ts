@@ -1844,6 +1844,41 @@ export type Database = {
           },
         ]
       }
+      internal_notes: {
+        Row: {
+          author_id: string | null
+          body: string
+          created_at: string
+          entity_id: string
+          entity_type: string
+          id: string
+        }
+        Insert: {
+          author_id?: string | null
+          body: string
+          created_at?: string
+          entity_id: string
+          entity_type: string
+          id?: string
+        }
+        Update: {
+          author_id?: string | null
+          body?: string
+          created_at?: string
+          entity_id?: string
+          entity_type?: string
+          id?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "internal_notes_author_id_fkey"
+            columns: ["author_id"]
+            isOneToOne: false
+            referencedRelation: "staff"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       invoice_lines: {
         Row: {
           created_at: string
@@ -2227,6 +2262,7 @@ export type Database = {
           estimated_hours: number | null
           id: string
           intake_km: number | null
+          outtake_km: number | null
           job_type: Database["public"]["Enums"]["job_type"] | null
           notes: string | null
           number: number
@@ -2248,6 +2284,7 @@ export type Database = {
           estimated_hours?: number | null
           id?: string
           intake_km?: number | null
+          outtake_km?: number | null
           job_type?: Database["public"]["Enums"]["job_type"] | null
           notes?: string | null
           number?: number
@@ -2269,6 +2306,7 @@ export type Database = {
           estimated_hours?: number | null
           id?: string
           intake_km?: number | null
+          outtake_km?: number | null
           job_type?: Database["public"]["Enums"]["job_type"] | null
           notes?: string | null
           number?: number
