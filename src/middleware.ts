@@ -86,7 +86,7 @@ export async function middleware(req: NextRequest) {
   // admin.colourking.nl -> rewrite to /app routes
   if (host.startsWith('admin.')) {
     // Public routes and API routes pass through directly
-    if (pathname === '/login' || pathname.startsWith('/reset-password') || pathname.startsWith('/api/')) {
+    if (pathname === '/login' || pathname.startsWith('/reset-password') || pathname.startsWith('/api/') || pathname.startsWith('/s/')) {
       return NextResponse.next();
     }
 
