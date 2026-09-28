@@ -450,7 +450,7 @@ export default function PublicHandoverPage() {
         </div>
 
         <p className="mt-8 text-center text-xs text-gray-400">
-          Powered by Colourking
+          Powered by dessystem.io
         </p>
       </div>
     </div>
