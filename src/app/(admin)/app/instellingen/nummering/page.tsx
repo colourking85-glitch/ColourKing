@@ -109,7 +109,8 @@ export default function NumberingPage() {
       const ww = String(Math.ceil(((d.getTime() - yearStart) / 86400000 + 1) / 7)).padStart(2, '0');
       return `${range.prefix}-${yy}${ww}${String(range.next_number).padStart(2, '0')}`;
     }
-    return `${range.prefix}-${range.year}-${String(range.next_number).padStart(4, '0')}`;
+    const yy = String(range.year % 100).padStart(2, '0');
+    return `${range.prefix}-${yy}${String(range.next_number).padStart(4, '0')}`;
   }
 
   return (
