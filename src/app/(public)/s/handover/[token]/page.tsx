@@ -450,7 +450,7 @@ export default function PublicHandoverPage() {
         </div>
 
         <p className="mt-8 text-center text-xs text-gray-400">
-          Powered by dessystem.io
+          Powered by Dessystems.io
         </p>
       </div>
     </div>

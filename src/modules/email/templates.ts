@@ -8,6 +8,7 @@
 import type { TemplateDataMap, EmailLocale } from './schema';
 import type { CompanyInfo } from '@/lib/company';
 import { formatCompanyFooter } from '@/lib/company';
+import { localToday } from '@/modules/reminders/evaluators';
 
 /* ── Formatting helpers ───────────────────────────────────── */
 
@@ -77,6 +78,8 @@ const STRINGS: Record<string, EmailStrings> = {
     // Appointment reminder
     reminderSubject: 'Herinnering: afspraak morgen bij Colourking',
     reminderIntro: 'Dit is een herinnering dat u morgen een afspraak heeft bij Colourking.',
+    reminderSubjectToday: 'Herinnering: afspraak vandaag bij Colourking',
+    reminderIntroToday: 'Dit is een herinnering dat u vandaag een afspraak heeft bij Colourking.',
 
     // Payment
     paymentSubject: 'Betaling ontvangen - Factuur {invoiceNumber}',
@@ -193,6 +196,8 @@ const STRINGS: Record<string, EmailStrings> = {
 
     reminderSubject: 'Reminder: appointment tomorrow at Colourking',
     reminderIntro: 'This is a friendly reminder that you have an appointment tomorrow at Colourking.',
+    reminderSubjectToday: 'Reminder: appointment today at Colourking',
+    reminderIntroToday: 'This is a friendly reminder that you have an appointment today at Colourking.',
 
     paymentSubject: 'Payment received - Invoice {invoiceNumber}',
     paymentIntro: 'We have received your payment. Thank you!',
@@ -301,6 +306,8 @@ const STRINGS: Record<string, EmailStrings> = {
 
     reminderSubject: 'Hatirlatma: yarin Colourking randevunuz var',
     reminderIntro: 'Bu, yarin Colourking\'de bir randevunuz oldugunu hatirlatmak icindir.',
+    reminderSubjectToday: 'Hatirlatma: bugun Colourking randevunuz var',
+    reminderIntroToday: 'Bu, bugun Colourking\'de bir randevunuz oldugunu hatirlatmak icindir.',
 
     paymentSubject: 'Odeme alindi - Fatura {invoiceNumber}',
     paymentIntro: 'Odemenizi aldik. Tesekkur ederiz!',
@@ -599,9 +606,11 @@ function renderAppointmentConfirmed(data: TemplateDataMap['appointmentConfirmed'
 }
 
 function renderAppointmentReminder(data: TemplateDataMap['appointmentReminder'], locale: EmailLocale): string {
+  const isToday = data.scheduledDate === localToday();
+  const introKey = isToday ? 'reminderIntroToday' : 'reminderIntro';
   const body = `
     ${greeting(locale, data.customerName)}
-    ${paragraph(t(locale, 'reminderIntro'))}
+    ${paragraph(t(locale, introKey))}
     ${detailTable(
       detailRow(t(locale, 'appointmentDate'), formatDate(data.scheduledDate, locale)) +
       detailRow(t(locale, 'appointmentTime'), data.scheduledTime) +
@@ -780,8 +789,13 @@ export function getSubject<T extends keyof TemplateDataMap>(
     vehicleReady: 'readySubject',
     handoverShare: 'handoverSubject',
   };
-  const key = subjectKeys[template];
+  let key = subjectKeys[template];
   if (!key) return 'Colourking';
+
+  if (template === 'appointmentReminder') {
+    const d = data as Record<string, unknown>;
+    if (d.scheduledDate === localToday()) key = 'reminderSubjectToday';
+  }
 
   // Extract vars from data for subject interpolation
   const d = data as Record<string, unknown>;
