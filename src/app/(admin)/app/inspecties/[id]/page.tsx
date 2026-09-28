@@ -4,7 +4,7 @@ import { useState, useEffect, useRef, useMemo, useCallback } from 'react';
 import { useParams } from 'next/navigation';
 import Link from 'next/link';
 import { useTranslations, useLocale } from 'next-intl';
-import { ArrowLeft, Printer, Link2, FileDown, Camera, Send, Undo2, CheckCircle2, XCircle, X, Lock, Copy, Mail } from 'lucide-react';
+import { ArrowLeft, Printer, Link2, FileDown, FileText, Camera, Send, Undo2, CheckCircle2, XCircle, X, Lock, Copy, Mail } from 'lucide-react';
 import { getSession } from '@/lib/auth';
 import { ScreenBadge } from '@/components/ui/ScreenBadge';
 import { PhotoCapture } from '@/components/ui/PhotoCapture';
@@ -430,9 +430,14 @@ export default function InspectieDetailPage() {
           <div className="flex-1" />
 
           <div className="flex items-center gap-2">
-            <button className="flex items-center gap-1.5 rounded-lg border border-ck-dark-border px-3 py-1.5 text-xs font-medium text-ck-muted-light hover:bg-ck-dark-surface hover:text-white">
+            <a
+              href={`/api/inspections/${id}/pdf?inline=1`}
+              target="_blank"
+              rel="noreferrer"
+              className="flex items-center gap-1.5 rounded-lg border border-ck-dark-border px-3 py-1.5 text-xs font-medium text-ck-muted-light hover:bg-ck-dark-surface hover:text-white"
+            >
               <Printer size={14} /> Printen
-            </button>
+            </a>
             <button
               onClick={() => { setShowShare(v => !v); if (!shareEmail && ins.customers?.email) setShareEmail(ins.customers.email); }}
               className={`flex items-center gap-1.5 rounded-lg border px-3 py-1.5 text-xs font-medium hover:bg-ck-dark-surface hover:text-white ${showShare ? 'border-ck-red text-white' : 'border-ck-dark-border text-ck-muted-light'}`}
@@ -449,10 +454,16 @@ export default function InspectieDetailPage() {
             )}
             <Link
               href={`/app/inspecties/${id}/rapport`}
+              className="flex items-center gap-1.5 rounded-lg border border-ck-dark-border px-3 py-1.5 text-xs font-medium text-ck-muted-light hover:bg-ck-dark-surface hover:text-white"
+            >
+              <FileText size={14} /> Rapport
+            </Link>
+            <a
+              href={`/api/inspections/${id}/pdf`}
               className="flex items-center gap-1.5 rounded-lg bg-ck-red px-3 py-1.5 text-xs font-semibold text-white hover:bg-ck-red-hover"
             >
               <FileDown size={14} /> PDF downloaden
-            </Link>
+            </a>
           </div>
         </div>
 

@@ -92,6 +92,7 @@ const LABELS: Record<Locale, Record<string, string>> = {
     error: 'Er ging iets mis. Probeer het opnieuw.',
     eSign: 'Gewone elektronische handtekening (eIDAS art. 25). Vastgelegd worden: verklaring, tijdstip, IP-adres, browser en de document-hash.',
     legalNote: 'Geen expertiserapport — opgesteld door de herstellende partij.',
+    downloadPdf: 'Rapport downloaden (PDF)',
   },
   en: {
     title: 'Damage inspection',
@@ -130,6 +131,7 @@ const LABELS: Record<Locale, Record<string, string>> = {
     error: 'Something went wrong. Please try again.',
     eSign: 'Simple electronic signature (eIDAS art. 25). Recorded: statement, timestamp, IP address, browser and the document hash.',
     legalNote: 'Not an expert report — prepared by the repairing party.',
+    downloadPdf: 'Download report (PDF)',
   },
   tr: {
     title: 'Hasar ekspertizi',
@@ -168,6 +170,7 @@ const LABELS: Record<Locale, Record<string, string>> = {
     error: 'Bir şeyler ters gitti. Lütfen tekrar deneyin.',
     eSign: 'Basit elektronik imza (eIDAS md. 25). Kaydedilenler: beyan, zaman damgası, IP adresi, tarayıcı ve belge özeti.',
     legalNote: 'Ekspertiz raporu değildir — onarımı yapan tarafça hazırlanmıştır.',
+    downloadPdf: 'Raporu indir (PDF)',
   },
 };
 
@@ -390,9 +393,21 @@ export default function InspectionSignPage() {
               {customerApproval && (
                 <p className="mt-1 text-sm text-gray-500">{t.signedBy} {customerApproval.signer_name} · {fmtDate(customerApproval.signed_at, locale)}</p>
               )}
+              {view.status === 'VERGRENDELD' && (
+                <a href={`/api/public/inspection/${token}/pdf`} className="mt-4 inline-flex items-center gap-2 rounded-xl bg-gray-900 px-5 py-2.5 text-sm font-semibold text-white hover:bg-gray-800">
+                  {t.downloadPdf}
+                </a>
+              )}
             </div>
           ) : isLocked ? (
-            <p className="text-center text-sm text-gray-600">{t.locked}</p>
+            <div className="text-center">
+              <p className="text-sm text-gray-600">{t.locked}</p>
+              {view.status === 'VERGRENDELD' && (
+                <a href={`/api/public/inspection/${token}/pdf`} className="mt-3 inline-flex items-center gap-2 rounded-xl bg-gray-900 px-5 py-2.5 text-sm font-semibold text-white hover:bg-gray-800">
+                  {t.downloadPdf}
+                </a>
+              )}
+            </div>
           ) : !canSign ? (
             <p className="text-center text-sm text-gray-600">{t.notOpen}</p>
           ) : (

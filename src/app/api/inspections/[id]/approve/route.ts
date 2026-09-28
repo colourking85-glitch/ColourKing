@@ -1,6 +1,7 @@
 import { NextRequest, NextResponse } from 'next/server';
 import { createClient } from '@/lib/supabase/server';
 import { errorMessage } from '@/modules/inspectie/errors';
+import { freezePdfIfLocked } from '@/modules/inspectie/pdf-freeze';
 
 /**
  * Records an approval (signature) through the SQL function ins_approve()
@@ -63,6 +64,7 @@ export async function POST(
       });
       if (trErr) throw trErr;
       inspection = data;
+      await freezePdfIfLocked(params.id, (data as { status?: string } | null)?.status);
     }
 
     return NextResponse.json({ approval, inspection }, { status: 201 });

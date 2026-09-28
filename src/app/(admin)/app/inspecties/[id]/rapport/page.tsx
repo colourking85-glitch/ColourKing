@@ -67,13 +67,13 @@ export default function InspectionReportPage() {
             <Printer size={14} />
             Printen
           </button>
-          <button
-            onClick={() => window.print()}
+          <a
+            href={`/api/inspections/${id}/pdf`}
             className="flex items-center gap-1.5 rounded-lg bg-ck-red px-3 py-1.5 text-sm font-semibold text-white hover:bg-ck-red-hover"
           >
             <FileDown size={14} />
             PDF downloaden
-          </button>
+          </a>
         </div>
       </div>
 

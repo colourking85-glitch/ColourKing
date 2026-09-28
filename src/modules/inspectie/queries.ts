@@ -98,6 +98,11 @@ export async function getInspection(id: string) {
     );
   }
 
+  // ins_snapshots is one-to-one (unique inspection_id): PostgREST returns an
+  // object, but every consumer expects an array.
+  const snapshotsRaw = data.ins_snapshots as unknown;
+  const snapshots = Array.isArray(snapshotsRaw) ? snapshotsRaw : snapshotsRaw ? [snapshotsRaw] : [];
+
   // Photos live in a private bucket; hand out short-lived signed URLs.
   const photosWithUrls = await signInsPhotoUrls(supabase, data.ins_photos ?? []);
   if (data.ins_events) {
@@ -106,7 +111,7 @@ export async function getInspection(id: string) {
     );
   }
 
-  return { ...data, ins_photos: photosWithUrls };
+  return { ...data, ins_photos: photosWithUrls, ins_snapshots: snapshots };
 }
 
 export async function getComponents() {

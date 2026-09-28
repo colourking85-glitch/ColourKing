@@ -2,6 +2,7 @@ import { NextRequest, NextResponse } from 'next/server';
 import { createClient } from '@/lib/supabase/server';
 import { errorMessage } from '@/modules/inspectie/errors';
 import { canTransition, type InsStatus } from '@/modules/inspectie/machine';
+import { freezePdfIfLocked } from '@/modules/inspectie/pdf-freeze';
 
 /**
  * Status changes go through the SQL function ins_transition() (migration 0062).
@@ -39,6 +40,8 @@ export async function POST(
       p_payload: payload ?? {},
     });
     if (error) throw error;
+
+    await freezePdfIfLocked(params.id, (data as { status?: string } | null)?.status);
 
     return NextResponse.json(data);
   } catch (err: unknown) {

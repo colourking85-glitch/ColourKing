@@ -4,6 +4,9 @@ const withNextIntl = createNextIntlPlugin('./src/i18n/request.ts');
 /** @type {import('next').NextConfig} */
 const nextConfig = {
   output: 'standalone',
+  experimental: {
+    serverComponentsExternalPackages: ['@react-pdf/renderer'],
+  },
   images: {
     unoptimized: true,
   },
