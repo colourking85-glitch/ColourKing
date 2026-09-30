@@ -1,0 +1,19 @@
+{
+  "name": "ColourKing Inspection",
+  "short_name": "CK Inspect",
+  "description": "ColourKing Bodyshop – Damage Inspection Tool",
+  "start_url": "/app/inspecties",
+  "scope": "/app/",
+  "display": "standalone",
+  "orientation": "any",
+  "background_color": "#0d0d12",
+  "theme_color": "#dc2626",
+  "icons": [
+    {
+      "src": "/images/Logo-ColourKing.jpg",
+      "sizes": "512x512",
+      "type": "image/jpeg",
+      "purpose": "any"
+    }
+  ]
+}

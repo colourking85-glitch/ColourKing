@@ -73,7 +73,7 @@ export const SCREEN_REGISTRY: Record<string, ScreenMeta> = {
   '/app/documenten': { id: 'DO05', title: 'Document Archive', titleNl: 'Documentarchief', module: 'DO', route: '/app/documenten' },
   '/app/documenten/[id]': { id: 'DO03', title: 'Document Detail', titleNl: 'Documentdetail', module: 'DO', route: '/app/documenten/[id]' },
   '/app/reparatieopdracht/[id]': { id: 'DO20', title: 'Repair Order', titleNl: 'Reparatieopdracht', module: 'DO', route: '/app/reparatieopdracht/[id]' },
-  '/app/afleverbon': { id: 'DO21', title: 'Handover Notes', titleNl: 'Afleverbonnen', module: 'DO', route: '/app/afleverbon' },
+  '/app/afleverbon': { id: 'DO22', title: 'Handover Notes List', titleNl: 'Afleverbonnen', module: 'DO', route: '/app/afleverbon' },
   '/app/afleverbon/nieuw': { id: 'DO21', title: 'Create Handover', titleNl: 'Afleverbon Aanmaken', module: 'DO', route: '/app/afleverbon/nieuw' },
   '/app/afleverbon/[id]': { id: 'DO21', title: 'Handover Note', titleNl: 'Afleverbon', module: 'DO', route: '/app/afleverbon/[id]' },
 
@@ -154,6 +154,9 @@ export const SCREEN_REGISTRY: Record<string, ScreenMeta> = {
   '/app/analytics': { id: 'AN05', title: 'Site Analytics', titleNl: 'Website Analyse', module: 'SY', route: '/app/analytics' },
 
   // Public pages
+  '/': { id: 'PB01', title: 'Homepage', titleNl: 'Homepagina', module: 'PB', route: '/' },
+  '/afspraak': { id: 'PB02', title: 'Booking Wizard', titleNl: 'Afspraak Wizard', module: 'PB', route: '/afspraak' },
+  '/contact': { id: 'PB03', title: 'Contact & Quote', titleNl: 'Contact & Offerte', module: 'PB', route: '/contact' },
   '/faq': { id: 'PB10', title: 'FAQ', titleNl: 'Veelgestelde vragen', module: 'PB', route: '/faq' },
   '/tracking': { id: 'PB20', title: 'Repair Tracking', titleNl: 'Reparatie Tracking', module: 'PB', route: '/tracking' },
 };

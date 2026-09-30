@@ -1,8 +1,8 @@
 'use client';
 
-import { useState, useEffect } from 'react';
+import { useState, useEffect, useMemo } from 'react';
 import Link from 'next/link';
-import { Search, ClipboardCheck, Eye, Plus } from 'lucide-react';
+import { Search, ClipboardCheck, Eye, Plus, ChevronUp, ChevronDown, ChevronsUpDown } from 'lucide-react';
 import { useTranslations } from 'next-intl';
 import { ScreenBadge } from '@/components/ui/ScreenBadge';
 import { STATUS_LABELS, STATUS_COLORS, type InsStatus } from '@/modules/inspectie/machine';
@@ -29,8 +29,13 @@ type Inspection = {
   staff: { id: string; name: string } | null;
 };
 
-function formatDate(iso: string) {
-  return new Date(iso).toLocaleDateString('nl-NL', { day: '2-digit', month: '2-digit', year: 'numeric' });
+type SortField = 'reference' | 'status' | 'vehicle' | 'customer' | 'finding_count' | 'total_hours' | 'indicative_total_cents' | 'date';
+type SortDir = 'asc' | 'desc';
+
+function formatDateTime(iso: string) {
+  const d = new Date(iso);
+  return d.toLocaleDateString('nl-NL', { day: '2-digit', month: '2-digit', year: 'numeric' }) + ' ' +
+    d.toLocaleTimeString('nl-NL', { hour: '2-digit', minute: '2-digit' });
 }
 
 function formatHours(h: number | null) {
@@ -43,6 +48,27 @@ function formatCents(cents: number | null) {
   return '€ ' + Math.round(cents / 100).toLocaleString('nl-NL');
 }
 
+function SortIcon({ field, current, dir }: { field: SortField; current: SortField | null; dir: SortDir }) {
+  if (current !== field) return <ChevronsUpDown size={14} className="ml-1 inline opacity-30" />;
+  return dir === 'asc'
+    ? <ChevronUp size={14} className="ml-1 inline text-ck-red" />
+    : <ChevronDown size={14} className="ml-1 inline text-ck-red" />;
+}
+
+function getSortValue(ins: Inspection, field: SortField): string | number {
+  switch (field) {
+    case 'reference': return ins.reference;
+    case 'status': return ins.status;
+    case 'vehicle': return `${ins.make || ''} ${ins.model || ''}`.trim();
+    case 'customer': return ins.customers?.name || '';
+    case 'finding_count': return ins.finding_count;
+    case 'total_hours': return ins.total_hours ?? 0;
+    case 'indicative_total_cents': return ins.indicative_total_cents ?? 0;
+    case 'date': return new Date(ins.locked_at || ins.created_at).getTime();
+    default: return '';
+  }
+}
+
 export default function InspectiesPage() {
   const t = useTranslations('in');
   const tCommon = useTranslations('common');
@@ -50,6 +76,8 @@ export default function InspectiesPage() {
   const [search, setSearch] = useState('');
   const [statusFilter, setStatusFilter] = useState('');
   const [loading, setLoading] = useState(true);
+  const [sortField, setSortField] = useState<SortField | null>(null);
+  const [sortDir, setSortDir] = useState<SortDir>('desc');
 
   useEffect(() => {
     setLoading(true);
@@ -62,9 +90,32 @@ export default function InspectiesPage() {
       .finally(() => setLoading(false));
   }, [search, statusFilter]);
 
+  const toggleSort = (field: SortField) => {
+    if (sortField === field) {
+      setSortDir(d => d === 'asc' ? 'desc' : 'asc');
+    } else {
+      setSortField(field);
+      setSortDir(field === 'date' || field === 'finding_count' || field === 'total_hours' || field === 'indicative_total_cents' ? 'desc' : 'asc');
+    }
+  };
+
+  const sorted = useMemo(() => {
+    if (!sortField) return inspections;
+    return [...inspections].sort((a, b) => {
+      const va = getSortValue(a, sortField);
+      const vb = getSortValue(b, sortField);
+      const cmp = typeof va === 'number' && typeof vb === 'number'
+        ? va - vb
+        : String(va).localeCompare(String(vb), 'nl');
+      return sortDir === 'asc' ? cmp : -cmp;
+    });
+  }, [inspections, sortField, sortDir]);
+
+  const thClass = 'px-4 py-3 cursor-pointer select-none hover:text-white transition-colors';
+
   return (
     <div className="space-y-6">
-      <div className="flex items-center justify-between">
+      <div className="flex flex-wrap items-center justify-between gap-3">
         <div className="flex items-center gap-3">
           <ScreenBadge code="IN05" />
           <h1 className="font-display text-2xl font-bold text-white">{t('title')}</h1>
@@ -78,7 +129,7 @@ export default function InspectiesPage() {
         </Link>
       </div>
 
-      <div className="flex gap-3">
+      <div className="flex flex-col sm:flex-row gap-3">
         <div className="relative flex-1">
           <Search size={16} className="absolute left-3 top-1/2 -translate-y-1/2 text-ck-muted" />
           <input
@@ -102,7 +153,7 @@ export default function InspectiesPage() {
       </div>
 
       {/* KPI summary */}
-      <div className="grid grid-cols-4 gap-4">
+      <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
         {[
           { label: t('statuses.BEZIG'), count: inspections.filter(i => i.status === 'BEZIG').length, color: 'text-blue-400' },
           { label: t('statuses.TER_AKKOORD'), count: inspections.filter(i => i.status === 'TER_AKKOORD').length, color: 'text-amber-400' },
@@ -128,22 +179,39 @@ export default function InspectiesPage() {
             </p>
           </div>
         ) : (
-          <table className="w-full">
+          <div className="overflow-x-auto">
+          <table className="w-full min-w-[900px]">
             <thead>
               <tr className="border-b border-ck-dark-border text-left text-xs uppercase tracking-wider text-ck-muted">
-                <th className="px-4 py-3">{t('reference')}</th>
-                <th className="px-4 py-3">{t('status')}</th>
-                <th className="px-4 py-3">{t('vehicle')}</th>
-                <th className="px-4 py-3">{t('customer')}</th>
-                <th className="px-4 py-3 text-right">{t('findings')}</th>
-                <th className="px-4 py-3 text-right">{t('hours')}</th>
-                <th className="px-4 py-3 text-right">{t('indicative')}</th>
-                <th className="px-4 py-3">{t('date')}</th>
+                <th className={thClass} onClick={() => toggleSort('reference')}>
+                  {t('reference')}<SortIcon field="reference" current={sortField} dir={sortDir} />
+                </th>
+                <th className={thClass} onClick={() => toggleSort('status')}>
+                  {t('status')}<SortIcon field="status" current={sortField} dir={sortDir} />
+                </th>
+                <th className={thClass} onClick={() => toggleSort('vehicle')}>
+                  {t('vehicle')}<SortIcon field="vehicle" current={sortField} dir={sortDir} />
+                </th>
+                <th className={thClass} onClick={() => toggleSort('customer')}>
+                  {t('customer')}<SortIcon field="customer" current={sortField} dir={sortDir} />
+                </th>
+                <th className={`${thClass} text-right`} onClick={() => toggleSort('finding_count')}>
+                  {t('findings')}<SortIcon field="finding_count" current={sortField} dir={sortDir} />
+                </th>
+                <th className={`${thClass} text-right`} onClick={() => toggleSort('total_hours')}>
+                  {t('hours')}<SortIcon field="total_hours" current={sortField} dir={sortDir} />
+                </th>
+                <th className={`${thClass} text-right`} onClick={() => toggleSort('indicative_total_cents')}>
+                  {t('indicative')}<SortIcon field="indicative_total_cents" current={sortField} dir={sortDir} />
+                </th>
+                <th className={thClass} onClick={() => toggleSort('date')}>
+                  {t('date')}<SortIcon field="date" current={sortField} dir={sortDir} />
+                </th>
                 <th className="px-4 py-3"></th>
               </tr>
             </thead>
             <tbody>
-              {inspections.map(ins => (
+              {sorted.map(ins => (
                 <tr
                   key={ins.id}
                   className="border-b border-ck-dark-border last:border-0 hover:bg-ck-dark-surface transition-colors"
@@ -179,7 +247,7 @@ export default function InspectiesPage() {
                     {formatCents(ins.indicative_total_cents)}
                   </td>
                   <td className="px-4 py-3 text-sm text-ck-muted">
-                    {formatDate(ins.locked_at || ins.created_at)}
+                    {formatDateTime(ins.locked_at || ins.created_at)}
                   </td>
                   <td className="px-4 py-3">
                     <Link
@@ -193,6 +261,7 @@ export default function InspectiesPage() {
               ))}
             </tbody>
           </table>
+          </div>
         )}
       </div>
     </div>

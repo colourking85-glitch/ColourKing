@@ -560,7 +560,7 @@ export const MODULES: ModuleDoc[] = [
       },
       {
         code: 'SY03',
-        agentNotes: 'GET /api/number-ranges — returns ranges by doc_type and year. PATCH /api/number-ranges/[id] — update prefix.',
+        agentNotes: 'GET /api/settings/numbering — returns ranges by doc_type and year. PATCH /api/settings/numbering — update prefix.',
         userFlow: 'Configure document number prefixes. Each document type (offer, invoice, credit note, repair order, handover note) has a number range per year. Edit the prefix to customise numbering (e.g., "INV-2026-" for invoices). Preview shows the next number to be allocated.',
         inputs: 'Prefix text per document type.',
         outputs: 'Updated number range with next-number preview.',
@@ -584,10 +584,10 @@ export const MODULES: ModuleDoc[] = [
       },
       {
         code: 'SY20',
-        agentNotes: 'GET /api/ai/chat — streaming chat endpoint. Multi-provider: supports OpenAI (GPT-4o), Anthropic (Claude), and Google (Gemini). Provider configured via ai_settings table (primary_provider, secondary_provider, photo_eval_provider). Each provider has its own API key env var. Photo evaluation uses dedicated provider setting. GET /api/ai/settings — read settings. PATCH /api/ai/settings — update provider config.',
-        userFlow: 'AI assistant panel and configuration. Two functions:\n\n1. Chat Assistant: Open from the "AI" button in the header. The assistant has context about the current screen and can help with data interpretation, suggest next steps, and answer how-to questions. Type your question and press Enter.\n\n2. AI Settings: Configure which AI providers to use. Three provider slots:\n   - Primary provider (for chat): OpenAI GPT-4o, Anthropic Claude, or Google Gemini\n   - Secondary/fallback provider: used if primary fails\n   - Photo evaluation provider: dedicated provider for the AI photo quality scoring on the Offerte page\n\nEach provider requires its own API key configured in Environment Secrets (SY50). The photo evaluation AI scores uploaded damage photos on 5 criteria: lighting, angle, focus, distance, and damage visibility.',
-        inputs: 'Chat: text prompt. Settings: provider selection dropdowns, temperature, max tokens.',
-        outputs: 'Chat: AI-generated response with screen context. Settings: updated AI provider configuration. Photo eval: per-photo quality scores with pass/fail and improvement tips.',
+        agentNotes: 'GET /api/settings/ai/providers — returns providers with active status, env keys, models. GET /api/settings/ai — returns AI settings (default_provider, photo_check_enabled, photo_check_provider). PUT /api/settings/ai — update settings. POST /api/infra/secrets { action: "test", service } — test provider connectivity. Multi-provider: Anthropic (Claude), Google (Gemini), OpenAI (GPT-4o). Active when env key is set. One default provider for all features. Photo check has a dedicated provider override.',
+        userFlow: 'AI provider configuration screen. Three provider cards: Anthropic (Claude), Google (Gemini), OpenAI (GPT-4o). Each card shows:\n- Env key name and active/inactive status\n- Vision model and text model names\n- "Test" button to verify connectivity\n- "Set Default" button to make this the default provider\n\nFeatures section: currently one feature — Photo Check (AI photo quality evaluation). Each feature has an enable/disable toggle and a provider selector to override the default.\n\nThe Chat Assistant (header "AI" button) uses whichever provider is set as default here. Photo evaluation on the public quote page (PB03) uses the photo_check_provider if set, otherwise the default.\n\nEach provider requires its own API key configured in Environment Secrets (SY50).',
+        inputs: 'Default provider selection. Per-feature provider override dropdown. Feature enable/disable toggles. Test provider button.',
+        outputs: 'Provider status cards (active/inactive, env key, models). Feature toggles with provider selection. Test results with latency.',
         crossScreen: 'Chat available from any screen via header button. Photo evaluation used on public Offerte page (PB03). API keys managed in Environment Secrets (SY50). Settings stored in ai_settings table.',
       },
       {

@@ -4,13 +4,14 @@ import { useState, useEffect, useRef, useMemo, useCallback } from 'react';
 import { useParams } from 'next/navigation';
 import Link from 'next/link';
 import { useTranslations, useLocale } from 'next-intl';
-import { ArrowLeft, Printer, Link2, FileDown, FileText, Camera, Send, Undo2, CheckCircle2, XCircle, X, Lock, Copy, Mail } from 'lucide-react';
+import { useRouter } from 'next/navigation';
+import { ArrowLeft, Printer, Link2, FileDown, FileText, Camera, Send, Undo2, CheckCircle2, XCircle, X, Lock, Copy, Mail, Trash2, PanelLeftOpen, PanelRightOpen } from 'lucide-react';
 import { getSession } from '@/lib/auth';
 import { ScreenBadge } from '@/components/ui/ScreenBadge';
 import { PhotoCapture } from '@/components/ui/PhotoCapture';
 import { VehicleDamageMap, COMPONENT_SLOTS, defaultPointForKey, type MapMarker } from '@/components/shared/VehicleDamageMap';
 import {
-  STATUS_LABELS, STATUS_COLORS, isTerminal,
+  STATUS_COLORS, isTerminal,
   type InsStatus
 } from '@/modules/inspectie/machine';
 
@@ -130,7 +131,7 @@ type Inspection = {
 // ---------- helpers ----------
 
 const num = (n: number) => n.toFixed(1).replace('.', ',');
-const hrs = (n: number) => n ? num(n) + ' u' : '—';
+const hrs = (n: number, unit: string) => n ? num(n) + ' ' + unit : '—';
 const eur = (cents: number) => '€ ' + Math.round(cents / 100).toLocaleString('nl-NL');
 const fmtDate = (iso: string) => new Date(iso).toLocaleDateString('nl-NL', { day: '2-digit', month: '2-digit', year: 'numeric' });
 const fmtDateTime = (iso: string) => {
@@ -139,18 +140,18 @@ const fmtDateTime = (iso: string) => {
     d.toLocaleTimeString('nl-NL', { hour: '2-digit', minute: '2-digit' });
 };
 
-const SEV: Record<number, { label: string; bar: string; color: string }> = {
-  1: { label: 'Licht', bar: '●○○○', color: 'text-gray-400' },
-  2: { label: 'Matig', bar: '●●○○', color: 'text-amber-400' },
-  3: { label: 'Zwaar', bar: '●●●○', color: 'text-orange-500' },
-  4: { label: 'Zeer zwaar', bar: '●●●●', color: 'text-red-500' },
+const SEV_META: Record<number, { key: string; bar: string; color: string }> = {
+  1: { key: 'detail.sevLight', bar: '●○○○', color: 'text-gray-400' },
+  2: { key: 'detail.sevModerate', bar: '●●○○', color: 'text-amber-400' },
+  3: { key: 'detail.sevHeavy', bar: '●●●○', color: 'text-orange-500' },
+  4: { key: 'detail.sevVeryHeavy', bar: '●●●●', color: 'text-red-500' },
 };
 
-const DISP: Record<string, string> = {
-  herstellen: 'Herstellen',
-  vervangen: 'Vervangen',
-  onderzoeken: 'Onderzoeken',
-  geen_actie: 'Geen actie',
+const DISP_KEYS: Record<string, string> = {
+  herstellen: 'detail.dispRepair',
+  vervangen: 'detail.dispReplace',
+  onderzoeken: 'detail.dispInvestigate',
+  geen_actie: 'detail.dispNoAction',
 };
 
 type ViewTab = 'rapport' | 'bevindingen' | 'verificatie';
@@ -160,11 +161,16 @@ type FindingFilter = 'alles' | 'herstellen' | 'vervangen' | 'onderzoeken' | 'pre
 
 export default function InspectieDetailPage() {
   const { id } = useParams<{ id: string }>();
+  const router = useRouter();
   const t = useTranslations('in');
   const tCommon = useTranslations('common');
   const tIn = useTranslations('in');
   const locale = useLocale();
   const [components, setComponents] = useState<{ key: string; name_nl: string; name_en: string | null; name_tr: string | null }[]>([]);
+
+  const sevLabel = (severity: number) => (SEV_META[severity] || SEV_META[2]).key ? t((SEV_META[severity] || SEV_META[2]).key) : '';
+  const dispLabel = (disposition: string) => DISP_KEYS[disposition] ? t(DISP_KEYS[disposition]) : disposition;
+  const hrsT = (n: number) => hrs(n, t('detail.hourUnit'));
 
   const [ins, setIns] = useState<Inspection | null>(null);
   const [busy, setBusy] = useState(false);
@@ -184,6 +190,8 @@ export default function InspectieDetailPage() {
   const [selectedRef, setSelectedRef] = useState<string>('');
   const [filter, setFilter] = useState<FindingFilter>('alles');
   const [showCamera, setShowCamera] = useState(false);
+  const [showLeftPanel, setShowLeftPanel] = useState(false);
+  const [showRightPanel, setShowRightPanel] = useState(false);
   const scrollRef = useRef<HTMLDivElement>(null);
 
   useEffect(() => {
@@ -229,6 +237,17 @@ export default function InspectieDetailPage() {
     } catch (e) { setActionError(e instanceof Error ? e.message : String(e)); }
     finally { setBusy(false); }
   }, [id, reload, tIn]);
+
+  const doDelete = useCallback(async () => {
+    if (!confirm(tIn('detail.confirmDelete'))) return;
+    setBusy(true); setActionError('');
+    try {
+      const r = await fetch(`/api/inspections/${id}`, { method: 'DELETE' });
+      if (!r.ok) { const d = await r.json().catch(() => ({})); throw new Error(d.error || r.statusText); }
+      router.push('/app/inspecties');
+    } catch (e) { setActionError(e instanceof Error ? e.message : String(e)); }
+    finally { setBusy(false); }
+  }, [id, router, tIn]);
 
   const loadShareLinks = useCallback(async () => {
     const r = await fetch(`/api/inspections/${id}/share`);
@@ -319,7 +338,7 @@ export default function InspectieDetailPage() {
   if (error || !ins) {
     return (
       <div className="flex h-[calc(100vh-80px)] flex-col items-center justify-center gap-4">
-        <p className="text-red-400">{error || 'Inspectie niet gevonden'}</p>
+        <p className="text-red-400">{error || t('detail.notFound')}</p>
         <Link href="/app/inspecties" className="text-sm text-ck-red hover:underline">
           {tCommon('back')}
         </Link>
@@ -336,29 +355,32 @@ export default function InspectieDetailPage() {
     <div className="-m-6 flex h-[calc(100vh-48px)] flex-col overflow-hidden bg-ck-dark">
       {/* ─── Header ─── */}
       <header className="flex-none border-b border-ck-dark-border bg-ck-dark-card">
-        <div className="flex items-center gap-4 px-5 h-[56px]">
+        <div className="flex flex-wrap items-center gap-2 px-3 py-2 sm:gap-4 sm:px-5 sm:h-[56px] sm:py-0">
           <Link href="/app/inspecties" className="flex h-8 w-8 items-center justify-center rounded-lg text-ck-muted hover:bg-ck-dark-surface hover:text-white">
             <ArrowLeft size={18} />
           </Link>
+          <button onClick={() => setShowLeftPanel(v => !v)} className="flex lg:hidden h-8 w-8 items-center justify-center rounded-lg text-ck-muted hover:bg-ck-dark-surface hover:text-white">
+            <PanelLeftOpen size={18} />
+          </button>
           <div className="flex items-center gap-3">
             <ScreenBadge code="IN10" />
             <div className="leading-tight">
-              <span className="text-sm font-semibold text-white">Schadeopname</span>
+              <span className="text-sm font-semibold text-white">{t('report.title')}</span>
               <span className="ml-2 font-mono text-xs text-ck-muted">{ins.reference}</span>
             </div>
           </div>
 
           <div className="flex items-center gap-2 border-l border-ck-dark-border pl-4 ml-1">
             <span className={`inline-flex items-center gap-1.5 rounded-full px-2.5 py-0.5 text-xs font-semibold ${STATUS_COLORS[ins.status]}`}>
-              {STATUS_LABELS[ins.status].nl}
+              {t(`statuses.${ins.status}`)}
             </span>
             {ins.locked_at && (
-              <span className="text-xs text-ck-muted">{fmtDateTime(ins.locked_at)}</span>
+              <span className="hidden sm:inline text-xs text-ck-muted">{fmtDateTime(ins.locked_at)}</span>
             )}
           </div>
 
           {!locked && (
-            <div className="flex items-center gap-2 border-l border-ck-dark-border pl-4 ml-1">
+            <div className="flex flex-wrap items-center gap-2 border-l border-ck-dark-border pl-4 ml-1">
               {(ins.status === 'CONCEPT' || ins.status === 'BEZIG') && (
                 <button
                   onClick={() => doTransition('TER_AKKOORD')}
@@ -424,60 +446,70 @@ export default function InspectieDetailPage() {
                   <XCircle size={14} /> {tIn('detail.cancel')}
                 </button>
               )}
+              <button
+                onClick={doDelete}
+                disabled={busy}
+                className="flex items-center gap-1.5 rounded-lg border border-red-500/30 px-3 py-1.5 text-xs font-medium text-red-400 hover:bg-red-500/10 disabled:opacity-50"
+              >
+                <Trash2 size={14} /> {tIn('detail.delete')}
+              </button>
             </div>
           )}
           {actionError && <span className="ml-3 text-xs text-red-400">{actionError}</span>}
           <div className="flex-1" />
 
-          <div className="flex items-center gap-2">
+          <div className="flex flex-wrap items-center gap-2">
             <a
               href={`/api/inspections/${id}/pdf?inline=1`}
               target="_blank"
               rel="noreferrer"
-              className="flex items-center gap-1.5 rounded-lg border border-ck-dark-border px-3 py-1.5 text-xs font-medium text-ck-muted-light hover:bg-ck-dark-surface hover:text-white"
+              className="hidden sm:flex items-center gap-1.5 rounded-lg border border-ck-dark-border px-3 py-1.5 text-xs font-medium text-ck-muted-light hover:bg-ck-dark-surface hover:text-white"
             >
-              <Printer size={14} /> Printen
+              <Printer size={14} /> <span className="hidden md:inline">{t('detail.print')}</span>
             </a>
             <button
               onClick={() => { setShowShare(v => !v); if (!shareEmail && ins.customers?.email) setShareEmail(ins.customers.email); }}
-              className={`flex items-center gap-1.5 rounded-lg border px-3 py-1.5 text-xs font-medium hover:bg-ck-dark-surface hover:text-white ${showShare ? 'border-ck-red text-white' : 'border-ck-dark-border text-ck-muted-light'}`}
+              className={`hidden sm:flex items-center gap-1.5 rounded-lg border px-3 py-1.5 text-xs font-medium hover:bg-ck-dark-surface hover:text-white ${showShare ? 'border-ck-red text-white' : 'border-ck-dark-border text-ck-muted-light'}`}
             >
-              <Link2 size={14} /> Deellink
+              <Link2 size={14} /> <span className="hidden md:inline">{t('detail.shareLink')}</span>
             </button>
             {!locked && (
               <button
                 onClick={() => setShowCamera(true)}
                 className="flex items-center gap-1.5 rounded-lg border border-ck-dark-border px-3 py-1.5 text-xs font-medium text-ck-muted-light hover:bg-ck-dark-surface hover:text-white"
               >
-                <Camera size={14} /> Foto
+                <Camera size={14} /> <span className="hidden md:inline">{t('detail.photo')}</span>
               </button>
             )}
             <Link
               href={`/app/inspecties/${id}/rapport`}
-              className="flex items-center gap-1.5 rounded-lg border border-ck-dark-border px-3 py-1.5 text-xs font-medium text-ck-muted-light hover:bg-ck-dark-surface hover:text-white"
+              className="hidden sm:flex items-center gap-1.5 rounded-lg border border-ck-dark-border px-3 py-1.5 text-xs font-medium text-ck-muted-light hover:bg-ck-dark-surface hover:text-white"
             >
-              <FileText size={14} /> Rapport
+              <FileText size={14} /> <span className="hidden md:inline">{t('detail.reportLink')}</span>
             </Link>
             <a
               href={`/api/inspections/${id}/pdf`}
               className="flex items-center gap-1.5 rounded-lg bg-ck-red px-3 py-1.5 text-xs font-semibold text-white hover:bg-ck-red-hover"
             >
-              <FileDown size={14} /> PDF downloaden
+              <FileDown size={14} /> <span className="hidden md:inline">{t('detail.downloadPdf')}</span>
             </a>
+            <button onClick={() => setShowRightPanel(v => !v)} className="flex xl:hidden h-8 w-8 items-center justify-center rounded-lg text-ck-muted hover:bg-ck-dark-surface hover:text-white">
+              <PanelRightOpen size={18} />
+            </button>
           </div>
         </div>
 
         {/* Vehicle bar */}
-        <div className="flex items-center gap-5 px-5 pb-2.5 text-xs text-ck-muted overflow-hidden whitespace-nowrap">
+        <div className="flex items-center gap-5 px-3 sm:px-5 pb-2.5 text-xs text-ck-muted overflow-x-auto whitespace-nowrap">
           <span className="font-semibold text-white">{ins.make} {ins.model}</span>
           {ins.licence_plate && (
             <span className="rounded border border-ck-dark-border px-1.5 py-0.5 font-mono text-white">{ins.licence_plate}</span>
           )}
           {ins.odometer_km && <span>{ins.odometer_km.toLocaleString('nl-NL')} km</span>}
-          {ins.first_reg_date && <span>Bouwjaar {new Date(ins.first_reg_date).getFullYear()}{ins.fuel ? ' · ' + ins.fuel : ''}</span>}
-          {ins.rdw_verified && <span>RDW gecontroleerd</span>}
-          {ins.staff && <span>Opnemer {ins.staff.name}</span>}
-          {customerApproval && <span>Akkoord {customerApproval.signer_name} · elektronisch ondertekend</span>}
+          {ins.first_reg_date && <span>{t('detail.buildYear')} {new Date(ins.first_reg_date).getFullYear()}{ins.fuel ? ' · ' + ins.fuel : ''}</span>}
+          {ins.rdw_verified && <span>{t('detail.rdwChecked')}</span>}
+          {ins.staff && <span>{t('detail.inspectorLabel')} {ins.staff.name}</span>}
+          {customerApproval && <span>{t('detail.approvalSignedElectronic', { name: customerApproval.signer_name })}</span>}
         </div>
         {showShare && (
           <div className="border-t border-ck-dark-border bg-ck-dark-surface/40 px-5 py-3">
@@ -533,17 +565,17 @@ export default function InspectieDetailPage() {
       <div className="flex flex-1 min-h-0">
 
         {/* ─── Left sidebar: document outline + findings rail ─── */}
-        <nav className="flex w-[260px] flex-none flex-col border-r border-ck-dark-border bg-ck-dark-card min-h-0">
+        <nav className={`${showLeftPanel ? 'flex' : 'hidden'} lg:flex w-[260px] flex-none flex-col border-r border-ck-dark-border bg-ck-dark-card min-h-0 absolute lg:relative z-20 h-full`}>
           <div className="px-4 pt-4 pb-1">
-            <span className="text-[10px] font-semibold uppercase tracking-widest text-ck-muted">Documentindeling</span>
+            <span className="text-[10px] font-semibold uppercase tracking-widest text-ck-muted">{t('detail.documentOutline')}</span>
           </div>
           <div className="flex flex-col gap-px px-2 pb-2">
             {[
-              { no: '01', title: 'Samenvatting', meta: 'blad 1' },
-              { no: '02', title: 'Fotoserie', meta: String(guidedPhotos.length) },
-              { no: '03', title: 'Bevindingen', meta: String(inScopeFindings.length) },
-              { no: '04', title: 'Pre-existent', meta: String(preFindings.length) },
-              { no: '05', title: 'Verificatie', meta: 'hash' },
+              { no: '01', title: t('detail.outlineSummary'), meta: t('report.sheet', { n: '1' }) },
+              { no: '02', title: t('detail.outlinePhotoSeries'), meta: String(guidedPhotos.length) },
+              { no: '03', title: t('detail.outlineFindings'), meta: String(inScopeFindings.length) },
+              { no: '04', title: t('detail.outlinePreExistent'), meta: String(preFindings.length) },
+              { no: '05', title: t('detail.outlineVerification'), meta: 'hash' },
             ].map(s => (
               <button
                 key={s.no}
@@ -559,13 +591,13 @@ export default function InspectieDetailPage() {
 
           {/* Findings list */}
           <div className="flex items-center justify-between border-t border-ck-dark-border px-4 pt-3 pb-1">
-            <span className="text-[10px] font-semibold uppercase tracking-widest text-ck-muted">Bevindingen</span>
+            <span className="text-[10px] font-semibold uppercase tracking-widest text-ck-muted">{t('detail.outlineFindings')}</span>
             <span className="font-mono text-[11px] text-ck-muted">{findings.length}</span>
           </div>
 
           {/* Filters */}
           <div className="flex flex-wrap gap-1 px-4 pb-2">
-            {([['alles', 'Alle'], ['herstellen', 'Herstel'], ['vervangen', 'Vervang'], ['onderzoeken', 'Onderz.'], ['pre', 'Pre-exist.']] as const).map(([key, label]) => (
+            {([['alles', t('detail.filterAll')], ['herstellen', t('detail.filterRepair')], ['vervangen', t('detail.filterReplace')], ['onderzoeken', t('detail.filterInvestigate')], ['pre', t('detail.filterPreExistent')]] as [FindingFilter, string][]).map(([key, label]) => (
               <button
                 key={key}
                 onClick={() => setFilter(key)}
@@ -583,7 +615,7 @@ export default function InspectieDetailPage() {
           {/* Findings rail */}
           <div className="flex-1 overflow-auto px-2 pb-4">
             {filteredFindings.map(f => {
-              const sev = SEV[f.severity] || SEV[2];
+              const sev = SEV_META[f.severity] || SEV_META[2];
               const isPre = f.origin === 'pre_existent';
               const selected = f.reference === selectedRef;
               return (
@@ -611,7 +643,7 @@ export default function InspectieDetailPage() {
           {/* Toolbar */}
           <div className="flex items-center gap-4 border-b border-ck-dark-border bg-ck-dark-card px-5 h-[44px] flex-none">
             <div className="flex gap-0.5 rounded-lg bg-ck-dark-surface p-0.5">
-              {([['rapport', 'Rapport'], ['bevindingen', 'Bevindingen'], ['verificatie', 'Verificatie']] as const).map(([key, label]) => (
+              {([['rapport', t('detail.tabReport')], ['bevindingen', t('detail.tabFindings')], ['verificatie', t('detail.tabVerification')]] as [ViewTab, string][]).map(([key, label]) => (
                 <button
                   key={key}
                   onClick={() => setView(key)}
@@ -626,9 +658,9 @@ export default function InspectieDetailPage() {
               ))}
             </div>
             <span className="text-xs text-ck-muted">
-              {view === 'rapport' && `${ins.photo_count} foto's · gerenderd uit snapshot`}
-              {view === 'bevindingen' && `${findings.length} bevindingen · ${partCount} onderdelen`}
-              {view === 'verificatie' && 'append-only gebeurtenissenlog'}
+              {view === 'rapport' && t('detail.subtitlePhotos', { count: ins.photo_count })}
+              {view === 'bevindingen' && t('detail.subtitleFindings', { count: findings.length, parts: partCount })}
+              {view === 'verificatie' && t('detail.subtitleVerification')}
             </span>
             <div className="flex-1" />
             {snapshot && (
@@ -649,31 +681,30 @@ export default function InspectieDetailPage() {
                   <div className="p-10 pb-8">
                     {/* Page header */}
                     <div className="flex items-baseline justify-between border-b-2 border-white pb-2.5">
-                      <span className="text-[12px] font-semibold uppercase tracking-widest text-white">ColourKing Autoschade</span>
-                      <span className="font-mono text-[11px] text-ck-muted">{ins.reference} · blad 1</span>
+                      <span className="text-[12px] font-semibold uppercase tracking-widest text-white">{t('report.companyName')}</span>
+                      <span className="font-mono text-[11px] text-ck-muted">{ins.reference} · {t('report.sheet', { n: '1' })}</span>
                     </div>
 
-                    <h1 className="mt-6 text-3xl font-bold text-white">Schadeopname</h1>
+                    <h1 className="mt-6 text-3xl font-bold text-white">{t('report.title')}</h1>
                     <p className="mt-1 text-sm text-ck-muted">
-                      Opname van de vastgestelde staat van het voertuig en de voorgestelde herstelwijze.
-                      Geen expertiserapport — opgesteld door de herstellende partij.
+                      {t('report.description')}
                     </p>
 
                     {/* Vehicle details grid */}
-                    <div className="mt-6 grid grid-cols-2 gap-x-10 border-t border-ck-dark-border">
+                    <div className="mt-6 grid grid-cols-1 sm:grid-cols-2 gap-x-10 border-t border-ck-dark-border">
                       {[
-                        ['Kenteken', ins.licence_plate || '—'],
-                        ['Referentie', ins.reference],
-                        ['Merk / model', `${ins.make || ''} ${ins.model || ''}`.trim() || '—'],
-                        ['Soort opname', ins.purpose ? t(`purposes.${ins.purpose}`) : '—'],
-                        ['VIN', ins.vin || '—'],
-                        ['Schadedatum', ins.event_date ? fmtDate(ins.event_date) : '—'],
-                        ['Eerste toelating', ins.first_reg_date ? fmtDate(ins.first_reg_date) : '—'],
-                        ['Toedracht', ins.event_description || '—'],
-                        ['Kilometerstand', ins.odometer_km ? ins.odometer_km.toLocaleString('nl-NL') + ' km' : '—'],
-                        ['Opnamedatum', ins.started_at ? fmtDateTime(ins.started_at) : fmtDateTime(ins.created_at)],
-                        ['Brandstof', ins.fuel || '—'],
-                        ['RDW-controle', ins.rdw_verified ? 'Geverifieerd' : '—'],
+                        [t('report.licencePlate'), ins.licence_plate || '—'],
+                        [t('report.reference'), ins.reference],
+                        [t('report.makeModel'), `${ins.make || ''} ${ins.model || ''}`.trim() || '—'],
+                        [t('report.inspectionType'), ins.purpose ? t(`purposes.${ins.purpose}`) : '—'],
+                        [t('report.vin'), ins.vin || '—'],
+                        [t('report.damageDate'), ins.event_date ? fmtDate(ins.event_date) : '—'],
+                        [t('report.firstRegistration'), ins.first_reg_date ? fmtDate(ins.first_reg_date) : '—'],
+                        [t('report.circumstances'), ins.event_description || '—'],
+                        [t('report.odometer'), ins.odometer_km ? ins.odometer_km.toLocaleString('nl-NL') + ' km' : '—'],
+                        [t('report.inspectionDate'), ins.started_at ? fmtDateTime(ins.started_at) : fmtDateTime(ins.created_at)],
+                        [t('report.fuel'), ins.fuel || '—'],
+                        [t('report.rdwCheck'), ins.rdw_verified ? t('report.rdwVerified') : '—'],
                       ].map(([k, v]) => (
                         <div key={k} className="flex justify-between gap-4 border-b border-ck-dark-border py-1.5">
                           <span className="text-[12px] text-ck-muted">{k}</span>
@@ -683,13 +714,13 @@ export default function InspectieDetailPage() {
                     </div>
 
                     {/* KPIs */}
-                    <h2 className="mt-8 mb-3 text-lg font-semibold text-white">Samenvatting</h2>
-                    <div className="grid grid-cols-4 gap-px overflow-hidden rounded border border-ck-dark-border bg-ck-dark-border">
+                    <h2 className="mt-8 mb-3 text-lg font-semibold text-white">{t('report.summary')}</h2>
+                    <div className="grid grid-cols-2 md:grid-cols-4 gap-px overflow-hidden rounded border border-ck-dark-border bg-ck-dark-border">
                       {[
-                        { value: findings.length, label: `Bevindingen (incl. ${preFindings.length} pre-existent)` },
-                        { value: ins.photo_count, label: "Foto's vastgelegd" },
-                        { value: num(repairTotal), label: 'Uur plaatwerk' },
-                        { value: num(paintTotal), label: 'Uur spuitwerk' },
+                        { value: findings.length, label: t('report.findingsKpi', { pre: preFindings.length }) },
+                        { value: ins.photo_count, label: t('report.photosCaptured') },
+                        { value: num(repairTotal), label: t('report.bodyworkHours') },
+                        { value: num(paintTotal), label: t('report.paintHours') },
                       ].map(kpi => (
                         <div key={kpi.label} className="bg-ck-dark-card px-4 py-3">
                           <div className="text-2xl font-semibold tabular-nums text-white">{kpi.value}</div>
@@ -699,15 +730,15 @@ export default function InspectieDetailPage() {
                     </div>
 
                     {/* Disposition + Hours */}
-                    <div className="mt-6 grid grid-cols-2 gap-8">
+                    <div className="mt-6 grid grid-cols-1 md:grid-cols-2 gap-8">
                       <div>
-                        <span className="text-[10px] font-semibold uppercase tracking-widest text-ck-muted">Herstelwijze</span>
+                        <span className="text-[10px] font-semibold uppercase tracking-widest text-ck-muted">{t('report.dispositionLabel')}</span>
                         <div className="mt-3 space-y-2.5">
                           {[
-                            ['Herstellen', dispCounts.herstellen, 'bg-orange-500'],
-                            ['Vervangen', dispCounts.vervangen, 'bg-blue-500'],
-                            ['Nader onderzoeken', dispCounts.onderzoeken, 'bg-gray-400'],
-                            ['Pre-existent · buiten opdracht', preFindings.length, 'bg-ck-dark-border'],
+                            [t('report.dispRepair'), dispCounts.herstellen, 'bg-orange-500'],
+                            [t('report.dispReplace'), dispCounts.vervangen, 'bg-blue-500'],
+                            [t('report.dispInvestigate'), dispCounts.onderzoeken, 'bg-gray-400'],
+                            [t('report.dispPreExistent'), preFindings.length, 'bg-ck-dark-border'],
                           ].map(([label, count, color]) => (
                             <div key={label as string}>
                               <div className="flex justify-between text-[12px] text-ck-muted-light">
@@ -726,13 +757,13 @@ export default function InspectieDetailPage() {
                       </div>
 
                       <div>
-                        <span className="text-[10px] font-semibold uppercase tracking-widest text-ck-muted">Uren en indicatie</span>
+                        <span className="text-[10px] font-semibold uppercase tracking-widest text-ck-muted">{t('report.hoursAndEstimate')}</span>
                         <div className="mt-3 border-t border-ck-dark-border">
                           {[
-                            ['Plaatwerk', hrs(repairTotal)],
-                            ['Spuitwerk', hrs(paintTotal)],
-                            ['Voorbewerking', hrs(Math.round(paintTotal * 0.55 * 10) / 10)],
-                            ['Onderdelen', `${partCount} posities`],
+                            [t('report.bodywork'), hrsT(repairTotal)],
+                            [t('report.paintwork'), hrsT(paintTotal)],
+                            [t('report.preparation'), hrsT(Math.round(paintTotal * 0.55 * 10) / 10)],
+                            [t('report.parts'), t('report.positions', { count: partCount })],
                           ].map(([k, v]) => (
                             <div key={k} className="flex justify-between border-b border-ck-dark-border py-1.5 text-[13px]">
                               <span className="text-ck-muted-light">{k}</span>
@@ -744,11 +775,11 @@ export default function InspectieDetailPage() {
                         {ins.indicative_total_cents != null && ins.indicative_total_cents > 0 && (
                           <div className="mt-3 rounded bg-ck-dark-surface p-3">
                             <div className="flex items-baseline justify-between">
-                              <span className="text-[12px] text-ck-muted">Indicatief richtbedrag</span>
+                              <span className="text-[12px] text-ck-muted">{t('report.indicativeAmount')}</span>
                               <span className="text-xl font-semibold tabular-nums text-white">{eur(ins.indicative_total_cents)}</span>
                             </div>
                             <p className="mt-1.5 text-[11px] leading-relaxed text-ck-muted">
-                              Excl. btw. Indicatief richtbedrag op basis van de opname. De definitieve prijsopgave volgt in de offerte.
+                              {t('report.indicativeDisclaimer')}
                             </p>
                           </div>
                         )}
@@ -758,30 +789,29 @@ export default function InspectieDetailPage() {
                     {/* Caveats */}
                     {(findings.some(f => f.hidden_damage_possible) || findings.some(f => f.adas_possible) || preFindings.length > 0) && (
                       <>
-                        <h2 className="mt-8 mb-3 text-lg font-semibold text-white">Voorbehoud</h2>
+                        <h2 className="mt-8 mb-3 text-lg font-semibold text-white">{t('report.caveats')}</h2>
                         <div className="overflow-hidden rounded border border-ck-dark-border">
                           {findings.some(f => f.hidden_damage_possible) && (
                             <div className="flex gap-3 border-b border-ck-dark-border px-4 py-2.5">
-                              <span className="flex-none rounded bg-orange-900/50 px-2 py-0.5 text-[11px] font-semibold text-orange-300">Verborgen</span>
+                              <span className="flex-none rounded bg-orange-900/50 px-2 py-0.5 text-[11px] font-semibold text-orange-300">{t('report.hidden')}</span>
                               <p className="text-[13px] leading-relaxed text-ck-muted-light">
-                                Bij {findings.filter(f => f.hidden_damage_possible).map(f => f.reference).join(', ')} is verborgen schade mogelijk.
-                                Wat na demontage aan het licht komt, valt buiten deze opname en wordt als meerwerk ter goedkeuring aangeboden.
+                                {t('report.hiddenText', { refs: findings.filter(f => f.hidden_damage_possible).map(f => f.reference).join(', ') })}
                               </p>
                             </div>
                           )}
                           {findings.some(f => f.adas_possible) && (
                             <div className="flex gap-3 border-b border-ck-dark-border px-4 py-2.5">
-                              <span className="flex-none rounded bg-blue-900/50 px-2 py-0.5 text-[11px] font-semibold text-blue-300">ADAS</span>
+                              <span className="flex-none rounded bg-blue-900/50 px-2 py-0.5 text-[11px] font-semibold text-blue-300">{t('report.adas')}</span>
                               <p className="text-[13px] leading-relaxed text-ck-muted-light">
-                                Bij {findings.filter(f => f.adas_possible).map(f => f.reference).join(', ')} is kalibratie van rijhulpsystemen mogelijk vereist.
+                                {t('report.adasText', { refs: findings.filter(f => f.adas_possible).map(f => f.reference).join(', ') })}
                               </p>
                             </div>
                           )}
                           {preFindings.length > 0 && (
                             <div className="flex gap-3 px-4 py-2.5">
-                              <span className="flex-none rounded bg-gray-800 px-2 py-0.5 text-[11px] font-semibold text-gray-300">Pre-existent</span>
+                              <span className="flex-none rounded bg-gray-800 px-2 py-0.5 text-[11px] font-semibold text-gray-300">{t('report.preExistentLabel')}</span>
                               <p className="text-[13px] leading-relaxed text-ck-muted-light">
-                                {preFindings.length} posities zijn als bestaande schade vastgelegd en vallen buiten de opdracht.
+                                {t('report.preExistentText', { count: preFindings.length })}
                               </p>
                             </div>
                           )}
@@ -790,9 +820,9 @@ export default function InspectieDetailPage() {
                     )}
 
                     {/* Signatures */}
-                    <div className="mt-10 grid grid-cols-2 gap-8">
+                    <div className="mt-10 grid grid-cols-1 md:grid-cols-2 gap-8">
                       <div>
-                        <span className="text-[10px] font-semibold uppercase tracking-widest text-ck-muted">Opgenomen door</span>
+                        <span className="text-[10px] font-semibold uppercase tracking-widest text-ck-muted">{t('report.inspectedBy')}</span>
                         <div className="mt-1 flex h-14 items-end border-b border-white pb-1.5">
                           <span className="text-sm italic text-ck-muted">
                             {inspectorApproval ? inspectorApproval.signer_name : ins.staff?.name || '—'}
@@ -803,7 +833,7 @@ export default function InspectieDetailPage() {
                         </span>
                       </div>
                       <div>
-                        <span className="text-[10px] font-semibold uppercase tracking-widest text-ck-muted">Akkoord klant</span>
+                        <span className="text-[10px] font-semibold uppercase tracking-widest text-ck-muted">{t('report.customerApproval')}</span>
                         <div className="mt-1 flex h-14 items-end border-b border-white pb-1.5">
                           {customerApproval ? (
                             <span className="text-lg italic text-white">{customerApproval.signer_name}</span>
@@ -813,8 +843,8 @@ export default function InspectieDetailPage() {
                         </div>
                         <span className="mt-1.5 block text-[11px] text-ck-muted">
                           {customerApproval
-                            ? `${customerApproval.signer_name} · elektronisch ondertekend · ${fmtDateTime(customerApproval.signed_at)}`
-                            : 'Niet ondertekend'
+                            ? t('report.eSignedDetail', { name: customerApproval.signer_name, date: fmtDateTime(customerApproval.signed_at) })
+                            : t('report.notSigned')
                           }
                         </span>
                       </div>
@@ -826,13 +856,13 @@ export default function InspectieDetailPage() {
                 {guidedPhotos.length > 0 && (
                   <article className="rounded bg-ck-dark-card shadow-lg p-10">
                     <div className="flex items-baseline justify-between border-b border-ck-dark-border pb-2.5">
-                      <span className="text-[12px] font-semibold uppercase tracking-widest text-white">Fotoserie · geleide opnames</span>
-                      <span className="font-mono text-[11px] text-ck-muted">blad 2</span>
+                      <span className="text-[12px] font-semibold uppercase tracking-widest text-white">{t('report.guidedPhotosTitle')}</span>
+                      <span className="font-mono text-[11px] text-ck-muted">{t('report.sheet', { n: '2' })}</span>
                     </div>
                     <p className="mt-3 mb-5 text-[13px] text-ck-muted">
-                      Vaste opnames rondom het voertuig. Alle bestanden zijn write-once vastgelegd met sha256.
+                      {t('report.guidedPhotosDesc')}
                     </p>
-                    <div className="grid grid-cols-5 gap-3">
+                    <div className="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-5 gap-3">
                       {guidedPhotos.map(p => (
                         <div key={p.id}>
                           <div className="relative aspect-[4/3] overflow-hidden rounded bg-ck-dark-surface">
@@ -860,13 +890,13 @@ export default function InspectieDetailPage() {
                   <article className="rounded bg-ck-dark-card shadow-lg p-10">
                     <div className="flex items-baseline justify-between border-b border-ck-dark-border pb-2.5">
                       <span className="text-[12px] font-semibold uppercase tracking-widest text-white">
-                        Bevindingen {inScopeFindings[0]?.reference}–{inScopeFindings[inScopeFindings.length - 1]?.reference}
+                        {t('report.findingsRange', { from: inScopeFindings[0]?.reference, to: inScopeFindings[inScopeFindings.length - 1]?.reference })}
                       </span>
-                      <span className="font-mono text-[11px] text-ck-muted">blad 3</span>
+                      <span className="font-mono text-[11px] text-ck-muted">{t('report.sheet', { n: '3' })}</span>
                     </div>
 
                     {inScopeFindings.map(f => {
-                      const sev = SEV[f.severity] || SEV[2];
+                      const sev = SEV_META[f.severity] || SEV_META[2];
                       const findingPhotos = photos.filter(p => p.finding_id === f.id);
                       const selected = f.reference === selectedRef;
                       return (
@@ -882,10 +912,10 @@ export default function InspectieDetailPage() {
                             <span className="font-mono text-sm font-semibold text-white">{f.reference}</span>
                             <h3 className="flex-1 text-lg font-semibold text-white">{f.component_key}</h3>
                             <span className={`font-mono text-[12px] tracking-wider ${sev.color}`}>{sev.bar}</span>
-                            <span className="text-[11px] text-ck-muted">{sev.label}</span>
+                            <span className="text-[11px] text-ck-muted">{sevLabel(f.severity)}</span>
                           </div>
 
-                          <div className="mt-3 grid grid-cols-[240px_1fr] gap-5">
+                          <div className="mt-3 grid grid-cols-1 md:grid-cols-[240px_1fr] gap-5">
                             {/* Photos */}
                             <div className="grid grid-cols-2 gap-1.5">
                               {findingPhotos.slice(0, 4).map(p => (
@@ -906,14 +936,14 @@ export default function InspectieDetailPage() {
                             {/* Detail rows */}
                             <div>
                               {[
-                                ['Zone', f.sub_location ? `${f.component_key} · ${f.sub_location}` : f.component_key],
-                                ['Schade', f.damage_types?.join(', ') || '—'],
-                                ['Herstelwijze', f.repair_technique || DISP[f.disposition] || '—'],
-                                ['Lakwerk', f.paint_required ? (f.paint_operation || 'Paneel') + (f.blend_components?.length ? ' · inspuiten ' + f.blend_components.join(', ') : '') : 'Niet vereist'],
-                                ['Uren', `Plaatwerk ${hrs(f.repair_hours)} · Spuitwerk ${hrs(f.paint_hours)}`],
-                                ...(f.ins_finding_parts?.length ? [['Onderdelen', f.ins_finding_parts.map(p => `${p.description}${p.part_number ? ' (' + p.part_number + ')' : ''} × ${p.qty}`).join(' · ')]] : []),
-                                ...(f.hidden_damage_possible && f.hidden_damage_note ? [['Voorbehoud', f.hidden_damage_note]] : []),
-                                ...(f.adas_possible ? [['Rijhulpsystemen', 'Kalibratie mogelijk vereist']] : []),
+                                [t('report.zone'), f.sub_location ? `${f.component_key} · ${f.sub_location}` : f.component_key],
+                                [t('report.damage'), f.damage_types?.join(', ') || '—'],
+                                [t('report.dispositionRow'), f.repair_technique || dispLabel(f.disposition)],
+                                [t('report.paintLabel'), f.paint_required ? (f.paint_operation || t('report.panel')) + (f.blend_components?.length ? ' · ' + t('report.blending') + ' ' + f.blend_components.join(', ') : '') : t('report.paintNotRequired')],
+                                [t('report.hoursLabel'), t('report.hoursRow', { bodywork: hrsT(f.repair_hours), paint: hrsT(f.paint_hours) })],
+                                ...(f.ins_finding_parts?.length ? [[t('report.partsLabel'), f.ins_finding_parts.map(p => `${p.description}${p.part_number ? ' (' + p.part_number + ')' : ''} × ${p.qty}`).join(' · ')]] : []),
+                                ...(f.hidden_damage_possible && f.hidden_damage_note ? [[t('report.caveatLabel'), f.hidden_damage_note]] : []),
+                                ...(f.adas_possible ? [[t('report.adasSystems'), t('report.adasCalibration')]] : []),
                               ].map(([k, v]) => (
                                 <div key={k} className="grid grid-cols-[112px_1fr] gap-3 border-b border-ck-dark-border py-1">
                                   <span className="text-[12px] text-ck-muted">{k}</span>
@@ -932,15 +962,15 @@ export default function InspectieDetailPage() {
                 {preFindings.length > 0 && (
                   <article className="rounded bg-ck-dark-card shadow-lg p-10">
                     <div className="flex items-baseline justify-between border-b border-ck-dark-border pb-2.5">
-                      <span className="text-[12px] font-semibold uppercase tracking-widest text-white">Pre-existente schade · buiten opdracht</span>
+                      <span className="text-[12px] font-semibold uppercase tracking-widest text-white">{t('report.preExistentSectionTitle')}</span>
                     </div>
                     <p className="mt-3 mb-4 text-[13px] text-ck-muted">
-                      Deze posities zijn vastgesteld bij de opname, vallen buiten de opdracht en zijn niet meegerekend in uren of richtbedrag.
+                      {t('report.preExistentSectionDesc')}
                     </p>
                     {preFindings.map(f => {
                       const findingPhotos = photos.filter(p => p.finding_id === f.id);
                       return (
-                        <div key={f.id} className="grid grid-cols-[120px_1fr_130px] items-start gap-4 border-t border-ck-dark-border py-3">
+                        <div key={f.id} className="grid grid-cols-1 sm:grid-cols-[120px_1fr_130px] items-start gap-4 border-t border-ck-dark-border py-3">
                           <div className="flex gap-1.5">
                             {findingPhotos.slice(0, 1).map(p => (
                               <div key={p.id} className="relative h-10 w-14 overflow-hidden rounded bg-ck-dark-surface">
@@ -959,11 +989,11 @@ export default function InspectieDetailPage() {
                               <span className="text-sm font-medium text-white">{f.component_key}</span>
                             </div>
                             <p className="mt-0.5 text-[12px] text-ck-muted">
-                              {f.damage_types?.join(', ')} · {f.description || 'buiten opdracht'}
+                              {f.damage_types?.join(', ')} · {f.description || t('report.outOfScopeDefault')}
                             </p>
                           </div>
                           <span className="justify-self-end rounded bg-ck-dark-surface px-2 py-0.5 text-[11px] font-medium text-ck-muted">
-                            Buiten opdracht
+                            {t('report.outOfScope')}
                           </span>
                         </div>
                       );
@@ -974,28 +1004,28 @@ export default function InspectieDetailPage() {
                 {/* Verification */}
                 <article className="rounded bg-ck-dark-card shadow-lg p-10">
                   <div className="flex items-baseline justify-between border-b-2 border-white pb-2.5">
-                    <span className="text-[12px] font-semibold uppercase tracking-widest text-white">Verificatie</span>
+                    <span className="text-[12px] font-semibold uppercase tracking-widest text-white">{t('report.verification')}</span>
                   </div>
                   <div className="mt-5">
                     {[
-                      ['Rapport', ins.reference],
-                      ['Vergrendeld', ins.locked_at ? fmtDateTime(ins.locked_at) : '—'],
-                      ['Opgenomen door', ins.staff ? `${ins.staff.name} · ingelogd` : '—'],
-                      ['Akkoord', customerApproval ? `${customerApproval.signer_name} (klant) · elektronisch ondertekend` : '—'],
-                      ['Bevindingen / foto\'s', `${findings.length} / ${ins.photo_count}`],
+                      [t('report.reportLabel'), ins.reference],
+                      [t('report.locked'), ins.locked_at ? fmtDateTime(ins.locked_at) : '—'],
+                      [t('report.inspectedBy'), ins.staff ? t('report.inspectedByLoggedIn', { name: ins.staff.name }) : '—'],
+                      [t('report.customerApproval'), customerApproval ? t('report.approvalElectronic', { name: customerApproval.signer_name }) : '—'],
+                      [t('report.findingsPhotos'), `${findings.length} / ${ins.photo_count}`],
                       ...(snapshot ? [
-                        ['Snapshot-hash', snapshot.snapshot_hash || '—'],
-                        ['PDF-hash', snapshot.pdf_hash || '—'],
+                        [t('report.snapshotHash'), snapshot.snapshot_hash || '—'],
+                        [t('report.pdfHash'), snapshot.pdf_hash || '—'],
                       ] : []),
                     ].map(([k, v]) => (
                       <div key={k} className="grid grid-cols-[190px_1fr] gap-4 border-b border-ck-dark-border py-2">
                         <span className="text-[12px] text-ck-muted">{k}</span>
-                        <span className={`text-[13px] text-white ${(k as string).includes('hash') ? 'font-mono text-[12px] break-all' : ''}`}>{v}</span>
+                        <span className={`text-[13px] text-white ${(v as string).length > 20 ? 'font-mono text-[12px] break-all' : ''}`}>{v}</span>
                       </div>
                     ))}
                   </div>
                   <p className="mt-5 text-[13px] text-ck-muted-light">
-                    Dit rapport is na vergrendeling niet meer wijzigbaar. De hierboven vermelde snapshot-hash dekt alle bevindingen, foto&apos;s en verklaringen zoals ondertekend.
+                    {t('report.verificationText')}
                   </p>
                 </article>
               </div>
@@ -1039,7 +1069,7 @@ export default function InspectieDetailPage() {
                 {(() => {
                   const zones: Record<string, { count: number; hours: number }> = {};
                   inScopeFindings.forEach(f => {
-                    const zone = f.component_key.split(' ')[0] || 'Overig';
+                    const zone = f.component_key.split(' ')[0] || t('detail.zoneOther');
                     if (!zones[zone]) zones[zone] = { count: 0, hours: 0 };
                     zones[zone].count++;
                     zones[zone].hours += f.repair_hours + f.paint_hours;
@@ -1047,15 +1077,15 @@ export default function InspectieDetailPage() {
                   const entries = Object.entries(zones).sort((a, b) => b[1].hours - a[1].hours).slice(0, 4);
                   const maxH = Math.max(...entries.map(e => e[1].hours), 1);
                   return (
-                    <div className="grid grid-cols-4 gap-4">
+                    <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
                       {entries.map(([zone, data]) => (
                         <div key={zone} className="rounded-lg border border-ck-dark-border bg-ck-dark-card p-4">
                           <div className="flex items-baseline justify-between">
                             <span className="text-[13px] font-semibold text-white">{zone}</span>
-                            <span className="font-mono text-[11px] text-ck-muted">{data.count} pos.</span>
+                            <span className="font-mono text-[11px] text-ck-muted">{data.count} {t('detail.posAbbrev')}</span>
                           </div>
                           <div className="mt-1.5 text-2xl font-semibold tabular-nums text-white">{num(data.hours)}</div>
-                          <div className="text-[11px] text-ck-muted">uur plaat + spuit</div>
+                          <div className="text-[11px] text-ck-muted">{t('detail.zoneHours')}</div>
                           <div className="mt-2.5 h-1 overflow-hidden rounded-full bg-ck-dark-surface">
                             <div className="h-full rounded-full bg-ck-red" style={{ width: `${Math.round(data.hours / maxH * 100)}%` }} />
                           </div>
@@ -1066,21 +1096,21 @@ export default function InspectieDetailPage() {
                 })()}
 
                 {/* Full table */}
-                <div className="overflow-hidden rounded-lg border border-ck-dark-border bg-ck-dark-card">
-                  <div className="grid grid-cols-[58px_1.5fr_1.2fr_74px_1.3fr_78px_78px_74px_64px] gap-3 border-b border-ck-dark-border bg-ck-dark-surface px-4 py-2.5">
-                    {['Ref', 'Onderdeel', 'Schade', 'Ernst', 'Herstelwijze', 'Plaat', 'Spuit', 'Onderdelen', 'Vlag'].map(h => (
+                <div className="overflow-x-auto rounded-lg border border-ck-dark-border bg-ck-dark-card">
+                  <div className="min-w-[700px] grid grid-cols-[58px_1.5fr_1.2fr_74px_1.3fr_78px_78px_74px_64px] gap-3 border-b border-ck-dark-border bg-ck-dark-surface px-4 py-2.5">
+                    {[t('table.ref'), t('table.component'), t('table.damage'), t('table.severity'), t('table.disposition'), t('table.bodywork'), t('table.paintwork'), t('table.parts'), t('table.flag')].map(h => (
                       <span key={h} className="text-[10px] font-semibold uppercase tracking-widest text-ck-muted">{h}</span>
                     ))}
                   </div>
                   {findings.map(f => {
-                    const sev = SEV[f.severity] || SEV[2];
+                    const sev = SEV_META[f.severity] || SEV_META[2];
                     const isPre = f.origin === 'pre_existent';
                     const selected = f.reference === selectedRef;
                     return (
                       <div
                         key={f.id}
                         onClick={() => setSelectedRef(f.reference)}
-                        className={`grid grid-cols-[58px_1.5fr_1.2fr_74px_1.3fr_78px_78px_74px_64px] gap-3 items-center border-b border-ck-dark-border px-4 py-2.5 cursor-pointer hover:bg-ck-dark-surface ${
+                        className={`min-w-[700px] grid grid-cols-[58px_1.5fr_1.2fr_74px_1.3fr_78px_78px_74px_64px] gap-3 items-center border-b border-ck-dark-border px-4 py-2.5 cursor-pointer hover:bg-ck-dark-surface ${
                           selected ? 'bg-ck-red/5' : ''
                         }`}
                       >
@@ -1088,27 +1118,27 @@ export default function InspectieDetailPage() {
                         <span className="truncate text-[13px] font-medium text-white">{f.component_key}</span>
                         <span className="truncate text-[12px] text-ck-muted-light">{f.damage_types?.join(', ')}</span>
                         <span className={`font-mono text-[12px] tracking-wider ${sev.color}`}>{sev.bar}</span>
-                        <span className="truncate text-[12px] text-ck-muted-light">{f.repair_technique || DISP[f.disposition] || '—'}</span>
+                        <span className="truncate text-[12px] text-ck-muted-light">{f.repair_technique || dispLabel(f.disposition)}</span>
                         <span className="text-right font-mono text-[12px] tabular-nums text-ck-muted-light">{f.repair_hours ? num(f.repair_hours) : '—'}</span>
                         <span className="text-right font-mono text-[12px] tabular-nums text-ck-muted-light">{f.paint_hours ? num(f.paint_hours) : '—'}</span>
-                        <span className="truncate text-[11px] text-ck-muted">{f.ins_finding_parts?.length ? `${f.ins_finding_parts.length} × nieuw` : '—'}</span>
+                        <span className="truncate text-[11px] text-ck-muted">{f.ins_finding_parts?.length ? t('table.newParts', { count: f.ins_finding_parts.length }) : '—'}</span>
                         <span className={`text-[10px] font-semibold uppercase tracking-wider ${
                           f.hidden_damage_possible || f.adas_possible ? 'text-orange-400' : isPre ? 'text-ck-muted' : 'text-ck-muted/30'
                         }`}>
-                          {f.hidden_damage_possible ? 'Verborgen' : f.adas_possible ? 'ADAS' : isPre ? 'Buiten' : ''}
+                          {f.hidden_damage_possible ? t('table.flagHidden') : f.adas_possible ? t('table.flagAdas') : isPre ? t('table.flagOutOfScope') : ''}
                         </span>
                       </div>
                     );
                   })}
 
                   {/* Totals row */}
-                  <div className="grid grid-cols-[58px_1.5fr_1.2fr_74px_1.3fr_78px_78px_74px_64px] gap-3 border-t-2 border-white px-4 py-3">
+                  <div className="min-w-[700px] grid grid-cols-[58px_1.5fr_1.2fr_74px_1.3fr_78px_78px_74px_64px] gap-3 border-t-2 border-white px-4 py-3">
                     <span />
-                    <span className="text-[13px] font-semibold text-white">Totaal in opdracht</span>
-                    <span /><span /><span className="text-right text-[11px] text-ck-muted">uren</span>
+                    <span className="text-[13px] font-semibold text-white">{t('table.totalInOrder')}</span>
+                    <span /><span /><span className="text-right text-[11px] text-ck-muted">{t('table.hoursLabel')}</span>
                     <span className="text-right font-mono text-[13px] font-semibold tabular-nums text-white">{num(repairTotal)}</span>
                     <span className="text-right font-mono text-[13px] font-semibold tabular-nums text-white">{num(paintTotal)}</span>
-                    <span className="text-[11px] text-ck-muted">{partCount} pos.</span>
+                    <span className="text-[11px] text-ck-muted">{partCount} {t('detail.posAbbrev')}</span>
                     <span />
                   </div>
                 </div>
@@ -1117,10 +1147,10 @@ export default function InspectieDetailPage() {
 
             {/* ═══ Verificatie view ═══ */}
             {view === 'verificatie' && (
-              <div className="grid grid-cols-[1.1fr_1fr] gap-5 items-start">
+              <div className="grid grid-cols-1 md:grid-cols-[1.1fr_1fr] gap-5 items-start">
                 {/* Events */}
                 <div className="rounded-lg border border-ck-dark-border bg-ck-dark-card p-5">
-                  <h3 className="mb-3 text-base font-semibold text-white">Gebeurtenissen</h3>
+                  <h3 className="mb-3 text-base font-semibold text-white">{t('verify.events')}</h3>
                   {events.map(e => (
                     <div key={e.id} className="grid grid-cols-[130px_1fr] gap-4 border-t border-ck-dark-border py-2.5">
                       <span className="font-mono text-[11px] text-ck-muted">{fmtDateTime(e.created_at)}</span>
@@ -1135,19 +1165,19 @@ export default function InspectieDetailPage() {
                     </div>
                   ))}
                   {events.length === 0 && (
-                    <p className="py-4 text-center text-sm text-ck-muted">Geen gebeurtenissen</p>
+                    <p className="py-4 text-center text-sm text-ck-muted">{t('verify.noEvents')}</p>
                   )}
                 </div>
 
                 <div className="space-y-4">
                   {/* Integrity */}
                   <div className="rounded-lg border border-ck-dark-border bg-ck-dark-card p-5">
-                    <h3 className="mb-3 text-base font-semibold text-white">Integriteit</h3>
+                    <h3 className="mb-3 text-base font-semibold text-white">{t('verify.integrity')}</h3>
                     {[
-                      ['Snapshot', snapshot?.snapshot_hash ? snapshot.snapshot_hash.slice(0, 4) + '…' + snapshot.snapshot_hash.slice(-4) : '—'],
-                      ['PDF', snapshot?.pdf_hash ? snapshot.pdf_hash.slice(0, 4) + '…' + snapshot.pdf_hash.slice(-4) : '—'],
-                      [`Foto's (${ins.photo_count})`, 'alle sha256 gelijk'],
-                      ['Catalogus in snapshot', '55 componenten'],
+                      [t('verify.snapshot'), snapshot?.snapshot_hash ? snapshot.snapshot_hash.slice(0, 4) + '…' + snapshot.snapshot_hash.slice(-4) : '—'],
+                      [t('verify.pdf'), snapshot?.pdf_hash ? snapshot.pdf_hash.slice(0, 4) + '…' + snapshot.pdf_hash.slice(-4) : '—'],
+                      [t('verify.photosLabel', { count: ins.photo_count }), t('verify.allSha256Match')],
+                      [t('verify.catalogInSnapshot'), t('verify.catalogComponents')],
                     ].map(([k, v]) => (
                       <div key={k} className="flex justify-between gap-4 border-t border-ck-dark-border py-1.5">
                         <span className="text-[12px] text-ck-muted">{k}</span>
@@ -1158,15 +1188,15 @@ export default function InspectieDetailPage() {
 
                   {/* Signature */}
                   <div className="rounded-lg border border-ck-dark-border bg-ck-dark-card p-5">
-                    <h3 className="mb-3 text-base font-semibold text-white">Ondertekening</h3>
+                    <h3 className="mb-3 text-base font-semibold text-white">{t('verify.signatures')}</h3>
                     {approvals.map(a => (
                       <div key={a.id}>
                         {[
-                          ['Rol', a.role === 'klant' ? tIn('detail.roleCustomer') : tIn('detail.roleInspector')],
-                          ['Naam', a.signer_name],
-                          ['Identificatie', a.identification || 'Ingelogd'],
-                          ['Verklaring', a.statement_text || 'Opname ingezien en akkoord'],
-                          ['Tijdstip', fmtDateTime(a.signed_at)],
+                          [t('verify.role'), a.role === 'klant' ? tIn('detail.roleCustomer') : tIn('detail.roleInspector')],
+                          [t('verify.name'), a.signer_name],
+                          [t('verify.identification'), a.identification || t('verify.loggedIn')],
+                          [t('verify.statement'), a.statement_text || t('verify.defaultStatement')],
+                          [t('verify.timestamp'), fmtDateTime(a.signed_at)],
                         ].map(([k, v]) => (
                           <div key={k} className="flex justify-between gap-4 border-t border-ck-dark-border py-1.5">
                             <span className="text-[12px] text-ck-muted">{k}</span>
@@ -1176,10 +1206,10 @@ export default function InspectieDetailPage() {
                       </div>
                     ))}
                     {approvals.length === 0 && (
-                      <p className="py-2 text-center text-sm text-ck-muted">Geen ondertekeningen</p>
+                      <p className="py-2 text-center text-sm text-ck-muted">{t('verify.noSignatures')}</p>
                     )}
                     <p className="mt-3 text-[11px] leading-relaxed text-ck-muted">
-                      Gewone elektronische handtekening (eIDAS art. 25 lid 1). Bewaarde bewijsmiddelen: verklaringstekst, tijdstempel, IP-adres, user-agent en de document-hash op het moment van ondertekening.
+                      {t('verify.eidasText')}
                     </p>
                   </div>
                 </div>
@@ -1190,7 +1220,7 @@ export default function InspectieDetailPage() {
 
         {/* ─── Right sidebar: finding detail ─── */}
         {selectedFinding && (
-          <aside className="flex w-[340px] flex-none flex-col border-l border-ck-dark-border bg-ck-dark-card min-h-0">
+          <aside className={`${showRightPanel ? 'flex' : 'hidden'} xl:flex w-[340px] flex-none flex-col border-l border-ck-dark-border bg-ck-dark-card min-h-0 absolute xl:relative right-0 z-20 h-full`}>
             {/* Photo capture panel */}
             {showCamera && !locked && (
               <div className="border-b border-ck-dark-border p-3">
@@ -1209,24 +1239,24 @@ export default function InspectieDetailPage() {
               </div>
             )}
             <div className="flex items-center justify-between border-b border-ck-dark-border px-4 py-3">
-              <span className="text-[10px] font-semibold uppercase tracking-widest text-ck-muted">Bevinding in detail</span>
+              <span className="text-[10px] font-semibold uppercase tracking-widest text-ck-muted">{t('detail.findingDetail')}</span>
               <span className="font-mono text-[12px] font-medium text-white">{selectedFinding.reference}</span>
             </div>
 
             <div className="flex-1 overflow-auto px-4 py-4">
               <h3 className="text-xl font-semibold text-white">{selectedFinding.component_key}</h3>
               <span className="mt-0.5 block text-[12px] text-ck-muted">
-                {selectedFinding.sub_location || 'Geen sublocatie'}
+                {selectedFinding.sub_location || t('detail.noSubLocation')}
               </span>
 
               {/* Severity + disposition */}
               <div className="mt-4 flex items-center gap-2">
-                <span className={`font-mono text-sm tracking-wider ${(SEV[selectedFinding.severity] || SEV[2]).color}`}>
-                  {(SEV[selectedFinding.severity] || SEV[2]).bar}
+                <span className={`font-mono text-sm tracking-wider ${(SEV_META[selectedFinding.severity] || SEV_META[2]).color}`}>
+                  {(SEV_META[selectedFinding.severity] || SEV_META[2]).bar}
                 </span>
-                <span className="text-[12px] text-ck-muted-light">{(SEV[selectedFinding.severity] || SEV[2]).label}</span>
+                <span className="text-[12px] text-ck-muted-light">{sevLabel(selectedFinding.severity)}</span>
                 <span className="ml-auto rounded bg-ck-dark-surface px-2 py-0.5 text-[11px] font-medium text-ck-muted-light">
-                  {DISP[selectedFinding.disposition] || selectedFinding.disposition}
+                  {dispLabel(selectedFinding.disposition)}
                 </span>
               </div>
 
@@ -1252,11 +1282,11 @@ export default function InspectieDetailPage() {
               {/* Detail rows */}
               <div className="mt-4">
                 {[
-                  ['Zone', selectedFinding.sub_location || selectedFinding.component_key],
-                  ['Schade', selectedFinding.damage_types?.join(', ') || '—'],
-                  ['Herstelwijze', selectedFinding.repair_technique || '—'],
-                  ['Lakwerk', selectedFinding.paint_required ? (selectedFinding.paint_operation || 'Paneel') : 'Niet vereist'],
-                  ["Foto's", selectedPhotos.map(p => p.reference).join(' · ') || '—'],
+                  [t('report.zone'), selectedFinding.sub_location || selectedFinding.component_key],
+                  [t('report.damage'), selectedFinding.damage_types?.join(', ') || '—'],
+                  [t('report.dispositionRow'), selectedFinding.repair_technique || '—'],
+                  [t('report.paintLabel'), selectedFinding.paint_required ? (selectedFinding.paint_operation || t('report.panel')) : t('report.paintNotRequired')],
+                  [t('photos'), selectedPhotos.map(p => p.reference).join(' · ') || '—'],
                 ].map(([k, v]) => (
                   <div key={k} className="grid grid-cols-[104px_1fr] gap-3 border-t border-ck-dark-border py-1.5">
                     <span className="text-[12px] text-ck-muted">{k}</span>
@@ -1268,19 +1298,19 @@ export default function InspectieDetailPage() {
               {/* Hours box */}
               <div className="mt-4 rounded bg-ck-dark-surface p-3">
                 <div className="flex justify-between text-[12px] text-ck-muted-light">
-                  <span>Plaatwerk</span>
-                  <span className="font-mono tabular-nums">{hrs(selectedFinding.repair_hours)}</span>
+                  <span>{t('report.bodywork')}</span>
+                  <span className="font-mono tabular-nums">{hrsT(selectedFinding.repair_hours)}</span>
                 </div>
                 <div className="mt-1 flex justify-between text-[12px] text-ck-muted-light">
-                  <span>Spuitwerk</span>
-                  <span className="font-mono tabular-nums">{hrs(selectedFinding.paint_hours)}</span>
+                  <span>{t('report.paintwork')}</span>
+                  <span className="font-mono tabular-nums">{hrsT(selectedFinding.paint_hours)}</span>
                 </div>
               </div>
 
               {/* Parts */}
               {selectedFinding.ins_finding_parts?.length > 0 && (
                 <div className="mt-4">
-                  <span className="text-[10px] font-semibold uppercase tracking-widest text-ck-muted">Onderdelen</span>
+                  <span className="text-[10px] font-semibold uppercase tracking-widest text-ck-muted">{t('report.partsLabel')}</span>
                   {selectedFinding.ins_finding_parts.map(p => (
                     <div key={p.id} className="flex justify-between border-t border-ck-dark-border py-1.5 text-[12px]">
                       <span className="text-ck-muted-light">{p.description} {p.part_number ? `(${p.part_number})` : ''}</span>
@@ -1294,17 +1324,17 @@ export default function InspectieDetailPage() {
               {(selectedFinding.hidden_damage_possible || selectedFinding.adas_possible) && (
                 <div className="mt-4 rounded border border-ck-dark-border p-3">
                   <span className="rounded bg-orange-900/50 px-2 py-0.5 text-[11px] font-semibold text-orange-300">
-                    {selectedFinding.hidden_damage_possible ? 'Verborgen' : 'ADAS'}
+                    {selectedFinding.hidden_damage_possible ? t('report.hidden') : t('report.adas')}
                   </span>
                   <p className="mt-1.5 text-[12px] leading-relaxed text-ck-muted-light">
-                    {selectedFinding.hidden_damage_note || 'Kalibratie rijhulpsystemen mogelijk vereist'}
+                    {selectedFinding.hidden_damage_note || t('report.adasCalibration')}
                   </p>
                 </div>
               )}
 
               {/* Evidence */}
               <div className="mt-5">
-                <span className="text-[10px] font-semibold uppercase tracking-widest text-ck-muted">Bewijs</span>
+                <span className="text-[10px] font-semibold uppercase tracking-widest text-ck-muted">{t('detail.evidence')}</span>
                 {selectedPhotos.map(p => (
                   <div key={p.id} className="flex justify-between border-t border-ck-dark-border py-1.5">
                     <span className="font-mono text-[11px] text-ck-muted">{p.reference} sha256</span>
@@ -1319,13 +1349,13 @@ export default function InspectieDetailPage() {
             {/* Bottom bar */}
             <div className="flex items-center gap-3 border-t border-ck-dark-border px-4 py-2.5">
               <span className="flex-1 text-[11px] text-ck-muted">
-                {locked ? 'Vergrendeld — wijzigen niet mogelijk' : `Status: ${STATUS_LABELS[ins.status].nl}`}
+                {locked ? t('detail.lockedNoEdit') : `${t('detail.statusPrefix')} ${t(`statuses.${ins.status}`)}`}
               </span>
               <Link
                 href="/app/offertes"
                 className="rounded-lg border border-ck-dark-border px-3 py-1.5 text-[12px] font-medium text-ck-muted-light hover:bg-ck-dark-surface hover:text-white"
               >
-                Naar offerte
+                {t('detail.toQuote')}
               </Link>
             </div>
           </aside>

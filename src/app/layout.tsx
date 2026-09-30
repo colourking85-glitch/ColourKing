@@ -15,6 +15,19 @@ const mono = JetBrains_Mono({
 export const metadata: Metadata = {
   title: 'Colourking',
   description: 'Autospuitbedrijf Colour King — Rotterdam',
+  manifest: '/manifest.json',
+  themeColor: '#dc2626',
+  appleWebApp: {
+    capable: true,
+    statusBarStyle: 'black-translucent',
+    title: 'CK Inspect',
+  },
+  viewport: {
+    width: 'device-width',
+    initialScale: 1,
+    maximumScale: 1,
+    userScalable: false,
+  },
 };
 
 export default function RootLayout({

@@ -1,6 +1,7 @@
 'use client';
 
 import { useState, useEffect } from 'react';
+import { useTranslations } from 'next-intl';
 import { ScreenBadge } from '@/components/ui/ScreenBadge';
 
 /* ------------------------------------------------------------------ */
@@ -59,6 +60,8 @@ const DEFAULTS: CertificationsSettings = {
 /*  Page                                                               */
 /* ------------------------------------------------------------------ */
 export default function CertificationsPage() {
+  const t = useTranslations('sy');
+  const tCommon = useTranslations('common');
   const [settings, setSettings] = useState<CertificationsSettings>(DEFAULTS);
   const [loading, setLoading] = useState(true);
   const [saving, setSaving] = useState(false);
@@ -80,10 +83,10 @@ export default function CertificationsPage() {
         body: JSON.stringify(settings),
       });
       if (res.ok) {
-        setToast('Instellingen opgeslagen');
+        setToast(t('certSaved'));
         setTimeout(() => setToast(null), 3000);
       } else {
-        setToast('Fout bij opslaan');
+        setToast(t('certSaveFailed'));
         setTimeout(() => setToast(null), 4000);
       }
     } finally {
@@ -111,65 +114,65 @@ export default function CertificationsPage() {
       {/* Header */}
       <div>
         <div className="flex items-center gap-3">
-          <h1 className="text-xl font-medium text-white">Certificeringen &amp; Website</h1>
+          <h1 className="text-xl font-medium text-white">{t('certTitle')}</h1>
           <ScreenBadge code="SY55" />
         </div>
         <p className="mt-1 text-sm text-ck-text-muted">
-          Beheer certificeringen, social proof en diensten die op de website getoond worden.
+          {t('certSubtitle')}
         </p>
       </div>
 
       {/* Section 1: Certificeringen */}
       <section className="rounded-[10px] border-[0.5px] border-ck-border bg-ck-surface">
         <div className="border-b border-ck-border px-5 py-3">
-          <h2 className="text-sm font-medium text-white">Certificeringen</h2>
+          <h2 className="text-sm font-medium text-white">{t('certCertifications')}</h2>
         </div>
         <div className="divide-y divide-ck-border">
           {/* BOVAG */}
           <div className="flex items-center justify-between px-5 py-4">
-            <span className="text-sm text-ck-text-muted">BOVAG lid</span>
+            <span className="text-sm text-ck-text-muted">{t('certBovag')}</span>
             <Toggle checked={settings.bovag} onChange={(v) => update('bovag', v)} />
           </div>
 
           {/* RDW APK */}
           <div className="flex items-center justify-between px-5 py-4">
-            <span className="text-sm text-ck-text-muted">RDW APK Erkend</span>
+            <span className="text-sm text-ck-text-muted">{t('certRdwApk')}</span>
             <Toggle checked={settings.rdw_apk} onChange={(v) => update('rdw_apk', v)} />
           </div>
 
           {/* Erkend Leerbedrijf */}
           <div className="flex items-center justify-between px-5 py-4">
-            <span className="text-sm text-ck-text-muted">Erkend Leerbedrijf</span>
+            <span className="text-sm text-ck-text-muted">{t('certLeerbedrijf')}</span>
             <Toggle checked={settings.erkend_leerbedrijf} onChange={(v) => update('erkend_leerbedrijf', v)} />
           </div>
 
           {/* Erkend Duurzaam */}
           <div className="flex items-center justify-between px-5 py-4">
-            <span className="text-sm text-ck-text-muted">Erkend Duurzaam</span>
+            <span className="text-sm text-ck-text-muted">{t('certDuurzaam')}</span>
             <Toggle checked={settings.erkend_duurzaam} onChange={(v) => update('erkend_duurzaam', v)} />
           </div>
 
           {/* Paint system */}
           <div className="px-5 py-4">
-            <label className="mb-1.5 block text-sm text-ck-text-muted">Verfsysteem certificering</label>
+            <label className="mb-1.5 block text-sm text-ck-text-muted">{t('certPaintSystem')}</label>
             <input
               type="text"
               className={inputClass}
               value={settings.paint_system}
               onChange={(e) => update('paint_system', e.target.value)}
-              placeholder="bijv. Standox, Sikkens, Spies Hecker"
+              placeholder={t('certPaintSystemPlaceholder')}
             />
           </div>
 
           {/* Insurer partners */}
           <div className="px-5 py-4">
-            <label className="mb-1.5 block text-sm text-ck-text-muted">Verzekeringspartners</label>
+            <label className="mb-1.5 block text-sm text-ck-text-muted">{t('certInsurerPartners')}</label>
             <input
               type="text"
               className={inputClass}
               value={settings.insurer_partners}
               onChange={(e) => update('insurer_partners', e.target.value)}
-              placeholder="bijv. Univé, Centraal Beheer, OHRA"
+              placeholder={t('certInsurerPartnersPlaceholder')}
             />
           </div>
         </div>
@@ -178,24 +181,24 @@ export default function CertificationsPage() {
       {/* Section 2: Social Proof */}
       <section className="rounded-[10px] border-[0.5px] border-ck-border bg-ck-surface">
         <div className="border-b border-ck-border px-5 py-3">
-          <h2 className="text-sm font-medium text-white">Social Proof</h2>
+          <h2 className="text-sm font-medium text-white">{t('certSocialProof')}</h2>
         </div>
         <div className="divide-y divide-ck-border">
           {/* Google review score */}
           <div className="px-5 py-4">
-            <label className="mb-1.5 block text-sm text-ck-text-muted">Google Reviews score</label>
+            <label className="mb-1.5 block text-sm text-ck-text-muted">{t('certGoogleScore')}</label>
             <input
               type="text"
               className={inputClass}
               value={settings.google_review_score}
               onChange={(e) => update('google_review_score', e.target.value)}
-              placeholder="bijv. 4.8"
+              placeholder={t('certGoogleScorePlaceholder')}
             />
           </div>
 
           {/* Google review count */}
           <div className="px-5 py-4">
-            <label className="mb-1.5 block text-sm text-ck-text-muted">Aantal Google Reviews</label>
+            <label className="mb-1.5 block text-sm text-ck-text-muted">{t('certGoogleCount')}</label>
             <input
               type="number"
               className={inputClass}
@@ -211,12 +214,12 @@ export default function CertificationsPage() {
       {/* Section 3: Diensten & Responstijd */}
       <section className="rounded-[10px] border-[0.5px] border-ck-border bg-ck-surface">
         <div className="border-b border-ck-border px-5 py-3">
-          <h2 className="text-sm font-medium text-white">Diensten &amp; Responstijd</h2>
+          <h2 className="text-sm font-medium text-white">{t('certServices')}</h2>
         </div>
         <div className="divide-y divide-ck-border">
           {/* Response SLA hours */}
           <div className="px-5 py-4">
-            <label className="mb-1.5 block text-sm text-ck-text-muted">Reactietijd (uren)</label>
+            <label className="mb-1.5 block text-sm text-ck-text-muted">{t('certResponseSla')}</label>
             <input
               type="number"
               className={inputClass}
@@ -224,12 +227,12 @@ export default function CertificationsPage() {
               onChange={(e) => update('response_sla_hours', parseInt(e.target.value, 10) || 0)}
               min={0}
             />
-            <p className="mt-1 text-xs text-ck-text-muted">0 = niet tonen op website</p>
+            <p className="mt-1 text-xs text-ck-text-muted">{t('certResponseSlaHint')}</p>
           </div>
 
           {/* Show replacement vehicle */}
           <div className="flex items-center justify-between px-5 py-4">
-            <span className="text-sm text-ck-text-muted">Vervangend vervoer aanbieden</span>
+            <span className="text-sm text-ck-text-muted">{t('certReplacementVehicle')}</span>
             <Toggle
               checked={settings.show_replacement_vehicle}
               onChange={(v) => update('show_replacement_vehicle', v)}
@@ -238,7 +241,7 @@ export default function CertificationsPage() {
 
           {/* Show pickup & delivery */}
           <div className="flex items-center justify-between px-5 py-4">
-            <span className="text-sm text-ck-text-muted">Haal- en brengservice aanbieden</span>
+            <span className="text-sm text-ck-text-muted">{t('certPickupDelivery')}</span>
             <Toggle
               checked={settings.show_pickup_delivery}
               onChange={(v) => update('show_pickup_delivery', v)}
@@ -254,7 +257,7 @@ export default function CertificationsPage() {
           disabled={saving}
           className="rounded-lg bg-ck-red px-6 py-2.5 text-sm font-semibold text-white hover:bg-ck-red-hover transition-colors disabled:opacity-50"
         >
-          {saving ? 'Opslaan...' : 'Opslaan'}
+          {saving ? tCommon('saving') : tCommon('save')}
         </button>
       </div>
 

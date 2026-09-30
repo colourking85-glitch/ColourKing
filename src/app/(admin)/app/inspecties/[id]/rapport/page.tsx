@@ -40,7 +40,7 @@ export default function InspectionReportPage() {
   if (!data) {
     return (
       <div className="flex h-64 items-center justify-center">
-        <p className="text-sm text-ck-muted">Inspectie niet gevonden</p>
+        <p className="text-sm text-ck-muted">{tCommon('notFound')}</p>
       </div>
     );
   }
@@ -48,7 +48,7 @@ export default function InspectionReportPage() {
   return (
     <div className="space-y-4">
       {/* Toolbar */}
-      <div className="no-print flex items-center justify-between rounded-[10px] border-[0.5px] border-ck-dark-border bg-ck-dark-card p-3">
+      <div className="no-print flex flex-wrap items-center justify-between gap-2 rounded-[10px] border-[0.5px] border-ck-dark-border bg-ck-dark-card p-3">
         <div className="flex items-center gap-2">
           <ScreenBadge code="IN15" />
           <Link
@@ -65,20 +65,20 @@ export default function InspectionReportPage() {
             className="flex items-center gap-1.5 rounded-lg border border-ck-dark-border px-3 py-1.5 text-sm text-ck-muted-light hover:bg-ck-dark-surface hover:text-white"
           >
             <Printer size={14} />
-            Printen
+            {tCommon('print')}
           </button>
           <a
             href={`/api/inspections/${id}/pdf`}
             className="flex items-center gap-1.5 rounded-lg bg-ck-red px-3 py-1.5 text-sm font-semibold text-white hover:bg-ck-red-hover"
           >
             <FileDown size={14} />
-            PDF downloaden
+            {tCommon('downloadPdf')}
           </a>
         </div>
       </div>
 
       {/* Report */}
-      <div className="mx-auto overflow-hidden rounded-[10px] border-[0.5px] border-ck-dark-border shadow-xl">
+      <div className="mx-auto overflow-x-auto rounded-[10px] border-[0.5px] border-ck-dark-border shadow-xl">
         <InspectionReportTemplate data={data} company={company} />
       </div>
     </div>
