@@ -135,10 +135,16 @@ export function HandoverTemplate({ handover, company: c }: { handover: HandoverD
     <div className="handover-template bg-white text-gray-900" style={{ fontFamily: 'Inter, system-ui, sans-serif' }}>
       <style>{`
         @media print {
-          body { margin: 0; padding: 0; }
+          html, body { margin: 0; padding: 0; background: white !important; -webkit-print-color-adjust: exact; print-color-adjust: exact; }
+          body > div > div > aside,
+          body > div > div > div > header,
+          nav, .no-print { display: none !important; }
+          body > div > div { display: block !important; }
+          body > div > div > div { display: block !important; overflow: visible !important; }
+          body > div > div > div > main { padding: 0 !important; overflow: visible !important; }
           .handover-template { box-shadow: none !important; margin: 0 !important; max-width: none !important; }
-          .no-print { display: none !important; }
         }
+        @page { size: A4; margin: 10mm; }
         .handover-template {
           max-width: 210mm;
           margin: 0 auto;

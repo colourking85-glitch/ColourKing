@@ -16,11 +16,13 @@ export default function HandoverPrintPage() {
       fetch(`/api/handover-notes/${id}`).then(r => r.ok ? r.json() : null),
       fetch('/api/settings/company').then(r => r.ok ? r.json() : undefined),
     ]).then(([data, comp]) => {
-      if (data) setDoc(data);
-      setCompany(comp);
+      if (data) {
+        setDoc(data);
+        setCompany(comp);
+        setTimeout(() => window.print(), 500);
+      }
     }).finally(() => {
       setLoading(false);
-      setTimeout(() => window.print(), 500);
     });
   }, [id]);
 

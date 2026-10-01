@@ -40,18 +40,42 @@ export async function getHandoverNotesForJob(jobId: string) {
 
 export async function listHandoverNotes(search?: string) {
   const supabase = createClient();
-  let query = supabase
+
+  if (search) {
+    const term = `%${search}%`;
+
+    const { data: byCustomer } = await supabase
+      .from('customers')
+      .select('id')
+      .ilike('name', term);
+
+    const customerIds = byCustomer?.map(c => c.id) ?? [];
+
+    let query = supabase
+      .from('documents')
+      .select(DOC_SELECT)
+      .eq('doc_type', 'handover_note')
+      .order('created_at', { ascending: false })
+      .limit(100);
+
+    if (customerIds.length > 0) {
+      query = query.or(`doc_number.ilike.${term},customer_id.in.(${customerIds.join(',')})`);
+    } else {
+      query = query.ilike('doc_number', term);
+    }
+
+    const { data, error } = await query;
+    if (error) throw error;
+    return data;
+  }
+
+  const { data, error } = await supabase
     .from('documents')
     .select(DOC_SELECT)
     .eq('doc_type', 'handover_note')
     .order('created_at', { ascending: false })
     .limit(100);
 
-  if (search) {
-    query = query.or(`doc_number.ilike.%${search}%,customers.name.ilike.%${search}%`);
-  }
-
-  const { data, error } = await query;
   if (error) throw error;
   return data;
 }

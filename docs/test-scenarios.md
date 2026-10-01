@@ -1,6 +1,6 @@
 # ColourKing End-to-End Test Scenarios
 
-Last updated: 2026-09-26
+Last updated: 2026-10-01
 
 Production URLs:
 - Public site: https://colourking.nl
@@ -523,3 +523,159 @@ Production URLs:
 **Edge cases:**
 - Send email without BCC configured, then with BCC, and verify BCC delivery
 - Verify status badge styling in the sent-emails table (single line, no wrapping)
+
+---
+
+## Scenario 10: Handover Note — Create, Edit & Issue (DO21)
+
+**Description:** Create a handover note from an existing job, verify the auto-populated payload, edit fields while in draft, toggle gallery consent, and issue the document to lock it with a document number.
+
+**Preconditions:**
+- Logged into admin.colourking.nl with admin or office role
+- An existing job in "ready", "delivered", or "closed" stage with an approved offer containing at least one offer line
+- Note the job number and customer name for verification
+
+**Steps:**
+
+1. Navigate to Handover Notes (/app/afleverbon) and click "+ Create Handover Note".
+   - **Expected:** Redirects to /app/afleverbon/nieuw. Page shows a list of eligible jobs (only jobs in ready/delivered/closed stages). The job from preconditions appears in the list.
+
+2. Select the target job and submit.
+   - **Expected:** POST to /api/handover-notes with the job_id succeeds (201). Redirect to the new handover note detail page (/app/afleverbon/[id]). Status badge shows "draft". No document number is assigned yet — header shows "CONCEPT" or "DRAFT".
+
+3. Verify the auto-populated payload on the detail page.
+   - **Expected:**
+     - Work Summary section shows the offer line descriptions joined by newlines (pulled from the approved offer)
+     - Mileage Out shows "Niet ingevuld" / 0 km (default)
+     - Items Returned shows default items: "Sleutels" and "Kentekenbewijs"
+     - Gallery Consent checkbox is unchecked (default false)
+     - Signature section shows a "Sign here" button (no signatures yet)
+     - Sidebar shows customer name, creation date, and a "Go to job" link
+
+4. Toggle Gallery Consent by clicking the consent checkbox.
+   - **Expected:** PATCH to /api/handover-notes/[id] with `{ action: "gallery_consent", consent: true }`. The checkbox turns green (checked). The `gallery_consent` column on the document updates to `true`.
+
+5. Toggle Gallery Consent off again.
+   - **Expected:** Checkbox returns to unchecked. `gallery_consent` is `false` again. Confirm this only works while the document is in draft status.
+
+6. Click the "Issue" button (Uitgegeven) in the top-right.
+   - **Expected:** PATCH with `{ action: "issue", payload: {...} }`. Document status changes from "draft" to "issued". A document number is assigned (format: AFL-YYYY-NNNN based on the number range). The "Issue" button disappears and is replaced by "Email Link" and "Share" buttons. The Print/PDF button remains.
+
+7. Return to the Handover Notes list (/app/afleverbon).
+   - **Expected:** The newly issued handover note appears in the table with its document number, status "issued" (green badge), correct customer name, vehicle plate, and date.
+
+8. Try toggling gallery consent on the issued document.
+   - **Expected:** The checkbox is disabled (not clickable). Gallery consent cannot be changed on a non-draft document. The API returns 409 if called directly with the message "Gallery consent can only be set on draft documents".
+
+**Edge cases:**
+- Create a handover note for a job with no approved offer — verify work_summary is empty but the note is still created
+- Create a handover note for a job without a vehicle — verify vehicle fields are null but the note is created
+- Attempt to create a handover note with a missing/invalid job_id — verify 400 error
+- Search the handover list by document number and by customer name — verify search filtering works
+- Verify the "Go to job" link on the sidebar navigates correctly to the parent job
+
+---
+
+## Scenario 11: Handover Note — Signature, Share & Email (DO21)
+
+**Description:** Sign a handover note (admin-side and customer-side via public link), generate a share link, email it to the customer, and verify the public signing flow including link expiry.
+
+**Preconditions:**
+- Logged into admin.colourking.nl with admin or office role
+- An **issued** handover note exists (from Scenario 10 or created fresh)
+- The handover note's customer has an email address on file
+- Note the handover note id and document number
+
+**Steps:**
+
+1. Navigate to the issued handover note detail page (/app/afleverbon/[id]).
+   - **Expected:** Page loads with status "issued" (green badge). The "Email Link" and "Share" buttons are visible. The "Sign here" button is available.
+
+2. Click "Sign here" to add an admin/staff signature.
+   - **Expected:** A signature panel appears with a name input field and a signature canvas (draw area). The "Sign" button is disabled until a name is entered.
+
+3. Enter the signer name (e.g., "Sunay Sabri") and draw a signature on the canvas, then submit.
+   - **Expected:** PATCH to /api/handover-notes/[id] with `{ action: "sign", signer_name: "Sunay Sabri", signer_role: "customer", signature_data: "data:image/png;base64,..." }`. Returns 201. The signature panel is replaced by a signature card showing the name, role, timestamp, and the drawn signature image. The sidebar updates with "Signed at" date and "Signed by" name.
+
+4. Click the "Share" button.
+   - **Expected:** PATCH with `{ action: "share" }`. A share token is generated (32-char hex UUID without dashes). A green bar appears showing the full share URL: `https://admin.colourking.nl/s/handover/{token}`. The link is auto-copied to clipboard. Share expires in 30 days.
+
+5. Open the share link in an incognito/private browser window (no login required).
+   - **Expected:** The public handover page loads at /s/handover/[token] without authentication. Shows the handover note content: document number, customer info, vehicle info, work summary, mileage, warranty, returned items, gallery consent status, and any existing signatures. Multi-locale labels are shown (nl/en/tr support). A signature canvas is available for the customer to sign.
+
+6. On the public page, enter the customer name and draw a signature, then submit.
+   - **Expected:** POST to /api/public/handover/[token] with `{ action: "sign", signer_name: "...", signature_data: "..." }`. Returns `{ ok: true }`. The page confirms the signature was recorded. Going back to the admin detail page shows two signatures now.
+
+7. On the public page, toggle gallery consent.
+   - **Expected:** POST with `{ action: "gallery_consent", consent: true }`. Returns `{ ok: true }`. The consent checkbox updates on the public page and is reflected on the admin side.
+
+8. Click the "Email Link" button on the admin detail page.
+   - **Expected:** POST to /api/handover-notes/[id]/send-email. An email is sent to the customer's email address containing the share link. The email uses the handoverShare template with the customer's name, document number, and vehicle info. A success toast is shown. The email appears in Settings → Sent Emails (SY25).
+
+9. Test an expired link: manually set share_expires_at to a past date in the database, then access the public link.
+   - **Expected:** GET /api/public/handover/[token] returns 410 Gone with `{ error: "Link expired" }`. The public page shows an expiry error message.
+
+**Edge cases:**
+- Sign without entering a signer name — verify the sign action is blocked (button disabled, API returns 400)
+- Sign without drawing on the canvas — verify signature_data validation prevents empty submissions
+- Attempt to sign a cancelled document — verify the API returns an error "Cannot sign a cancelled document"
+- Access a public link with a non-existent token — verify 404 is returned
+- Submit a POST to the public endpoint with an unknown action — verify 400 "Unknown action"
+- Verify the share token is unique (partial index on documents.share_token)
+
+---
+
+## Scenario 12: Handover Note — Print, Document Chain & Cross-Feature Integration (DO21/DO22)
+
+**Description:** Verify the print/PDF view renders correctly, test the document chain linking handover to its parent job documents, and confirm cross-feature integrations with vehicle activity tracking and portfolio gallery consent.
+
+**Preconditions:**
+- Logged into admin.colourking.nl with admin or office role
+- An issued handover note with at least one signature exists
+- The parent job has an approved offer and ideally a repair order (for a full document chain)
+- The handover note has `mileage_out` > 0 and `gallery_consent` = true (set via Scenario 10/11)
+
+**Steps:**
+
+1. Navigate to the handover note detail page (/app/afleverbon/[id]) and click the "Print / PDF" button.
+   - **Expected:** A new tab/window opens at /app/afleverbon/[id]/print. The HandoverTemplate component renders an A4-formatted print view with:
+     - Company header (Colourking logo and contact info)
+     - Customer info (name, email, phone)
+     - Vehicle info (plate, make, model)
+     - Work summary section with all approved offer lines
+     - Mileage out value
+     - Warranty text (if any)
+     - Items returned as a checklist
+     - Gallery consent status
+     - All signature images with signer names and dates
+     - Footer with document number and date
+   - The browser's print dialog (`window.print()`) is triggered automatically.
+
+2. Verify the print template multi-locale rendering by changing the document locale.
+   - **Expected:** The template renders labels in the document's locale (default: nl). Dutch labels include "Werkzaamheden", "Km-stand afgifte", "Garantie", "Teruggegeven items". If the locale were 'en', labels would be in English; if 'tr', in Turkish. All three locale sets exist in the HandoverTemplate component.
+
+3. On the detail page, verify the document chain is displayed correctly.
+   - **Expected:** The API response includes a `chain` array showing all documents linked to the same job (offer → repair_order → handover_note → invoice). Each chain entry shows doc_type, doc_number, and status. The handover note's position in the chain is correct.
+
+4. Navigate to the parent job detail page (/app/jobs/[job_id]) from the "Go to job" link.
+   - **Expected:** The job detail page shows a "Create Handover" shortcut/link in the documents section. Since a handover note already exists for this job, it should show a link to the existing note rather than prompting creation.
+
+5. Navigate to the Vehicle detail page for this job's vehicle and check the activity timeline (/app/voertuigen/[vehicle_id]).
+   - **Expected:** The vehicle's activity timeline (fetched from /api/vehicles/[id]/activity) includes an entry for the handover note showing the `mileage_out` value extracted from the handover payload. This provides odometer tracking history for the vehicle.
+
+6. Verify portfolio integration: if gallery consent is true, check the portfolio module.
+   - **Expected:** When a portfolio entry is created for this job (via /app/portfolio), the `consent_status` is automatically derived from the handover note's `gallery_consent` field. A handover with `gallery_consent: true` results in portfolio `consent_status: "granted"`.
+
+7. Verify the handover note appears in the Document Archive (/app/documenten, DO05).
+   - **Expected:** The document archive page lists the handover note with a purple badge for doc_type "handover_note". Clicking it opens the document detail view (/app/documenten/[id]) which supports the handover_note type and renders its payload correctly.
+
+8. Navigate to Settings → Numbering (/app/instellingen/nummering).
+   - **Expected:** The numbering settings page shows a row for "handover_note" with prefix "AFL" (or "HO"). The next number can be configured. The prefix matches the document numbers assigned to issued handover notes.
+
+**Edge cases:**
+- Print a draft handover note — verify it renders but shows "CONCEPT" instead of a document number
+- Print a handover note with no signatures — verify the signature section shows "No signatures" or is empty
+- Verify the print CSS hides screen-only elements (buttons, navigation) and uses A4-appropriate margins
+- Check that the document chain API correctly orders documents by creation date
+- Verify that a handover note without a vehicle still renders the print template (vehicle section is skipped or shows "N/A")
+- Confirm the handover note search works with partial document number matching (e.g., searching "AFL-2026" finds all 2026 notes)
