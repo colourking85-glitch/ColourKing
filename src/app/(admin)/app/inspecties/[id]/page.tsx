@@ -446,14 +446,16 @@ export default function InspectieDetailPage() {
                   <XCircle size={14} /> {tIn('detail.cancel')}
                 </button>
               )}
-              <button
-                onClick={doDelete}
-                disabled={busy}
-                className="flex items-center gap-1.5 rounded-lg border border-red-500/30 px-3 py-1.5 text-xs font-medium text-red-400 hover:bg-red-500/10 disabled:opacity-50"
-              >
-                <Trash2 size={14} /> {tIn('detail.delete')}
-              </button>
             </div>
+          )}
+          {ins.status !== 'VERGRENDELD' && (
+            <button
+              onClick={doDelete}
+              disabled={busy}
+              className="flex items-center gap-1.5 rounded-lg border border-red-500/30 px-3 py-1.5 text-xs font-medium text-red-400 hover:bg-red-500/10 disabled:opacity-50"
+            >
+              <Trash2 size={14} /> {tIn('detail.delete')}
+            </button>
           )}
           {actionError && <span className="ml-3 text-xs text-red-400">{actionError}</span>}
           <div className="flex-1" />

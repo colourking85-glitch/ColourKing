@@ -825,7 +825,9 @@
       "dispReplace": "Vervangen",
       "dispInvestigate": "Onderzoeken",
       "dispNoAction": "Geen actie",
-      "zoneOther": "Overig"
+      "zoneOther": "Overig",
+      "delete": "Verwijderen",
+      "confirmDelete": "Weet u zeker dat u deze inspectie wilt verwijderen? Dit kan niet ongedaan worden gemaakt."
     },
     "title": "Inspecties",
     "new": "Nieuwe inspectie",
@@ -1239,9 +1241,7 @@
       "totalInOrder": "Totaal in opdracht",
       "hoursLabel": "uren",
       "newParts": "{count} × nieuw"
-    },
-    "detail.delete": "Verwijderen",
-    "detail.confirmDelete": "Weet u zeker dat u deze inspectie wilt verwijderen? Dit kan niet ongedaan worden gemaakt."
+    }
   },
   "es": {
     "title": "Offertes",

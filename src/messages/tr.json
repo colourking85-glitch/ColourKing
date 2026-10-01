@@ -825,7 +825,9 @@
       "dispReplace": "Değiştirme",
       "dispInvestigate": "İnceleme",
       "dispNoAction": "İşlem yok",
-      "zoneOther": "Diğer"
+      "zoneOther": "Diğer",
+      "delete": "Sil",
+      "confirmDelete": "Bu incelemeyi silmek istediğinizden emin misiniz? Bu işlem geri alınamaz."
     },
     "title": "Muayeneler",
     "new": "Yeni Muayene",
@@ -1239,9 +1241,7 @@
       "totalInOrder": "Emir toplamı",
       "hoursLabel": "saat",
       "newParts": "{count} × yeni"
-    },
-    "detail.delete": "Sil",
-    "detail.confirmDelete": "Bu incelemeyi silmek istediğinizden emin misiniz? Bu işlem geri alınamaz."
+    }
   },
   "es": {
     "title": "Teklifler",
