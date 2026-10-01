@@ -1,9 +1,10 @@
 'use client';
 
-import { useEffect, useRef } from 'react';
+import { useEffect, useRef, useState } from 'react';
 import { X, Workflow, ArrowDownToLine, ArrowUpFromLine, ArrowRightLeft, Bot } from 'lucide-react';
-import { getScreenDoc, type ScreenDoc } from '@/lib/screen-docs';
+import { getScreenDoc, loadLocaleModules, type ScreenDoc } from '@/lib/screen-docs';
 import { MODULE_COLORS } from '@/lib/codes';
+import { useAppLocale } from '@/components/AdminIntlProvider';
 
 type Props = {
   screenCode: string;
@@ -24,7 +25,16 @@ function Section({ icon: Icon, title, content }: { icon: React.ElementType; titl
 
 export function ScreenHelpPanel({ screenCode, onClose }: Props) {
   const panelRef = useRef<HTMLDivElement>(null);
-  const doc: ScreenDoc | undefined = getScreenDoc(screenCode);
+  const { locale } = useAppLocale();
+  const [ready, setReady] = useState(locale === 'en');
+
+  useEffect(() => {
+    if (locale === 'en') { setReady(true); return; }
+    setReady(false);
+    loadLocaleModules(locale).then(() => setReady(true));
+  }, [locale]);
+
+  const doc: ScreenDoc | undefined = ready ? getScreenDoc(screenCode, locale) : getScreenDoc(screenCode);
   const mod = screenCode.slice(0, 2);
   const color = MODULE_COLORS[mod] ?? 'bg-slate-700/30 text-slate-400';
 

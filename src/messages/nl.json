@@ -100,7 +100,8 @@
     "envSecrets": "Omgevingsgeheimen",
     "certifications": "Certificeringen",
     "reminders": "Herinneringen",
-    "offDays": "Sluitingsdagen"
+    "offDays": "Sluitingsdagen",
+    "support": "Support"
   },
   "header": {
     "quickCreate": "Snel aanmaken",
@@ -115,6 +116,7 @@
     "generalSettings": "Algemene instellingen",
     "supportSection": "Ondersteuning",
     "helpDocs": "Help & Documentatie",
+    "supportCases": "Support Cases",
     "securitySection": "Beveiliging",
     "accountSecurity": "Account & Beveiliging",
     "admin": "Beheer",
@@ -3668,5 +3670,63 @@
     "convertPhotos": "{n, plural, =0 {Geen foto's} one {# foto} other {# foto's}} klaar om te importeren — kentekens worden eerst onherkenbaar gemaakt.",
     "convertConfirm": "Omzetten",
     "cancel": "Annuleren"
+  },
+  "support": {
+    "title": "Support",
+    "newCase": "Nieuwe Case",
+    "noCases": "Geen cases gevonden",
+    "createFirst": "Maak uw eerste support case aan",
+    "notConfigured": "Support API niet geconfigureerd",
+    "notConfiguredHint": "Voeg DES_SUPPORT_API_KEY en DES_SUPPORT_API_URL toe aan uw omgevingsvariabelen.",
+    "caseCreated": "Case {number} succesvol aangemaakt",
+    "submit": "Verzenden",
+    "autoContext": "Automatisch vastgelegde context",
+    "conversation": "Gesprek",
+    "technicalContext": "Technische Context",
+    "replyPlaceholder": "Typ uw antwoord...",
+    "agent": "Agent",
+    "you": "U",
+    "status": {
+      "new": "Nieuw",
+      "triage": "Triage",
+      "assigned": "Toegewezen",
+      "in_progress": "In Behandeling",
+      "waiting_customer": "Wacht op Klant",
+      "waiting_provider": "Wacht op Provider",
+      "resolved": "Opgelost",
+      "closed": "Gesloten",
+      "reopened": "Heropend",
+      "cancelled": "Geannuleerd"
+    },
+    "priority": {
+      "low": "Laag",
+      "normal": "Normaal",
+      "high": "Hoog",
+      "critical": "Kritiek"
+    },
+    "category": {
+      "access_problem": "Toegangsprobleem",
+      "bug": "Bug Melding",
+      "question": "Vraag",
+      "feature_request": "Functie Verzoek",
+      "other": "Overig"
+    },
+    "fields": {
+      "subject": "Onderwerp",
+      "description": "Beschrijving",
+      "category": "Categorie",
+      "priority": "Prioriteit",
+      "created": "Aangemaakt",
+      "resolved": "Opgelost"
+    },
+    "placeholders": {
+      "subject": "Korte samenvatting van het probleem...",
+      "description": "Beschrijf het probleem in detail..."
+    },
+    "filter": {
+      "open": "Open",
+      "closed": "Gesloten",
+      "all": "Alles"
+    }
   }
 }

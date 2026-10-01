@@ -682,6 +682,8 @@ export const MODULES: ModuleDoc[] = [
   },
 ];
 
+type Locale = 'nl' | 'en' | 'tr';
+
 const DOC_INDEX = new Map<string, ScreenDoc>();
 for (const mod of MODULES) {
   for (const s of mod.screens) {
@@ -689,6 +691,39 @@ for (const mod of MODULES) {
   }
 }
 
-export function getScreenDoc(code: string): ScreenDoc | undefined {
-  return DOC_INDEX.get(code);
+let MODULES_NL: ModuleDoc[] | null = null;
+let MODULES_TR: ModuleDoc[] | null = null;
+const DOC_INDEX_NL = new Map<string, ScreenDoc>();
+const DOC_INDEX_TR = new Map<string, ScreenDoc>();
+
+async function loadLocaleModules(locale: Locale) {
+  if (locale === 'nl' && !MODULES_NL) {
+    const mod = await import('./screen-docs-nl');
+    MODULES_NL = mod.MODULES_NL;
+    for (const m of MODULES_NL!) for (const s of m.screens) DOC_INDEX_NL.set(s.code, s);
+  }
+  if (locale === 'tr' && !MODULES_TR) {
+    const mod = await import('./screen-docs-tr');
+    MODULES_TR = mod.MODULES_TR;
+    for (const m of MODULES_TR!) for (const s of m.screens) DOC_INDEX_TR.set(s.code, s);
+  }
+}
+
+function getIndexForLocale(locale: Locale): Map<string, ScreenDoc> {
+  if (locale === 'nl') return DOC_INDEX_NL;
+  if (locale === 'tr') return DOC_INDEX_TR;
+  return DOC_INDEX;
+}
+
+export function getModulesForLocale(locale: Locale): ModuleDoc[] {
+  if (locale === 'nl' && MODULES_NL) return MODULES_NL;
+  if (locale === 'tr' && MODULES_TR) return MODULES_TR;
+  return MODULES;
+}
+
+export { loadLocaleModules };
+
+export function getScreenDoc(code: string, locale: Locale = 'en'): ScreenDoc | undefined {
+  const idx = getIndexForLocale(locale);
+  return idx.get(code) ?? DOC_INDEX.get(code);
 }

@@ -4,7 +4,7 @@ import { useState, useEffect, useRef, useCallback } from 'react';
 import { usePathname } from 'next/navigation';
 import { useTranslations } from 'next-intl';
 import {
-  Search, User, LogOut, Plus, Settings, HelpCircle,
+  Search, User, LogOut, Plus, Settings, HelpCircle, Headphones,
   Inbox, Users, Car, Wrench, Bell, Sparkles,
   ClipboardList, ClipboardCheck, ChevronDown, Receipt, Star, FileText,
 } from 'lucide-react';
@@ -178,6 +178,7 @@ export function Header() {
     { kind: 'link', labelKey: 'generalSettings', href: '/app/instellingen', icon: Settings },
     { kind: 'sep', labelKey: 'supportSection' },
     { kind: 'link', labelKey: 'helpDocs', href: '/app/help', icon: HelpCircle },
+    { kind: 'link', labelKey: 'supportCases', href: '/app/support', icon: Headphones },
   ];
 
   function closeAll() {

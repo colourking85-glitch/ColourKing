@@ -1,12 +1,12 @@
 'use client';
 
-import { useState, useMemo } from 'react';
+import { useState, useMemo, useEffect } from 'react';
 import { useTranslations } from 'next-intl';
 import { BookOpenCheck, Bot, ChevronRight, ChevronDown, GitBranch, Globe, Search } from 'lucide-react';
 import { ScreenBadge } from '@/components/ui/ScreenBadge';
 import { BusinessFlowChart } from '@/components/ui/BusinessFlowChart';
 import { SCREEN_REGISTRY } from '@/lib/codes';
-import { MODULES, type ScreenDoc, type ModuleDoc } from '@/lib/screen-docs';
+import { MODULES, type ScreenDoc, type ModuleDoc, loadLocaleModules, getModulesForLocale } from '@/lib/screen-docs';
 import { useAppLocale } from '@/components/AdminIntlProvider';
 
 type Tab = 'agent' | 'user' | 'flow';
@@ -56,12 +56,12 @@ function getSnippet(text: string, query: string, contextLen = 80): string {
   return snippet;
 }
 
-function deepSearch(query: string, fieldLabels: { key: keyof ScreenDoc; label: string }[]): SearchResult[] {
+function deepSearch(query: string, fieldLabels: { key: keyof ScreenDoc; label: string }[], modules: ModuleDoc[]): SearchResult[] {
   if (!query || query.length < 2) return [];
   const q = query.toLowerCase();
   const results: SearchResult[] = [];
 
-  for (const mod of MODULES) {
+  for (const mod of modules) {
     for (const screen of mod.screens) {
       const title = getScreenTitle(screen.code).toLowerCase();
       const codeMatch = screen.code.toLowerCase().includes(q);
@@ -105,6 +105,15 @@ export default function ManualPage() {
   const [expandedModule, setExpandedModule] = useState<string | null>('leads');
   const [searchQuery, setSearchQuery] = useState('');
   const [langOpen, setLangOpen] = useState(false);
+  const [localeReady, setLocaleReady] = useState(locale === 'en');
+
+  useEffect(() => {
+    if (locale === 'en') { setLocaleReady(true); return; }
+    setLocaleReady(false);
+    loadLocaleModules(locale).then(() => setLocaleReady(true));
+  }, [locale]);
+
+  const modules = localeReady ? getModulesForLocale(locale) : MODULES;
 
   const searchableFields: { key: keyof ScreenDoc; label: string }[] = useMemo(() => [
     { key: 'userFlow', label: tSy('howItWorks') },
@@ -114,7 +123,7 @@ export default function ManualPage() {
     { key: 'agentNotes', label: tSy('fieldAgentNotes') },
   ], [tSy]);
 
-  const searchResults = useMemo(() => deepSearch(searchQuery, searchableFields), [searchQuery, searchableFields]);
+  const searchResults = useMemo(() => deepSearch(searchQuery, searchableFields, modules), [searchQuery, searchableFields, modules]);
 
   const isSearchActive = searchQuery.length >= 2;
 
@@ -321,7 +330,7 @@ export default function ManualPage() {
               <div className="rounded-[10px] border border-[#1e1e2a] bg-[#12121a] p-6">
                 <h2 className="text-base font-medium text-white">{tSy('screenApiRef')}</h2>
                 <div className="mt-4 space-y-3">
-                  {MODULES.flatMap((m) =>
+                  {modules.flatMap((m) =>
                     m.screens.map((s) => (
                       <div key={s.code} className="border-b border-[#1e1e2a] pb-3 last:border-0 last:pb-0">
                         <p className="text-sm font-medium text-white">
@@ -367,7 +376,7 @@ export default function ManualPage() {
                 </div>
               </div>
 
-              {MODULES.map((mod) => (
+              {modules.map((mod) => (
                 <div key={mod.id} className="rounded-[10px] border border-[#1e1e2a] bg-[#12121a]">
                   <button
                     onClick={() => setExpandedModule(expandedModule === mod.id ? null : mod.id)}

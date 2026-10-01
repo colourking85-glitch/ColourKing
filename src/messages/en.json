@@ -100,7 +100,8 @@
     "envSecrets": "Environment Secrets",
     "certifications": "Certifications",
     "reminders": "Reminders",
-    "offDays": "Off days"
+    "offDays": "Off days",
+    "support": "Support"
   },
   "header": {
     "quickCreate": "Quick create",
@@ -115,6 +116,7 @@
     "generalSettings": "General settings",
     "supportSection": "Support",
     "helpDocs": "Help & Documentation",
+    "supportCases": "Support Cases",
     "securitySection": "Security",
     "accountSecurity": "Account & Security",
     "admin": "Admin",
@@ -3668,5 +3670,63 @@
     "convertPhotos": "{n, plural, =0 {No photos} one {# photo} other {# photos}} ready to import — plates are hidden first.",
     "convertConfirm": "Convert",
     "cancel": "Cancel"
+  },
+  "support": {
+    "title": "Support",
+    "newCase": "New Case",
+    "noCases": "No cases found",
+    "createFirst": "Create your first support case",
+    "notConfigured": "Support API not configured",
+    "notConfiguredHint": "Add DES_SUPPORT_API_KEY and DES_SUPPORT_API_URL to your environment variables.",
+    "caseCreated": "Case {number} created successfully",
+    "submit": "Submit",
+    "autoContext": "Auto-captured context",
+    "conversation": "Conversation",
+    "technicalContext": "Technical Context",
+    "replyPlaceholder": "Type your reply...",
+    "agent": "Agent",
+    "you": "You",
+    "status": {
+      "new": "New",
+      "triage": "Triage",
+      "assigned": "Assigned",
+      "in_progress": "In Progress",
+      "waiting_customer": "Waiting on Customer",
+      "waiting_provider": "Waiting on Provider",
+      "resolved": "Resolved",
+      "closed": "Closed",
+      "reopened": "Reopened",
+      "cancelled": "Cancelled"
+    },
+    "priority": {
+      "low": "Low",
+      "normal": "Normal",
+      "high": "High",
+      "critical": "Critical"
+    },
+    "category": {
+      "access_problem": "Access Problem",
+      "bug": "Bug Report",
+      "question": "Question",
+      "feature_request": "Feature Request",
+      "other": "Other"
+    },
+    "fields": {
+      "subject": "Subject",
+      "description": "Description",
+      "category": "Category",
+      "priority": "Priority",
+      "created": "Created",
+      "resolved": "Resolved"
+    },
+    "placeholders": {
+      "subject": "Brief summary of the issue...",
+      "description": "Describe the issue in detail..."
+    },
+    "filter": {
+      "open": "Open",
+      "closed": "Closed",
+      "all": "All"
+    }
   }
 }

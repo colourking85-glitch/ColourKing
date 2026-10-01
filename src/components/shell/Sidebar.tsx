@@ -10,6 +10,7 @@ import {
   BarChart3, Calculator, ShoppingCart, BookOpen, Settings, Bell,
   ChevronLeft, ChevronRight, ChevronDown, BookOpenCheck, Clock, Bot, Mail, HardDrive, Server,
   Plug, Zap, CarFront, Coins, Shield, Activity, ClipboardCheck, Award, Images, BellRing, CalendarOff,
+  Headphones,
 } from 'lucide-react';
 import { ScreenBadge } from '@/components/ui/ScreenBadge';
 import { SCREEN_REGISTRY } from '@/lib/codes';
@@ -133,6 +134,7 @@ const NAV: NavSection[] = [
         ],
       },
       { label: 'manual', href: '/app/handleiding', icon: BookOpenCheck, code: 'SY10' },
+      { label: 'support', href: '/app/support', icon: Headphones, code: 'SY65' },
     ],
   },
 ];

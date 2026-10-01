@@ -100,7 +100,8 @@
     "envSecrets": "Ortam Sırları",
     "certifications": "Sertifikalar",
     "reminders": "Hatırlatmalar",
-    "offDays": "Kapalı günler"
+    "offDays": "Kapalı günler",
+    "support": "Destek"
   },
   "header": {
     "quickCreate": "Hızlı oluştur",
@@ -115,6 +116,7 @@
     "generalSettings": "Genel ayarlar",
     "supportSection": "Destek",
     "helpDocs": "Yardım ve Belgeler",
+    "supportCases": "Destek Talepleri",
     "securitySection": "Güvenlik",
     "accountSecurity": "Hesap ve Güvenlik",
     "admin": "Yönetici",
@@ -3668,5 +3670,63 @@
     "convertPhotos": "{n} fotograf ice aktarmaya hazir — plakalar once gizlenir.",
     "convertConfirm": "Donustur",
     "cancel": "Iptal"
+  },
+  "support": {
+    "title": "Destek",
+    "newCase": "Yeni Talep",
+    "noCases": "Talep bulunamadı",
+    "createFirst": "İlk destek talebinizi oluşturun",
+    "notConfigured": "Destek API yapılandırılmamış",
+    "notConfiguredHint": "DES_SUPPORT_API_KEY ve DES_SUPPORT_API_URL ortam değişkenlerini ekleyin.",
+    "caseCreated": "Talep {number} başarıyla oluşturuldu",
+    "submit": "Gönder",
+    "autoContext": "Otomatik yakalanan bağlam",
+    "conversation": "Görüşme",
+    "technicalContext": "Teknik Bağlam",
+    "replyPlaceholder": "Yanıtınızı yazın...",
+    "agent": "Temsilci",
+    "you": "Siz",
+    "status": {
+      "new": "Yeni",
+      "triage": "Değerlendirme",
+      "assigned": "Atandı",
+      "in_progress": "İşlemde",
+      "waiting_customer": "Müşteri Bekleniyor",
+      "waiting_provider": "Sağlayıcı Bekleniyor",
+      "resolved": "Çözüldü",
+      "closed": "Kapatıldı",
+      "reopened": "Yeniden Açıldı",
+      "cancelled": "İptal Edildi"
+    },
+    "priority": {
+      "low": "Düşük",
+      "normal": "Normal",
+      "high": "Yüksek",
+      "critical": "Kritik"
+    },
+    "category": {
+      "access_problem": "Erişim Sorunu",
+      "bug": "Hata Bildirimi",
+      "question": "Soru",
+      "feature_request": "Özellik İsteği",
+      "other": "Diğer"
+    },
+    "fields": {
+      "subject": "Konu",
+      "description": "Açıklama",
+      "category": "Kategori",
+      "priority": "Öncelik",
+      "created": "Oluşturulma",
+      "resolved": "Çözülme"
+    },
+    "placeholders": {
+      "subject": "Sorunun kısa özeti...",
+      "description": "Sorunu ayrıntılı olarak açıklayın..."
+    },
+    "filter": {
+      "open": "Açık",
+      "closed": "Kapalı",
+      "all": "Tümü"
+    }
   }
 }
