@@ -2115,7 +2115,8 @@
     "certReplacementVehicle": "İkame araç sunma",
     "certPickupDelivery": "Araç alma & teslim hizmeti sunma",
     "certSaved": "Ayarlar kaydedildi",
-    "certSaveFailed": "Kaydetme başarısız"
+    "certSaveFailed": "Kaydetme başarısız",
+    "searchPlaceholder": "Kılavuzda ara..."
   },
   "signature": {
     "signHere": "Buraya imza atın",
@@ -2212,8 +2213,7 @@
     "newLead": "Yeni müşteri adayı",
     "system": "Sistem",
     "email": "E-posta",
-    "view": "Görüntüle",
-    "searchPlaceholder": "Kılavuzda ara..."
+    "view": "Görüntüle"
   },
   "pub": {
     "nav": {

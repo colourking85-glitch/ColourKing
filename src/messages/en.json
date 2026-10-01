@@ -2115,7 +2115,8 @@
     "certReplacementVehicle": "Offer replacement vehicle",
     "certPickupDelivery": "Offer pick-up & delivery service",
     "certSaved": "Settings saved",
-    "certSaveFailed": "Failed to save"
+    "certSaveFailed": "Failed to save",
+    "searchPlaceholder": "Search manuals..."
   },
   "signature": {
     "signHere": "Sign here",
@@ -2212,8 +2213,7 @@
     "newLead": "New lead",
     "system": "System",
     "email": "Email",
-    "view": "View",
-    "searchPlaceholder": "Search manuals..."
+    "view": "View"
   },
   "em": {
     "subjectOffer": "Your quote {offerNumber} from Colourking",

@@ -2115,7 +2115,8 @@
     "certReplacementVehicle": "Vervangend vervoer aanbieden",
     "certPickupDelivery": "Haal- en brengservice aanbieden",
     "certSaved": "Instellingen opgeslagen",
-    "certSaveFailed": "Fout bij opslaan"
+    "certSaveFailed": "Fout bij opslaan",
+    "searchPlaceholder": "Zoek in handleiding..."
   },
   "signature": {
     "signHere": "Hier tekenen",
@@ -2212,8 +2213,7 @@
     "newLead": "Nieuwe lead",
     "system": "Systeem",
     "email": "E-mail",
-    "view": "Bekijken",
-    "searchPlaceholder": "Zoek in handleiding..."
+    "view": "Bekijken"
   },
   "pub": {
     "nav": {
