@@ -2,11 +2,12 @@
 
 import { useState, useMemo } from 'react';
 import { useTranslations } from 'next-intl';
-import { BookOpenCheck, Bot, ChevronRight, ChevronDown, GitBranch, Search } from 'lucide-react';
+import { BookOpenCheck, Bot, ChevronRight, ChevronDown, GitBranch, Globe, Search } from 'lucide-react';
 import { ScreenBadge } from '@/components/ui/ScreenBadge';
 import { BusinessFlowChart } from '@/components/ui/BusinessFlowChart';
 import { SCREEN_REGISTRY } from '@/lib/codes';
 import { MODULES, type ScreenDoc, type ModuleDoc } from '@/lib/screen-docs';
+import { useAppLocale } from '@/components/AdminIntlProvider';
 
 type Tab = 'agent' | 'user' | 'flow';
 
@@ -15,6 +16,12 @@ type SearchResult = {
   screen: ScreenDoc;
   matchedFields: { field: string; label: string; snippet: string }[];
 };
+
+const LOCALES = [
+  { code: 'nl' as const, label: 'NL', name: 'Nederlands' },
+  { code: 'en' as const, label: 'EN', name: 'English' },
+  { code: 'tr' as const, label: 'TR', name: 'Türkçe' },
+];
 
 function getScreenTitle(code: string): string {
   const entry = Object.values(SCREEN_REGISTRY).find((s) => s.id === code);
@@ -49,15 +56,7 @@ function getSnippet(text: string, query: string, contextLen = 80): string {
   return snippet;
 }
 
-const SEARCHABLE_FIELDS: { key: keyof ScreenDoc; label: string }[] = [
-  { key: 'userFlow', label: 'How it works' },
-  { key: 'inputs', label: 'Inputs' },
-  { key: 'outputs', label: 'Outputs' },
-  { key: 'crossScreen', label: 'Cross-screen' },
-  { key: 'agentNotes', label: 'Agent notes' },
-];
-
-function deepSearch(query: string): SearchResult[] {
+function deepSearch(query: string, fieldLabels: { key: keyof ScreenDoc; label: string }[]): SearchResult[] {
   if (!query || query.length < 2) return [];
   const q = query.toLowerCase();
   const results: SearchResult[] = [];
@@ -73,12 +72,12 @@ function deepSearch(query: string): SearchResult[] {
       if (codeMatch || titleMatch) {
         matchedFields.push({
           field: 'code',
-          label: 'Screen',
+          label: fieldLabels.find(f => f.key === 'userFlow')?.label ?? 'Screen',
           snippet: `${screen.code} — ${getScreenTitle(screen.code)}`,
         });
       }
 
-      for (const { key, label } of SEARCHABLE_FIELDS) {
+      for (const { key, label } of fieldLabels) {
         const value = screen[key];
         if (value.toLowerCase().includes(q)) {
           matchedFields.push({
@@ -101,19 +100,34 @@ function deepSearch(query: string): SearchResult[] {
 export default function ManualPage() {
   const t = useTranslations('nav');
   const tSy = useTranslations('sy');
+  const { locale, setLocale } = useAppLocale();
   const [tab, setTab] = useState<Tab>('user');
   const [expandedModule, setExpandedModule] = useState<string | null>('leads');
   const [searchQuery, setSearchQuery] = useState('');
+  const [langOpen, setLangOpen] = useState(false);
 
-  const searchResults = useMemo(() => deepSearch(searchQuery), [searchQuery]);
+  const searchableFields: { key: keyof ScreenDoc; label: string }[] = useMemo(() => [
+    { key: 'userFlow', label: tSy('howItWorks') },
+    { key: 'inputs', label: tSy('fieldInputs') },
+    { key: 'outputs', label: tSy('fieldOutputs') },
+    { key: 'crossScreen', label: tSy('crossScreenEffects') },
+    { key: 'agentNotes', label: tSy('fieldAgentNotes') },
+  ], [tSy]);
+
+  const searchResults = useMemo(() => deepSearch(searchQuery, searchableFields), [searchQuery, searchableFields]);
 
   const isSearchActive = searchQuery.length >= 2;
 
+  const flowSteps = tSy('flowSteps').split(',');
+  const userFlowSteps = tSy('userFlowSteps').split(',');
+
   const tabs: { key: Tab; label: string; icon: React.ReactNode }[] = [
-    { key: 'user', label: 'End User Manual', icon: <BookOpenCheck className="h-4 w-4" /> },
-    { key: 'agent', label: 'AI Agent Guide', icon: <Bot className="h-4 w-4" /> },
-    { key: 'flow', label: 'Business Flow', icon: <GitBranch className="h-4 w-4" /> },
+    { key: 'user', label: tSy('tabUser'), icon: <BookOpenCheck className="h-4 w-4" /> },
+    { key: 'agent', label: tSy('tabAgent'), icon: <Bot className="h-4 w-4" /> },
+    { key: 'flow', label: tSy('tabFlow'), icon: <GitBranch className="h-4 w-4" /> },
   ];
+
+  const currentLocale = LOCALES.find(l => l.code === locale) ?? LOCALES[0];
 
   return (
     <div className="mx-auto max-w-6xl space-y-6 p-6">
@@ -122,34 +136,60 @@ export default function ManualPage() {
         <div>
           <div className="flex items-center gap-3">
             <h1 className="text-xl font-medium text-white">
-              {tab === 'user' ? 'End User Manual' : tab === 'agent' ? 'AI Agent Quick Reference' : 'Business Flow Chart'}
+              {tab === 'user' ? tSy('manualTitle') : tab === 'agent' ? tSy('agentTitle') : tSy('flowTitle')}
             </h1>
             <ScreenBadge code="SY10" />
           </div>
           <p className="mt-1 text-sm text-[#6b6b80]">
-            {tab === 'user'
-              ? 'Complete guide to every screen: what it does, how to use it, and how it connects to other parts of the system.'
-              : tab === 'agent'
-              ? 'Machine-readable reference for AI agents to understand, navigate, and test the Colourking system.'
-              : 'Visual end-to-end overview of all modules, screens, state machines, and how data flows through the system.'}
+            {tab === 'user' ? tSy('manualDesc') : tab === 'agent' ? tSy('agentDesc') : tSy('flowDesc')}
           </p>
+        </div>
+
+        {/* Language dropdown */}
+        <div className="relative">
+          <button
+            onClick={() => setLangOpen(!langOpen)}
+            className="flex items-center gap-2 rounded-lg border border-[#1e1e2a] bg-[#12121a] px-3 py-2 text-sm text-white hover:border-[#E8364E]/50 transition-colors"
+          >
+            <Globe className="h-4 w-4 text-[#6b6b80]" />
+            <span>{currentLocale.label}</span>
+            <ChevronDown className={`h-3 w-3 text-[#6b6b80] transition-transform ${langOpen ? 'rotate-180' : ''}`} />
+          </button>
+          {langOpen && (
+            <div className="absolute right-0 top-full z-50 mt-1 w-40 rounded-lg border border-[#1e1e2a] bg-[#12121a] py-1 shadow-lg">
+              {LOCALES.map(l => (
+                <button
+                  key={l.code}
+                  onClick={() => { setLocale(l.code); setLangOpen(false); }}
+                  className={`flex w-full items-center gap-2 px-3 py-2 text-sm transition-colors ${
+                    locale === l.code
+                      ? 'bg-[#E8364E]/10 text-[#E8364E]'
+                      : 'text-[#6b6b80] hover:bg-white/5 hover:text-white'
+                  }`}
+                >
+                  <span className="font-medium">{l.label}</span>
+                  <span className="text-xs">{l.name}</span>
+                </button>
+              ))}
+            </div>
+          )}
         </div>
       </div>
 
       {/* Tab switcher */}
       <div className="flex flex-wrap items-center gap-2">
-        {tabs.map((t) => (
+        {tabs.map((tabItem) => (
           <button
-            key={t.key}
-            onClick={() => setTab(t.key)}
+            key={tabItem.key}
+            onClick={() => setTab(tabItem.key)}
             className={`flex items-center gap-2 rounded-[10px] px-4 py-2 text-sm font-medium transition-colors ${
-              tab === t.key
+              tab === tabItem.key
                 ? 'bg-[#E8364E] text-white'
                 : 'border border-[#1e1e2a] bg-[#12121a] text-[#6b6b80] hover:text-white'
             }`}
           >
-            {t.icon}
-            {t.label}
+            {tabItem.icon}
+            {tabItem.label}
           </button>
         ))}
       </div>
@@ -172,12 +212,14 @@ export default function ManualPage() {
           <div className="flex items-center justify-between">
             <p className="text-sm text-[#6b6b80]">
               {searchResults.length === 0
-                ? `No results for "${searchQuery}"`
-                : `${searchResults.length} result${searchResults.length !== 1 ? 's' : ''} for "${searchQuery}"`}
+                ? tSy('noResults', { query: searchQuery })
+                : searchResults.length === 1
+                ? tSy('resultCount', { count: searchResults.length, query: searchQuery })
+                : tSy('resultCountPlural', { count: searchResults.length, query: searchQuery })}
             </p>
             {searchResults.length > 0 && (
               <p className="text-xs text-[#6b6b80]">
-                Searching across all screens: flows, inputs, outputs, cross-screen effects & agent notes
+                {tSy('searchScope')}
               </p>
             )}
           </div>
@@ -225,7 +267,7 @@ export default function ManualPage() {
             <div className="space-y-4">
               {/* System overview card */}
               <div className="rounded-[10px] border border-[#1e1e2a] bg-[#12121a] p-6">
-                <h2 className="text-base font-medium text-white">System Overview</h2>
+                <h2 className="text-base font-medium text-white">{tSy('systemOverview')}</h2>
                 <div className="mt-4 space-y-3 text-sm text-[#6b6b80]">
                   <p><span className="text-white">Stack:</span> Next.js 14 App Router + Supabase + Vercel + Tailwind CSS</p>
                   <p><span className="text-white">Auth:</span> Supabase Auth with 3 roles (admin, office, tech). Session checked in middleware for /app/* routes.</p>
@@ -239,9 +281,9 @@ export default function ManualPage() {
 
               {/* Business flow */}
               <div className="rounded-[10px] border border-[#1e1e2a] bg-[#12121a] p-6">
-                <h2 className="text-base font-medium text-white">Core Business Flow</h2>
+                <h2 className="text-base font-medium text-white">{tSy('coreBusinessFlow')}</h2>
                 <div className="mt-4 flex flex-wrap items-center gap-2 text-sm">
-                  {['Lead', 'Offer', 'Approval', 'Repair Order', 'Job', 'Parts', 'Tasks', 'Handover', 'Invoice', 'Paid', 'Delivered', 'Portfolio'].map((step, i, arr) => (
+                  {flowSteps.map((step, i, arr) => (
                     <span key={step} className="flex items-center gap-2">
                       <span className="rounded-md bg-[#0a0a0f] px-3 py-1.5 text-white">{step}</span>
                       {i < arr.length - 1 && <ChevronRight className="h-3 w-3 text-[#6b6b80]" />}
@@ -252,7 +294,7 @@ export default function ManualPage() {
 
               {/* State machines */}
               <div className="rounded-[10px] border border-[#1e1e2a] bg-[#12121a] p-6">
-                <h2 className="text-base font-medium text-white">State Machines</h2>
+                <h2 className="text-base font-medium text-white">{tSy('stateMachines')}</h2>
                 <div className="mt-4 space-y-4">
                   {[
                     { name: 'Lead Status', flow: 'new → contacted → quoted → won | lost (terminal from any non-terminal state)' },
@@ -277,7 +319,7 @@ export default function ManualPage() {
 
               {/* Per-screen API reference */}
               <div className="rounded-[10px] border border-[#1e1e2a] bg-[#12121a] p-6">
-                <h2 className="text-base font-medium text-white">Screen API Reference</h2>
+                <h2 className="text-base font-medium text-white">{tSy('screenApiRef')}</h2>
                 <div className="mt-4 space-y-3">
                   {MODULES.flatMap((m) =>
                     m.screens.map((s) => (
@@ -295,18 +337,13 @@ export default function ManualPage() {
 
               {/* Hard rules */}
               <div className="rounded-[10px] border border-[#E8364E]/20 bg-[#E8364E]/5 p-6">
-                <h2 className="text-base font-medium text-[#E8364E]">Hard Rules (Never Violate)</h2>
+                <h2 className="text-base font-medium text-[#E8364E]">{tSy('hardRules')}</h2>
                 <ul className="mt-4 space-y-2 text-sm text-[#6b6b80]">
-                  <li>1. All schema changes via migration files in supabase/migrations/. Never use the Supabase dashboard.</li>
-                  <li>2. Regenerate src/types/database.ts after every migration, same commit.</li>
-                  <li>3. Never use SUPABASE_SERVICE_ROLE_KEY in client components or app/(public).</li>
-                  <li>4. Never edit an issued document or locked VAT period. Supersede or correct instead.</li>
-                  <li>5. Money is stored in cents as integers. Never floats.</li>
-                  <li>6. All user-facing strings go through next-intl. No hardcoded Dutch.</li>
-                  <li>7. Screen codes (JB10, ES20...) are never translated and never renamed.</li>
-                  <li>8. New tables must have RLS enabled and a policy.</li>
-                  <li>9. New screens must be registered in lib/codes.ts.</li>
-                  <li>10. New strings must exist in all three locales (en, nl, tr).</li>
+                  {Array.from({ length: 10 }, (_, i) => (
+                    <li key={i}>
+                      {i + 1}. {tSy(`rule${i + 1}` as any)}
+                    </li>
+                  ))}
                 </ul>
               </div>
             </div>
@@ -317,12 +354,12 @@ export default function ManualPage() {
             <div className="space-y-2">
               {/* Overview card */}
               <div className="rounded-[10px] border border-[#1e1e2a] bg-[#12121a] p-6">
-                <h2 className="text-base font-medium text-white">Welcome to Colourking</h2>
+                <h2 className="text-base font-medium text-white">{tSy('welcomeTitle')}</h2>
                 <p className="mt-2 text-sm text-[#6b6b80]">
-                  Colourking is a complete bodyshop management system. It handles the full workflow from receiving a customer enquiry (lead), through quoting, repair, and final delivery with invoicing. Use the sections below to learn how each part of the system works and how they connect to each other.
+                  {tSy('welcomeDesc')}
                 </p>
                 <div className="mt-4 flex flex-wrap gap-2">
-                  {['Lead', 'Offer', 'Approval', 'Repair Order', 'Job', 'Parts', 'Tasks', 'QC', 'Handover', 'Invoice', 'Payment', 'Delivered'].map((step, i) => (
+                  {userFlowSteps.map((step, i) => (
                     <span key={step} className="flex items-center gap-1 text-xs">
                       <span className="rounded-md bg-[#0a0a0f] px-2 py-1 text-white">{i + 1}. {step}</span>
                     </span>
@@ -339,7 +376,9 @@ export default function ManualPage() {
                     <div className="flex items-center gap-3">
                       <span className="rounded bg-[#0a0a0f] px-2 py-1 text-xs font-mono text-[#E8364E]">{mod.code}</span>
                       <span className="text-sm font-medium capitalize text-white">{mod.id}</span>
-                      <span className="text-xs text-[#6b6b80]">{mod.screens.length} screen{mod.screens.length > 1 ? 's' : ''}</span>
+                      <span className="text-xs text-[#6b6b80]">
+                        {mod.screens.length === 1 ? tSy('screenCount', { count: mod.screens.length }) : tSy('screenCountPlural', { count: mod.screens.length })}
+                      </span>
                     </div>
                     <ChevronDown className={`h-4 w-4 text-[#6b6b80] transition-transform ${expandedModule === mod.id ? 'rotate-180' : ''}`} />
                   </button>
@@ -355,19 +394,19 @@ export default function ManualPage() {
 
                           <div className="space-y-2 pl-4 border-l-2 border-[#1e1e2a]">
                             <div>
-                              <p className="text-xs font-medium text-[#E8364E] uppercase tracking-wider">How it works</p>
+                              <p className="text-xs font-medium text-[#E8364E] uppercase tracking-wider">{tSy('howItWorks')}</p>
                               <p className="mt-1 text-sm text-[#6b6b80] leading-relaxed whitespace-pre-line">{s.userFlow}</p>
                             </div>
                             <div>
-                              <p className="text-xs font-medium text-[#E8364E] uppercase tracking-wider">Inputs</p>
+                              <p className="text-xs font-medium text-[#E8364E] uppercase tracking-wider">{tSy('fieldInputs')}</p>
                               <p className="mt-1 text-sm text-[#6b6b80]">{s.inputs}</p>
                             </div>
                             <div>
-                              <p className="text-xs font-medium text-[#E8364E] uppercase tracking-wider">Outputs</p>
+                              <p className="text-xs font-medium text-[#E8364E] uppercase tracking-wider">{tSy('fieldOutputs')}</p>
                               <p className="mt-1 text-sm text-[#6b6b80]">{s.outputs}</p>
                             </div>
                             <div>
-                              <p className="text-xs font-medium text-[#E8364E] uppercase tracking-wider">Cross-screen effects</p>
+                              <p className="text-xs font-medium text-[#E8364E] uppercase tracking-wider">{tSy('crossScreenEffects')}</p>
                               <p className="mt-1 text-sm text-[#6b6b80]">{s.crossScreen}</p>
                             </div>
                           </div>
