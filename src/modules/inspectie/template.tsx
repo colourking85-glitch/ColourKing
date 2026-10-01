@@ -170,6 +170,7 @@ const S = {
     fontSize: '13px',
     lineHeight: '1.6',
     background: C.raised,
+    position: 'relative' as const,
   } as const,
   pageBreak: { pageBreakBefore: 'always' as const, paddingTop: '48px' },
 
@@ -181,6 +182,16 @@ const S = {
     borderBottom: `1px solid ${C.rule}`,
     paddingBottom: '12px',
     marginBottom: '32px',
+  } as const,
+  headerBrandWrap: {
+    display: 'flex',
+    alignItems: 'center',
+    gap: '10px',
+  } as const,
+  headerLogo: {
+    height: '28px',
+    width: 'auto',
+    opacity: 0.85,
   } as const,
   headerBrand: {
     fontSize: '11px',
@@ -495,7 +506,11 @@ export function InspectionReportTemplate({ data, company: c }: { data: Inspectio
       {/* ═══ Page 1: Summary ═══ */}
       <div style={S.page}>
         <div style={S.header}>
-          <span style={S.headerBrand}>ColourKing Autoschade</span>
+          <div style={S.headerBrandWrap}>
+            {/* eslint-disable-next-line @next/next/no-img-element */}
+            <img src="/images/logo-colourking.svg" alt="" style={S.headerLogo} />
+            <span style={S.headerBrand}>ColourKing Autoschade</span>
+          </div>
           <span style={S.headerRef}>{data.reference} · blad 1</span>
         </div>
 
@@ -684,7 +699,11 @@ export function InspectionReportTemplate({ data, company: c }: { data: Inspectio
       {guidedPhotos.length > 0 && (
         <div className="page-break" style={{ ...S.page, ...S.pageBreak }}>
           <div style={S.header}>
-            <span style={S.headerBrand}>Fotoserie · geleide opnames</span>
+            <div style={S.headerBrandWrap}>
+              {/* eslint-disable-next-line @next/next/no-img-element */}
+              <img src="/images/logo-colourking.svg" alt="" style={S.headerLogo} />
+              <span style={S.headerBrand}>Fotoserie · geleide opnames</span>
+            </div>
             <span style={S.headerRef}>{data.reference} · blad 2</span>
           </div>
           <p style={{ fontFamily: FONT.serif, fontSize: '13px', color: C.muted, marginBottom: '24px', lineHeight: '1.7' }}>
@@ -737,7 +756,11 @@ export function InspectionReportTemplate({ data, company: c }: { data: Inspectio
       {inScope.length > 0 && (
         <div className="page-break" style={{ ...S.page, ...S.pageBreak }}>
           <div style={S.header}>
-            <span style={S.headerBrand}>Bevindingen {inScope[0].reference}–{inScope[inScope.length - 1].reference}</span>
+            <div style={S.headerBrandWrap}>
+              {/* eslint-disable-next-line @next/next/no-img-element */}
+              <img src="/images/logo-colourking.svg" alt="" style={S.headerLogo} />
+              <span style={S.headerBrand}>Bevindingen {inScope[0].reference}–{inScope[inScope.length - 1].reference}</span>
+            </div>
             <span style={S.headerRef}>{data.reference} · blad 3</span>
           </div>
 
@@ -818,7 +841,11 @@ export function InspectionReportTemplate({ data, company: c }: { data: Inspectio
       {pre.length > 0 && (
         <div className="page-break" style={{ ...S.page, ...S.pageBreak }}>
           <div style={S.header}>
-            <span style={S.headerBrand}>Pre-existente schade · buiten opdracht</span>
+            <div style={S.headerBrandWrap}>
+              {/* eslint-disable-next-line @next/next/no-img-element */}
+              <img src="/images/logo-colourking.svg" alt="" style={S.headerLogo} />
+              <span style={S.headerBrand}>Pre-existente schade · buiten opdracht</span>
+            </div>
             <span style={S.headerRef}>{data.reference} · blad {guidedPhotos.length > 0 ? 4 : 3}</span>
           </div>
           <p style={{ fontFamily: FONT.serif, fontSize: '13px', color: C.muted, marginBottom: '20px', lineHeight: '1.7' }}>
@@ -849,7 +876,11 @@ export function InspectionReportTemplate({ data, company: c }: { data: Inspectio
       {/* ═══ Findings table ═══ */}
       <div className="page-break" style={{ ...S.page, ...S.pageBreak }}>
         <div style={S.header}>
-          <span style={S.headerBrand}>Bevindingentabel</span>
+          <div style={S.headerBrandWrap}>
+            {/* eslint-disable-next-line @next/next/no-img-element */}
+            <img src="/images/logo-colourking.svg" alt="" style={S.headerLogo} />
+            <span style={S.headerBrand}>Bevindingentabel</span>
+          </div>
           <span style={S.headerRef}>{data.reference} · overzicht</span>
         </div>
         <div style={{ overflowX: 'auto' }}>
@@ -911,7 +942,11 @@ export function InspectionReportTemplate({ data, company: c }: { data: Inspectio
       {/* ═══ Verification ═══ */}
       <div className="page-break" style={{ ...S.page, ...S.pageBreak }}>
         <div style={S.header}>
-          <span style={S.headerBrand}>Verificatie</span>
+          <div style={S.headerBrandWrap}>
+            {/* eslint-disable-next-line @next/next/no-img-element */}
+            <img src="/images/logo-colourking.svg" alt="" style={S.headerLogo} />
+            <span style={S.headerBrand}>Verificatie</span>
+          </div>
           <span style={S.headerRef}>{data.reference}</span>
         </div>
 
