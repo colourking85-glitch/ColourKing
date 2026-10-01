@@ -63,6 +63,7 @@ export default function CreateInvoicePage() {
   const [mode, setMode] = useState<CreateMode>('standalone');
   const [invoiceType, setInvoiceType] = useState<InvoiceType>('standard');
   const [invoiceLocale, setInvoiceLocale] = useState<string>(locale);
+  const [invoiceDate, setInvoiceDate] = useState(new Date().toISOString().split('T')[0]);
   const [dueDate, setDueDate] = useState('');
   const [terms, setTerms] = useState('');
   const [notes, setNotes] = useState('');
@@ -85,9 +86,14 @@ export default function CreateInvoicePage() {
   const [loadingCustomers, setLoadingCustomers] = useState(true);
 
   useEffect(() => {
-    const d = new Date();
-    d.setDate(d.getDate() + 30);
-    setDueDate(d.toISOString().split('T')[0]);
+    fetch('/api/settings/company')
+      .then(r => r.ok ? r.json() : {})
+      .then((comp: { payment_terms_days?: number }) => {
+        const days = comp.payment_terms_days || 14;
+        const d = new Date();
+        d.setDate(d.getDate() + days);
+        setDueDate(d.toISOString().split('T')[0]);
+      });
   }, []);
 
   useEffect(() => {
@@ -172,6 +178,7 @@ export default function CreateInvoicePage() {
             offer_id: selectedOfferId,
             due_date: dueDate || null,
             terms: terms || null,
+            issued_at: invoiceDate ? new Date(invoiceDate).toISOString() : null,
           }),
         });
         if (!res.ok) throw new Error((await res.json()).error || tc('saveFailed'));
@@ -196,6 +203,7 @@ export default function CreateInvoicePage() {
             vehicle_id: vehicleId || null,
             locale: invoiceLocale,
             due_date: dueDate || null,
+            issued_at: invoiceDate ? new Date(invoiceDate).toISOString() : null,
             terms: terms || null,
             notes: notes || null,
             invoice_type: invoiceType,
@@ -580,6 +588,15 @@ export default function CreateInvoicePage() {
       <div className="rounded-[10px] border-[0.5px] border-ck-border bg-ck-surface p-5">
         <h2 className="mb-4 text-xs font-medium uppercase tracking-wider text-ck-text-muted">{t('invoiceSettings')}</h2>
         <div className="grid gap-4 sm:grid-cols-3">
+          <div>
+            <label className="mb-1 block text-[11px] text-ck-text-muted">{t('invoiceDate')}</label>
+            <input
+              type="date"
+              value={invoiceDate}
+              onChange={e => setInvoiceDate(e.target.value)}
+              className="w-full rounded-[10px] border-[0.5px] border-ck-border bg-ck-surface px-3 py-2 text-sm text-ck-text focus:border-ck-red focus:outline-none"
+            />
+          </div>
           <div>
             <label className="mb-1 block text-[11px] text-ck-text-muted">{t('dueDate')}</label>
             <input

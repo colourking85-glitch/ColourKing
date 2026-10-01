@@ -28,6 +28,7 @@ type CompanyData = {
   payment_terms_days: number;
   quote_validity_days: number;
   default_invoice_notes: string;
+  show_bic_on_invoice: boolean;
 };
 
 const COMPANY_DEFAULTS: CompanyData = {
@@ -35,6 +36,7 @@ const COMPANY_DEFAULTS: CompanyData = {
   phone: '', email: '', website: '',
   kvk: '', vat_number: '', iban: '', bic: '', bank_name: '',
   payment_terms_days: 14, quote_validity_days: 30, default_invoice_notes: '',
+  show_bic_on_invoice: false,
 };
 
 export default function SettingsPage() {
@@ -113,7 +115,7 @@ export default function SettingsPage() {
     setCompanySaving(false);
   }
 
-  function updateCompany(field: keyof CompanyData, value: string | number) {
+  function updateCompany(field: keyof CompanyData, value: string | number | boolean) {
     setCompany(prev => ({ ...prev, [field]: value }));
   }
 
@@ -367,6 +369,17 @@ export default function SettingsPage() {
                     <textarea value={company.default_invoice_notes} onChange={e => updateCompany('default_invoice_notes', e.target.value)}
                       rows={3}
                       className="w-full rounded-lg border border-ck-dark-border bg-ck-dark-surface px-3 py-2 text-sm text-white focus:border-ck-red focus:outline-none" />
+                  </div>
+                  <div className="col-span-2">
+                    <label className="flex items-center gap-2 text-sm text-white cursor-pointer">
+                      <input
+                        type="checkbox"
+                        checked={company.show_bic_on_invoice ?? false}
+                        onChange={e => updateCompany('show_bic_on_invoice', e.target.checked)}
+                        className="h-4 w-4 rounded border-ck-dark-border bg-ck-dark-surface accent-ck-red"
+                      />
+                      {tSy('showBicOnInvoice')}
+                    </label>
                   </div>
                 </div>
               </section>

@@ -464,12 +464,14 @@ export function InvoiceTemplate({ invoice, company: c }: { invoice: InvoiceData;
                 {c?.iban ?? 'NL12 INGB 0675 6533 04'}
               </div>
             </div>
-            <div>
-              <div style={{ color: '#8a8aa0', fontSize: '12px', marginBottom: '3px' }}>{t.bic}</div>
-              <div className="inv-mono" style={{ fontWeight: 500, color: '#3a3a5a', fontSize: '14px' }}>
-                {c?.bic ?? 'INGBNL2A'}
+            {c?.show_bic_on_invoice && (
+              <div>
+                <div style={{ color: '#8a8aa0', fontSize: '12px', marginBottom: '3px' }}>{t.bic}</div>
+                <div className="inv-mono" style={{ fontWeight: 500, color: '#3a3a5a', fontSize: '14px' }}>
+                  {c.bic}
+                </div>
               </div>
-            </div>
+            )}
             <div>
               <div style={{ color: '#8a8aa0', fontSize: '12px', marginBottom: '3px' }}>{t.accountHolder}</div>
               <div style={{ fontWeight: 500, color: '#1a1a2e' }}>{legalName}</div>
@@ -480,17 +482,33 @@ export function InvoiceTemplate({ invoice, company: c }: { invoice: InvoiceData;
                 {invoice.invoice_number ?? '—'}
               </div>
             </div>
-            {invoice.due_date && (
-              <div>
-                <div style={{ color: '#8a8aa0', fontSize: '12px', marginBottom: '3px' }}>{t.dueDate}</div>
-                <div style={{ fontWeight: 500, color: '#1a1a2e' }}>{fmtDate(invoice.due_date, locale)}</div>
-              </div>
-            )}
           </div>
 
           {invoice.payment_token && invoice.status !== 'paid' && (
-            <div style={{ marginTop: '14px', paddingTop: '14px', borderTop: '1px solid #f0f0f5', fontSize: '13px', color: '#5a5a7a' }}>
-              {t.payOnlineDesc}
+            <div style={{ marginTop: '14px', paddingTop: '14px', borderTop: '1px solid #f0f0f5' }}>
+              <div style={{ fontSize: '13px', color: '#5a5a7a', marginBottom: '10px' }}>
+                {t.payOnlineDesc}
+              </div>
+              <a
+                href={`/s/${invoice.payment_token}`}
+                target="_blank"
+                rel="noopener noreferrer"
+                className="no-print"
+                style={{
+                  display: 'inline-flex',
+                  alignItems: 'center',
+                  gap: '6px',
+                  padding: '8px 18px',
+                  backgroundColor: ACCENT,
+                  color: '#fff',
+                  fontSize: '13px',
+                  fontWeight: 600,
+                  borderRadius: '6px',
+                  textDecoration: 'none',
+                }}
+              >
+                {t.payOnline}
+              </a>
             </div>
           )}
         </div>
@@ -531,7 +549,8 @@ export function InvoiceTemplate({ invoice, company: c }: { invoice: InvoiceData;
           {legalName} &nbsp;·&nbsp; {c?.address ?? 'Satijnbloem 6'}, {c?.postcode ?? '3068 JP'} {c?.city ?? 'Rotterdam'}
         </div>
         <div>
-          {t.btw}: {c?.vat_number ?? 'NL003653356B56'} &nbsp;·&nbsp; IBAN: {c?.iban ?? 'NL12 INGB 0675 6533 04'} &nbsp;·&nbsp; {t.bic}: {c?.bic ?? 'INGBNL2A'}
+          {t.btw}: {c?.vat_number ?? 'NL003653356B56'} &nbsp;·&nbsp; IBAN: {c?.iban ?? 'NL12 INGB 0675 6533 04'}
+          {c?.show_bic_on_invoice && c.bic && <> &nbsp;·&nbsp; {t.bic}: {c.bic}</>}
         </div>
         <div>{c?.email ?? 'info@colourking.nl'} &nbsp;·&nbsp; {c?.phone ?? '06 81 63 10 20'}</div>
       </div>

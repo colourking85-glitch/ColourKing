@@ -7,6 +7,7 @@ export const InvoiceSchema = z.object({
   offer_id: z.string().uuid().nullable().optional(),
   locale: z.string().default('nl'),
   due_date: z.string().nullable().optional(),
+  issued_at: z.string().nullable().optional(),
   notes: z.string().nullable().optional(),
   terms: z.string().nullable().optional(),
   invoice_type: z.enum(['standard', 'deposit']).default('standard'),
@@ -27,6 +28,7 @@ export const InvoiceLineSchema = z.object({
 export const CreateInvoiceFromOfferSchema = z.object({
   offer_id: z.string().uuid(),
   due_date: z.string().nullable().optional(),
+  issued_at: z.string().nullable().optional(),
   terms: z.string().nullable().optional(),
 });
 

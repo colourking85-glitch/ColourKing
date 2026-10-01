@@ -19,6 +19,7 @@ export type CompanyInfo = {
   quote_validity_days: number;
   default_invoice_notes: string;
   logo_url: string;
+  show_bic_on_invoice: boolean;
 };
 
 const DEFAULTS: CompanyInfo = {
@@ -40,6 +41,7 @@ const DEFAULTS: CompanyInfo = {
   quote_validity_days: 30,
   default_invoice_notes: '',
   logo_url: '',
+  show_bic_on_invoice: false,
 };
 
 let cached: CompanyInfo | null = null;

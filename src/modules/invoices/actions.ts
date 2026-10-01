@@ -11,6 +11,7 @@ import {
 } from './schema';
 import { canTransition, getGuard } from './machine';
 import { onInvoiceIssued, onPaymentReceived } from '@/modules/email/triggers';
+import { getCompanyInfo } from '@/lib/company';
 import type { InvoiceStatus } from '@/types/database';
 
 const TAX_RATES: Record<string, number> = {
@@ -27,6 +28,10 @@ export async function createInvoice(input: unknown) {
   const data = InvoiceSchema.parse(input);
   const supabase = createClient();
 
+  const { data: numData, error: numErr } = await supabase
+    .rpc('allocate_number', { p_doc_type: 'invoice' });
+  if (numErr) throw numErr;
+
   const clean = Object.fromEntries(
     Object.entries(data).filter(([, v]) => v != null)
   );
@@ -36,6 +41,8 @@ export async function createInvoice(input: unknown) {
     .insert({
       ...clean,
       status: 'draft',
+      invoice_number: numData,
+      issued_at: data.issued_at ?? new Date().toISOString(),
       payment_token: crypto.randomUUID(),
     })
     .select()
@@ -64,19 +71,26 @@ export async function createInvoiceFromOffer(input: unknown) {
     throw new Error('Only approved offers can be converted to invoices');
   }
 
-  // Calculate due date (default 30 days)
+  const company = await getCompanyInfo();
+  const termsDays = company.payment_terms_days || 14;
   const dueDate = parsed.due_date ?? new Date(
-    Date.now() + 30 * 24 * 60 * 60 * 1000
+    Date.now() + termsDays * 24 * 60 * 60 * 1000
   ).toISOString().split('T')[0];
 
   // Calculate tax summary
   const taxSummary = buildTaxSummary(offer.offer_lines ?? []);
+
+  const { data: numData, error: numErr } = await supabase
+    .rpc('allocate_number', { p_doc_type: 'invoice' });
+  if (numErr) throw numErr;
 
   // Create invoice
   const { data: invoice, error: invErr } = await supabase
     .from('invoices')
     .insert({
       status: 'draft',
+      invoice_number: numData,
+      issued_at: parsed.issued_at ?? new Date().toISOString(),
       customer_id: offer.customer_id,
       vehicle_id: offer.vehicle_id,
       job_id: offer.job_id,
@@ -313,20 +327,28 @@ async function transitionInvoice(id: string, to: InvoiceStatus) {
 export async function issueInvoice(id: string) {
   const { supabase } = await transitionInvoice(id, 'sent');
 
-  // Allocate a gapless invoice number via the documents system
-  const { data: numData, error: numErr } = await supabase
-    .rpc('allocate_number', { p_doc_type: 'invoice' });
-
-  if (numErr) throw numErr;
+  const { data: current } = await supabase
+    .from('invoices')
+    .select('invoice_number, issued_at')
+    .eq('id', id)
+    .single();
 
   const now = new Date().toISOString();
+  let invoiceNumber = current?.invoice_number;
+
+  if (!invoiceNumber) {
+    const { data: numData, error: numErr } = await supabase
+      .rpc('allocate_number', { p_doc_type: 'invoice' });
+    if (numErr) throw numErr;
+    invoiceNumber = numData;
+  }
 
   const { data: invoice, error } = await supabase
     .from('invoices')
     .update({
       status: 'sent',
-      invoice_number: numData,
-      issued_at: now,
+      invoice_number: invoiceNumber,
+      issued_at: current?.issued_at ?? now,
       sent_at: now,
     })
     .eq('id', id)
@@ -345,7 +367,7 @@ export async function issueInvoice(id: string) {
   if (inv) {
     await supabase.from('documents').insert({
       doc_type: 'invoice',
-      doc_number: numData,
+      doc_number: invoiceNumber,
       status: 'issued',
       invoice_id: id,
       customer_id: inv.customer_id,

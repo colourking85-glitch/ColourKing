@@ -150,6 +150,7 @@ export default function InvoiceDetailPage() {
   const [linkCopied, setLinkCopied] = useState(false);
   const [company, setCompany] = useState<CompanyInfo | undefined>();
   const [editing, setEditing] = useState(false);
+  const [editInvoiceDate, setEditInvoiceDate] = useState('');
   const [editDueDate, setEditDueDate] = useState('');
   const [editNotes, setEditNotes] = useState('');
   const [editTerms, setEditTerms] = useState('');
@@ -232,6 +233,7 @@ export default function InvoiceDetailPage() {
 
   const startEdit = () => {
     if (!invoice) return;
+    setEditInvoiceDate(invoice.issued_at ? invoice.issued_at.split('T')[0] : '');
     setEditDueDate(invoice.due_date ?? '');
     setEditNotes(invoice.notes ?? '');
     setEditTerms(invoice.terms ?? '');
@@ -246,6 +248,7 @@ export default function InvoiceDetailPage() {
       method: 'PATCH',
       headers: { 'Content-Type': 'application/json' },
       body: JSON.stringify({
+        issued_at: editInvoiceDate ? new Date(editInvoiceDate).toISOString() : null,
         due_date: editDueDate || null,
         notes: editNotes || null,
         terms: editTerms || null,
@@ -584,6 +587,15 @@ export default function InvoiceDetailPage() {
               <h2 className="mb-1 text-xs font-medium uppercase tracking-wider text-blue-400">{t('editDraft')}</h2>
               <p className="mb-4 text-[10px] text-ck-text-muted">{t('editDraftDesc')}</p>
               <div className="space-y-3">
+                <div>
+                  <label className="mb-1 block text-[11px] text-ck-text-muted">{t('invoiceDate')}</label>
+                  <input
+                    type="date"
+                    value={editInvoiceDate}
+                    onChange={e => setEditInvoiceDate(e.target.value)}
+                    className="w-full rounded-[10px] border-[0.5px] border-ck-border bg-ck-surface px-3 py-2 text-sm text-ck-text focus:border-blue-500 focus:outline-none"
+                  />
+                </div>
                 <div>
                   <label className="mb-1 block text-[11px] text-ck-text-muted">{t('dueDate')}</label>
                   <input

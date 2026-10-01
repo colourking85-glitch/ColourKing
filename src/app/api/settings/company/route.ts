@@ -29,6 +29,7 @@ export async function PUT(req: NextRequest) {
       'phone', 'email', 'website',
       'kvk', 'vat_number', 'iban', 'bic', 'bank_name',
       'payment_terms_days', 'quote_validity_days', 'default_invoice_notes',
+      'show_bic_on_invoice',
     ];
 
     const value: Record<string, unknown> = {};
