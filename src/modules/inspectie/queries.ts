@@ -33,9 +33,24 @@ export async function getInspections(filters?: {
   if (filters?.vehicle_id) query = query.eq('vehicle_id', filters.vehicle_id);
   if (filters?.customer_id) query = query.eq('customer_id', filters.customer_id);
   if (filters?.search) {
-    query = query.or(
-      `reference.ilike.%${filters.search}%,licence_plate.ilike.%${filters.search}%`
-    );
+    const term = `%${filters.search}%`;
+
+    const { data: byCustomer } = await supabase
+      .from('customers')
+      .select('id')
+      .ilike('name', term);
+
+    const customerIds = byCustomer?.map(c => c.id) ?? [];
+
+    if (customerIds.length > 0) {
+      query = query.or(
+        `reference.ilike.${term},licence_plate.ilike.${term},customer_id.in.(${customerIds.join(',')})`
+      );
+    } else {
+      query = query.or(
+        `reference.ilike.${term},licence_plate.ilike.${term}`
+      );
+    }
   }
 
   const { data, error } = await query;

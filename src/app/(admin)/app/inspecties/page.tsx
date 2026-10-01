@@ -74,21 +74,27 @@ export default function InspectiesPage() {
   const tCommon = useTranslations('common');
   const [inspections, setInspections] = useState<Inspection[]>([]);
   const [search, setSearch] = useState('');
+  const [debouncedSearch, setDebouncedSearch] = useState('');
   const [statusFilter, setStatusFilter] = useState('');
   const [loading, setLoading] = useState(true);
   const [sortField, setSortField] = useState<SortField | null>(null);
   const [sortDir, setSortDir] = useState<SortDir>('desc');
 
   useEffect(() => {
+    const timer = setTimeout(() => setDebouncedSearch(search), 300);
+    return () => clearTimeout(timer);
+  }, [search]);
+
+  useEffect(() => {
     setLoading(true);
     const params = new URLSearchParams();
-    if (search) params.set('search', search);
+    if (debouncedSearch) params.set('search', debouncedSearch);
     if (statusFilter) params.set('status', statusFilter);
     fetch(`/api/inspections?${params}`)
       .then(r => r.ok ? r.json() : [])
       .then(setInspections)
       .finally(() => setLoading(false));
-  }, [search, statusFilter]);
+  }, [debouncedSearch, statusFilter]);
 
   const toggleSort = (field: SortField) => {
     if (sortField === field) {
