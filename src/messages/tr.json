@@ -2212,7 +2212,8 @@
     "newLead": "Yeni müşteri adayı",
     "system": "Sistem",
     "email": "E-posta",
-    "view": "Görüntüle"
+    "view": "Görüntüle",
+    "searchPlaceholder": "Kılavuzda ara..."
   },
   "pub": {
     "nav": {

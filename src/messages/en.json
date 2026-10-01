@@ -2212,7 +2212,8 @@
     "newLead": "New lead",
     "system": "System",
     "email": "Email",
-    "view": "View"
+    "view": "View",
+    "searchPlaceholder": "Search manuals..."
   },
   "em": {
     "subjectOffer": "Your quote {offerNumber} from Colourking",

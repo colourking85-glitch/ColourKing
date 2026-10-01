@@ -2212,7 +2212,8 @@
     "newLead": "Nieuwe lead",
     "system": "Systeem",
     "email": "E-mail",
-    "view": "Bekijken"
+    "view": "Bekijken",
+    "searchPlaceholder": "Zoek in handleiding..."
   },
   "pub": {
     "nav": {
