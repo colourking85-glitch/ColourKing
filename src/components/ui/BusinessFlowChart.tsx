@@ -1,6 +1,7 @@
 'use client';
 
 import { useState } from 'react';
+import { useTranslations } from 'next-intl';
 import { ScreenBadge } from '@/components/ui/ScreenBadge';
 
 /* ── colour tokens per module (hex for SVG) ─────────────────────────── */
@@ -25,141 +26,93 @@ const MOD_HEX: Record<string, { bg: string; fg: string; border: string }> = {
 /* ── Flow data ──────────────────────────────────────────────────────── */
 type FlowNode = {
   id: string;
-  label: string;
+  labelKey: string;
+  descKey: string;
   module: string;
   screens: string[];
   x: number;
   y: number;
   w: number;
   h: number;
-  desc: string;
 };
 
 type FlowEdge = {
   from: string;
   to: string;
-  label?: string;
+  labelKey?: string;
   style?: 'solid' | 'dashed';
 };
 
 const NODES: FlowNode[] = [
-  // Row 0: Entry points
-  { id: 'website', label: 'Public Website', module: 'SY', screens: [], x: 60, y: 40, w: 150, h: 56, desc: 'colourking.nl — customer-facing pages with contact, offerte, and booking forms' },
-  { id: 'walk-in', label: 'Walk-in / Phone', module: 'SY', screens: [], x: 260, y: 40, w: 150, h: 56, desc: 'Direct customer contact via phone, email, or walk-in visits' },
-
-  // Row 1: Lead management
-  { id: 'lead', label: 'Lead', module: 'LD', screens: ['LD01', 'LD05', 'LD10'], x: 160, y: 140, w: 150, h: 64, desc: 'All customer enquiries enter as leads. Track status from new → contacted → quoted → won/lost. Upload damage photos, send email replies.' },
-
-  // Row 2: Customer + Vehicle
-  { id: 'customer', label: 'Customer', module: 'KL', screens: ['KL01', 'KL02', 'KL03', 'KL05'], x: 60, y: 250, w: 140, h: 56, desc: 'Customer records: private, company, fleet, or dealer. Linked to vehicles, offers, jobs, and invoices.' },
-  { id: 'vehicle', label: 'Vehicle', module: 'VH', screens: ['VH01', 'VH05', 'VH10'], x: 250, y: 250, w: 140, h: 56, desc: 'Vehicle records with RDW auto-fill. Track kenteken, make, model, colour, paint code. WOK flag for total loss.' },
-
-  // Row 3: Offer
-  { id: 'offer', label: 'Offer / Quote', module: 'ES', screens: ['ES01', 'ES05', 'ES10'], x: 460, y: 250, w: 160, h: 64, desc: 'Create offers with line items (labour, parts, materials). Draft → Sent → Approved/Rejected/Superseded. Preview & print.' },
-
-  // Row 4: Job (central)
-  { id: 'job', label: 'Repair Job', module: 'JB', screens: ['JB01', 'JB05', 'JB10', 'JB15'], x: 460, y: 380, w: 180, h: 72, desc: 'Central hub: 10-stage pipeline from intake to closed. Assigned technicians, photo uploads (before/during/after), event timeline, estimated delivery.' },
-
-  // Row 4: Supporting
-  { id: 'parts', label: 'Parts', module: 'PT', screens: ['PT01', 'PT05'], x: 700, y: 360, w: 130, h: 56, desc: 'Track parts per job: needed → ordered → shipped → received. Blocking flag prevents job advancement.' },
-  { id: 'tasks', label: 'Tasks', module: 'TS', screens: ['TS01', 'TS05', 'TS10'], x: 700, y: 440, w: 130, h: 56, desc: 'Work tasks per job. Clock in/out for time tracking. Status: todo → in_progress → done. Feeds into planning grid.' },
-  { id: 'appointment', label: 'Appointments', module: 'AP', screens: ['AP01', 'AP05', 'AP10'], x: 60, y: 390, w: 150, h: 56, desc: 'Weekly calendar for scheduling. Types: inspection, delivery, pickup. Colour-coded by type, border by status.' },
-
-  // Row 5: Documents + Handover
-  { id: 'repairorder', label: 'Repair Order', module: 'DO', screens: ['DO20'], x: 260, y: 510, w: 150, h: 56, desc: 'Generated from approved jobs. Auto-numbered, print-ready A4 document.' },
-  { id: 'handover', label: 'Handover Note', module: 'DO', screens: ['DO21', 'DO22'], x: 460, y: 510, w: 160, h: 56, desc: 'Delivery document with customer signature. Draft → Issued → Shared. Public view for customer signing.' },
-
-  // Row 6: Invoice + Payment
-  { id: 'invoice', label: 'Invoice', module: 'FA', screens: ['FA01', 'FA05', 'FA10'], x: 460, y: 620, w: 160, h: 64, desc: 'Professional invoices from approved offers. Issue → Track payment → Mollie payment links. Credit notes for corrections.' },
-
-  // Row 7: Finance
-  { id: 'vat', label: 'VAT / BTW', module: 'BW', screens: ['BW05', 'BW40'], x: 260, y: 720, w: 140, h: 56, desc: 'Dutch BTW returns by period. Filed returns are permanently locked. VAT calculator for quick lookups.' },
-  { id: 'purchase', label: 'Purchases', module: 'PU', screens: ['PU01', 'PU05'], x: 460, y: 720, w: 140, h: 56, desc: 'Incoming supplier invoices. Auto-calculated VAT. Categories feed into bookkeeping.' },
-  { id: 'bookkeeping', label: 'Bookkeeping', module: 'BK', screens: ['BK10'], x: 660, y: 720, w: 140, h: 56, desc: 'Export CSV data for accountant: invoices, purchases, VAT, profit/loss summary.' },
-
-  // Row 0-right: Reports + Dashboard
-  { id: 'dashboard', label: 'Dashboard', module: 'RP', screens: ['RP01'], x: 700, y: 40, w: 140, h: 56, desc: 'Key metrics: open leads, active jobs, pending invoices, monthly revenue. Activity feed.' },
-  { id: 'reports', label: 'Reports', module: 'RP', screens: ['RP10'], x: 700, y: 130, w: 140, h: 56, desc: 'Revenue, Jobs, Workload, Customers — aggregated charts and figures by date range.' },
-
-  // Documents archive
-  { id: 'documents', label: 'Doc Archive', module: 'DO', screens: ['DO03', 'DO05'], x: 60, y: 620, w: 150, h: 56, desc: 'Central archive of all system documents with frozen payload and SHA-256 integrity hash.' },
-
-  // Notifications
-  { id: 'notifications', label: 'Notifications', module: 'SY', screens: ['SY05'], x: 700, y: 230, w: 140, h: 56, desc: 'Real-time event feed: new leads, stage changes, document issued, appointment status.' },
+  { id: 'website', labelKey: 'bfNodeWebsite', descKey: 'bfNodeWebsiteDesc', module: 'SY', screens: [], x: 60, y: 40, w: 150, h: 56 },
+  { id: 'walk-in', labelKey: 'bfNodeWalkin', descKey: 'bfNodeWalkinDesc', module: 'SY', screens: [], x: 260, y: 40, w: 150, h: 56 },
+  { id: 'lead', labelKey: 'bfNodeLead', descKey: 'bfNodeLeadDesc', module: 'LD', screens: ['LD01', 'LD05', 'LD10'], x: 160, y: 140, w: 150, h: 64 },
+  { id: 'customer', labelKey: 'bfNodeCustomer', descKey: 'bfNodeCustomerDesc', module: 'KL', screens: ['KL01', 'KL02', 'KL03', 'KL05'], x: 60, y: 250, w: 140, h: 56 },
+  { id: 'vehicle', labelKey: 'bfNodeVehicle', descKey: 'bfNodeVehicleDesc', module: 'VH', screens: ['VH01', 'VH05', 'VH10'], x: 250, y: 250, w: 140, h: 56 },
+  { id: 'offer', labelKey: 'bfNodeOffer', descKey: 'bfNodeOfferDesc', module: 'ES', screens: ['ES01', 'ES05', 'ES10'], x: 460, y: 250, w: 160, h: 64 },
+  { id: 'job', labelKey: 'bfNodeJob', descKey: 'bfNodeJobDesc', module: 'JB', screens: ['JB01', 'JB05', 'JB10', 'JB15'], x: 460, y: 380, w: 180, h: 72 },
+  { id: 'parts', labelKey: 'bfNodeParts', descKey: 'bfNodePartsDesc', module: 'PT', screens: ['PT01', 'PT05'], x: 700, y: 360, w: 130, h: 56 },
+  { id: 'tasks', labelKey: 'bfNodeTasks', descKey: 'bfNodeTasksDesc', module: 'TS', screens: ['TS01', 'TS05', 'TS10'], x: 700, y: 440, w: 130, h: 56 },
+  { id: 'appointment', labelKey: 'bfNodeAppointment', descKey: 'bfNodeAppointmentDesc', module: 'AP', screens: ['AP01', 'AP05', 'AP10'], x: 60, y: 390, w: 150, h: 56 },
+  { id: 'repairorder', labelKey: 'bfNodeRepairorder', descKey: 'bfNodeRepairorderDesc', module: 'DO', screens: ['DO20'], x: 260, y: 510, w: 150, h: 56 },
+  { id: 'handover', labelKey: 'bfNodeHandover', descKey: 'bfNodeHandoverDesc', module: 'DO', screens: ['DO21', 'DO22'], x: 460, y: 510, w: 160, h: 56 },
+  { id: 'invoice', labelKey: 'bfNodeInvoice', descKey: 'bfNodeInvoiceDesc', module: 'FA', screens: ['FA01', 'FA05', 'FA10'], x: 460, y: 620, w: 160, h: 64 },
+  { id: 'vat', labelKey: 'bfNodeVat', descKey: 'bfNodeVatDesc', module: 'BW', screens: ['BW05', 'BW40'], x: 260, y: 720, w: 140, h: 56 },
+  { id: 'purchase', labelKey: 'bfNodePurchase', descKey: 'bfNodePurchaseDesc', module: 'PU', screens: ['PU01', 'PU05'], x: 460, y: 720, w: 140, h: 56 },
+  { id: 'bookkeeping', labelKey: 'bfNodeBookkeeping', descKey: 'bfNodeBookkeepingDesc', module: 'BK', screens: ['BK10'], x: 660, y: 720, w: 140, h: 56 },
+  { id: 'dashboard', labelKey: 'bfNodeDashboard', descKey: 'bfNodeDashboardDesc', module: 'RP', screens: ['RP01'], x: 700, y: 40, w: 140, h: 56 },
+  { id: 'reports', labelKey: 'bfNodeReports', descKey: 'bfNodeReportsDesc', module: 'RP', screens: ['RP10'], x: 700, y: 130, w: 140, h: 56 },
+  { id: 'documents', labelKey: 'bfNodeDocuments', descKey: 'bfNodeDocumentsDesc', module: 'DO', screens: ['DO03', 'DO05'], x: 60, y: 620, w: 150, h: 56 },
+  { id: 'notifications', labelKey: 'bfNodeNotifications', descKey: 'bfNodeNotificationsDesc', module: 'SY', screens: ['SY05'], x: 700, y: 230, w: 140, h: 56 },
 ];
 
 const EDGES: FlowEdge[] = [
-  // Entry → Lead
-  { from: 'website', to: 'lead', label: 'form submit' },
-  { from: 'walk-in', to: 'lead', label: 'manual entry' },
-
-  // Lead → Customer + Vehicle
-  { from: 'lead', to: 'customer', label: 'convert' },
-  { from: 'lead', to: 'vehicle', label: 'convert' },
-
-  // Lead → Offer
-  { from: 'lead', to: 'offer', label: 'quote', style: 'dashed' },
-
-  // Customer/Vehicle → Offer
+  { from: 'website', to: 'lead', labelKey: 'bfEdgeFormSubmit' },
+  { from: 'walk-in', to: 'lead', labelKey: 'bfEdgeManualEntry' },
+  { from: 'lead', to: 'customer', labelKey: 'bfEdgeConvert' },
+  { from: 'lead', to: 'vehicle', labelKey: 'bfEdgeConvert' },
+  { from: 'lead', to: 'offer', labelKey: 'bfEdgeQuote', style: 'dashed' },
   { from: 'customer', to: 'offer' },
   { from: 'vehicle', to: 'offer' },
-
-  // Offer → Job
-  { from: 'offer', to: 'job', label: 'approved' },
-
-  // Job → supporting
+  { from: 'offer', to: 'job', labelKey: 'bfEdgeApproved' },
   { from: 'job', to: 'parts' },
   { from: 'job', to: 'tasks' },
   { from: 'job', to: 'appointment', style: 'dashed' },
-
-  // Job → documents
-  { from: 'job', to: 'repairorder', label: 'approved stage' },
-  { from: 'job', to: 'handover', label: 'ready stage' },
-
-  // Handover → Invoice
-  { from: 'handover', to: 'invoice', label: 'delivered' },
-
-  // Offer → Invoice (direct)
-  { from: 'offer', to: 'invoice', label: 'create', style: 'dashed' },
-
-  // Invoice → Finance
+  { from: 'job', to: 'repairorder', labelKey: 'bfEdgeApprovedStage' },
+  { from: 'job', to: 'handover', labelKey: 'bfEdgeReadyStage' },
+  { from: 'handover', to: 'invoice', labelKey: 'bfEdgeDelivered' },
+  { from: 'offer', to: 'invoice', labelKey: 'bfEdgeCreate', style: 'dashed' },
   { from: 'invoice', to: 'vat' },
   { from: 'invoice', to: 'documents' },
   { from: 'purchase', to: 'vat' },
   { from: 'vat', to: 'bookkeeping' },
   { from: 'purchase', to: 'bookkeeping' },
   { from: 'invoice', to: 'bookkeeping', style: 'dashed' },
-
-  // Aggregation → Reports/Dashboard
   { from: 'lead', to: 'dashboard', style: 'dashed' },
   { from: 'job', to: 'dashboard', style: 'dashed' },
   { from: 'invoice', to: 'dashboard', style: 'dashed' },
   { from: 'invoice', to: 'reports', style: 'dashed' },
   { from: 'tasks', to: 'reports', style: 'dashed' },
-
-  // Notifications
   { from: 'lead', to: 'notifications', style: 'dashed' },
   { from: 'job', to: 'notifications', style: 'dashed' },
   { from: 'invoice', to: 'notifications', style: 'dashed' },
   { from: 'appointment', to: 'notifications', style: 'dashed' },
-
-  // Documents archive
   { from: 'repairorder', to: 'documents' },
   { from: 'handover', to: 'documents' },
 ];
 
 /* ── Job pipeline stages ────────────────────────────────────────────── */
 const JOB_STAGES = [
-  { id: 'intake', label: 'Intake', color: '#94a3b8' },
-  { id: 'quoted', label: 'Quoted', color: '#fbbf24' },
-  { id: 'approved', label: 'Approved', color: '#4ade80' },
-  { id: 'scheduled', label: 'Scheduled', color: '#60a5fa' },
-  { id: 'checked_in', label: 'Checked In', color: '#818cf8' },
-  { id: 'in_progress', label: 'In Progress', color: '#22d3ee' },
-  { id: 'qc', label: 'QC', color: '#f472b6' },
-  { id: 'ready', label: 'Ready', color: '#34d399' },
-  { id: 'delivered', label: 'Delivered', color: '#a78bfa' },
-  { id: 'closed', label: 'Closed', color: '#6b7280' },
+  { id: 'intake', labelKey: 'bfStageIntake', color: '#94a3b8' },
+  { id: 'quoted', labelKey: 'bfStageQuoted', color: '#fbbf24' },
+  { id: 'approved', labelKey: 'bfStageApproved', color: '#4ade80' },
+  { id: 'scheduled', labelKey: 'bfStageScheduled', color: '#60a5fa' },
+  { id: 'checked_in', labelKey: 'bfStageCheckedIn', color: '#818cf8' },
+  { id: 'in_progress', labelKey: 'bfStageInProgress', color: '#22d3ee' },
+  { id: 'qc', labelKey: 'bfStageQc', color: '#f472b6' },
+  { id: 'ready', labelKey: 'bfStageReady', color: '#34d399' },
+  { id: 'delivered', labelKey: 'bfStageDelivered', color: '#a78bfa' },
+  { id: 'closed', labelKey: 'bfStageClosed', color: '#6b7280' },
 ];
 
 /* ── Edge path calculation ──────────────────────────────────────────── */
@@ -207,6 +160,7 @@ function getEdgeLabelPos(from: FlowNode, to: FlowNode): { x: number; y: number }
 
 /* ── Component ──────────────────────────────────────────────────────── */
 export function BusinessFlowChart() {
+  const tSy = useTranslations('sy');
   const [selected, setSelected] = useState<string | null>(null);
   const [hoveredNode, setHoveredNode] = useState<string | null>(null);
   const nodeMap = new Map(NODES.map(n => [n.id, n]));
@@ -225,8 +179,8 @@ export function BusinessFlowChart() {
       {/* Main flow chart */}
       <div className="rounded-[10px] border border-[#1e1e2a] bg-[#12121a] p-4">
         <div className="mb-3 flex items-center justify-between">
-          <h2 className="text-base font-medium text-white">E2E Business Flow</h2>
-          <span className="text-[10px] text-[#6b6b80]">Click a node for details · Hover to see connections</span>
+          <h2 className="text-base font-medium text-white">{tSy('bfTitle')}</h2>
+          <span className="text-[10px] text-[#6b6b80]">{tSy('bfHint')}</span>
         </div>
         <div className="overflow-x-auto">
           <svg viewBox="0 0 900 800" className="w-full min-w-[700px]" style={{ maxHeight: '520px' }}>
@@ -260,7 +214,7 @@ export function BusinessFlowChart() {
                     markerEnd={isHighlighted ? 'url(#arrow-hl)' : 'url(#arrow)'}
                     className="transition-all duration-200"
                   />
-                  {e.label && isHighlighted && (() => {
+                  {e.labelKey && isHighlighted && (() => {
                     const pos = getEdgeLabelPos(from, to);
                     return (
                       <text
@@ -269,7 +223,7 @@ export function BusinessFlowChart() {
                         textAnchor="middle"
                         className="text-[8px] fill-[#E8364E] font-medium"
                       >
-                        {e.label}
+                        {tSy(e.labelKey)}
                       </text>
                     );
                   })()}
@@ -332,7 +286,7 @@ export function BusinessFlowChart() {
                     className="text-[11px] font-medium"
                     fill="white"
                   >
-                    {n.label}
+                    {tSy(n.labelKey)}
                   </text>
                   {/* Screen count */}
                   {n.screens.length > 0 && (
@@ -359,7 +313,7 @@ export function BusinessFlowChart() {
         <div className="rounded-[10px] border border-[#1e1e2a] bg-[#12121a] p-5">
           <div className="flex items-center gap-3">
             <ScreenBadge code={selectedNode.module + '00'} />
-            <h3 className="text-sm font-medium text-white">{selectedNode.label}</h3>
+            <h3 className="text-sm font-medium text-white">{tSy(selectedNode.labelKey)}</h3>
             {selectedNode.screens.length > 0 && (
               <div className="flex gap-1">
                 {selectedNode.screens.map(s => (
@@ -374,7 +328,7 @@ export function BusinessFlowChart() {
               ✕
             </button>
           </div>
-          <p className="mt-3 text-sm leading-relaxed text-[#6b6b80]">{selectedNode.desc}</p>
+          <p className="mt-3 text-sm leading-relaxed text-[#6b6b80]">{tSy(selectedNode.descKey)}</p>
           {/* Show connections */}
           <div className="mt-3 flex flex-wrap gap-2">
             {EDGES.filter(e => e.from === selectedNode.id || e.to === selectedNode.id).map((e, i) => {
@@ -388,8 +342,8 @@ export function BusinessFlowChart() {
                   className="flex items-center gap-1 rounded-md border border-[#1e1e2a] bg-[#0a0a0f] px-2 py-1 text-[11px] text-[#6b6b80] transition-colors hover:border-[#E8364E]/30 hover:text-white"
                 >
                   <span className="text-[#E8364E]">{direction}</span>
-                  {otherNode?.label}
-                  {e.label && <span className="text-[9px] text-[#4a4a5a]">({e.label})</span>}
+                  {otherNode && tSy(otherNode.labelKey)}
+                  {e.labelKey && <span className="text-[9px] text-[#4a4a5a]">({tSy(e.labelKey)})</span>}
                 </button>
               );
             })}
@@ -399,8 +353,8 @@ export function BusinessFlowChart() {
 
       {/* Job pipeline detail */}
       <div className="rounded-[10px] border border-[#1e1e2a] bg-[#12121a] p-5">
-        <h2 className="text-base font-medium text-white">Job Pipeline — 10 Stages</h2>
-        <p className="mt-1 text-xs text-[#6b6b80]">Linear pipeline with QC rework loop. Each stage has guard conditions and triggers.</p>
+        <h2 className="text-base font-medium text-white">{tSy('bfJobPipeline')}</h2>
+        <p className="mt-1 text-xs text-[#6b6b80]">{tSy('bfJobPipelineDesc')}</p>
         <div className="mt-4 flex flex-wrap items-center gap-1">
           {JOB_STAGES.map((s, i) => (
             <div key={s.id} className="flex items-center gap-1">
@@ -408,7 +362,7 @@ export function BusinessFlowChart() {
                 className="rounded-md border px-3 py-1.5 text-[11px] font-medium"
                 style={{ borderColor: s.color + '40', color: s.color, backgroundColor: s.color + '10' }}
               >
-                {s.label}
+                {tSy(s.labelKey)}
               </div>
               {i < JOB_STAGES.length - 1 && (
                 <svg width="20" height="12" viewBox="0 0 20 12" className="shrink-0">
@@ -420,14 +374,14 @@ export function BusinessFlowChart() {
           ))}
         </div>
         <div className="mt-3 flex items-center gap-2 rounded-md border border-[#f472b6]/20 bg-[#f472b6]/5 px-3 py-2 text-[11px] text-[#f472b6]">
-          <span className="font-medium">↩ QC Loop:</span>
-          <span className="text-[#6b6b80]">QC can send job back to In Progress for rework — the only non-linear transition</span>
+          <span className="font-medium">↩ {tSy('bfQcLoop')}</span>
+          <span className="text-[#6b6b80]">{tSy('bfQcLoopDesc')}</span>
         </div>
       </div>
 
       {/* State machines grid */}
       <div className="rounded-[10px] border border-[#1e1e2a] bg-[#12121a] p-5">
-        <h2 className="text-base font-medium text-white">State Machines</h2>
+        <h2 className="text-base font-medium text-white">{tSy('bfStateMachines')}</h2>
         <div className="mt-4 grid gap-3 sm:grid-cols-2 lg:grid-cols-3">
           {[
             { name: 'Lead', module: 'LD', states: ['new', 'contacted', 'quoted', 'won', 'lost'], terminal: ['won', 'lost'] },
@@ -470,24 +424,24 @@ export function BusinessFlowChart() {
 
       {/* Module map */}
       <div className="rounded-[10px] border border-[#1e1e2a] bg-[#12121a] p-5">
-        <h2 className="text-base font-medium text-white">Module Map — All Screens</h2>
+        <h2 className="text-base font-medium text-white">{tSy('bfModuleMap')}</h2>
         <div className="mt-4 grid gap-2 sm:grid-cols-2 lg:grid-cols-3">
           {[
-            { code: 'LD', name: 'Leads', screens: ['LD01', 'LD05', 'LD10'] },
-            { code: 'KL', name: 'Customers', screens: ['KL01', 'KL02', 'KL03', 'KL05'] },
-            { code: 'VH', name: 'Vehicles', screens: ['VH01', 'VH05', 'VH10'] },
-            { code: 'ES', name: 'Offers', screens: ['ES01', 'ES05', 'ES10'] },
-            { code: 'JB', name: 'Jobs', screens: ['JB01', 'JB05', 'JB10', 'JB15'] },
-            { code: 'PT', name: 'Parts', screens: ['PT01', 'PT05'] },
-            { code: 'TS', name: 'Tasks', screens: ['TS01', 'TS05', 'TS10'] },
-            { code: 'FA', name: 'Invoices', screens: ['FA01', 'FA05', 'FA10'] },
-            { code: 'DO', name: 'Documents', screens: ['DO03', 'DO05', 'DO20', 'DO21', 'DO22'] },
-            { code: 'AP', name: 'Appointments', screens: ['AP01', 'AP05', 'AP10'] },
-            { code: 'RP', name: 'Reports', screens: ['RP01', 'RP10'] },
-            { code: 'BW', name: 'VAT', screens: ['BW05', 'BW40'] },
-            { code: 'PU', name: 'Purchases', screens: ['PU01', 'PU05'] },
-            { code: 'BK', name: 'Bookkeeping', screens: ['BK10'] },
-            { code: 'SY', name: 'System', screens: ['SY01', 'SY02', 'SY03', 'SY05', 'SY06', 'SY10', 'SY15', 'SY20', 'SY25', 'SY30', 'SY35', 'SY40', 'SY45', 'SY50', 'SY55', 'SY60', 'AN05'] },
+            { code: 'LD', nameKey: 'bfModLeads', screens: ['LD01', 'LD05', 'LD10'] },
+            { code: 'KL', nameKey: 'bfModCustomers', screens: ['KL01', 'KL02', 'KL03', 'KL05'] },
+            { code: 'VH', nameKey: 'bfModVehicles', screens: ['VH01', 'VH05', 'VH10'] },
+            { code: 'ES', nameKey: 'bfModOffers', screens: ['ES01', 'ES05', 'ES10'] },
+            { code: 'JB', nameKey: 'bfModJobs', screens: ['JB01', 'JB05', 'JB10', 'JB15'] },
+            { code: 'PT', nameKey: 'bfModParts', screens: ['PT01', 'PT05'] },
+            { code: 'TS', nameKey: 'bfModTasks', screens: ['TS01', 'TS05', 'TS10'] },
+            { code: 'FA', nameKey: 'bfModInvoices', screens: ['FA01', 'FA05', 'FA10'] },
+            { code: 'DO', nameKey: 'bfModDocuments', screens: ['DO03', 'DO05', 'DO20', 'DO21', 'DO22'] },
+            { code: 'AP', nameKey: 'bfModAppointments', screens: ['AP01', 'AP05', 'AP10'] },
+            { code: 'RP', nameKey: 'bfModReports', screens: ['RP01', 'RP10'] },
+            { code: 'BW', nameKey: 'bfModVat', screens: ['BW05', 'BW40'] },
+            { code: 'PU', nameKey: 'bfModPurchases', screens: ['PU01', 'PU05'] },
+            { code: 'BK', nameKey: 'bfModBookkeeping', screens: ['BK10'] },
+            { code: 'SY', nameKey: 'bfModSystem', screens: ['SY01', 'SY02', 'SY03', 'SY05', 'SY06', 'SY10', 'SY15', 'SY20', 'SY25', 'SY30', 'SY35', 'SY40', 'SY45', 'SY50', 'SY55', 'SY60', 'AN05'] },
           ].map(m => {
             const c = MOD_HEX[m.code] ?? MOD_HEX.SY;
             return (
@@ -499,7 +453,7 @@ export function BusinessFlowChart() {
                 <div>
                   <div className="flex items-center gap-2">
                     <span className="font-mono text-xs font-bold" style={{ color: c.fg }}>{m.code}</span>
-                    <span className="text-xs font-medium text-white">{m.name}</span>
+                    <span className="text-xs font-medium text-white">{tSy(m.nameKey)}</span>
                   </div>
                   <div className="mt-1.5 flex flex-wrap gap-1">
                     {m.screens.map(s => (
