@@ -2,6 +2,8 @@ import { NextRequest, NextResponse } from 'next/server';
 import { admin } from '@/lib/supabase/admin';
 import { invalidateCompanyCache } from '@/lib/company';
 
+export const dynamic = 'force-dynamic';
+
 const BUCKET = 'company-assets';
 const MAX_SIZE = 5 * 1024 * 1024; // 5 MB
 

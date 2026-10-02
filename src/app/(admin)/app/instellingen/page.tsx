@@ -72,6 +72,7 @@ export default function SettingsPage() {
   const [company, setCompany] = useState<CompanyData>(COMPANY_DEFAULTS);
   const [companySaving, setCompanySaving] = useState(false);
   const [companySaved, setCompanySaved] = useState(false);
+  const [companyError, setCompanyError] = useState<string | null>(null);
 
   const [logoUrl, setLogoUrl] = useState<string | null>(null);
   const [logoUploading, setLogoUploading] = useState(false);
@@ -79,7 +80,7 @@ export default function SettingsPage() {
 
   const fetchCompany = useCallback(async () => {
     try {
-      const res = await fetch('/api/settings/company');
+      const res = await fetch('/api/settings/company', { cache: 'no-store' });
       if (res.ok) {
         const data = await res.json();
         setCompany({ ...COMPANY_DEFAULTS, ...data });
@@ -103,15 +104,28 @@ export default function SettingsPage() {
 
   async function handleSaveCompany() {
     setCompanySaving(true);
+    setCompanyError(null);
     try {
-      await fetch('/api/settings/company', {
+      const res = await fetch('/api/settings/company', {
         method: 'PUT',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify(company),
       });
+      if (!res.ok) {
+        const err = await res.json().catch(() => ({}));
+        setCompanyError(err.error ?? `Save failed (${res.status})`);
+        setCompanySaving(false);
+        return;
+      }
+      const result = await res.json();
+      if (result.value) {
+        setCompany({ ...COMPANY_DEFAULTS, ...result.value });
+      }
       setCompanySaved(true);
       setTimeout(() => setCompanySaved(false), 2000);
-    } catch { /* ignore */ }
+    } catch {
+      setCompanyError('Network error — check your connection');
+    }
     setCompanySaving(false);
   }
 
@@ -356,12 +370,12 @@ export default function SettingsPage() {
                 <div className="grid grid-cols-2 gap-4">
                   <div>
                     <label className="mb-1 block text-xs text-ck-muted">{tSy('paymentTermsDays')}</label>
-                    <input type="number" min={1} max={90} value={company.payment_terms_days} onChange={e => updateCompany('payment_terms_days', parseInt(e.target.value) || 14)}
+                    <input type="number" min={0} max={90} value={company.payment_terms_days} onChange={e => { const v = parseInt(e.target.value); updateCompany('payment_terms_days', Number.isNaN(v) ? 0 : v); }}
                       className="w-full rounded-lg border border-ck-dark-border bg-ck-dark-surface px-3 py-2 text-sm text-white focus:border-ck-red focus:outline-none" />
                   </div>
                   <div>
                     <label className="mb-1 block text-xs text-ck-muted">{tSy('quoteValidityDays')}</label>
-                    <input type="number" min={1} max={90} value={company.quote_validity_days} onChange={e => updateCompany('quote_validity_days', parseInt(e.target.value) || 30)}
+                    <input type="number" min={0} max={90} value={company.quote_validity_days} onChange={e => { const v = parseInt(e.target.value); updateCompany('quote_validity_days', Number.isNaN(v) ? 0 : v); }}
                       className="w-full rounded-lg border border-ck-dark-border bg-ck-dark-surface px-3 py-2 text-sm text-white focus:border-ck-red focus:outline-none" />
                   </div>
                   <div className="col-span-2">
@@ -395,6 +409,9 @@ export default function SettingsPage() {
                   <span className="flex items-center gap-1.5 text-sm text-green-400">
                     <Check size={14} /> {tSy('saved')}
                   </span>
+                )}
+                {companyError && (
+                  <span className="text-sm text-red-400">{companyError}</span>
                 )}
               </div>
             </>

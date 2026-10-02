@@ -3,6 +3,8 @@ import { admin } from '@/lib/supabase/admin';
 import { invalidateCompanyCache } from '@/lib/company';
 import { getStaffUser } from '@/lib/supabase/staff';
 
+export const dynamic = 'force-dynamic';
+
 export async function GET() {
   try {
     const { data } = await admin
@@ -11,9 +13,13 @@ export async function GET() {
       .eq('key', 'company')
       .single();
 
-    return NextResponse.json(data?.value ?? {});
+    return NextResponse.json(data?.value ?? {}, {
+      headers: { 'Cache-Control': 'no-store' },
+    });
   } catch {
-    return NextResponse.json({});
+    return NextResponse.json({}, {
+      headers: { 'Cache-Control': 'no-store' },
+    });
   }
 }
 
