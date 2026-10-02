@@ -384,22 +384,22 @@ export function BusinessFlowChart() {
         <h2 className="text-base font-medium text-white">{tSy('bfStateMachines')}</h2>
         <div className="mt-4 grid gap-3 sm:grid-cols-2 lg:grid-cols-3">
           {[
-            { name: 'Lead', module: 'LD', states: ['new', 'contacted', 'quoted', 'won', 'lost'], terminal: ['won', 'lost'] },
-            { name: 'Offer', module: 'ES', states: ['draft', 'sent', 'approved', 'rejected', 'superseded'], terminal: ['approved', 'rejected', 'superseded'] },
-            { name: 'Invoice', module: 'FA', states: ['draft', 'sent', 'paid', 'overdue', 'credited', 'cancelled'], terminal: ['paid', 'credited', 'cancelled'] },
-            { name: 'Part', module: 'PT', states: ['needed', 'ordered', 'shipped', 'received', 'returned'], terminal: ['received', 'returned'] },
-            { name: 'Task', module: 'TS', states: ['todo', 'in_progress', 'done', 'blocked'], terminal: ['done'] },
-            { name: 'Document', module: 'DO', states: ['draft', 'issued', 'cancelled'], terminal: ['issued', 'cancelled'] },
-            { name: 'VAT Return', module: 'BW', states: ['open', 'draft', 'filed', 'corrected'], terminal: ['filed'] },
-            { name: 'Appointment', module: 'AP', states: ['requested', 'confirmed', 'completed', 'cancelled'], terminal: ['completed', 'cancelled'] },
-            { name: 'Handover', module: 'DO', states: ['draft', 'issued', 'shared', 'signed'], terminal: ['signed'] },
+            { nameKey: 'bfSmLead', module: 'LD', states: ['new', 'contacted', 'quoted', 'won', 'lost'], terminal: ['won', 'lost'] },
+            { nameKey: 'bfSmOffer', module: 'ES', states: ['draft', 'sent', 'approved', 'rejected', 'superseded'], terminal: ['approved', 'rejected', 'superseded'] },
+            { nameKey: 'bfSmInvoice', module: 'FA', states: ['draft', 'sent', 'paid', 'overdue', 'credited', 'cancelled'], terminal: ['paid', 'credited', 'cancelled'] },
+            { nameKey: 'bfSmPart', module: 'PT', states: ['needed', 'ordered', 'shipped', 'received', 'returned'], terminal: ['received', 'returned'] },
+            { nameKey: 'bfSmTask', module: 'TS', states: ['todo', 'in_progress', 'done', 'blocked'], terminal: ['done'] },
+            { nameKey: 'bfSmDocument', module: 'DO', states: ['draft', 'issued', 'cancelled'], terminal: ['issued', 'cancelled'] },
+            { nameKey: 'bfSmVatReturn', module: 'BW', states: ['open', 'draft', 'filed', 'corrected'], terminal: ['filed'] },
+            { nameKey: 'bfSmAppointment', module: 'AP', states: ['requested', 'confirmed', 'completed', 'cancelled'], terminal: ['completed', 'cancelled'] },
+            { nameKey: 'bfSmHandover', module: 'DO', states: ['draft', 'issued', 'shared', 'signed'], terminal: ['signed'] },
           ].map(sm => {
             const c = MOD_HEX[sm.module] ?? MOD_HEX.SY;
             return (
-              <div key={sm.name} className="rounded-lg border border-[#1e1e2a] bg-[#0a0a0f] p-3">
+              <div key={sm.nameKey} className="rounded-lg border border-[#1e1e2a] bg-[#0a0a0f] p-3">
                 <div className="flex items-center gap-2">
                   <ScreenBadge code={sm.module} />
-                  <span className="text-xs font-medium text-white">{sm.name}</span>
+                  <span className="text-xs font-medium text-white">{tSy(sm.nameKey)}</span>
                 </div>
                 <div className="mt-2 flex flex-wrap gap-1">
                   {sm.states.map(s => (

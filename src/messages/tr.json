@@ -2243,7 +2243,16 @@
     "bfModVat": "KDV",
     "bfModPurchases": "Satın Alma",
     "bfModBookkeeping": "Muhasebe",
-    "bfModSystem": "Sistem"
+    "bfModSystem": "Sistem",
+    "bfSmLead": "Talep",
+    "bfSmOffer": "Teklif",
+    "bfSmInvoice": "Fatura",
+    "bfSmPart": "Parça",
+    "bfSmTask": "Görev",
+    "bfSmDocument": "Belge",
+    "bfSmVatReturn": "KDV Beyannamesi",
+    "bfSmAppointment": "Randevu",
+    "bfSmHandover": "Teslim Notu"
   },
   "signature": {
     "signHere": "Buraya imza atın",

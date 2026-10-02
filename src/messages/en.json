@@ -2243,7 +2243,16 @@
     "bfModVat": "VAT",
     "bfModPurchases": "Purchases",
     "bfModBookkeeping": "Bookkeeping",
-    "bfModSystem": "System"
+    "bfModSystem": "System",
+    "bfSmLead": "Lead",
+    "bfSmOffer": "Offer",
+    "bfSmInvoice": "Invoice",
+    "bfSmPart": "Part",
+    "bfSmTask": "Task",
+    "bfSmDocument": "Document",
+    "bfSmVatReturn": "VAT Return",
+    "bfSmAppointment": "Appointment",
+    "bfSmHandover": "Handover"
   },
   "signature": {
     "signHere": "Sign here",

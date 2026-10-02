@@ -2243,7 +2243,16 @@
     "bfModVat": "BTW",
     "bfModPurchases": "Inkoop",
     "bfModBookkeeping": "Boekhouding",
-    "bfModSystem": "Systeem"
+    "bfModSystem": "Systeem",
+    "bfSmLead": "Lead",
+    "bfSmOffer": "Offerte",
+    "bfSmInvoice": "Factuur",
+    "bfSmPart": "Onderdeel",
+    "bfSmTask": "Taak",
+    "bfSmDocument": "Document",
+    "bfSmVatReturn": "BTW-aangifte",
+    "bfSmAppointment": "Afspraak",
+    "bfSmHandover": "Opleverbon"
   },
   "signature": {
     "signHere": "Hier tekenen",
