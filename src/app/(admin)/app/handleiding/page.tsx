@@ -9,6 +9,28 @@ import { SCREEN_REGISTRY } from '@/lib/codes';
 import { MODULES, type ScreenDoc, type ModuleDoc, loadLocaleModules, getModulesForLocale } from '@/lib/screen-docs';
 import { useAppLocale } from '@/components/AdminIntlProvider';
 
+const MODULE_NAME_KEYS: Record<string, string> = {
+  leads: 'bfModLeads',
+  inspections: 'bfModInspections',
+  customers: 'bfModCustomers',
+  vehicles: 'bfModVehicles',
+  offers: 'bfModOffers',
+  portfolio: 'bfModPortfolio',
+  jobs: 'bfModJobs',
+  parts: 'bfModParts',
+  invoices: 'bfModInvoices',
+  documents: 'bfModDocuments',
+  appointments: 'bfModAppointments',
+  tasks: 'bfModTasks',
+  planning: 'bfModPlanning',
+  reports: 'bfModReports',
+  vat: 'bfModVat',
+  purchases: 'bfModPurchases',
+  bookkeeping: 'bfModBookkeeping',
+  publicWebsite: 'bfModPublicWebsite',
+  settings: 'bfModSettings',
+};
+
 type Tab = 'agent' | 'user' | 'flow';
 
 type SearchResult = {
@@ -248,7 +270,7 @@ export default function ManualPage() {
                 <span className="text-sm font-medium text-white">
                   {getScreenTitle(result.screen.code)}
                 </span>
-                <span className="text-xs text-[#6b6b80] capitalize">{result.module.id}</span>
+                <span className="text-xs text-[#6b6b80]">{MODULE_NAME_KEYS[result.module.id] ? tSy(MODULE_NAME_KEYS[result.module.id]) : result.module.id}</span>
               </div>
 
               <div className="space-y-2 pl-4 border-l-2 border-[#1e1e2a]">
@@ -384,7 +406,7 @@ export default function ManualPage() {
                   >
                     <div className="flex items-center gap-3">
                       <span className="rounded bg-[#0a0a0f] px-2 py-1 text-xs font-mono text-[#E8364E]">{mod.code}</span>
-                      <span className="text-sm font-medium capitalize text-white">{mod.id}</span>
+                      <span className="text-sm font-medium text-white">{MODULE_NAME_KEYS[mod.id] ? tSy(MODULE_NAME_KEYS[mod.id]) : mod.id}</span>
                       <span className="text-xs text-[#6b6b80]">
                         {mod.screens.length === 1 ? tSy('screenCount', { count: mod.screens.length }) : tSy('screenCountPlural', { count: mod.screens.length })}
                       </span>
