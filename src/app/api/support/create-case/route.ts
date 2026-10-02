@@ -33,7 +33,7 @@ export async function POST(req: NextRequest) {
         external_id: user.id,
       },
       context: {
-        app: 'colourking',
+        app: 'colourking-admin',
         app_version: process.env.NEXT_PUBLIC_APP_VERSION,
         route: body.route,
         browser: body.browser,

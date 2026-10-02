@@ -75,7 +75,7 @@ const CATEGORY_ICONS: Record<string, React.ElementType> = {
 
 function captureSupportContext() {
   return {
-    app: 'colourking',
+    app: 'colourking-admin',
     app_version: process.env.NEXT_PUBLIC_APP_VERSION,
     route: typeof window !== 'undefined' ? window.location.pathname : undefined,
     browser: typeof navigator !== 'undefined' ? navigator.userAgent : undefined,
@@ -141,7 +141,7 @@ export default function SupportPage() {
         throw new Error(err.error || `HTTP ${res.status}`);
       }
       const result = await res.json();
-      setCases(result.data || []);
+      setCases(result.cases || []);
     } catch (err) {
       setError(err instanceof Error ? err.message : 'Failed to load cases');
     } finally {
@@ -190,11 +190,12 @@ export default function SupportPage() {
         }),
       });
 
-      const result = await res.json();
-      if (!res.ok || !result.success) {
-        throw new Error(result.error || 'Failed to create case');
+      if (!res.ok) {
+        const err = await res.json().catch(() => ({}));
+        throw new Error(err.error || `HTTP ${res.status}`);
       }
 
+      const result = await res.json();
       setSubmitSuccess(result.case_number);
       setSubject('');
       setDescription('');

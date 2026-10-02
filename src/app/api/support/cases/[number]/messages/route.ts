@@ -30,8 +30,7 @@ export async function POST(
       },
       body: JSON.stringify({
         body: body.body,
-        sender_email: user.email,
-        sender_name: user.user_metadata?.full_name || user.email,
+        requester_email: user.email,
       }),
     }
   );

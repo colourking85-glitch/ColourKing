@@ -20,7 +20,7 @@ export async function GET(req: NextRequest) {
   const status = url.searchParams.get('status');
 
   apiTarget.searchParams.set('page', page);
-  apiTarget.searchParams.set('per_page', '50');
+  apiTarget.searchParams.set('limit', '50');
   if (status) apiTarget.searchParams.set('status', status);
 
   const response = await fetch(apiTarget.toString(), {
@@ -35,12 +35,5 @@ export async function GET(req: NextRequest) {
   }
 
   const result = await response.json();
-
-  if (result.data) {
-    result.data = result.data.filter(
-      (c: { user_email: string }) => c.user_email === user.email
-    );
-  }
-
   return NextResponse.json(result);
 }
