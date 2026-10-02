@@ -1721,7 +1721,7 @@
     "cash": "Nakit",
     "card": "Kart",
     "mollie": "Mollie",
-    "deleteConfirm": "Taslak faturayı sil",
+    "deleteConfirm": "Bu taslak faturayı silmek istediğinizden emin misiniz?",
     "backToInvoices": "Faturalara dön",
     "creditNoteDesc": "Faturanın tamamını alacaklandıran bir alacak dekontu oluşturulacak...",
     "creditReasonPlaceholder": "Alacak nedeni...",

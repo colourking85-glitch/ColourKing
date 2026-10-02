@@ -1721,7 +1721,7 @@
     "cash": "Contant",
     "card": "Pinpas",
     "mollie": "Mollie",
-    "deleteConfirm": "Conceptfactuur verwijderen",
+    "deleteConfirm": "Weet u zeker dat u deze conceptfactuur wilt verwijderen?",
     "backToInvoices": "Terug naar facturen",
     "creditNoteDesc": "Er wordt een creditnota aangemaakt die de volledige factuur crediteert...",
     "creditReasonPlaceholder": "Reden voor creditering...",

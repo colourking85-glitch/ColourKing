@@ -1721,7 +1721,7 @@
     "cash": "Cash",
     "card": "Card",
     "mollie": "Mollie",
-    "deleteConfirm": "Delete draft invoice",
+    "deleteConfirm": "Are you sure you want to delete this draft invoice?",
     "backToInvoices": "Back to invoices",
     "creditNoteDesc": "A credit note will be created that credits the full invoice...",
     "creditReasonPlaceholder": "Reason for credit...",

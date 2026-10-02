@@ -257,6 +257,7 @@ export default function InvoiceDetailPage() {
   };
 
   const handleDelete = async () => {
+    if (!confirm(t('deleteConfirm'))) return;
     setActing(true);
     const res = await fetch(`/api/invoices/${id}`, { method: 'DELETE' });
     if (res.ok) router.push('/app/facturen');
