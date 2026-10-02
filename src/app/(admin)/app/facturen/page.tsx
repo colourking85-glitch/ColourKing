@@ -31,7 +31,7 @@ type InvoiceRow = {
   vehicles: { id: string; kenteken: string | null; make: string | null; model: string | null } | null;
 };
 
-type SortKey = 'invoice_number' | 'customer' | 'kenteken' | 'created_at' | 'issued_at' | 'due_date' | 'total_cents' | 'status' | 'locale' | 'invoice_type';
+type SortKey = 'invoice_number' | 'customer' | 'kenteken' | 'created_at' | 'issued_at' | 'due_date' | 'vat_cents' | 'total_cents' | 'status' | 'locale' | 'invoice_type';
 type SortDir = 'asc' | 'desc';
 
 const STATUS_ICONS: Record<InvoiceStatus, typeof File> = {
@@ -58,6 +58,7 @@ const ALL_COLUMNS: ColumnDef[] = [
   { key: 'due_date', labelKey: 'dueDate', defaultVisible: true },
   { key: 'invoice_type', labelKey: 'invoiceTypeLabel', defaultVisible: false },
   { key: 'locale', labelKey: 'language', defaultVisible: false },
+  { key: 'vat_cents', labelKey: 'btw', defaultVisible: true, align: 'right' },
   { key: 'total_cents', labelKey: 'total', defaultVisible: true, align: 'right' },
   { key: 'status', labelKey: 'status', defaultVisible: true },
 ];
@@ -187,6 +188,7 @@ export default function InvoiceListPage() {
         case 'created_at': cmp = a.created_at.localeCompare(b.created_at); break;
         case 'issued_at': cmp = (a.issued_at ?? '').localeCompare(b.issued_at ?? ''); break;
         case 'due_date': cmp = (a.due_date ?? '').localeCompare(b.due_date ?? ''); break;
+        case 'vat_cents': cmp = a.vat_cents - b.vat_cents; break;
         case 'total_cents': cmp = a.total_cents - b.total_cents; break;
         case 'status': cmp = (STATUS_ORDER[a.status] ?? 9) - (STATUS_ORDER[b.status] ?? 9); break;
         case 'locale': cmp = (a.locale ?? '').localeCompare(b.locale ?? ''); break;
@@ -253,6 +255,14 @@ export default function InvoiceListPage() {
         );
       case 'locale':
         return <span className="font-mono text-xs uppercase text-ck-text-muted">{inv.locale ?? 'nl'}</span>;
+      case 'vat_cents': {
+        const pct = inv.subtotal_cents ? Math.round(inv.vat_cents / inv.subtotal_cents * 100) : 0;
+        return (
+          <span className="font-mono text-xs tabular-nums text-ck-text-muted" title={formatCents(inv.vat_cents)}>
+            {pct}% ({formatCents(inv.vat_cents)})
+          </span>
+        );
+      }
       case 'total_cents':
         return <span className="font-mono text-sm tabular-nums text-ck-text-2">{formatCents(inv.total_cents)}</span>;
       case 'status':

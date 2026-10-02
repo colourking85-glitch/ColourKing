@@ -1663,6 +1663,7 @@
     "customer": "Customer",
     "vehicle": "Vehicle",
     "total": "Total",
+    "btw": "VAT",
     "invoiceDate": "Invoice date",
     "dueDate": "Due date",
     "notes": "Notes",

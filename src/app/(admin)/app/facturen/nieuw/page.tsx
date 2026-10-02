@@ -8,6 +8,7 @@ import { ArrowLeft, Save, FileText, Plus, Trash2 } from 'lucide-react';
 import { formatCurrency } from '@/lib/format';
 import { useAppLocale } from '@/components/AdminIntlProvider';
 import { SearchableSelect } from '@/components/ui/SearchableSelect';
+import { DateInput } from '@/components/ui/DateInput';
 import type { OfferLineKind, TaxCode } from '@/types/database';
 
 type CustomerOption = { id: string; name: string; locale?: string };
@@ -69,6 +70,7 @@ export default function CreateInvoicePage() {
   const [notes, setNotes] = useState('');
   const [saving, setSaving] = useState(false);
   const [error, setError] = useState('');
+  const [nextNumber, setNextNumber] = useState('');
 
   // Offer mode
   const [offers, setOffers] = useState<OfferOption[]>([]);
@@ -93,6 +95,21 @@ export default function CreateInvoicePage() {
         const d = new Date();
         d.setDate(d.getDate() + days);
         setDueDate(d.toISOString().split('T')[0]);
+      });
+    fetch('/api/settings/numbering')
+      .then(r => r.ok ? r.json() : [])
+      .then((ranges: Array<{ doc_type: string; prefix: string; next_number: number }>) => {
+        const inv = ranges.find(r => r.doc_type === 'invoice');
+        if (inv) {
+          const now = new Date();
+          const yy = String(now.getFullYear() % 100).padStart(2, '0');
+          const d = new Date(Date.UTC(now.getUTCFullYear(), now.getUTCMonth(), now.getUTCDate()));
+          const day = d.getUTCDay() || 7;
+          d.setUTCDate(d.getUTCDate() + 4 - day);
+          const yearStart = Date.UTC(d.getUTCFullYear(), 0, 1);
+          const ww = String(Math.ceil(((d.getTime() - yearStart) / 86400000 + 1) / 7)).padStart(2, '0');
+          setNextNumber(`${inv.prefix}-${yy}${ww}${String(inv.next_number).padStart(2, '0')}`);
+        }
       });
   }, []);
 
@@ -248,9 +265,14 @@ export default function CreateInvoicePage() {
           </Link>
           <div>
             <h1 className="text-base font-medium text-ck-text">{t('new')}</h1>
-            <p className="mt-0.5 text-[11px] text-ck-text-muted">
-              {invoiceType === 'deposit' ? t('depositInvoice') : t('standardInvoice')}
-            </p>
+            <div className="mt-0.5 flex items-center gap-2">
+              {nextNumber && (
+                <span className="font-mono text-xs tabular-nums text-ck-red">{nextNumber}</span>
+              )}
+              <span className="text-[11px] text-ck-text-muted">
+                {invoiceType === 'deposit' ? t('depositInvoice') : t('standardInvoice')}
+              </span>
+            </div>
           </div>
         </div>
         <button
@@ -590,19 +612,19 @@ export default function CreateInvoicePage() {
         <div className="grid gap-4 sm:grid-cols-3">
           <div>
             <label className="mb-1 block text-[11px] text-ck-text-muted">{t('invoiceDate')}</label>
-            <input
-              type="date"
+            <DateInput
               value={invoiceDate}
-              onChange={e => setInvoiceDate(e.target.value)}
+              onChange={setInvoiceDate}
+              separator="."
               className="w-full rounded-[10px] border-[0.5px] border-ck-border bg-ck-surface px-3 py-2 text-sm text-ck-text focus:border-ck-red focus:outline-none"
             />
           </div>
           <div>
             <label className="mb-1 block text-[11px] text-ck-text-muted">{t('dueDate')}</label>
-            <input
-              type="date"
+            <DateInput
               value={dueDate}
-              onChange={e => setDueDate(e.target.value)}
+              onChange={setDueDate}
+              separator="."
               className="w-full rounded-[10px] border-[0.5px] border-ck-border bg-ck-surface px-3 py-2 text-sm text-ck-text focus:border-ck-red focus:outline-none"
             />
           </div>

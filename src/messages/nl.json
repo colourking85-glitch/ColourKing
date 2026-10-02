@@ -1663,6 +1663,7 @@
     "customer": "Klant",
     "vehicle": "Voertuig",
     "total": "Totaal",
+    "btw": "BTW",
     "invoiceDate": "Factuurdatum",
     "dueDate": "Vervaldatum",
     "notes": "Notities",
