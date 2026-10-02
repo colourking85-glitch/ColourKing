@@ -98,16 +98,21 @@ export default function NumberingPage() {
     }
   }
 
+  function getIsoYYWW(): string {
+    const now = new Date();
+    const yy = String(now.getFullYear() % 100).padStart(2, '0');
+    const d = new Date(Date.UTC(now.getUTCFullYear(), now.getUTCMonth(), now.getUTCDate()));
+    const day = d.getUTCDay() || 7;
+    d.setUTCDate(d.getUTCDate() + 4 - day);
+    const yearStart = Date.UTC(d.getUTCFullYear(), 0, 1);
+    const ww = String(Math.ceil(((d.getTime() - yearStart) / 86400000 + 1) / 7)).padStart(2, '0');
+    return yy + ww;
+  }
+
   function formatNextNumber(range: NumberRange): string {
-    if (range.doc_type === 'project_dossier') {
-      const now = new Date();
-      const yy = String(now.getFullYear() % 100).padStart(2, '0');
-      const d = new Date(Date.UTC(now.getUTCFullYear(), now.getUTCMonth(), now.getUTCDate()));
-      const day = d.getUTCDay() || 7;
-      d.setUTCDate(d.getUTCDate() + 4 - day);
-      const yearStart = Date.UTC(d.getUTCFullYear(), 0, 1);
-      const ww = String(Math.ceil(((d.getTime() - yearStart) / 86400000 + 1) / 7)).padStart(2, '0');
-      return `${range.prefix}-${yy}${ww}${String(range.next_number).padStart(2, '0')}`;
+    if (range.doc_type === 'project_dossier' || range.doc_type === 'invoice' || range.doc_type === 'credit_note') {
+      const yyww = getIsoYYWW();
+      return `${range.prefix}-${yyww}${String(range.next_number).padStart(2, '0')}`;
     }
     const yy = String(range.year % 100).padStart(2, '0');
     return `${range.prefix}-${yy}${String(range.next_number).padStart(4, '0')}`;

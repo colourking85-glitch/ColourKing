@@ -17,6 +17,46 @@ import { useAppLocale } from '@/components/AdminIntlProvider';
 import { SendEmailButton } from '@/components/ui/SendEmailButton';
 import type { CompanyInfo } from '@/lib/company';
 
+function isoToEu(iso: string): string {
+  if (!iso) return '';
+  const [y, m, d] = iso.split('-');
+  return d && m && y ? `${d}-${m}-${y}` : iso;
+}
+
+function euToIso(eu: string): string {
+  if (!eu) return '';
+  const [d, m, y] = eu.split('-');
+  return d && m && y ? `${y}-${m}-${d}` : eu;
+}
+
+function DateInput({ value, onChange }: { value: string; onChange: (iso: string) => void }) {
+  const [display, setDisplay] = useState(isoToEu(value));
+
+  useEffect(() => { setDisplay(isoToEu(value)); }, [value]);
+
+  function handleChange(e: React.ChangeEvent<HTMLInputElement>) {
+    let v = e.target.value.replace(/[^\d-]/g, '');
+    if (v.length === 2 && !v.includes('-')) v += '-';
+    else if (v.length === 5 && v.split('-').length === 2) v += '-';
+    if (v.length > 10) v = v.slice(0, 10);
+    setDisplay(v);
+    if (/^\d{2}-\d{2}-\d{4}$/.test(v)) {
+      onChange(euToIso(v));
+    }
+  }
+
+  return (
+    <input
+      type="text"
+      value={display}
+      onChange={handleChange}
+      placeholder="dd-mm-yyyy"
+      maxLength={10}
+      className="w-full rounded-[10px] border-[0.5px] border-ck-border bg-ck-surface px-3 py-2 text-sm text-ck-text focus:border-blue-500 focus:outline-none"
+    />
+  );
+}
+
 type InvoiceLine = {
   id: string;
   sort_order: number;
@@ -589,21 +629,11 @@ export default function InvoiceDetailPage() {
               <div className="space-y-3">
                 <div>
                   <label className="mb-1 block text-[11px] text-ck-text-muted">{t('invoiceDate')}</label>
-                  <input
-                    type="date"
-                    value={editInvoiceDate}
-                    onChange={e => setEditInvoiceDate(e.target.value)}
-                    className="w-full rounded-[10px] border-[0.5px] border-ck-border bg-ck-surface px-3 py-2 text-sm text-ck-text focus:border-blue-500 focus:outline-none"
-                  />
+                  <DateInput value={editInvoiceDate} onChange={setEditInvoiceDate} />
                 </div>
                 <div>
                   <label className="mb-1 block text-[11px] text-ck-text-muted">{t('dueDate')}</label>
-                  <input
-                    type="date"
-                    value={editDueDate}
-                    onChange={e => setEditDueDate(e.target.value)}
-                    className="w-full rounded-[10px] border-[0.5px] border-ck-border bg-ck-surface px-3 py-2 text-sm text-ck-text focus:border-blue-500 focus:outline-none"
-                  />
+                  <DateInput value={editDueDate} onChange={setEditDueDate} />
                 </div>
                 <div>
                   <label className="mb-1 block text-[11px] text-ck-text-muted">{t('locale')}</label>
