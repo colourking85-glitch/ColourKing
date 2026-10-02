@@ -25,7 +25,8 @@ export async function GET() {
 
 export async function PUT(req: NextRequest) {
   const staff = await getStaffUser();
-  if (!staff || staff.role !== 'admin') return NextResponse.json({ error: 'Forbidden' }, { status: 403 });
+  if (!staff) return NextResponse.json({ error: 'Not authenticated — please log in again' }, { status: 401 });
+  if (staff.role !== 'admin') return NextResponse.json({ error: `Requires admin role (your role: ${staff.role})` }, { status: 403 });
 
   try {
     const body = await req.json();

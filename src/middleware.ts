@@ -85,9 +85,19 @@ export async function middleware(req: NextRequest) {
 
   // admin.colourking.nl -> rewrite to /app routes
   if (host.startsWith('admin.')) {
-    // Public routes and API routes pass through directly
-    if (pathname === '/login' || pathname.startsWith('/reset-password') || pathname.startsWith('/api/') || pathname.startsWith('/s/')) {
+    // Public routes pass through directly
+    if (pathname === '/login' || pathname.startsWith('/reset-password') || pathname.startsWith('/s/')) {
       return NextResponse.next();
+    }
+
+    // API routes on admin subdomain — refresh session but don't rewrite
+    if (pathname.startsWith('/api/')) {
+      const res = NextResponse.next();
+      if (hasSupabaseConfig()) {
+        const supabase = createSupabaseMiddleware(req, res);
+        await supabase.auth.getUser();
+      }
+      return res;
     }
 
     const dest = pathname === '/' ? '/app' : pathname.startsWith('/app') ? pathname : `/app${pathname}`;
