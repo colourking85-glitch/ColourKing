@@ -2212,6 +2212,14 @@
     "bfNodeDocumentsDesc": "Central archive of all system documents with frozen payload and SHA-256 integrity hash.",
     "bfNodeNotifications": "Notifications",
     "bfNodeNotificationsDesc": "Real-time event feed: new leads, stage changes, document issued, appointment status.",
+    "bfNodePortfolio": "Project Dossier",
+    "bfNodePortfolioDesc": "Group multiple jobs and offers under one project. Track scope, timeline and progress across linked repair work.",
+    "bfNodeInspection": "Inspection",
+    "bfNodeInspectionDesc": "Vehicle damage inspections with photo reports. Requested → In progress → Completed. Feeds into offers and handover notes.",
+    "bfNodeAnalytics": "Analytics",
+    "bfNodeAnalyticsDesc": "Website traffic and visitor analytics for colourking.nl. Page views, referrers, device breakdown.",
+    "bfNodeSettings": "Settings",
+    "bfNodeSettingsDesc": "System configuration: staff, numbering, labour rates, brands, integrations, off days, certifications and more.",
     "bfEdgeFormSubmit": "form submit",
     "bfEdgeManualEntry": "manual entry",
     "bfEdgeConvert": "convert",
@@ -2221,6 +2229,7 @@
     "bfEdgeReadyStage": "ready stage",
     "bfEdgeDelivered": "delivered",
     "bfEdgeCreate": "create",
+    "bfEdgeInspect": "inspect",
     "bfStageIntake": "Intake",
     "bfStageQuoted": "Quoted",
     "bfStageApproved": "Approved",
@@ -2259,7 +2268,9 @@
     "bfSmDocument": "Document",
     "bfSmVatReturn": "VAT Return",
     "bfSmAppointment": "Appointment",
-    "bfSmHandover": "Handover"
+    "bfSmHandover": "Handover",
+    "bfSmInspection": "Inspection",
+    "bfSmPortfolio": "Portfolio"
   },
   "signature": {
     "signHere": "Sign here",

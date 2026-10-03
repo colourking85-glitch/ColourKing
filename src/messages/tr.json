@@ -2212,6 +2212,14 @@
     "bfNodeDocumentsDesc": "Dondurulmuş içerik ve SHA-256 bütünlük hash'i ile tüm sistem belgelerinin merkezi arşivi.",
     "bfNodeNotifications": "Bildirimler",
     "bfNodeNotificationsDesc": "Gerçek zamanlı olay akışı: yeni talepler, aşama değişiklikleri, belge düzenlendi, randevu durumu.",
+    "bfNodePortfolio": "Proje Dosyası",
+    "bfNodePortfolioDesc": "Birden fazla iş ve teklifi bir proje altında gruplayın. Kapsam, zaman çizelgesi ve bağlı onarım ilerlemesini takip edin.",
+    "bfNodeInspection": "Ekspertiz",
+    "bfNodeInspectionDesc": "Fotoğraflı araç hasar ekspertizi. Talep edildi → Devam ediyor → Tamamlandı. Teklif ve teslim belgelerini besler.",
+    "bfNodeAnalytics": "Analitik",
+    "bfNodeAnalyticsDesc": "colourking.nl için web sitesi trafiği ve ziyaretçi analitiği. Sayfa görüntülemeleri, yönlendirmeler, cihaz dağılımı.",
+    "bfNodeSettings": "Ayarlar",
+    "bfNodeSettingsDesc": "Sistem yapılandırması: personel, numaralandırma, işçilik tarifeleri, markalar, entegrasyonlar, tatil günleri, sertifikalar ve daha fazlası.",
     "bfEdgeFormSubmit": "form gönderimi",
     "bfEdgeManualEntry": "manuel giriş",
     "bfEdgeConvert": "dönüştür",
@@ -2221,6 +2229,7 @@
     "bfEdgeReadyStage": "hazır aşaması",
     "bfEdgeDelivered": "teslim edildi",
     "bfEdgeCreate": "oluştur",
+    "bfEdgeInspect": "ekspertiz",
     "bfStageIntake": "Alım",
     "bfStageQuoted": "Teklif Verildi",
     "bfStageApproved": "Onaylandı",
@@ -2259,7 +2268,9 @@
     "bfSmDocument": "Belge",
     "bfSmVatReturn": "KDV Beyannamesi",
     "bfSmAppointment": "Randevu",
-    "bfSmHandover": "Teslim Notu"
+    "bfSmHandover": "Teslim Notu",
+    "bfSmInspection": "Ekspertiz",
+    "bfSmPortfolio": "Portfolyo"
   },
   "signature": {
     "signHere": "Buraya imza atın",

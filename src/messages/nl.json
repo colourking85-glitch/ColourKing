@@ -2212,6 +2212,14 @@
     "bfNodeDocumentsDesc": "Centraal archief van alle systeemdocumenten met bevroren inhoud en SHA-256 integriteitshash.",
     "bfNodeNotifications": "Meldingen",
     "bfNodeNotificationsDesc": "Realtime gebeurtenisfeed: nieuwe leads, fasewijzigingen, document uitgegeven, afspraakstatus.",
+    "bfNodePortfolio": "Projectdossier",
+    "bfNodePortfolioDesc": "Groepeer meerdere jobs en offertes onder een project. Volg scope, tijdlijn en voortgang van gekoppeld herstelwerk.",
+    "bfNodeInspection": "Expertise",
+    "bfNodeInspectionDesc": "Voertuig schade-expertises met fotorapportage. Aangevraagd → Bezig → Afgerond. Voedt offertes en opleverdocumenten.",
+    "bfNodeAnalytics": "Analytics",
+    "bfNodeAnalyticsDesc": "Websiteverkeer en bezoekersanalyses voor colourking.nl. Paginaweergaven, verwijzingen, apparaatoverzicht.",
+    "bfNodeSettings": "Instellingen",
+    "bfNodeSettingsDesc": "Systeemconfiguratie: medewerkers, nummering, uurtarieven, merken, integraties, sluitingsdagen, certificeringen en meer.",
     "bfEdgeFormSubmit": "formulier verzonden",
     "bfEdgeManualEntry": "handmatige invoer",
     "bfEdgeConvert": "omzetten",
@@ -2221,6 +2229,7 @@
     "bfEdgeReadyStage": "gereed fase",
     "bfEdgeDelivered": "opgeleverd",
     "bfEdgeCreate": "aanmaken",
+    "bfEdgeInspect": "expertise",
     "bfStageIntake": "Intake",
     "bfStageQuoted": "Offerte",
     "bfStageApproved": "Goedgekeurd",
@@ -2259,7 +2268,9 @@
     "bfSmDocument": "Document",
     "bfSmVatReturn": "BTW-aangifte",
     "bfSmAppointment": "Afspraak",
-    "bfSmHandover": "Opleverbon"
+    "bfSmHandover": "Opleverbon",
+    "bfSmInspection": "Expertise",
+    "bfSmPortfolio": "Portfolio"
   },
   "signature": {
     "signHere": "Hier tekenen",

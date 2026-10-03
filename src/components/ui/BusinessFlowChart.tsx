@@ -10,6 +10,7 @@ const MOD_HEX: Record<string, { bg: string; fg: string; border: string }> = {
   KL: { bg: '#581c8720', fg: '#c084fc', border: '#6b21a8' },
   VH: { bg: '#1e3a5f20', fg: '#60a5fa', border: '#1e40af' },
   ES: { bg: '#14532d20', fg: '#4ade80', border: '#166534' },
+  PF: { bg: '#86198f20', fg: '#e879f9', border: '#a21caf' },
   JB: { bg: '#164e6320', fg: '#22d3ee', border: '#155e75' },
   PT: { bg: '#7c2d1220', fg: '#fb923c', border: '#9a3412' },
   FA: { bg: '#064e3b20', fg: '#34d399', border: '#065f46' },
@@ -20,6 +21,7 @@ const MOD_HEX: Record<string, { bg: string; fg: string; border: string }> = {
   BW: { bg: '#365314', fg: '#a3e635', border: '#4d7c0f' },
   PU: { bg: '#83184420', fg: '#f472b6', border: '#9d174d' },
   BK: { bg: '#134e4a20', fg: '#2dd4bf', border: '#115e59' },
+  IN: { bg: '#71370020', fg: '#fbbf24', border: '#a16207' },
   SY: { bg: '#33415520', fg: '#94a3b8', border: '#475569' },
 };
 
@@ -47,23 +49,27 @@ const NODES: FlowNode[] = [
   { id: 'website', labelKey: 'bfNodeWebsite', descKey: 'bfNodeWebsiteDesc', module: 'SY', screens: [], x: 60, y: 40, w: 150, h: 56 },
   { id: 'walk-in', labelKey: 'bfNodeWalkin', descKey: 'bfNodeWalkinDesc', module: 'SY', screens: [], x: 260, y: 40, w: 150, h: 56 },
   { id: 'lead', labelKey: 'bfNodeLead', descKey: 'bfNodeLeadDesc', module: 'LD', screens: ['LD01', 'LD05', 'LD10'], x: 160, y: 140, w: 150, h: 64 },
-  { id: 'customer', labelKey: 'bfNodeCustomer', descKey: 'bfNodeCustomerDesc', module: 'KL', screens: ['KL01', 'KL02', 'KL03', 'KL05'], x: 60, y: 250, w: 140, h: 56 },
-  { id: 'vehicle', labelKey: 'bfNodeVehicle', descKey: 'bfNodeVehicleDesc', module: 'VH', screens: ['VH01', 'VH05', 'VH10'], x: 250, y: 250, w: 140, h: 56 },
-  { id: 'offer', labelKey: 'bfNodeOffer', descKey: 'bfNodeOfferDesc', module: 'ES', screens: ['ES01', 'ES05', 'ES10'], x: 460, y: 250, w: 160, h: 64 },
-  { id: 'job', labelKey: 'bfNodeJob', descKey: 'bfNodeJobDesc', module: 'JB', screens: ['JB01', 'JB05', 'JB10', 'JB15'], x: 460, y: 380, w: 180, h: 72 },
-  { id: 'parts', labelKey: 'bfNodeParts', descKey: 'bfNodePartsDesc', module: 'PT', screens: ['PT01', 'PT05'], x: 700, y: 360, w: 130, h: 56 },
-  { id: 'tasks', labelKey: 'bfNodeTasks', descKey: 'bfNodeTasksDesc', module: 'TS', screens: ['TS01', 'TS05', 'TS10'], x: 700, y: 440, w: 130, h: 56 },
-  { id: 'appointment', labelKey: 'bfNodeAppointment', descKey: 'bfNodeAppointmentDesc', module: 'AP', screens: ['AP01', 'AP05', 'AP10'], x: 60, y: 390, w: 150, h: 56 },
-  { id: 'repairorder', labelKey: 'bfNodeRepairorder', descKey: 'bfNodeRepairorderDesc', module: 'DO', screens: ['DO20'], x: 260, y: 510, w: 150, h: 56 },
-  { id: 'handover', labelKey: 'bfNodeHandover', descKey: 'bfNodeHandoverDesc', module: 'DO', screens: ['DO21', 'DO22'], x: 460, y: 510, w: 160, h: 56 },
-  { id: 'invoice', labelKey: 'bfNodeInvoice', descKey: 'bfNodeInvoiceDesc', module: 'FA', screens: ['FA01', 'FA05', 'FA10'], x: 460, y: 620, w: 160, h: 64 },
-  { id: 'vat', labelKey: 'bfNodeVat', descKey: 'bfNodeVatDesc', module: 'BW', screens: ['BW05', 'BW40'], x: 260, y: 720, w: 140, h: 56 },
-  { id: 'purchase', labelKey: 'bfNodePurchase', descKey: 'bfNodePurchaseDesc', module: 'PU', screens: ['PU01', 'PU05'], x: 460, y: 720, w: 140, h: 56 },
-  { id: 'bookkeeping', labelKey: 'bfNodeBookkeeping', descKey: 'bfNodeBookkeepingDesc', module: 'BK', screens: ['BK10'], x: 660, y: 720, w: 140, h: 56 },
+  { id: 'customer', labelKey: 'bfNodeCustomer', descKey: 'bfNodeCustomerDesc', module: 'KL', screens: ['KL01', 'KL02', 'KL03', 'KL05'], x: 60, y: 260, w: 140, h: 56 },
+  { id: 'vehicle', labelKey: 'bfNodeVehicle', descKey: 'bfNodeVehicleDesc', module: 'VH', screens: ['VH01', 'VH05', 'VH10'], x: 250, y: 260, w: 140, h: 56 },
+  { id: 'offer', labelKey: 'bfNodeOffer', descKey: 'bfNodeOfferDesc', module: 'ES', screens: ['ES01', 'ES05', 'ES10'], x: 460, y: 260, w: 160, h: 64 },
+  { id: 'portfolio', labelKey: 'bfNodePortfolio', descKey: 'bfNodePortfolioDesc', module: 'PF', screens: ['PF01', 'PF05', 'PF10'], x: 160, y: 360, w: 160, h: 56 },
+  { id: 'job', labelKey: 'bfNodeJob', descKey: 'bfNodeJobDesc', module: 'JB', screens: ['JB01', 'JB05', 'JB10', 'JB15'], x: 460, y: 400, w: 180, h: 72 },
+  { id: 'parts', labelKey: 'bfNodeParts', descKey: 'bfNodePartsDesc', module: 'PT', screens: ['PT01', 'PT05'], x: 700, y: 380, w: 130, h: 56 },
+  { id: 'tasks', labelKey: 'bfNodeTasks', descKey: 'bfNodeTasksDesc', module: 'TS', screens: ['TS01', 'TS05', 'TS10'], x: 700, y: 460, w: 130, h: 56 },
+  { id: 'appointment', labelKey: 'bfNodeAppointment', descKey: 'bfNodeAppointmentDesc', module: 'AP', screens: ['AP01', 'AP05', 'AP10'], x: 60, y: 430, w: 150, h: 56 },
+  { id: 'inspection', labelKey: 'bfNodeInspection', descKey: 'bfNodeInspectionDesc', module: 'IN', screens: ['IN01', 'IN05', 'IN10', 'IN15'], x: 120, y: 520, w: 160, h: 56 },
+  { id: 'repairorder', labelKey: 'bfNodeRepairorder', descKey: 'bfNodeRepairorderDesc', module: 'DO', screens: ['DO20'], x: 300, y: 540, w: 150, h: 56 },
+  { id: 'handover', labelKey: 'bfNodeHandover', descKey: 'bfNodeHandoverDesc', module: 'DO', screens: ['DO21', 'DO22'], x: 500, y: 540, w: 160, h: 56 },
+  { id: 'invoice', labelKey: 'bfNodeInvoice', descKey: 'bfNodeInvoiceDesc', module: 'FA', screens: ['FA01', 'FA05', 'FA10'], x: 460, y: 660, w: 160, h: 64 },
+  { id: 'vat', labelKey: 'bfNodeVat', descKey: 'bfNodeVatDesc', module: 'BW', screens: ['BW05', 'BW40'], x: 260, y: 770, w: 140, h: 56 },
+  { id: 'purchase', labelKey: 'bfNodePurchase', descKey: 'bfNodePurchaseDesc', module: 'PU', screens: ['PU01', 'PU05'], x: 460, y: 770, w: 140, h: 56 },
+  { id: 'bookkeeping', labelKey: 'bfNodeBookkeeping', descKey: 'bfNodeBookkeepingDesc', module: 'BK', screens: ['BK10'], x: 660, y: 770, w: 140, h: 56 },
   { id: 'dashboard', labelKey: 'bfNodeDashboard', descKey: 'bfNodeDashboardDesc', module: 'RP', screens: ['RP01'], x: 700, y: 40, w: 140, h: 56 },
   { id: 'reports', labelKey: 'bfNodeReports', descKey: 'bfNodeReportsDesc', module: 'RP', screens: ['RP10'], x: 700, y: 130, w: 140, h: 56 },
-  { id: 'documents', labelKey: 'bfNodeDocuments', descKey: 'bfNodeDocumentsDesc', module: 'DO', screens: ['DO03', 'DO05'], x: 60, y: 620, w: 150, h: 56 },
-  { id: 'notifications', labelKey: 'bfNodeNotifications', descKey: 'bfNodeNotificationsDesc', module: 'SY', screens: ['SY05'], x: 700, y: 230, w: 140, h: 56 },
+  { id: 'analytics', labelKey: 'bfNodeAnalytics', descKey: 'bfNodeAnalyticsDesc', module: 'SY', screens: ['AN05'], x: 700, y: 210, w: 140, h: 48 },
+  { id: 'documents', labelKey: 'bfNodeDocuments', descKey: 'bfNodeDocumentsDesc', module: 'DO', screens: ['DO03', 'DO05'], x: 60, y: 660, w: 150, h: 56 },
+  { id: 'notifications', labelKey: 'bfNodeNotifications', descKey: 'bfNodeNotificationsDesc', module: 'SY', screens: ['SY05'], x: 700, y: 290, w: 140, h: 56 },
+  { id: 'settings', labelKey: 'bfNodeSettings', descKey: 'bfNodeSettingsDesc', module: 'SY', screens: ['SY01', 'SY02', 'SY03', 'SY06', 'SY10'], x: 60, y: 770, w: 150, h: 56 },
 ];
 
 const EDGES: FlowEdge[] = [
@@ -74,12 +80,17 @@ const EDGES: FlowEdge[] = [
   { from: 'lead', to: 'offer', labelKey: 'bfEdgeQuote', style: 'dashed' },
   { from: 'customer', to: 'offer' },
   { from: 'vehicle', to: 'offer' },
+  { from: 'customer', to: 'portfolio', style: 'dashed' },
+  { from: 'offer', to: 'portfolio', style: 'dashed' },
+  { from: 'portfolio', to: 'job', labelKey: 'bfEdgeCreate' },
   { from: 'offer', to: 'job', labelKey: 'bfEdgeApproved' },
   { from: 'job', to: 'parts' },
   { from: 'job', to: 'tasks' },
   { from: 'job', to: 'appointment', style: 'dashed' },
+  { from: 'job', to: 'inspection', labelKey: 'bfEdgeInspect' },
   { from: 'job', to: 'repairorder', labelKey: 'bfEdgeApprovedStage' },
   { from: 'job', to: 'handover', labelKey: 'bfEdgeReadyStage' },
+  { from: 'inspection', to: 'documents' },
   { from: 'handover', to: 'invoice', labelKey: 'bfEdgeDelivered' },
   { from: 'offer', to: 'invoice', labelKey: 'bfEdgeCreate', style: 'dashed' },
   { from: 'invoice', to: 'vat' },
@@ -93,12 +104,14 @@ const EDGES: FlowEdge[] = [
   { from: 'invoice', to: 'dashboard', style: 'dashed' },
   { from: 'invoice', to: 'reports', style: 'dashed' },
   { from: 'tasks', to: 'reports', style: 'dashed' },
+  { from: 'dashboard', to: 'analytics', style: 'dashed' },
   { from: 'lead', to: 'notifications', style: 'dashed' },
   { from: 'job', to: 'notifications', style: 'dashed' },
   { from: 'invoice', to: 'notifications', style: 'dashed' },
   { from: 'appointment', to: 'notifications', style: 'dashed' },
   { from: 'repairorder', to: 'documents' },
   { from: 'handover', to: 'documents' },
+  { from: 'inspection', to: 'handover', style: 'dashed' },
 ];
 
 /* ── Job pipeline stages ────────────────────────────────────────────── */
@@ -183,7 +196,7 @@ export function BusinessFlowChart() {
           <span className="text-[10px] text-[#6b6b80]">{tSy('bfHint')}</span>
         </div>
         <div className="overflow-x-auto">
-          <svg viewBox="0 0 900 800" className="w-full min-w-[700px]" style={{ maxHeight: '520px' }}>
+          <svg viewBox="0 0 900 860" className="w-full min-w-[700px]" style={{ maxHeight: '560px' }}>
             <defs>
               <marker id="arrow" viewBox="0 0 10 7" refX="9" refY="3.5" markerWidth="8" markerHeight="6" orient="auto-start-reverse">
                 <path d="M0,0 L10,3.5 L0,7 Z" fill="#4a4a5a" />
@@ -393,6 +406,8 @@ export function BusinessFlowChart() {
             { nameKey: 'bfSmVatReturn', module: 'BW', states: ['open', 'draft', 'filed', 'corrected'], terminal: ['filed'] },
             { nameKey: 'bfSmAppointment', module: 'AP', states: ['requested', 'confirmed', 'completed', 'cancelled'], terminal: ['completed', 'cancelled'] },
             { nameKey: 'bfSmHandover', module: 'DO', states: ['draft', 'issued', 'shared', 'signed'], terminal: ['signed'] },
+            { nameKey: 'bfSmInspection', module: 'IN', states: ['requested', 'in_progress', 'completed', 'cancelled'], terminal: ['completed', 'cancelled'] },
+            { nameKey: 'bfSmPortfolio', module: 'PF', states: ['open', 'active', 'completed', 'archived'], terminal: ['completed', 'archived'] },
           ].map(sm => {
             const c = MOD_HEX[sm.module] ?? MOD_HEX.SY;
             return (
@@ -431,17 +446,19 @@ export function BusinessFlowChart() {
             { code: 'KL', nameKey: 'bfModCustomers', screens: ['KL01', 'KL02', 'KL03', 'KL05'] },
             { code: 'VH', nameKey: 'bfModVehicles', screens: ['VH01', 'VH05', 'VH10'] },
             { code: 'ES', nameKey: 'bfModOffers', screens: ['ES01', 'ES05', 'ES10'] },
+            { code: 'PF', nameKey: 'bfModPortfolio', screens: ['PF01', 'PF05', 'PF10'] },
             { code: 'JB', nameKey: 'bfModJobs', screens: ['JB01', 'JB05', 'JB10', 'JB15'] },
             { code: 'PT', nameKey: 'bfModParts', screens: ['PT01', 'PT05'] },
             { code: 'TS', nameKey: 'bfModTasks', screens: ['TS01', 'TS05', 'TS10'] },
             { code: 'FA', nameKey: 'bfModInvoices', screens: ['FA01', 'FA05', 'FA10'] },
             { code: 'DO', nameKey: 'bfModDocuments', screens: ['DO03', 'DO05', 'DO20', 'DO21', 'DO22'] },
             { code: 'AP', nameKey: 'bfModAppointments', screens: ['AP01', 'AP05', 'AP10'] },
+            { code: 'IN', nameKey: 'bfModInspections', screens: ['IN01', 'IN05', 'IN10', 'IN15'] },
             { code: 'RP', nameKey: 'bfModReports', screens: ['RP01', 'RP10'] },
             { code: 'BW', nameKey: 'bfModVat', screens: ['BW05', 'BW40'] },
             { code: 'PU', nameKey: 'bfModPurchases', screens: ['PU01', 'PU05'] },
             { code: 'BK', nameKey: 'bfModBookkeeping', screens: ['BK10'] },
-            { code: 'SY', nameKey: 'bfModSystem', screens: ['SY01', 'SY02', 'SY03', 'SY05', 'SY06', 'SY10', 'SY15', 'SY20', 'SY25', 'SY30', 'SY35', 'SY40', 'SY45', 'SY50', 'SY55', 'SY60', 'AN05'] },
+            { code: 'SY', nameKey: 'bfModSystem', screens: ['SY01', 'SY02', 'SY03', 'SY05', 'SY06', 'SY10', 'SY15', 'SY20', 'SY25', 'SY30', 'SY35', 'SY40', 'SY45', 'SY50', 'SY55', 'SY60', 'SY65', 'AN05'] },
           ].map(m => {
             const c = MOD_HEX[m.code] ?? MOD_HEX.SY;
             return (
