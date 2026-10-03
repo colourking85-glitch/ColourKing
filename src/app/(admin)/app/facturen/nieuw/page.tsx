@@ -609,7 +609,7 @@ export default function CreateInvoicePage() {
       {/* Invoice settings */}
       <div className="rounded-[10px] border-[0.5px] border-ck-border bg-ck-surface p-5">
         <h2 className="mb-4 text-xs font-medium uppercase tracking-wider text-ck-text-muted">{t('invoiceSettings')}</h2>
-        <div className="grid gap-4 sm:grid-cols-3">
+        <div className="grid gap-4 sm:grid-cols-4">
           <div>
             <label className="mb-1 block text-[11px] text-ck-text-muted">{t('invoiceNumber')}</label>
             <div className="w-full rounded-[10px] border-[0.5px] border-ck-border bg-ck-bg px-3 py-2 font-mono text-sm tabular-nums text-ck-red">
@@ -646,7 +646,7 @@ export default function CreateInvoicePage() {
               <option value="tr">TR — Türkçe</option>
             </select>
           </div>
-          <div className="sm:col-span-2">
+          <div className="sm:col-span-4">
             <label className="mb-1 block text-[11px] text-ck-text-muted">
               {t('notes')} <span className="text-ck-text-faint">({t('notesOnInvoice')})</span>
             </label>
@@ -658,7 +658,7 @@ export default function CreateInvoicePage() {
               placeholder={invoiceType === 'deposit' ? t('depositNotesPlaceholder') : t('notesPlaceholder')}
             />
           </div>
-          <div className="sm:col-span-3">
+          <div className="sm:col-span-4">
             <label className="mb-1 block text-[11px] text-ck-text-muted">{t('paymentTerms')}</label>
             <textarea
               value={terms}
