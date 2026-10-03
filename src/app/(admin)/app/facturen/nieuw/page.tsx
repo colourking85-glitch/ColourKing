@@ -41,7 +41,6 @@ type LineItem = {
   quantity: number;
   unit: string;
   unit_price_cents: number;
-  discount_pct: number;
   tax_code: TaxCode;
 };
 
@@ -153,7 +152,6 @@ export default function CreateInvoicePage() {
       quantity: 1,
       unit: 'st',
       unit_price_cents: 0,
-      discount_pct: 0,
       tax_code: 'H21',
     }]);
   };
@@ -167,9 +165,7 @@ export default function CreateInvoicePage() {
   };
 
   const calcLineTotal = (line: LineItem) => {
-    const gross = Math.round(line.quantity * line.unit_price_cents);
-    const disc = Math.round(gross * line.discount_pct / 100);
-    return gross - disc;
+    return Math.round(line.quantity * line.unit_price_cents);
   };
 
   const calcLineVat = (line: LineItem) => {
@@ -239,7 +235,7 @@ export default function CreateInvoicePage() {
               quantity: line.quantity,
               unit: line.unit,
               unit_price_cents: line.unit_price_cents,
-              discount_pct: line.discount_pct,
+              discount_pct: 0,
               tax_code: line.tax_code,
             }),
           });
@@ -571,9 +567,6 @@ export default function CreateInvoicePage() {
                           <option key={k} value={k}>{t(`kind_${k}`)}</option>
                         ))}
                       </select>
-                      {line.discount_pct > 0 && (
-                        <span className="text-[11px] text-red-400">-{line.discount_pct}%</span>
-                      )}
                     </div>
                     <span className="font-mono text-sm tabular-nums text-ck-text-2">
                       {formatCents(calcLineTotal(line) + calcLineVat(line))}

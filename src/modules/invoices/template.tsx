@@ -75,6 +75,10 @@ function fmtNumber(n: number, locale: string): string {
   return new Intl.NumberFormat(loc, { minimumFractionDigits: 0, maximumFractionDigits: 2 }).format(n);
 }
 
+const TAX_RATES_DISPLAY: Record<string, string> = {
+  H21: '21', L9: '9', N0: '0', V0: '0', M0: '0', ICP: '0', EX: '0',
+};
+
 type LocaleStrings = Record<string, string>;
 
 const LOCALES: Record<string, LocaleStrings> = {
@@ -326,7 +330,6 @@ export function InvoiceTemplate({ invoice, company: c }: { invoice: InvoiceData;
               { text: t.description, align: 'left' as const },
               { text: t.quantity, align: 'right' as const, width: '70px' },
               { text: t.unitPrice, align: 'right' as const, width: '90px' },
-              { text: t.discount, align: 'right' as const, width: '65px' },
               { text: t.vat, align: 'right' as const, width: '75px' },
               { text: t.total, align: 'right' as const, width: '95px' },
             ].map((col, i) => (
@@ -363,10 +366,7 @@ export function InvoiceTemplate({ invoice, company: c }: { invoice: InvoiceData;
                 {fmtCurrency(line.unit_price_cents, locale)}
               </td>
               <td className="inv-mono" style={{ padding: '9px 8px', textAlign: 'right', fontSize: '13px', color: '#8a8aa0' }}>
-                {Number(line.discount_pct) > 0 ? `${fmtNumber(Number(line.discount_pct), locale)}%` : '—'}
-              </td>
-              <td className="inv-mono" style={{ padding: '9px 8px', textAlign: 'right', fontSize: '13px', color: '#8a8aa0' }}>
-                {fmtCurrency(line.vat_amount_cents, locale)}
+                {fmtCurrency(line.vat_amount_cents, locale)} <span style={{ fontSize: '11px' }}>({TAX_RATES_DISPLAY[line.tax_code] ?? '0'}%)</span>
               </td>
               <td className="inv-mono" style={{ padding: '9px 8px', textAlign: 'right', fontSize: '13.5px', fontWeight: 600, color: '#2a2a4a' }}>
                 {fmtCurrency(line.line_total_cents, locale)}
@@ -378,34 +378,6 @@ export function InvoiceTemplate({ invoice, company: c }: { invoice: InvoiceData;
 
       {/* Totals + VAT summary */}
       <div style={{ display: 'flex', gap: '32px', marginBottom: '28px' }}>
-        {/* VAT summary */}
-        {invoice.tax_summary && Object.keys(invoice.tax_summary).length > 0 && (
-          <div style={{ flex: 1 }}>
-            <div style={{ fontSize: '11px', textTransform: 'uppercase', letterSpacing: '0.08em', color: '#8a8aa0', marginBottom: '8px', fontWeight: 600 }}>
-              {t.vatSummary}
-            </div>
-            <table style={{ width: '100%', fontSize: '13px' }}>
-              <thead>
-                <tr style={{ borderBottom: '1px solid #e8e8f0' }}>
-                  {[t.taxCode, t.taxRate, t.taxBase, t.taxAmount].map((h, i) => (
-                    <th key={i} style={{ padding: '5px 8px', textAlign: i === 0 ? 'left' : 'right', fontSize: '11px', color: '#8a8aa0', fontWeight: 500 }}>{h}</th>
-                  ))}
-                </tr>
-              </thead>
-              <tbody>
-                {Object.entries(invoice.tax_summary).map(([code, val]) => (
-                  <tr key={code} style={{ borderBottom: '1px solid #f4f4f8' }}>
-                    <td className="inv-mono" style={{ padding: '5px 8px', fontSize: '12px', color: '#4a4a6a' }}>{code}</td>
-                    <td className="inv-mono" style={{ padding: '5px 8px', textAlign: 'right', fontSize: '12px', color: '#4a4a6a' }}>{val.rate}%</td>
-                    <td className="inv-mono" style={{ padding: '5px 8px', textAlign: 'right', fontSize: '12px', color: '#4a4a6a' }}>{fmtCurrency(val.base_cents, locale)}</td>
-                    <td className="inv-mono" style={{ padding: '5px 8px', textAlign: 'right', fontSize: '12px', color: '#4a4a6a' }}>{fmtCurrency(val.vat_cents, locale)}</td>
-                  </tr>
-                ))}
-              </tbody>
-            </table>
-          </div>
-        )}
-
         {/* Grand total */}
         <div style={{ width: '260px', marginLeft: 'auto' }}>
           <div style={{ borderTop: '1px solid #e8e8f0', paddingTop: '8px' }}>
@@ -413,12 +385,6 @@ export function InvoiceTemplate({ invoice, company: c }: { invoice: InvoiceData;
               <span style={{ color: '#8a8aa0' }}>{t.subtotal}</span>
               <span className="inv-mono" style={{ color: '#4a4a6a' }}>{fmtCurrency(invoice.subtotal_cents, locale)}</span>
             </div>
-            {invoice.discount_cents !== 0 && (
-              <div style={{ display: 'flex', justifyContent: 'space-between', padding: '4px 0', fontSize: '14px' }}>
-                <span style={{ color: '#8a8aa0' }}>{t.discount}</span>
-                <span className="inv-mono" style={{ color: '#dc2626' }}>-{fmtCurrency(Math.abs(invoice.discount_cents), locale)}</span>
-              </div>
-            )}
             <div style={{ display: 'flex', justifyContent: 'space-between', padding: '4px 0', fontSize: '14px' }}>
               <span style={{ color: '#8a8aa0' }}>{t.vat}</span>
               <span className="inv-mono" style={{ color: '#4a4a6a' }}>{fmtCurrency(invoice.vat_cents, locale)}</span>
