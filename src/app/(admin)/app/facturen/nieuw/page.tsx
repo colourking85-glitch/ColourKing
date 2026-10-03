@@ -608,7 +608,14 @@ export default function CreateInvoicePage() {
 
       {/* Invoice settings */}
       <div className="rounded-[10px] border-[0.5px] border-ck-border bg-ck-surface p-5">
-        <h2 className="mb-4 text-xs font-medium uppercase tracking-wider text-ck-text-muted">{t('invoiceSettings')}</h2>
+        <div className="mb-4 flex items-center gap-3">
+          <h2 className="text-xs font-medium uppercase tracking-wider text-ck-text-muted">{t('invoiceSettings')}</h2>
+          {nextNumber && (
+            <span className="rounded-md border-[0.5px] border-ck-red/30 bg-ck-red/5 px-2.5 py-0.5 font-mono text-xs tabular-nums text-ck-red">
+              {nextNumber}
+            </span>
+          )}
+        </div>
         <div className="grid gap-4 sm:grid-cols-3">
           <div>
             <label className="mb-1 block text-[11px] text-ck-text-muted">{t('invoiceDate')}</label>
