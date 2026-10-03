@@ -1667,6 +1667,7 @@
     "invoiceDate": "Fatura tarihi",
     "dueDate": "Son ödeme tarihi",
     "notes": "Notlar",
+    "notesOnInvoice": "faturada görünür",
     "terms": "Şartlar",
     "draft": "Taslak",
     "sent": "Gönderildi",

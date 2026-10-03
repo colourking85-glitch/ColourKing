@@ -1667,6 +1667,7 @@
     "invoiceDate": "Factuurdatum",
     "dueDate": "Vervaldatum",
     "notes": "Notities",
+    "notesOnInvoice": "verschijnt op factuur",
     "terms": "Voorwaarden",
     "draft": "Concept",
     "sent": "Verzonden",

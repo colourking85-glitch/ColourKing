@@ -608,15 +608,14 @@ export default function CreateInvoicePage() {
 
       {/* Invoice settings */}
       <div className="rounded-[10px] border-[0.5px] border-ck-border bg-ck-surface p-5">
-        <div className="mb-4 flex items-center gap-3">
-          <h2 className="text-xs font-medium uppercase tracking-wider text-ck-text-muted">{t('invoiceSettings')}</h2>
-          {nextNumber && (
-            <span className="rounded-md border-[0.5px] border-ck-red/30 bg-ck-red/5 px-2.5 py-0.5 font-mono text-xs tabular-nums text-ck-red">
-              {nextNumber}
-            </span>
-          )}
-        </div>
+        <h2 className="mb-4 text-xs font-medium uppercase tracking-wider text-ck-text-muted">{t('invoiceSettings')}</h2>
         <div className="grid gap-4 sm:grid-cols-3">
+          <div>
+            <label className="mb-1 block text-[11px] text-ck-text-muted">{t('invoiceNumber')}</label>
+            <div className="w-full rounded-[10px] border-[0.5px] border-ck-border bg-ck-bg px-3 py-2 font-mono text-sm tabular-nums text-ck-red">
+              {nextNumber || '—'}
+            </div>
+          </div>
           <div>
             <label className="mb-1 block text-[11px] text-ck-text-muted">{t('invoiceDate')}</label>
             <DateInput
@@ -637,25 +636,20 @@ export default function CreateInvoicePage() {
           </div>
           <div>
             <label className="mb-1 block text-[11px] text-ck-text-muted">{t('language')}</label>
-            <div className="flex gap-1">
-              {(['nl', 'en', 'tr'] as const).map(lang => (
-                <button
-                  key={lang}
-                  type="button"
-                  onClick={() => setInvoiceLocale(lang)}
-                  className={`flex-1 rounded-[10px] border-[0.5px] px-3 py-2 text-sm font-mono uppercase transition-colors ${
-                    invoiceLocale === lang
-                      ? 'border-ck-red bg-ck-red/10 text-ck-red font-medium'
-                      : 'border-ck-border text-ck-text-3 hover:border-ck-text-muted'
-                  }`}
-                >
-                  {lang}
-                </button>
-              ))}
-            </div>
+            <select
+              value={invoiceLocale}
+              onChange={e => setInvoiceLocale(e.target.value)}
+              className="w-full rounded-[10px] border-[0.5px] border-ck-border bg-ck-surface px-3 py-2 text-sm text-ck-text focus:border-ck-red focus:outline-none"
+            >
+              <option value="nl">NL — Nederlands</option>
+              <option value="en">EN — English</option>
+              <option value="tr">TR — Türkçe</option>
+            </select>
           </div>
-          <div>
-            <label className="mb-1 block text-[11px] text-ck-text-muted">{t('notes')}</label>
+          <div className="sm:col-span-2">
+            <label className="mb-1 block text-[11px] text-ck-text-muted">
+              {t('notes')} <span className="text-ck-text-faint">({t('notesOnInvoice')})</span>
+            </label>
             <input
               type="text"
               value={notes}

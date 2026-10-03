@@ -1667,6 +1667,7 @@
     "invoiceDate": "Invoice date",
     "dueDate": "Due date",
     "notes": "Notes",
+    "notesOnInvoice": "appears on invoice",
     "terms": "Terms",
     "draft": "Draft",
     "sent": "Sent",
