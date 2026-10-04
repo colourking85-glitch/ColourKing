@@ -3782,6 +3782,7 @@
   },
   "support": {
     "title": "Support",
+    "notice": "Create a support ticket to report issues or request help. If you are unable to create a ticket, please email",
     "newCase": "New Case",
     "noCases": "No cases found",
     "createFirst": "Create your first support case",

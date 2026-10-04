@@ -3782,6 +3782,7 @@
   },
   "support": {
     "title": "Destek",
+    "notice": "Sorun bildirmek veya yardım istemek için bir destek talebi oluşturun. Talep oluşturamıyorsanız, lütfen e-posta gönderin:",
     "newCase": "Yeni Talep",
     "noCases": "Talep bulunamadı",
     "createFirst": "İlk destek talebinizi oluşturun",

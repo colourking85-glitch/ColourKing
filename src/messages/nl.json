@@ -3782,6 +3782,7 @@
   },
   "support": {
     "title": "Support",
+    "notice": "Maak een supportticket aan om problemen te melden of hulp te vragen. Als u geen ticket kunt aanmaken, stuur dan een e-mail naar",
     "newCase": "Nieuwe Case",
     "noCases": "Geen cases gevonden",
     "createFirst": "Maak uw eerste support case aan",

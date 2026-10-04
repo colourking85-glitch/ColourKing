@@ -278,6 +278,14 @@ export default function SupportPage() {
         </div>
       </div>
 
+      {/* Notice */}
+      <p className="mb-4 text-[13px] text-ck-text-muted">
+        {t('notice')}{' '}
+        <a href="mailto:support@dessystems.io" className="text-ck-red hover:underline">
+          support@dessystems.io
+        </a>
+      </p>
+
       {error && (
         <div className="mb-4 rounded-lg border border-red-500/30 bg-red-500/10 px-4 py-3 text-[13px] text-red-400">
           {error}
