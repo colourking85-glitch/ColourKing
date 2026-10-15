@@ -163,6 +163,8 @@ const STRINGS: Record<string, EmailStrings> = {
     reviewVehicle: 'Voertuig',
     reviewJob: 'Opdrachtnummer',
     reviewCta: 'Beoordeling achterlaten',
+    reviewGoogleIntro: 'Wilt u ons ook helpen op Google? Een Google-beoordeling helpt andere klanten ons te vinden.',
+    reviewGoogleCta: 'Beoordeel ons op Google',
     reviewFooter: 'Uw feedback helpt ons om onze service te verbeteren. Bedankt voor uw tijd!',
   },
 
@@ -281,6 +283,8 @@ const STRINGS: Record<string, EmailStrings> = {
     reviewVehicle: 'Vehicle',
     reviewJob: 'Job number',
     reviewCta: 'Leave a Review',
+    reviewGoogleIntro: 'Would you also like to help us on Google? A Google review helps other customers find us.',
+    reviewGoogleCta: 'Review us on Google',
     reviewFooter: 'Your feedback helps us improve our service. Thank you for your time!',
   },
 
@@ -399,6 +403,8 @@ const STRINGS: Record<string, EmailStrings> = {
     reviewVehicle: 'Araç',
     reviewJob: 'İş numarası',
     reviewCta: 'Değerlendirme Bırak',
+    reviewGoogleIntro: 'Google\'da da bize yardımcı olmak ister misiniz? Bir Google değerlendirmesi diğer müşterilerin bizi bulmasına yardımcı olur.',
+    reviewGoogleCta: 'Google\'da değerlendir',
     reviewFooter: 'Geri bildiriminiz hizmetimizi geliştirmemize yardımcı olur. Zaman ayırdığınız için teşekkürler!',
   },
 };
@@ -761,6 +767,8 @@ function renderHandoverShare(data: TemplateDataMap['handoverShare'], locale: Ema
     ${paragraph(`<span style="color:#6b7280;font-size:12px;">${t(locale, 'handoverExpiry')}</span>`)}`;
 }
 
+const GOOGLE_REVIEW_URL = 'https://g.page/r/CXMy6BYQ3Lo0EBM/review';
+
 function renderReviewRequest(data: TemplateDataMap['reviewRequest'], locale: EmailLocale): string {
   return `
     ${greeting(locale, data.customerName)}
@@ -770,6 +778,9 @@ function renderReviewRequest(data: TemplateDataMap['reviewRequest'], locale: Ema
       (data.jobNumber ? detailRow(t(locale, 'reviewJob'), data.jobNumber) : '')
     )}
     <div style="text-align:center;margin:24px 0;">${ctaButton(t(locale, 'reviewCta'), data.reviewUrl)}</div>
+    ${divider()}
+    ${paragraph(t(locale, 'reviewGoogleIntro'))}
+    <div style="text-align:center;margin:16px 0;">${ctaButton(t(locale, 'reviewGoogleCta'), GOOGLE_REVIEW_URL, true)}</div>
     ${paragraph(`<span style="color:#6b7280;font-size:13px;">${t(locale, 'reviewFooter')}</span>`)}`;
 }
 
