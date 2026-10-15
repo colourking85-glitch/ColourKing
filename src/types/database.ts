@@ -3339,6 +3339,63 @@ export type Database = {
           },
         ]
       }
+      reviews: {
+        Row: {
+          id: string
+          job_id: string | null
+          customer_id: string | null
+          rating: number | null
+          comment: string | null
+          review_token: string
+          locale: string
+          requested_at: string
+          responded_at: string | null
+          published: boolean
+          created_at: string
+        }
+        Insert: {
+          id?: string
+          job_id?: string | null
+          customer_id?: string | null
+          rating?: number | null
+          comment?: string | null
+          review_token: string
+          locale?: string
+          requested_at?: string
+          responded_at?: string | null
+          published?: boolean
+          created_at?: string
+        }
+        Update: {
+          id?: string
+          job_id?: string | null
+          customer_id?: string | null
+          rating?: number | null
+          comment?: string | null
+          review_token?: string
+          locale?: string
+          requested_at?: string
+          responded_at?: string | null
+          published?: boolean
+          created_at?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "reviews_job_id_fkey"
+            columns: ["job_id"]
+            isOneToOne: false
+            referencedRelation: "jobs"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "reviews_customer_id_fkey"
+            columns: ["customer_id"]
+            isOneToOne: false
+            referencedRelation: "customers"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       resources: {
         Row: {
           active: boolean
@@ -4122,6 +4179,7 @@ export type Database = {
         | "offer_expiring"
         | "appointment_reminder"
         | "vehicle_ready"
+        | "review_request"
       repair_network: "none" | "schadegarant" | "topherstel" | "other"
       replacement_vehicle_policy:
         | "included"
@@ -4424,6 +4482,7 @@ export const Constants = {
         "offer_expiring",
         "appointment_reminder",
         "vehicle_ready",
+        "review_request",
       ],
       repair_network: ["none", "schadegarant", "topherstel", "other"],
       replacement_vehicle_policy: [

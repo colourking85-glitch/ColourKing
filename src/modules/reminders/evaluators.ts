@@ -222,6 +222,40 @@ export function evaluateAppointments(rows: AppointmentRow[], nowMs: number, cfg:
   return out;
 }
 
+export type ReviewCandidateRow = {
+  id: string;
+  job_number: string | null;
+  stage: string;
+  updated_at: string | null;
+  customers: CustomerRef;
+};
+
+/** Jobs delivered X days ago without a review request yet. */
+export function evaluateReviewRequests(
+  rows: ReviewCandidateRow[],
+  nowMs: number,
+  delayDays: number,
+): Candidate[] {
+  const delay = delayDays * 24 * HOUR;
+  return rows
+    .filter((j) => {
+      if (!j.updated_at) return false;
+      const deliveredMs = Date.parse(j.updated_at);
+      return nowMs >= deliveredMs + delay && nowMs - (deliveredMs + delay) < GRACE_MS;
+    })
+    .filter((j) => !customerBlocked(pickCustomer(j.customers)))
+    .map((j) => {
+      const customer = pickCustomer(j.customers);
+      return {
+        kind: 'review_request' as const, entityType: 'job' as const, entityId: j.id, stage: `+${delayDays}d`,
+        recipient: customer?.email ?? null,
+        locale: validLocale(customer?.locale),
+        sender: 'workshop' as const,
+        data: {},
+      };
+    });
+}
+
 /** Jobs sitting in `ready` — the actual email is rendered by sendVehicleReady(). */
 export function evaluateJobs(rows: JobRow[], cfg: ReminderSettings): Candidate[] {
   if (!cfg.vehicle_ready.enabled) return [];

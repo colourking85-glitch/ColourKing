@@ -156,6 +156,14 @@ const STRINGS: Record<string, EmailStrings> = {
     handoverDoc: 'Documentnummer',
     handoverView: 'Afleverbon bekijken en ondertekenen',
     handoverExpiry: 'De link is 30 dagen geldig.',
+
+    // Review request
+    reviewSubject: 'Hoe was uw ervaring bij Colourking?',
+    reviewIntro: 'Uw voertuig is onlangs bij ons afgeleverd. Wij horen graag hoe u de service heeft ervaren.',
+    reviewVehicle: 'Voertuig',
+    reviewJob: 'Opdrachtnummer',
+    reviewCta: 'Beoordeling achterlaten',
+    reviewFooter: 'Uw feedback helpt ons om onze service te verbeteren. Bedankt voor uw tijd!',
   },
 
   en: {
@@ -266,6 +274,14 @@ const STRINGS: Record<string, EmailStrings> = {
     handoverDoc: 'Document number',
     handoverView: 'View and sign handover note',
     handoverExpiry: 'The link is valid for 30 days.',
+
+    // Review request
+    reviewSubject: 'How was your experience at Colourking?',
+    reviewIntro: 'Your vehicle was recently delivered back to you. We would love to hear about your experience with our service.',
+    reviewVehicle: 'Vehicle',
+    reviewJob: 'Job number',
+    reviewCta: 'Leave a Review',
+    reviewFooter: 'Your feedback helps us improve our service. Thank you for your time!',
   },
 
   tr: {
@@ -376,6 +392,14 @@ const STRINGS: Record<string, EmailStrings> = {
     handoverDoc: 'Belge numarasi',
     handoverView: 'Teslim belgesini goruntule ve imzala',
     handoverExpiry: 'Baglanti 30 gun gecerlidir.',
+
+    // Review request
+    reviewSubject: 'Colourking deneyiminiz nasıldı?',
+    reviewIntro: 'Aracınız yakın zamanda size teslim edildi. Hizmetimiz hakkındaki deneyiminizi duymak isteriz.',
+    reviewVehicle: 'Araç',
+    reviewJob: 'İş numarası',
+    reviewCta: 'Değerlendirme Bırak',
+    reviewFooter: 'Geri bildiriminiz hizmetimizi geliştirmemize yardımcı olur. Zaman ayırdığınız için teşekkürler!',
   },
 };
 
@@ -737,6 +761,18 @@ function renderHandoverShare(data: TemplateDataMap['handoverShare'], locale: Ema
     ${paragraph(`<span style="color:#6b7280;font-size:12px;">${t(locale, 'handoverExpiry')}</span>`)}`;
 }
 
+function renderReviewRequest(data: TemplateDataMap['reviewRequest'], locale: EmailLocale): string {
+  return `
+    ${greeting(locale, data.customerName)}
+    ${paragraph(t(locale, 'reviewIntro'))}
+    ${detailTable(
+      (data.vehicleInfo ? detailRow(t(locale, 'reviewVehicle'), data.vehicleInfo) : '') +
+      (data.jobNumber ? detailRow(t(locale, 'reviewJob'), data.jobNumber) : '')
+    )}
+    <div style="text-align:center;margin:24px 0;">${ctaButton(t(locale, 'reviewCta'), data.reviewUrl)}</div>
+    ${paragraph(`<span style="color:#6b7280;font-size:13px;">${t(locale, 'reviewFooter')}</span>`)}`;
+}
+
 /* ── Public API ────────────────────────────────────────────── */
 
 const RENDERERS: Record<string, (data: unknown, locale: EmailLocale) => string> = {
@@ -751,6 +787,7 @@ const RENDERERS: Record<string, (data: unknown, locale: EmailLocale) => string> 
   paymentReceived: (d, l) => renderPaymentReceived(d as TemplateDataMap['paymentReceived'], l),
   leadReceived: (d, l) => renderLeadReceived(d as TemplateDataMap['leadReceived'], l),
   vehicleReady: (d, l) => renderVehicleReady(d as TemplateDataMap['vehicleReady'], l),
+  reviewRequest: (d, l) => renderReviewRequest(d as TemplateDataMap['reviewRequest'], l),
 };
 
 /**
@@ -788,6 +825,7 @@ export function getSubject<T extends keyof TemplateDataMap>(
     leadReceived: 'leadSubject',
     vehicleReady: 'readySubject',
     handoverShare: 'handoverSubject',
+    reviewRequest: 'reviewSubject',
   };
   let key = subjectKeys[template];
   if (!key) return 'Colourking';

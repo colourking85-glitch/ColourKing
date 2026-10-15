@@ -10,7 +10,7 @@ import {
   BarChart3, Calculator, ShoppingCart, BookOpen, Settings, Bell,
   ChevronLeft, ChevronRight, ChevronDown, BookOpenCheck, Clock, Bot, Mail, HardDrive, Server,
   Plug, Zap, CarFront, Coins, Shield, Activity, ClipboardCheck, Award, Images, BellRing, CalendarOff,
-  Headphones,
+  Headphones, Star,
 } from 'lucide-react';
 import { ScreenBadge } from '@/components/ui/ScreenBadge';
 import { SCREEN_REGISTRY } from '@/lib/codes';
@@ -84,6 +84,7 @@ const NAV: NavSection[] = [
       { label: 'documents', href: '/app/documenten', icon: FolderOpen, code: 'DO05', permission: 'documents.read' },
       { label: 'handovers', href: '/app/afleverbon', icon: ClipboardList, code: 'DO21', permission: 'documents.read' },
       { label: 'appointments', href: '/app/afspraken', icon: CalendarDays, code: 'AP05', permission: 'appointments.read' },
+      { label: 'reviews', href: '/app/beoordelingen', icon: Star, code: 'RV05' },
     ],
   },
   {

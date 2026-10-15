@@ -630,3 +630,58 @@ export async function onHandoverShared(documentId: string): Promise<SendOutcome>
   });
   return { success: result.success, to, locale, messageId: result.messageId, error: result.error };
 }
+
+/**
+ * Sends a review request email to the customer after job delivery.
+ * Creates a reviews row with a unique token and emails the public review link.
+ */
+export async function onReviewRequest(jobId: string): Promise<SendOutcome> {
+  const { data: job } = await supabase
+    .from('jobs')
+    .select('id, job_number, status, customers(id, name, email, locale), vehicles(kenteken, make, model)')
+    .eq('id', jobId)
+    .single();
+  if (!job) return { success: false, error: 'not_found' };
+
+  const customer = (Array.isArray(job.customers) ? job.customers[0] : job.customers) as Record<string, unknown> | null;
+  const vehicle = (Array.isArray(job.vehicles) ? job.vehicles[0] : job.vehicles) as Record<string, unknown> | null;
+  if (!customer?.email) return { success: false, error: 'no_email' };
+
+  const { data: existing } = await supabase
+    .from('reviews')
+    .select('id')
+    .eq('job_id', jobId)
+    .maybeSingle();
+  if (existing) return { success: false, error: 'already_requested' };
+
+  const token = crypto.randomUUID().replace(/-/g, '');
+  const locale = validLocale((customer.locale as string) ?? 'nl');
+
+  const { error: insertErr } = await supabase.from('reviews').insert({
+    job_id: jobId,
+    customer_id: customer.id as string,
+    review_token: token,
+    locale,
+  });
+  if (insertErr) return { success: false, error: insertErr.message };
+
+  const company = await getCompanyInfo();
+  const vehicleInfo = vehicle ? `${vehicle.kenteken ?? ''} (${vehicle.make ?? ''} ${vehicle.model ?? ''})`.trim() : null;
+  const data = {
+    customerName: String(customer.name ?? ''),
+    vehicleInfo,
+    jobNumber: job.job_number ?? null,
+    reviewUrl: `${APP_URL}/s/review/${token}`,
+  };
+  const html = renderTemplate('reviewRequest', data, locale, company);
+  const subject = getSubject('reviewRequest', data, locale);
+  const to = String(customer.email);
+  const sender = await getSender('workshop');
+  const result = await sendEmail(to, subject, html, sender);
+
+  await logEmail({
+    to, subject, template: 'reviewRequest', locale, ref_type: 'review', ref_id: jobId,
+    status: result.success ? 'sent' : 'failed', error: result.error, from: sender.from, messageId: result.messageId,
+  });
+  return { success: result.success, to, locale, messageId: result.messageId, error: result.error };
+}

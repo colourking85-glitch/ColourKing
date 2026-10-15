@@ -4,14 +4,14 @@ import { getSender } from '@/lib/email-identity';
 import { sendEmail } from '@/modules/email/sender';
 import { renderTemplate, getSubject } from '@/modules/email/templates';
 import { logEmail } from '@/modules/email/log';
-import { sendVehicleReady } from '@/modules/email/triggers';
+import { sendVehicleReady, onReviewRequest } from '@/modules/email/triggers';
 import { normalizeReminderSettings, type ReminderSettings, type EmailTemplateName, type TemplateDataMap } from '@/modules/email/schema';
-import { evaluateInvoices, evaluateOffers, evaluateAppointments, evaluateJobs, localToday, type InvoiceRow, type OfferRow, type AppointmentRow, type JobRow } from './evaluators';
+import { evaluateInvoices, evaluateOffers, evaluateAppointments, evaluateJobs, evaluateReviewRequests, localToday, type InvoiceRow, type OfferRow, type AppointmentRow, type JobRow, type ReviewCandidateRow } from './evaluators';
 import type { Candidate, CandidateResult, ReminderKind, RunReport } from './schema';
 
 const APP_URL = process.env.NEXT_PUBLIC_APP_URL ?? 'https://colourking.nl';
 
-const TEMPLATE_FOR: Record<Exclude<ReminderKind, 'vehicle_ready'>, EmailTemplateName> = {
+const TEMPLATE_FOR: Record<Exclude<ReminderKind, 'vehicle_ready' | 'review_request'>, EmailTemplateName> = {
   invoice_due_soon: 'invoiceDueSoon',
   invoice_overdue: 'invoiceOverdue',
   offer_expiring: 'offerExpiring',
@@ -40,7 +40,7 @@ export async function runReminders(opts: RunOptions = {}): Promise<RunReport> {
   try {
     const cfg = await getReminderSettings();
     const company = await getCompanyInfo();
-    const wanted = new Set<ReminderKind>(opts.kinds ?? ['invoice_due_soon', 'invoice_overdue', 'offer_expiring', 'appointment_reminder', 'vehicle_ready']);
+    const wanted = new Set<ReminderKind>(opts.kinds ?? ['invoice_due_soon', 'invoice_overdue', 'offer_expiring', 'appointment_reminder', 'vehicle_ready', 'review_request']);
     const candidates: Candidate[] = [];
 
     if (wanted.has('invoice_due_soon') || wanted.has('invoice_overdue')) {
@@ -85,6 +85,26 @@ export async function runReminders(opts: RunOptions = {}): Promise<RunReport> {
         .select('id, number, stage, customers(name, email, locale, status)')
         .eq('stage', 'ready');
       candidates.push(...evaluateJobs((jobs ?? []) as unknown as JobRow[], cfg));
+    }
+
+    if (wanted.has('review_request')) {
+      const reviewDelay = ((cfg as Record<string, unknown>).review_request_delay_days as number) ?? 3;
+      const { data: delivered } = await admin
+        .from('jobs')
+        .select('id, job_number:number, stage, updated_at, customers(name, email, locale, status)')
+        .eq('stage', 'delivered');
+      const withoutReview: ReviewCandidateRow[] = [];
+      const jobIds = (delivered ?? []).map(j => j.id);
+      const { data: existingReviews } = jobIds.length
+        ? await admin.from('reviews').select('job_id').in('job_id', jobIds)
+        : { data: [] as Array<{ job_id: string }> };
+      const reviewed = new Set((existingReviews ?? []).map(r => r.job_id));
+      for (const j of delivered ?? []) {
+        if (!reviewed.has(j.id)) {
+          withoutReview.push({ ...j, job_number: j.job_number != null ? String(j.job_number) : null } as unknown as ReviewCandidateRow);
+        }
+      }
+      candidates.push(...evaluateReviewRequests(withoutReview, nowMs, reviewDelay));
     }
 
     report.evaluated = candidates.length;
@@ -165,6 +185,11 @@ async function processCandidate(
 
   if (c.kind === 'vehicle_ready') {
     const r = await sendVehicleReady(c.entityId);
+    return { ...c, status: r.success ? 'sent' : 'failed', messageId: r.messageId ?? null, error: r.error ?? null };
+  }
+
+  if (c.kind === 'review_request') {
+    const r = await onReviewRequest(c.entityId);
     return { ...c, status: r.success ? 'sent' : 'failed', messageId: r.messageId ?? null, error: r.error ?? null };
   }
 

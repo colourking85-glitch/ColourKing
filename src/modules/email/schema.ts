@@ -12,6 +12,7 @@ export const EmailTemplateName = z.enum([
   'leadReceived',
   'vehicleReady',
   'handoverShare',
+  'reviewRequest',
 ]);
 
 export type EmailTemplateName = z.infer<typeof EmailTemplateName>;
@@ -134,6 +135,13 @@ export const HandoverShareData = z.object({
   signUrl: z.string().url(),
 });
 
+export const ReviewRequestData = z.object({
+  customerName: z.string(),
+  vehicleInfo: z.string().nullable().optional(),
+  jobNumber: z.string().nullable().optional(),
+  reviewUrl: z.string().url(),
+});
+
 /* ── Template data union ──────────────────────────────────── */
 
 export const TemplateDataMap = {
@@ -148,6 +156,7 @@ export const TemplateDataMap = {
   leadReceived: LeadReceivedData,
   vehicleReady: VehicleReadyData,
   handoverShare: HandoverShareData,
+  reviewRequest: ReviewRequestData,
 } as const;
 
 export type TemplateDataMap = {

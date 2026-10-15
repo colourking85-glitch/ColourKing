@@ -23,6 +23,7 @@ export const MODULE_COLORS: Record<string, string> = {
   PU: 'bg-pink-900/30 text-pink-400',
   BK: 'bg-teal-900/30 text-teal-400',
   IN: 'bg-yellow-900/30 text-yellow-400',
+  RV: 'bg-red-900/30 text-red-400',
   SY: 'bg-slate-700/30 text-slate-400',
 };
 
@@ -82,6 +83,9 @@ export const SCREEN_REGISTRY: Record<string, ScreenMeta> = {
   '/app/inspecties/nieuw': { id: 'IN01', title: 'Create Inspection', titleNl: 'Inspectie Aanmaken', module: 'IN', route: '/app/inspecties/nieuw' },
   '/app/inspecties/[id]': { id: 'IN10', title: 'Inspection Detail', titleNl: 'Inspectiedetail', module: 'IN', route: '/app/inspecties/[id]' },
   '/app/inspecties/[id]/rapport': { id: 'IN15', title: 'Inspection Report', titleNl: 'Inspectierapport', module: 'IN', route: '/app/inspecties/[id]/rapport' },
+
+  // Reviews
+  '/app/beoordelingen': { id: 'RV05', title: 'Reviews Dashboard', titleNl: 'Beoordelingen', module: 'RV', route: '/app/beoordelingen' },
 
   // Appointments
   '/app/afspraken': { id: 'AP05', title: 'Appointment Calendar', titleNl: 'Afsprakenkalender', module: 'AP', route: '/app/afspraken' },
