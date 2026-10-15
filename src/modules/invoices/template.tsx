@@ -195,7 +195,7 @@ const LOCALES: Record<string, LocaleStrings> = {
   },
 };
 
-const ACCENT = '#c41e3a';
+const ACCENT = '#c8a951';
 
 export function InvoiceTemplate({ invoice, company: c }: { invoice: InvoiceData; company?: CompanyInfo }) {
   const locale = invoice.locale || 'nl';
@@ -403,7 +403,7 @@ export function InvoiceTemplate({ invoice, company: c }: { invoice: InvoiceData;
               <span style={{ color: isCreditNote ? '#9a3412' : '#1a1a2e' }}>
                 {isCreditNote ? t.grandTotalCredit : t.grandTotal}
               </span>
-              <span className="inv-mono" style={{ color: isCreditNote ? '#9a3412' : ACCENT, letterSpacing: '0.01em' }}>
+              <span className="inv-mono" style={{ color: isCreditNote ? '#9a3412' : '#1a1a2e', letterSpacing: '0.01em' }}>
                 {fmtCurrency(invoice.total_cents, locale)}
               </span>
             </div>
