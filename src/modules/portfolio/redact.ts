@@ -19,17 +19,27 @@ export function pixelGrid(regionW: number, regionH: number): { cols: number; row
   return { cols, rows: Math.min(rows, 12) };
 }
 
-export async function loadImage(src: Blob | string): Promise<HTMLImageElement> {
-  const url = typeof src === 'string' ? src : URL.createObjectURL(src);
+export async function loadImage(src: Blob | string): Promise<HTMLImageElement & { _objectUrl?: string }> {
+  const isBlob = typeof src !== 'string';
+  const url = isBlob ? URL.createObjectURL(src) : src;
+  const img = new Image() as HTMLImageElement & { _objectUrl?: string };
+  img.crossOrigin = 'anonymous';
+  img.decoding = 'async';
+  img.src = url;
   try {
-    const img = new Image();
-    img.crossOrigin = 'anonymous';
-    img.decoding = 'async';
-    img.src = url;
     await img.decode();
-    return img;
-  } finally {
-    if (typeof src !== 'string') setTimeout(() => URL.revokeObjectURL(url), 0);
+  } catch (e) {
+    if (isBlob) URL.revokeObjectURL(url);
+    throw e;
+  }
+  if (isBlob) img._objectUrl = url;
+  return img;
+}
+
+export function revokeImage(img: HTMLImageElement & { _objectUrl?: string }) {
+  if (img._objectUrl) {
+    URL.revokeObjectURL(img._objectUrl);
+    img._objectUrl = undefined;
   }
 }
 

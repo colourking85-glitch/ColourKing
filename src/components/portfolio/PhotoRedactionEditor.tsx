@@ -3,7 +3,7 @@
 import { useState, useEffect, useRef, useCallback } from 'react';
 import { useTranslations } from 'next-intl';
 import { X, ScanSearch, Eye, EyeOff, Loader2, ShieldCheck, Trash2 } from 'lucide-react';
-import { loadImage, drawRedacted, canvasToBlob, toDetectionBase64 } from '@/modules/portfolio/redact';
+import { loadImage, revokeImage, drawRedacted, canvasToBlob, toDetectionBase64 } from '@/modules/portfolio/redact';
 import type { RedactionRegion } from '@/modules/portfolio/schema';
 
 type Phase = 'before' | 'during' | 'after';
@@ -76,17 +76,19 @@ export function PhotoRedactionEditor({ projectId, source, defaultPairGroup, onCl
   // Load the image, then ask for AI suggestions
   useEffect(() => {
     let cancelled = false;
+    let loaded: HTMLImageElement | null = null;
     (async () => {
       try {
         const image = await loadImage('file' in source ? source.file : source.url);
-        if (cancelled) return;
+        if (cancelled) { revokeImage(image); return; }
+        loaded = image;
         setImg(image);
         detect(image);
       } catch {
         if (!cancelled) setLoadError(true);
       }
     })();
-    return () => { cancelled = true; };
+    return () => { cancelled = true; if (loaded) revokeImage(loaded); };
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, []);
 
