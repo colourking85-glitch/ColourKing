@@ -450,33 +450,7 @@ export function InvoiceTemplate({ invoice, company: c }: { invoice: InvoiceData;
             </div>
           </div>
 
-          {invoice.payment_token && invoice.status !== 'paid' && (
-            <div style={{ marginTop: '14px', paddingTop: '14px', borderTop: '1px solid #f0f0f5' }}>
-              <div style={{ fontSize: '13px', color: '#5a5a7a', marginBottom: '10px' }}>
-                {t.payOnlineDesc}
-              </div>
-              <a
-                href={`/s/${invoice.payment_token}`}
-                target="_blank"
-                rel="noopener noreferrer"
-                className="no-print"
-                style={{
-                  display: 'inline-flex',
-                  alignItems: 'center',
-                  gap: '6px',
-                  padding: '8px 18px',
-                  backgroundColor: ACCENT,
-                  color: '#fff',
-                  fontSize: '13px',
-                  fontWeight: 600,
-                  borderRadius: '6px',
-                  textDecoration: 'none',
-                }}
-              >
-                {t.payOnline}
-              </a>
-            </div>
-          )}
+          {/* Pay online section hidden for now */}
         </div>
       )}
 
