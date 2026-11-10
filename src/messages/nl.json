@@ -19,6 +19,7 @@
     "no": "Nee",
     "authenticating": "Verifiëren...",
     "saveFailed": "Opslaan mislukt",
+    "vatPeriodLocked": "Periode {period} is aangegeven en vergrendeld voor de BTW. Gebruik een datum in een open periode, of corrigeer via BW05.",
     "saving": "Opslaan...",
     "soon": "Binnenkort",
     "all": "Alles",

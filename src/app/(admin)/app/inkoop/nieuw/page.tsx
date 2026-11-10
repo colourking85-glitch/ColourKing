@@ -7,6 +7,7 @@ import { useTranslations } from 'next-intl';
 import { ArrowLeft, Save } from 'lucide-react';
 import { formatCurrency } from '@/lib/format';
 import { useAppLocale } from '@/components/AdminIntlProvider';
+import { vatLockPeriod } from '@/lib/vat-period';
 
 const CATEGORIES = [
   'general', 'parts', 'paint', 'materials', 'tools',
@@ -83,8 +84,9 @@ export default function CreatePurchasePage() {
       });
 
       if (!res.ok) {
-        const data = await res.json();
-        throw new Error(data.error || tc('saveFailed'));
+        const data = await res.json().catch(() => null);
+        const period = vatLockPeriod(data);
+        throw new Error(period ? tc('vatPeriodLocked', { period }) : data?.error || tc('saveFailed'));
       }
 
       router.push('/app/inkoop');

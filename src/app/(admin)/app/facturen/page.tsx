@@ -12,6 +12,7 @@ import type { InvoiceStatus } from '@/types/database';
 import { formatCurrency } from '@/lib/format';
 import { useAppLocale } from '@/components/AdminIntlProvider';
 import { ScreenBadge } from '@/components/ui/ScreenBadge';
+import { vatLockPeriod } from '@/lib/vat-period';
 
 type InvoiceRow = {
   id: string;
@@ -77,6 +78,7 @@ const ALLOWED_BULK_TARGETS: InvoiceStatus[] = ['sent', 'cancelled', 'overdue', '
 
 export default function InvoiceListPage() {
   const t = useTranslations('fa');
+  const tc = useTranslations('common');
   const { locale } = useAppLocale();
   const formatCents = (c: number) => formatCurrency(c, locale);
   const [invoices, setInvoices] = useState<InvoiceRow[]>([]);
@@ -92,6 +94,7 @@ export default function InvoiceListPage() {
   const [bulkStatus, setBulkStatus] = useState<InvoiceStatus | ''>('');
   const [bulkConfirmStep, setBulkConfirmStep] = useState(0);
   const [bulkProcessing, setBulkProcessing] = useState(false);
+  const [bulkError, setBulkError] = useState('');
 
   const statusLabel = (s: InvoiceStatus): string => {
     const map: Record<InvoiceStatus, string> = { draft: t('draft'), sent: t('sent'), paid: t('paid'), overdue: t('overdue'), cancelled: t('cancelled'), credited: t('credited') };
@@ -161,6 +164,11 @@ export default function InvoiceListPage() {
         body: JSON.stringify({ ids: Array.from(selected), status: bulkStatus }),
       });
       if (res.ok) {
+        const data: { results?: Array<{ ok: boolean }> } = await res.json().catch(() => ({}));
+        const lockedPeriods = Array.from(new Set(
+          (data.results ?? []).filter(r => !r.ok).map(r => vatLockPeriod(r)).filter((p): p is string => !!p)
+        ));
+        setBulkError(lockedPeriods.length ? tc('vatPeriodLocked', { period: lockedPeriods.join(', ') }) : '');
         fetchInvoices();
         setBulkStatus('');
         setBulkConfirmStep(0);
@@ -350,6 +358,12 @@ export default function InvoiceListPage() {
           )}
         </div>
       </div>
+
+      {bulkError && (
+        <div role="alert" className="rounded-[10px] border-[0.5px] border-red-500/40 bg-red-500/10 px-4 py-3 text-sm text-red-400">
+          {bulkError}
+        </div>
+      )}
 
       {/* Bulk action bar */}
       {selected.size > 0 && (

@@ -4,6 +4,7 @@ import { revalidatePath } from 'next/cache';
 import { createClient } from '@/lib/supabase/server';
 import { VatReturnSchema, CalculateVatSchema } from './schema';
 import type { VatPeriodType, TaxCode } from '@/types/database';
+import { vatPeriodRange, VAT_COUNTED_STATUSES } from '@/lib/vat-period';
 
 /** Tax rates matching the Dutch BTW system */
 const TAX_RATES: Record<string, number> = {
@@ -17,7 +18,7 @@ const TAX_RATES: Record<string, number> = {
 };
 
 /**
- * Get date range for a VAT period.
+ * Get date range for a VAT period, in shop time (Europe/Amsterdam).
  * For quarters: Q1=Jan-Mar, Q2=Apr-Jun, Q3=Jul-Sep, Q4=Oct-Dec
  * For months: 1=Jan, 2=Feb, etc.
  */
@@ -26,22 +27,7 @@ export async function getPeriodDateRange(
   period: number,
   periodType: VatPeriodType
 ): Promise<{ start: string; end: string }> {
-  if (periodType === 'quarter') {
-    const startMonth = (period - 1) * 3; // 0-indexed
-    const start = new Date(year, startMonth, 1);
-    const end = new Date(year, startMonth + 3, 0, 23, 59, 59, 999);
-    return {
-      start: start.toISOString(),
-      end: end.toISOString(),
-    };
-  }
-  // month
-  const start = new Date(year, period - 1, 1);
-  const end = new Date(year, period, 0, 23, 59, 59, 999);
-  return {
-    start: start.toISOString(),
-    end: end.toISOString(),
-  };
+  return vatPeriodRange(year, period, periodType);
 }
 
 /**
@@ -59,7 +45,8 @@ export async function calculateVatReturn(
   const supabase = createClient();
   const { start, end } = await getPeriodDateRange(year, period, periodType);
 
-  // Get all invoice lines from issued/paid/overdue invoices in the period
+  // Invoice lines of every counted invoice issued in the period. A credited
+  // original still counts here; its credit note offsets it in its own period.
   const { data: invoices, error: invErr } = await supabase
     .from('invoices')
     .select(`
@@ -68,7 +55,7 @@ export async function calculateVatReturn(
         id, line_total_cents, vat_amount_cents, tax_code
       )
     `)
-    .in('status', ['sent', 'paid', 'overdue'])
+    .in('status', VAT_COUNTED_STATUSES)
     .gte('issued_at', start)
     .lte('issued_at', end);
 
@@ -143,13 +130,15 @@ export async function createOrUpdateVatReturn(input: unknown) {
   const data = VatReturnSchema.parse(input);
   const supabase = createClient();
 
-  // Check if a return already exists for this period
+  // Check if a live return already exists for this period (corrected
+  // originals are history and stay locked)
   const { data: existing } = await supabase
     .from('vat_returns')
     .select('id, locked, status')
     .eq('year', data.year)
     .eq('period', data.period)
     .eq('period_type', data.period_type)
+    .neq('status', 'corrected')
     .maybeSingle();
 
   if (existing?.locked) {

@@ -19,6 +19,7 @@
     "no": "Hayır",
     "authenticating": "Kimlik doğrulanıyor...",
     "saveFailed": "Kaydetme başarısız",
+    "vatPeriodLocked": "{period} dönemi KDV için beyan edildi ve kilitlendi. Açık bir dönemde bir tarih kullanın veya BW05 üzerinden düzeltin.",
     "saving": "Kaydediliyor...",
     "soon": "Yakında",
     "all": "Tümü",

@@ -1,4 +1,5 @@
 import { NextRequest, NextResponse } from 'next/server';
+import { vatLockedResponse } from '@/lib/vat-lock-response';
 import { listPurchases } from '@/modules/purchases/queries';
 import { createPurchase } from '@/modules/purchases/actions';
 
@@ -25,6 +26,8 @@ export async function POST(req: NextRequest) {
     const purchase = await createPurchase(body);
     return NextResponse.json(purchase, { status: 201 });
   } catch (e) {
+    const locked = vatLockedResponse(e);
+    if (locked) return locked;
     const msg = (e as Error).message;
     const status = msg.includes('parse') ? 400 : 500;
     return NextResponse.json({ error: msg }, { status });

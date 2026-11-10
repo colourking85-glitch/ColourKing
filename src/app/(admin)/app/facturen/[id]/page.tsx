@@ -17,6 +17,7 @@ import { useAppLocale } from '@/components/AdminIntlProvider';
 import { SendEmailButton } from '@/components/ui/SendEmailButton';
 import { DateInput } from '@/components/ui/DateInput';
 import type { CompanyInfo } from '@/lib/company';
+import { vatLockPeriod } from '@/lib/vat-period';
 
 type InvoiceLine = {
   id: string;
@@ -158,6 +159,15 @@ export default function InvoiceDetailPage() {
   const [editLocale, setEditLocale] = useState('nl');
   const [saving, setSaving] = useState(false);
   const [saved, setSaved] = useState(false);
+  const [actionError, setActionError] = useState('');
+
+  /** Readable message for a failed request; VAT period locks get their own text. */
+  const failMessage = async (res: Response) => {
+    const data = await res.json().catch(() => null);
+    const period = vatLockPeriod(data);
+    if (period) return tc('vatPeriodLocked', { period });
+    return (data && typeof data.error === 'string' && data.error) || tc('saveFailed');
+  };
 
   const load = () => {
     setLoading(true);
@@ -177,14 +187,17 @@ export default function InvoiceDetailPage() {
 
   const handleIssue = async () => {
     setActing(true);
+    setActionError('');
     const res = await fetch(`/api/invoices/${id}/issue`, { method: 'POST' });
     if (res.ok) load();
+    else setActionError(await failMessage(res));
     setActing(false);
   };
 
   const handleCreditNote = async () => {
     if (!creditNoteReason.trim()) return;
     setActing(true);
+    setActionError('');
     const res = await fetch(`/api/invoices/${id}/credit-note`, {
       method: 'POST',
       headers: { 'Content-Type': 'application/json' },
@@ -193,6 +206,8 @@ export default function InvoiceDetailPage() {
     if (res.ok) {
       const cn = await res.json();
       router.push(`/app/facturen/${cn.id}`);
+    } else {
+      setActionError(await failMessage(res));
     }
     setActing(false);
     setShowCreditNote(false);
@@ -220,8 +235,10 @@ export default function InvoiceDetailPage() {
   const handleDelete = async () => {
     if (!confirm(t('deleteConfirm'))) return;
     setActing(true);
+    setActionError('');
     const res = await fetch(`/api/invoices/${id}`, { method: 'DELETE' });
     if (res.ok) router.push('/app/facturen');
+    else setActionError(await failMessage(res));
     setActing(false);
   };
 
@@ -246,6 +263,7 @@ export default function InvoiceDetailPage() {
 
   const handleSaveEdit = async () => {
     setSaving(true);
+    setActionError('');
     const res = await fetch(`/api/invoices/${id}`, {
       method: 'PATCH',
       headers: { 'Content-Type': 'application/json' },
@@ -262,6 +280,8 @@ export default function InvoiceDetailPage() {
       setEditing(false);
       load();
       setTimeout(() => setSaved(false), 2000);
+    } else {
+      setActionError(await failMessage(res));
     }
     setSaving(false);
   };
@@ -318,6 +338,11 @@ export default function InvoiceDetailPage() {
 
   return (
     <div className="space-y-6">
+      {actionError && (
+        <div role="alert" className="rounded-[10px] border-[0.5px] border-red-500/40 bg-red-500/10 px-4 py-3 text-sm text-red-400">
+          {actionError}
+        </div>
+      )}
       {/* Header */}
       <div className="flex items-start justify-between">
         <div className="flex items-start gap-3">

@@ -2,6 +2,7 @@ import { NextRequest, NextResponse } from 'next/server';
 import { createClient } from '@/lib/supabase/server';
 import { canTransition } from '@/modules/invoices/machine';
 import type { InvoiceStatus } from '@/types/database';
+import { VAT_PERIOD_LOCKED, vatLockPeriod } from '@/lib/vat-period';
 
 export async function PATCH(req: NextRequest) {
   const { ids, status }: { ids: string[]; status: InvoiceStatus } = await req.json();
@@ -19,7 +20,7 @@ export async function PATCH(req: NextRequest) {
 
   if (fetchErr) return NextResponse.json({ error: fetchErr.message }, { status: 500 });
 
-  const results: { id: string; ok: boolean; error?: string }[] = [];
+  const results: { id: string; ok: boolean; error?: string; code?: string; period?: string }[] = [];
 
   for (const inv of invoices ?? []) {
     const from = inv.status as InvoiceStatus;
@@ -33,7 +34,13 @@ export async function PATCH(req: NextRequest) {
       .update({ status })
       .eq('id', inv.id);
 
-    results.push({ id: inv.id, ok: !error, error: error?.message });
+    const lockedPeriod = error ? vatLockPeriod(error) : null;
+    results.push({
+      id: inv.id,
+      ok: !error,
+      error: error?.message,
+      ...(lockedPeriod ? { code: VAT_PERIOD_LOCKED, period: lockedPeriod } : {}),
+    });
   }
 
   return NextResponse.json({ results });
