@@ -1,4 +1,5 @@
 import { NextRequest, NextResponse } from 'next/server';
+import { vatLockedResponse } from '@/lib/vat-lock-response';
 import { getInvoice, getInvoiceChain } from '@/modules/invoices/queries';
 import { updateInvoice, deleteInvoice } from '@/modules/invoices/actions';
 
@@ -24,6 +25,8 @@ export async function PATCH(
     const invoice = await updateInvoice(params.id, body);
     return NextResponse.json(invoice);
   } catch (e) {
+    const locked = vatLockedResponse(e);
+    if (locked) return locked;
     const msg = (e as Error).message;
     const status = msg.includes('Only draft') ? 409
       : msg.includes('parse') ? 400
@@ -40,6 +43,8 @@ export async function DELETE(
     await deleteInvoice(params.id);
     return NextResponse.json({ ok: true });
   } catch (e) {
+    const locked = vatLockedResponse(e);
+    if (locked) return locked;
     return NextResponse.json({ error: (e as Error).message }, { status: 409 });
   }
 }

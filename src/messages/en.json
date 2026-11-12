@@ -19,6 +19,7 @@
     "no": "No",
     "authenticating": "Authenticating...",
     "saveFailed": "Save failed",
+    "vatPeriodLocked": "Period {period} has been filed and is locked for VAT. Use a date in an open period, or correct it via BW05.",
     "saving": "Saving...",
     "soon": "Soon",
     "all": "All",

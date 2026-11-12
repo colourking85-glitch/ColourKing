@@ -324,31 +324,31 @@ describe('Box amount computation', () => {
 });
 
 // ─── Period date range ──────────────────────────────────────────────────────
+// Ranges are in shop time (Europe/Amsterdam), expressed as UTC instants, so
+// these assertions hold whatever the time zone of the test machine.
 describe('Period date range', () => {
-  it('returns correct Q1 range', async () => {
+  it('returns correct Q1 range (CET start, CEST end)', async () => {
     const { start, end } = await getPeriodDateRange(2026, 1, 'quarter');
-    expect(new Date(start).getMonth()).toBe(0); // January
-    expect(new Date(end).getMonth()).toBe(2);   // March
+    expect(start).toBe('2025-12-31T23:00:00.000Z'); // 1 Jan 00:00 CET
+    expect(end).toBe('2026-03-31T21:59:59.999Z');   // 31 Mar 23:59:59.999 CEST
   });
 
-  it('returns correct Q4 range', async () => {
+  it('returns correct Q4 range (CEST start, CET end)', async () => {
     const { start, end } = await getPeriodDateRange(2026, 4, 'quarter');
-    expect(new Date(start).getMonth()).toBe(9);  // October
-    expect(new Date(end).getMonth()).toBe(11);   // December
+    expect(start).toBe('2026-09-30T22:00:00.000Z'); // 1 Oct 00:00 CEST
+    expect(end).toBe('2026-12-31T22:59:59.999Z');   // 31 Dec 23:59:59.999 CET
   });
 
   it('returns correct monthly range for June', async () => {
     const { start, end } = await getPeriodDateRange(2026, 6, 'month');
-    expect(new Date(start).getMonth()).toBe(5);  // June (0-indexed)
-    expect(new Date(end).getMonth()).toBe(5);    // June
-    expect(new Date(end).getDate()).toBe(30);    // June has 30 days
+    expect(start).toBe('2026-05-31T22:00:00.000Z');
+    expect(end).toBe('2026-06-30T21:59:59.999Z'); // June has 30 days
   });
 
   it('returns correct monthly range for February', async () => {
     const { start, end } = await getPeriodDateRange(2026, 2, 'month');
-    expect(new Date(start).getMonth()).toBe(1);
-    expect(new Date(end).getMonth()).toBe(1);
-    expect(new Date(end).getDate()).toBe(28); // 2026 is not a leap year
+    expect(start).toBe('2026-01-31T23:00:00.000Z');
+    expect(end).toBe('2026-02-28T22:59:59.999Z'); // 2026 is not a leap year
   });
 });
 

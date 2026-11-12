@@ -57,6 +57,7 @@ export async function getVatReturnByPeriod(
     .eq('year', year)
     .eq('period', period)
     .eq('period_type', periodType)
+    .neq('status', 'corrected')
     .maybeSingle();
 
   if (error) throw error;

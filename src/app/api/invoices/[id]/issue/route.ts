@@ -1,4 +1,5 @@
 import { NextRequest, NextResponse } from 'next/server';
+import { vatLockedResponse } from '@/lib/vat-lock-response';
 import { issueInvoice } from '@/modules/invoices/actions';
 
 export async function POST(
@@ -9,6 +10,8 @@ export async function POST(
     const invoice = await issueInvoice(params.id);
     return NextResponse.json(invoice);
   } catch (e) {
+    const locked = vatLockedResponse(e);
+    if (locked) return locked;
     const msg = (e as Error).message;
     const status = msg.includes('Cannot transition') || msg.includes('must have')
       ? 409

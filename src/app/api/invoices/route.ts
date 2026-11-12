@@ -1,4 +1,5 @@
 import { NextRequest, NextResponse } from 'next/server';
+import { vatLockedResponse } from '@/lib/vat-lock-response';
 import { listInvoices } from '@/modules/invoices/queries';
 import { createInvoiceFromOffer, createInvoice } from '@/modules/invoices/actions';
 import type { InvoiceStatus } from '@/types/database';
@@ -27,6 +28,8 @@ export async function POST(req: NextRequest) {
       : await createInvoice(body);
     return NextResponse.json(invoice, { status: 201 });
   } catch (e) {
+    const locked = vatLockedResponse(e);
+    if (locked) return locked;
     const msg = (e as Error).message;
     const status = msg.includes('parse') ? 400
       : msg.includes('Only approved') ? 409

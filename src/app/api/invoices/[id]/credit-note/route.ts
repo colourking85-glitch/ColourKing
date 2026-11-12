@@ -1,4 +1,5 @@
 import { NextRequest, NextResponse } from 'next/server';
+import { vatLockedResponse } from '@/lib/vat-lock-response';
 import { createCreditNote } from '@/modules/invoices/actions';
 
 export async function POST(
@@ -13,6 +14,8 @@ export async function POST(
     });
     return NextResponse.json(creditNote, { status: 201 });
   } catch (e) {
+    const locked = vatLockedResponse(e);
+    if (locked) return locked;
     const msg = (e as Error).message;
     const status = msg.includes('Can only create') ? 409
       : msg.includes('parse') ? 400

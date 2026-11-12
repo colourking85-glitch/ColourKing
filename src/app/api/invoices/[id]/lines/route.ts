@@ -1,4 +1,5 @@
 import { NextRequest, NextResponse } from 'next/server';
+import { vatLockedResponse } from '@/lib/vat-lock-response';
 import { addInvoiceLine, removeInvoiceLine } from '@/modules/invoices/actions';
 
 export async function POST(
@@ -11,6 +12,8 @@ export async function POST(
     const line = await addInvoiceLine(id, body);
     return NextResponse.json(line, { status: 201 });
   } catch (e) {
+    const locked = vatLockedResponse(e);
+    if (locked) return locked;
     const msg = (e as Error).message;
     const status = msg.includes('parse') ? 400 : msg.includes('draft') ? 409 : 500;
     return NextResponse.json({ error: msg }, { status });
@@ -23,6 +26,8 @@ export async function DELETE(req: NextRequest) {
     await removeInvoiceLine(lineId);
     return NextResponse.json({ ok: true });
   } catch (e) {
+    const locked = vatLockedResponse(e);
+    if (locked) return locked;
     const msg = (e as Error).message;
     const status = msg.includes('draft') ? 409 : 500;
     return NextResponse.json({ error: msg }, { status });
